@@ -1,3 +1,4 @@
-log-format: text
-log-level: info
-log-report-caller: false
+log:
+    format: text
+    level: info
+    report-caller: false
