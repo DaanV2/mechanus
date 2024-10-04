@@ -15,12 +15,10 @@ var rootCmd = &cobra.Command{
 	// has an action associated with it:
 	// Run: func(cmd *cobra.Command, args []string) { },
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
-		logconfing := config.GetSub[config.Logger]("log")
-
 		setup.UpdateLogger(
-			logconfing.ReportCaller,
-			logconfing.Level,
-			logconfing.Format,
+			config.Logger.ReportCaller.Value(),
+			config.Logger.Level.Value(),
+			config.Logger.Format.Value(),
 		)
 	},
 }
@@ -36,6 +34,5 @@ func Execute() {
 
 func init() {
 	pflags := rootCmd.PersistentFlags()
-	config.LoggerFlags(pflags)
-	config.BindFlags(pflags)
+	config.Logger.AddToSet(pflags)
 }

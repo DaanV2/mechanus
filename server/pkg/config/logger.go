@@ -2,14 +2,20 @@ package config
 
 import "github.com/spf13/pflag"
 
-type Logger struct {
-	ReportCaller bool   `mapstructure:"report-caller"`
-	Level        string `mapstructure:"level"`
-	Format       string `mapstructure:"format"`
+type LoggerConfig struct {
+	ReportCaller Flag[bool]
+	Level        Flag[string]
+	Format       Flag[string]
 }
 
-func LoggerFlags(flags *pflag.FlagSet) {
-	flags.Bool("log.report-caller", false, "Whenever or not to output the file that outputs the log")
-	flags.String("log.level", "info", "The debug level, levels are: debug, info, warn, error, fatal")
-	flags.String("log.format", "text", "The text format of the logger")
+var Logger = &LoggerConfig{
+	ReportCaller: Bool("log.report-caller", false, "Whenever or not to output the file that outputs the log"),
+	Level:        String("log.level", "info", "The debug level, levels are: debug, info, warn, error, fatal"),
+	Format:       String("log.format", "text", "The text format of the logger"),
+}
+
+func (c *LoggerConfig) AddToSet(set *pflag.FlagSet) {
+	c.ReportCaller.AddToSet(set)
+	c.Level.AddToSet(set)
+	c.Format.AddToSet(set)
 }

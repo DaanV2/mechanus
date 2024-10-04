@@ -4,6 +4,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/DaanV2/mechanus/server/pkg/config"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/log"
 )
@@ -21,11 +22,15 @@ func Logger() {
 	logger.SetStyles(CreateStyle())
 
 	log.SetDefault(logger)
+	UpdateLogger(
+		config.Logger.ReportCaller.Value(),
+		config.Logger.Level.Value(),
+		config.Logger.Format.Value(),
+	)
 }
 
 func UpdateLogger(reportCaller bool, level, format string) {
-	logger := log.Default()
-	updateLogger(logger, reportCaller, level, format)
+	updateLogger(log.Default(), reportCaller, level, format)
 }
 
 func updateLogger(logger *log.Logger, reportCaller bool, level, format string) {

@@ -15,7 +15,7 @@ import (
 var serverCmd = &cobra.Command{
 	Use:   "server",
 	Short: "A brief description of your command",
-	Run: ServerWorkload,
+	Run:   ServerWorkload,
 	PreRun: func(cmd *cobra.Command, args []string) {
 		log.Info("server starting")
 	},
@@ -37,12 +37,11 @@ func init() {
 	// is called directly, e.g.:
 	// serverCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	flags := serverCmd.Flags()
-	config.MDNSFlags(flags)
-	config.BindFlags(flags)
+	config.MDNS.AddToSet(flags)
 }
 
 func ServerWorkload(cmd *cobra.Command, args []string) {
-	discovery, err := mdns.NewDiscoverService(mdns.FromFlags(cmd.Flags()))
+	discovery, err := mdns.NewDiscoverService()
 	if err != nil {
 		log.Fatal("couldn't setup mdns discovery", "error", err)
 	}

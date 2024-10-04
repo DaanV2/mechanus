@@ -7,37 +7,11 @@ import (
 	"github.com/DaanV2/mechanus/server/pkg/config"
 	"github.com/charmbracelet/log"
 	"github.com/miekg/dns"
-	"github.com/spf13/pflag"
 )
 
 type discoverServiceOptions struct {
 	ipv4 bool
 	ipv6 bool
-}
-
-type DiscoverServiceOption interface {
-	apply(o *discoverServiceOptions)
-}
-
-type handlerDiscoverServiceOption struct {
-	applyFn func(o *discoverServiceOptions)
-}
-
-func (h handlerDiscoverServiceOption) apply(o *discoverServiceOptions) {
-	h.applyFn(o)
-}
-
-func FromFlags(pflag *pflag.FlagSet) DiscoverServiceOption {
-	return handlerDiscoverServiceOption{
-		applyFn: func(o *discoverServiceOptions) {
-			if v, err := pflag.GetBool(config.MDNS_IPV4_ENABLED); err == nil {
-				o.ipv4 = v
-			}
-			if v, err := pflag.GetBool(config.MDNS_IPV6_ENABLED); err == nil {
-				o.ipv6 = v
-			}
-		},
-	}
 }
 
 type DiscoverService struct {
@@ -47,18 +21,15 @@ type DiscoverService struct {
 	logger     *log.Logger
 }
 
-func NewDiscoverService(opts ...DiscoverServiceOption) (*DiscoverService, error) {
+func NewDiscoverService() (*DiscoverService, error) {
 	service := &DiscoverService{
 		options: &discoverServiceOptions{
-			ipv4: true,
-			ipv6: false,
+			ipv4: config.MDNS.IPV4.Value(),
+			ipv6: config.MDNS.IPV6.Value(),
 		},
 		ipv4Server: nil,
 		ipv6Server: nil,
 		logger:     log.WithPrefix("mdns"),
-	}
-	for _, opt := range opts {
-		opt.apply(service.options)
 	}
 	var (
 		iface *net.Interface
