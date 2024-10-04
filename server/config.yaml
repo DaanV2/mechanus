@@ -1,4 +1,0 @@
-log:
-    format: text
-    level: info
-    report-caller: false

@@ -20,10 +20,7 @@ func BindFlags(flags *pflag.FlagSet) {
 func BindFlag(flag *pflag.Flag) {
 	env := flag.Name
 	env = strings.ToUpper(env)
-
-	for _, old := range illegal_env {
-		env = strings.ReplaceAll(env, old, "_")
-	}
+	env = EnvironmentNamer().Replace(env)
 
 	logger := log.With("env", env, "flag", flag.Name)
 	if err := viper.BindPFlag(flag.Name, flag); err != nil {
@@ -34,4 +31,13 @@ func BindFlag(flag *pflag.Flag) {
 	}
 
 	flag.Usage += fmt.Sprintf(" (env: %s)", env)
+}
+
+func EnvironmentNamer() *strings.Replacer {
+	v := make([]string, 0, len(illegal_env)*2)
+	for _, i := range illegal_env {
+		v = append(v, i, "_")
+	}
+
+	return strings.NewReplacer(v...)
 }

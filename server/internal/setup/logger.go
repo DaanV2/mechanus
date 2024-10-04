@@ -12,7 +12,7 @@ func Logger() {
 	logOptions := log.Options{
 		TimeFormat:      time.DateTime,
 		ReportCaller:    false,
-		ReportTimestamp: false,
+		ReportTimestamp: true,
 		Formatter:       log.TextFormatter,
 	}
 

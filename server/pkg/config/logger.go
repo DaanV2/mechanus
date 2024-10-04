@@ -3,9 +3,9 @@ package config
 import "github.com/spf13/pflag"
 
 type Logger struct {
-	ReportCaller bool   `mapstructure:"log.report-caller"`
-	Level        string `mapstructure:"log.level"`
-	Format       string `mapstructure:"log.format"`
+	ReportCaller bool   `mapstructure:"report-caller"`
+	Level        string `mapstructure:"level"`
+	Format       string `mapstructure:"format"`
 }
 
 func LoggerFlags(flags *pflag.FlagSet) {

@@ -10,7 +10,8 @@
       "request": "launch",
       "mode": "auto",
       "program": "${workspaceFolder}/main.go",
-      "args": ["server"]
+      "envFile": "${workspaceFolder}/.env",
+      "args": ["server", "--log.level", "cli"]
     }
   ]
 }

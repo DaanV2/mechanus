@@ -1,10 +1,7 @@
-/*
-Copyright © 2024 NAME HERE <EMAIL ADDRESS>
-*/
 package cmd
 
 import (
-	"github.com/DaanV2/mechanus/server/internal/terminal"
+	"github.com/DaanV2/mechanus/server/internal/setup"
 	"github.com/DaanV2/mechanus/server/pkg/config"
 	"github.com/charmbracelet/log"
 	"github.com/spf13/cobra"
@@ -12,11 +9,20 @@ import (
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "server",
-	Short: "A brief description of your application",
+	Use:   "mechanus",
+	Short: "🤖",
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	// Run: func(cmd *cobra.Command, args []string) { },
+	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		logconfing := config.GetSub[config.Logger]("log")
+
+		setup.UpdateLogger(
+			logconfing.ReportCaller,
+			logconfing.Level,
+			logconfing.Format,
+		)
+	},
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -32,7 +38,4 @@ func init() {
 	pflags := rootCmd.PersistentFlags()
 	config.LoggerFlags(pflags)
 	config.BindFlags(pflags)
-
-	rootCmd.SetHelpTemplate(terminal.HELP_TEMPLATE)
-	rootCmd.SetUsageTemplate(terminal.USAGE_TEMPLATE)
 }

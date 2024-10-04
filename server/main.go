@@ -9,23 +9,14 @@ import (
 
 	"github.com/DaanV2/mechanus/server/cmd"
 	"github.com/DaanV2/mechanus/server/internal/setup"
-	"github.com/DaanV2/mechanus/server/pkg/config"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
 func main() {
-	cobra.OnInitialize(
-		setup.Logger,
-		setup.Config,
-		func() {
-			logconfing := config.Get[config.Logger]()
-			setup.UpdateLogger(
-				logconfing.ReportCaller,
-				logconfing.Level,
-				logconfing.Format,
-			)
-		})
+	setup.Logger()
+	setup.Viper()
+	setup.Config()
 
 	cobra.OnFinalize(func() {
 		err := viper.SafeWriteConfig()

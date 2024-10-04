@@ -1,16 +1,21 @@
 {
-	"folders": [
-		{
-			"path": "..",
-			"name": "mechanus"
-		},
-		{
-			"path": "../server",
-			"name": "server"
-		},
-		{
-			"path": "../client",
-			"name": "client"
-		}
-	]
+  "folders": [
+    {
+      "path": "..",
+      "name": "mechanus"
+    },
+    {
+      "path": "../server",
+      "name": "server"
+    },
+    {
+      "path": "../client",
+      "name": "client"
+    }
+  ],
+  "settings": {
+    "terminal.integrated.env.windows": {
+      "LOG_LEVEL": "debug"
+    }
+  }
 }

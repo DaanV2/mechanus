@@ -14,3 +14,13 @@ func Get[T any]() T {
 
 	return config
 }
+
+func GetSub[T any](key string) T {
+	var config T
+	
+	if err := viper.UnmarshalKey(key, &config); err != nil {
+		log.With("error", err).Fatalf("fatal reading config: '%T' on key %s", config, key)
+	}
+
+	return config
+}
