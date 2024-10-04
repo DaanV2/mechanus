@@ -32,18 +32,20 @@ func updateLogger(logger *log.Logger, reportCaller bool, level, format string) {
 	logger.SetReportCaller(reportCaller)
 
 	// level
-	l, err := log.ParseLevel(level)
-	if err != nil {
-		log.Fatal("invalid log level", "error", err)
+	if level != "" {
+		l, err := log.ParseLevel(level)
+		if err != nil {
+			log.Fatal("invalid log level", "error", err)
+		}
+		logger.SetLevel(l)
 	}
-	logger.SetLevel(l)
 
 	// format
 	switch format {
 	default:
 		log.Warn("unknown log format, falling back to text, expected text, json or logfmt", "format", format)
 		fallthrough
-	case "text":
+	case "text", "":
 		logger.SetFormatter(log.TextFormatter)
 	case "json":
 		logger.SetFormatter(log.JSONFormatter)
