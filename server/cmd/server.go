@@ -36,10 +36,11 @@ func init() {
 	// serverCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	flags := serverCmd.Flags()
 	config.MDNS.AddToSet(flags)
+	config.APIServer.AddToSet(flags)
+	config.Database.AddToSet(flags)
 }
 
 func ServerWorkload(cmd *cobra.Command, args []string) {
-
 
 	process.AwaitSignal(syscall.SIGTERM, syscall.SIGKILL, syscall.SIGQUIT)
 }
