@@ -32,13 +32,14 @@ func (s *Service) Get(id string) (User, error) {
 
 // Create makes a new entry in the database, assumes the password is set in the PasswordHash field as plain bytes, will hash that field first
 func (s *Service) Create(user User) (User, error) {
+	user.BaseItem = database.NewBaseItem()
 	err := HashPassword(&user)
 	if err != nil {
 		return user, err
 	}
 
 	_, err = s.storage.Get(user.ID)
-	if errors.Is(err, database.ErrNotFound) {
+	if !errors.Is(err, database.ErrNotFound) {
 		return user, database.ErrAlreadyExists
 	}
 
@@ -54,9 +55,9 @@ func (s *Service) Update(user User) (User, error) {
 	}
 
 	// These field may not be updated
-	user.ID = duser.ID
+	user.BaseItem = duser.BaseItem.Update()
 	user.PasswordHash = duser.PasswordHash
-	
+
 	return user, s.storage.Set(user.ID, user)
 }
 
@@ -68,6 +69,7 @@ func (s *Service) UpdatePassword(id string, newPassword []byte) error {
 	}
 
 	user.PasswordHash = newPassword
+	user.BaseItem = user.BaseItem.Update()
 	err = HashPassword(&user)
 	if err != nil {
 		return err

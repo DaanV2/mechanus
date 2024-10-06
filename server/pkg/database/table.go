@@ -42,6 +42,7 @@ func newTable[T any](name TableName, handler IOHandler) *Table[T] {
 			name:    string(name),
 			handler: handler,
 		},
+		logger: log.Default().WithPrefix("db[\""+string(name)+"\"]"),
 	}
 }
 
@@ -72,6 +73,7 @@ func (table *Table[T]) Get(id string) (T, error) {
 }
 
 func (table *Table[T]) Set(id string, item T) error {
+	table.logger.Debugf("setting '%s' to db '%s'", id, table.t.name)
 	var (
 		data []byte
 		err  error
@@ -80,7 +82,7 @@ func (table *Table[T]) Set(id string, item T) error {
 	if v, ok := interface{}(item).(encoding.BinaryMarshaler); ok {
 		data, err = v.MarshalBinary()
 	} else {
-		data, err = json.Marshal(v)
+		data, err = json.Marshal(item)
 	}
 	if err != nil {
 		return err
