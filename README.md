@@ -12,10 +12,9 @@ This project provides software for local vttrpg, by managing multiple screens/cl
 
 ## TODO Features
 
+- [ ] Use https://connectrpc.com/docs/go/getting-started
 - [ ] Manage the TV on the table for battle map displayment
 - [ ] Local mDNS
 - [ ] Player views
 - [ ] DM views
 - [ ] Support for other vttrpg file formats
-
-
