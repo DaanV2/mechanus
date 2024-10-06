@@ -1,0 +1,40 @@
+name: Server
+on:
+  pull_request:
+    paths: ["server"]
+    branches:
+      - main
+  push:
+    paths: ["server"]
+    branches:
+      - main
+jobs:
+  checks:
+    name: 📋 Build and test checks
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - name: 📦 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🏗️ Setup Golang
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: ./go.work
+
+      - name: 🛠️ Build
+        working-directory: server
+        run: go build ./...
+
+      - name: 🧪 Run Tests
+        working-directory: server
+        run: go test ./... --cover -coverprofile=reports/coverage
+
+      - name: Run linting
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: latest
+          working-directory: server
