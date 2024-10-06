@@ -7,3 +7,6 @@
 ```bash
 make tools
 ```
+
+Manual installs:
+- [protoc](https://github.com/protocolbuffers/protobuf/releases/latest)

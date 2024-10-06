@@ -1,0 +1,18 @@
+syntax = "proto3";
+option go_package = ".;grpc_v1";
+
+service Users {
+    rpc Get(GetUserRequest) returns (GetUserResponse) {};
+}
+
+message GetUserRequest {
+    string id = 1; // The users UUID to lookup
+}
+
+message GetUserResponse {
+    User user = 1;
+}
+
+message User {
+    string id = 1; // The users UUID
+}

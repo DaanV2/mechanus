@@ -1,4 +1,12 @@
 tools:
 	go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
 	go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
-	go get -u github.com/spf13/cobra@latest
+	go install github.com/spf13/cobra-cli@latest
+
+
+proto-v1:
+	protoc --go_out=./server/internal/grpc/v1 \
+		--go-grpc_out=./server/internal/grpc/v1 \
+		shared/proto/v1/*.proto
+
+proto: proto-v1
