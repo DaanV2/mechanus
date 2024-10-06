@@ -14,20 +14,20 @@ const (
 
 type Service struct {
 	db      *database.Database
-	storage *database.Table[User]
+	dbtable *database.Table[User]
 	logger  *log.Logger
 }
 
 func NewService(db *database.Database) *Service {
 	return &Service{
 		db:      db,
-		storage: database.GetTable[User](db, TABLE_USER),
+		dbtable: database.GetTable[User](db, TABLE_USER),
 		logger: log.Default().WithPrefix("users"),
 	}
 }
 
 func (s *Service) Get(id string) (User, error) {
-	return s.storage.Get(id)
+	return s.dbtable.Get(id)
 }
 
 // Create makes a new entry in the database, assumes the password is set in the PasswordHash field as plain bytes, will hash that field first
@@ -38,12 +38,12 @@ func (s *Service) Create(user User) (User, error) {
 		return user, err
 	}
 
-	_, err = s.storage.Get(user.ID)
+	_, err = s.dbtable.Get(user.ID)
 	if !errors.Is(err, database.ErrNotFound) {
 		return user, database.ErrAlreadyExists
 	}
 
-	err = s.storage.Set(user.ID, user)
+	err = s.dbtable.Set(user.ID, user)
 	return user, err
 }
 
@@ -58,12 +58,12 @@ func (s *Service) Update(user User) (User, error) {
 	user.BaseItem = duser.BaseItem.Update()
 	user.PasswordHash = duser.PasswordHash
 
-	return user, s.storage.Set(user.ID, user)
+	return user, s.dbtable.Set(user.ID, user)
 }
 
 // UpdatePassword will update the password field with the new password in the database
 func (s *Service) UpdatePassword(id string, newPassword []byte) error {
-	user, err := s.storage.Get(id)
+	user, err := s.dbtable.Get(id)
 	if err != nil {
 		return err
 	}
@@ -75,7 +75,7 @@ func (s *Service) UpdatePassword(id string, newPassword []byte) error {
 		return err
 	}
 
-	return s.storage.Set(user.ID, user)
+	return s.dbtable.Set(user.ID, user)
 }
 
 func HashPassword(user *User) error {
