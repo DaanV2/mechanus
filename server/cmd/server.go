@@ -3,10 +3,8 @@ package cmd
 import (
 	"syscall"
 
-	"github.com/DaanV2/mechanus/server/internal/logging"
 	"github.com/DaanV2/mechanus/server/internal/process"
 	"github.com/DaanV2/mechanus/server/pkg/config"
-	"github.com/DaanV2/mechanus/server/services/mdns"
 	"github.com/charmbracelet/log"
 	"github.com/spf13/cobra"
 )
@@ -41,12 +39,7 @@ func init() {
 }
 
 func ServerWorkload(cmd *cobra.Command, args []string) {
-	discovery, err := mdns.NewService()
-	if err != nil {
-		log.Fatal("couldn't setup mdns discovery", "error", err)
-	}
 
-	defer logging.ReportIf("couldn't close mdns discovery", discovery.Close)
 
 	process.AwaitSignal(syscall.SIGTERM, syscall.SIGKILL, syscall.SIGQUIT)
 }
