@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/DaanV2/mechanus/server/pkg/database"
-	"github.com/DaanV2/mechanus/server/pkg/users"
+	"github.com/DaanV2/mechanus/server/services/users"
 	"github.com/stretchr/testify/require"
 )
 
