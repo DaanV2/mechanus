@@ -68,3 +68,7 @@ func (f *FileIO) Set(name string, data []byte) error {
 
 	return os.WriteFile(file, data, 0644)
 }
+
+func (f *FileIO) String() string {
+	return "fileio: " + f.folder
+}

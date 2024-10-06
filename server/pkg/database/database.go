@@ -12,7 +12,7 @@ type Database struct {
 	handler IOHandler
 }
 
-func GetTable[T any](db *Database, name string) *Table[T] {
+func GetTable[T any](db *Database, name TableName) *Table[T] {
 	t, ok := db.tables.Load(name)
 	if ok {
 		if v, ok := t.(*Table[T]); ok {

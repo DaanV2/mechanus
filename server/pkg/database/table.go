@@ -4,12 +4,17 @@ import (
 	"encoding"
 	"encoding/json"
 	"path/filepath"
+
+	"github.com/charmbracelet/log"
 )
+
+type TableName string
 
 var _ IOHandler = &rawTable{}
 
 type Table[T any] struct {
 	t *rawTable
+	logger *log.Logger
 }
 
 type rawTable struct {
@@ -31,10 +36,10 @@ func (r *rawTable) Name() string {
 	return r.name
 }
 
-func newTable[T any](name string, handler IOHandler) *Table[T] {
+func newTable[T any](name TableName, handler IOHandler) *Table[T] {
 	return &Table[T]{
 		t: &rawTable{
-			name:    name,
+			name:    string(name),
 			handler: handler,
 		},
 	}
@@ -44,7 +49,13 @@ func (table *Table[T]) Name() string {
 	return table.t.name
 }
 
+func (table *Table[T]) String() string {
+	return "db.table[\"" + table.t.name + "\"]"
+}
+
 func (table *Table[T]) Get(id string) (T, error) {
+	table.logger.Debugf("retrieving '%s' from db '%s'", id, table.t.name)
+
 	var result T
 	data, err := table.t.Get(id)
 	if err != nil {

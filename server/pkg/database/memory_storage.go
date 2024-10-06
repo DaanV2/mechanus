@@ -1,6 +1,8 @@
 package database
 
-import "sync"
+import (
+	"sync"
+)
 
 var _ IOHandler = &MemoryIO{}
 
@@ -30,4 +32,8 @@ func (m *MemoryIO) Get(id string) ([]byte, error) {
 func (m *MemoryIO) Set(id string, data []byte) error {
 	m.items.Store(id, data)
 	return nil
+}
+
+func (m *MemoryIO) String() string {
+	return "memoryio"
 }
