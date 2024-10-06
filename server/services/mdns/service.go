@@ -38,7 +38,7 @@ func NewService() (*Service, error) {
 		mdnsConfig.Iface = &iface
 	}
 
-	log.Debug("starting new mdns service", "config", mdnsConfig)
+	log.Debug("starting new mdns service", "zone", mdnsConfig.Zone, "iface", mdnsConfig.Iface)
 	server, err := hash_mdns.NewServer(mdnsConfig)
 	if err != nil {
 		return nil, err
