@@ -38,7 +38,7 @@ jobs:
         working-directory: client
         run: npm ci
 
-      - name: ⚙️ Compile
+      - name: 🛠️ Compile
         working-directory: client
         run: npm build
 
