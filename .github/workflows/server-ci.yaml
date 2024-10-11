@@ -1,4 +1,4 @@
-name: Server
+name: 🗄️ Server
 on:
   pull_request:
     paths: ["server/**"]
@@ -17,6 +17,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
+
     steps:
       - name: 📦 Checkout Repository
         uses: actions/checkout@v4

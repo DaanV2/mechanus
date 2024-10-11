@@ -1,5 +1,5 @@
 # This is a basic workflow to help you get started with Actions
-name: 📋 Unit Test
+name: 🖼️ Client 
 env:
   FORCE_COLOR: true
 
