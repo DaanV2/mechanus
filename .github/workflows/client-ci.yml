@@ -1,0 +1,51 @@
+# This is a basic workflow to help you get started with Actions
+name: 📋 Unit Test
+env:
+  FORCE_COLOR: true
+
+on:
+  pull_request:
+    paths: ["client/**"]
+    branches:
+      - main
+  push:
+    paths: ["client/**"]
+    branches:
+      - main
+  workflow_dispatch: 
+
+jobs:
+  test:
+    name: 📋 Test ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macOS-latest]
+
+    steps:
+      - name: 📦 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: ⚒️ Setup Node.js Environment
+        uses: actions/setup-node@v4
+        with:
+          cache: npm
+          cache-dependency-path: client/package-lock.json
+          node-version-file: client/package.json
+
+      - name: ⚒️ Setup Project
+        working-directory: client
+        run: npm ci
+
+      - name: ⚙️ Compile
+        working-directory: client
+        run: npm build
+
+      - name: 📋 Test
+        working-directory: client
+        run: npm run test
+
+      - name: 🔍 Linting
+        working-directory: client
+        run: npm run lint
