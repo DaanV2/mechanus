@@ -11,7 +11,7 @@ on:
   workflow_dispatch: 
 jobs:
   checks:
-    name: 📋 Build and test checks
+    name: 📋 Build, Test and lint; ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false

@@ -16,7 +16,7 @@ on:
 
 jobs:
   test:
-    name: 📋 Test ${{ matrix.os }}
+    name: 📋 Build, Test and lint; ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
