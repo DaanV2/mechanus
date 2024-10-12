@@ -1,2 +1,11 @@
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to read the documentation</p>
+<svelte:head>
+  <title>Mechanus</title>
+</svelte:head>
+
+<div class="centered-container">
+  <div class="box-container">
+    <h1 class="page-title">Mechanus</h1>
+    <a href="./players/login" class="action-button">Players</a>
+    <a href="./devices" class="action-button">Devices</a>
+  </div>
+</div>
