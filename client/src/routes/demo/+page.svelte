@@ -24,15 +24,4 @@
   .subpage-item {
     margin: 0.5rem 0;
   }
-
-  .subpage-link {
-    text-decoration: none;
-    color: #007bff;
-    font-size: 1rem;
-    transition: color 0.3s;
-  }
-
-  .subpage-link:hover {
-    color: #0056b3;
-  }
 </style>
