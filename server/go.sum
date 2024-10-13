@@ -1,3 +1,5 @@
+connectrpc.com/connect v1.17.0 h1:W0ZqMhtVzn9Zhn2yATuUokDLO5N+gIuBWMOnsQrfmZk=
+connectrpc.com/connect v1.17.0/go.mod h1:0292hj1rnx8oFrStN7cB4jjVBeqs+Yx5yDIC2prWDO8=
 github.com/DaanV2/go-locks v1.0.2 h1:iETmJ5eB13gyLdYE3jcspQZP2hvIGPUA6etnYalyH8A=
 github.com/DaanV2/go-locks v1.0.2/go.mod h1:DHk3hSmlaKummUB0KhedIKuvB8UHfAPDHhDBRnPu5Gk=
 github.com/aymanbagabas/go-osc52/v2 v2.0.1 h1:HwpRHbFMcZLEVr42D4p7XBqjyuxQH5SMiErDT4WkJ2k=
