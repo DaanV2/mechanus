@@ -32,7 +32,7 @@
       autoDensity: true,
       background: '#1099bb',
       resizeTo: window,
-      preference: 'webgpu',
+      preference: 'webgpu'
     });
 
     app.canvas.id = 'render_view';

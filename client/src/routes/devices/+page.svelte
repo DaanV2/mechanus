@@ -1,3 +1,3 @@
 <svelte:head>
-    <title>Devices</title> 
+  <title>Devices</title>
 </svelte:head>

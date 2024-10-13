@@ -1,6 +1,6 @@
 <script lang="ts">
   // Define an array of subpage objects
-  const subpages = [{ name: 'Size check', path: 'demo/size' }];
+  const subpages = [{ name: 'Size check', path: '/demo/size' }];
 </script>
 
 <div class="centered-container">
