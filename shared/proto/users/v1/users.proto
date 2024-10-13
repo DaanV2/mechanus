@@ -1,5 +1,5 @@
 syntax = "proto3";
-option go_package = ".;users";
+option go_package = "github.com/DaanV2/mechanus/server/internal/grpc/users/v1;usersv1";
 package users.v1;
 
 service UserService {
