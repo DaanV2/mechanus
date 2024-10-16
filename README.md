@@ -1,7 +1,7 @@
 # Mechanus (WIP)
 
 [![🖼️ Client](https://github.com/DaanV2/mechanus/actions/workflows/client-ci.yml/badge.svg)](https://github.com/DaanV2/mechanus/actions/workflows/client-ci.yml)
-[![🗄️ Server](https://github.com/DaanV2/mechanus/actions/workflows/server-ci.yaml/badge.svg)](https://github.com/DaanV2/mechanus/actions/workflows/server-ci.yaml)
+[![🗄️ Server](https://github.com/DaanV2/mechanus/actions/workflows/server-ci.yml/badge.svg)](https://github.com/DaanV2/mechanus/actions/workflows/server-ci.yml)
 
 This project provides software for local vttrpg, by managing multiple screens/clients/players/dm to help create a ttrpg experience using hardware
 
