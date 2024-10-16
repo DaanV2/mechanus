@@ -25,7 +25,10 @@ func NewApiServer() (*APIServer, error) {
 
 	var opts []grpc.ServerOption
 	grpcServer := grpc.NewServer(opts...)
-	grpcServer.Serve(lis)
+	err = grpcServer.Serve(lis)
+	if err != nil {
+		return nil, err
+	}
 
 	if config.APIServer.GRPC.Reflection.Value() {
 		reflection.Register(grpcServer)

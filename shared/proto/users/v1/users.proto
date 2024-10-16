@@ -1,7 +1,8 @@
 syntax = "proto3";
-option go_package = ".;grpc_v1";
+option go_package = "github.com/DaanV2/mechanus/server/internal/grpc/users/v1;usersv1";
+package users.v1;
 
-service Users {
+service UserService {
     rpc Get(GetUserRequest) returns (GetUserResponse) {};
 }
 

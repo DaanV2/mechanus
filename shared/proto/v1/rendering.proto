@@ -1,6 +1,0 @@
-syntax = "proto3";
-option go_package = ".;grpc_v1";
-
-service Rendering {
-    
-}
