@@ -6,7 +6,7 @@ require (
 	connectrpc.com/connect v1.17.0
 	github.com/DaanV2/go-locks v1.0.2
 	github.com/charmbracelet/bubbles v0.20.0
-	github.com/charmbracelet/bubbletea v1.1.0
+	github.com/charmbracelet/bubbletea v1.1.1
 	github.com/charmbracelet/lipgloss v0.13.0
 	github.com/charmbracelet/log v0.4.0
 	github.com/google/uuid v1.6.0
@@ -15,9 +15,9 @@ require (
 	github.com/spf13/viper v1.19.0
 	github.com/stretchr/testify v1.9.0
 	golang.org/x/crypto v0.28.0
-	golang.org/x/net v0.28.0
+	golang.org/x/net v0.30.0
 	google.golang.org/grpc v1.67.1
-	google.golang.org/protobuf v1.34.2
+	google.golang.org/protobuf v1.35.1
 )
 
 require (
