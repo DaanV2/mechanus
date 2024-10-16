@@ -8,7 +8,7 @@ plugins:
     out: server/internal/grpc
     opt: paths=source_relative
 # Client
-  - remote: buf.build/bufbuild/es
+  - remote: buf.build/bufbuild/es:v1.10.0
     out: client/src/proto
     opt: target=ts
   - remote: buf.build/bufbuild/connect-es

@@ -1,0 +1,36 @@
+syntax = "proto3";
+option go_package = "github.com/DaanV2/mechanus/server/internal/grpc/users/v1;usersv1";
+package users.v1;
+
+// A service for logging in a user, or creating their account
+service LoginService {
+    // Log in the user, returns a JWT token
+    rpc Login(LoginRequest) returns (LoginResponse) {};
+    // Create a new user, returns a JWT token
+    rpc Create(CreateAccountRequest) returns (CreateAccountResponse) {};
+}
+
+// A login request
+message LoginRequest {
+    // The username
+    string username = 1;
+    // The password
+    string password = 2;
+}
+
+message LoginResponse {
+    // The JWT token, without prefix
+    string token = 1;
+}
+
+message CreateAccountRequest {
+    // The username
+    string username = 1;
+    // The password
+    string password = 2;
+}
+
+message CreateAccountResponse {
+    // The JWT token, without prefix
+    string token = 1;
+}
