@@ -3,7 +3,7 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { CreateAccountRequest, CreateAccountResponse, LoginRequest, LoginResponse } from "./login_pb.js";
+import { CreateAccountRequest, CreateAccountResponse, LoginRequest, LoginResponse, RefreshTokenRequest, RefreshTokenResponse } from "./login_pb.js";
 import { MethodKind } from "@bufbuild/protobuf";
 
 /**
@@ -34,6 +34,17 @@ export const LoginService = {
       name: "Create",
       I: CreateAccountRequest,
       O: CreateAccountResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * Refresh a given token, with a new JWT token
+     *
+     * @generated from rpc users.v1.LoginService.Refresh
+     */
+    refresh: {
+      name: "Refresh",
+      I: RefreshTokenRequest,
+      O: RefreshTokenResponse,
       kind: MethodKind.Unary,
     },
   }
