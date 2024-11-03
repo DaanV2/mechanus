@@ -1,6 +1,7 @@
 package database
 
 import (
+	"iter"
 	"sync"
 )
 
@@ -32,6 +33,19 @@ func (m *MemoryIO) Get(id string) ([]byte, error) {
 func (m *MemoryIO) Set(id string, data []byte) error {
 	m.items.Store(id, data)
 	return nil
+}
+
+func (m *MemoryIO) Ids() iter.Seq[string] {
+	return func(yield func(string) bool) {
+		m.items.Range(func(key, value any) bool {
+			k, ok := key.(string)
+			if ok {
+				return !yield(k)
+			}
+
+			return true
+		})
+	}
 }
 
 func (m *MemoryIO) String() string {

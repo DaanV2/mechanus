@@ -2,6 +2,7 @@ package users
 
 import (
 	"errors"
+	"strings"
 
 	"github.com/DaanV2/mechanus/server/pkg/database"
 	"github.com/charmbracelet/log"
@@ -14,20 +15,26 @@ const (
 
 type Service struct {
 	db      *database.Database
-	dbtable *database.Table[User]
+	userTable *database.Table[User]
 	logger  *log.Logger
 }
 
 func NewService(db *database.Database) *Service {
 	return &Service{
 		db:      db,
-		dbtable: database.GetTable[User](db, TABLE_USER),
-		logger: log.Default().WithPrefix("users"),
+		userTable: database.GetTable[User](db, TABLE_USER),
+		logger:  log.Default().WithPrefix("users"),
 	}
 }
 
 func (s *Service) Get(id string) (User, error) {
-	return s.dbtable.Get(id)
+	return s.userTable.Get(id)
+}
+
+func (s *Service) GetByUsername(username string) (User, error) {
+	return s.userTable.First(func(item User) bool {
+		return strings.EqualFold(item.Name, username)
+	})
 }
 
 // Create makes a new entry in the database, assumes the password is set in the PasswordHash field as plain bytes, will hash that field first
@@ -38,12 +45,12 @@ func (s *Service) Create(user User) (User, error) {
 		return user, err
 	}
 
-	_, err = s.dbtable.Get(user.ID)
+	_, err = s.userTable.Get(user.ID)
 	if !errors.Is(err, database.ErrNotFound) {
 		return user, database.ErrAlreadyExists
 	}
 
-	err = s.dbtable.Set(user.ID, user)
+	err = s.userTable.Set(user.ID, user)
 	return user, err
 }
 
@@ -58,12 +65,12 @@ func (s *Service) Update(user User) (User, error) {
 	user.BaseItem = duser.BaseItem.Update()
 	user.PasswordHash = duser.PasswordHash
 
-	return user, s.dbtable.Set(user.ID, user)
+	return user, s.userTable.Set(user.ID, user)
 }
 
 // UpdatePassword will update the password field with the new password in the database
 func (s *Service) UpdatePassword(id string, newPassword []byte) error {
-	user, err := s.dbtable.Get(id)
+	user, err := s.userTable.Get(id)
 	if err != nil {
 		return err
 	}
@@ -75,7 +82,7 @@ func (s *Service) UpdatePassword(id string, newPassword []byte) error {
 		return err
 	}
 
-	return s.dbtable.Set(user.ID, user)
+	return s.userTable.Set(user.ID, user)
 }
 
 func HashPassword(user *User) error {

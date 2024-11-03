@@ -2,12 +2,13 @@ package database
 
 import (
 	"fmt"
+	"iter"
 	"os"
 	"path/filepath"
 	"runtime"
 
 	"github.com/DaanV2/go-locks"
-	"github.com/DaanV2/mechanus/server/pkg/xio"
+	xio "github.com/DaanV2/mechanus/server/pkg/extensions/io"
 )
 
 var _ IOHandler = &FileIO{}
@@ -71,4 +72,24 @@ func (f *FileIO) Set(name string, data []byte) error {
 
 func (f *FileIO) String() string {
 	return "fileio: " + f.folder
+}
+
+func (f *FileIO) Ids() iter.Seq[string] {
+	files, err := os.ReadDir(f.folder)
+	if err != nil {
+		panic(fmt.Errorf("error reading files from dir: %s -> %w", f.folder, err)) // This should never happen
+	}
+
+	return func(yield func(string) bool) {
+		for _, f := range files {
+			if f == nil || f.IsDir() {
+				continue
+			}
+
+			name := filepath.Base(f.Name())
+			if !yield(name) {
+				return
+			}
+		}
+	}
 }
