@@ -71,6 +71,13 @@ func (rpc *LoginRPC) Login(ctx context.Context, request *connect.Request[v1.Logi
 	// Valid, create JWT
 	logger.Info("user logged in")
 	token, err := rpc.signIn(ctx, user, PASSWORD)
+	if err != nil {
+		return nil, connect.NewError(
+			connect.CodeUnauthenticated,
+			errors.New("wrong username or password"),
+		)
+	}
+
 	resp := &v1.LoginResponse{
 		Token: token,
 	}
