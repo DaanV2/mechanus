@@ -19,6 +19,10 @@ const (
 	REFRESH  LoginType = "refresh"
 )
 
+func (l LoginType) String() string {
+	return string(l)
+}
+
 var _ usersv1connect.LoginServiceHandler = &LoginRPC{}
 
 type LoginRPC struct {
@@ -99,6 +103,13 @@ func (rpc *LoginRPC) Create(ctx context.Context, request *connect.Request[v1.Cre
 
 	log.Info("created user", "id", user.ID, "name", user.Name)
 	token, err := rpc.signIn(ctx, user, PASSWORD)
+	if err != nil {
+		return nil, connect.NewError(
+			connect.CodeInternal,
+			err,
+		)
+	}
+
 	resp := &v1.CreateAccountResponse{
 		Token: token,
 	}
@@ -116,5 +127,5 @@ func (rpc *LoginRPC) Refresh(context.Context, *connect.Request[v1.RefreshTokenRe
 func (rpc *LoginRPC) signIn(ctx context.Context, user users.User, t LoginType) (string, error) {
 	log.Info("logging in user", "name", user.Name, "id", user.ID)
 
-	return rpc.jwtService.Create(ctx, user)
+	return rpc.jwtService.Create(ctx, user, t.String())
 }

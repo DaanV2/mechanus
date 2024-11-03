@@ -14,8 +14,9 @@ import (
 )
 
 type Claims struct {
-	User JWTUser `json:"user"`
 	jwt.RegisteredClaims
+	User  JWTUser `json:"user"`
+	Scope string  `json:"scope"`
 }
 
 type JWTUser struct {
@@ -39,7 +40,7 @@ type JWTService struct {
 
 // TODO Refresh
 
-func (s *JWTService) Create(ctx context.Context, user users.User) (string, error) {
+func (s *JWTService) Create(ctx context.Context, user users.User, scope string) (string, error) {
 	logging.From(ctx).Info("creating jwt")
 	claims := &Claims{
 		User: JWTUser{
@@ -48,6 +49,7 @@ func (s *JWTService) Create(ctx context.Context, user users.User) (string, error
 			Roles:     user.Roles,
 			Campaigns: user.Campaigns,
 		},
+		Scope: scope,
 	}
 
 	token, err := s.sign(claims)
