@@ -20,6 +20,24 @@
     "[proto3]": {
       "editor.defaultFormatter": "zxh404.vscode-proto3"
     },
-    "protoc": {}
+    "protoc": {},
+    "editor.formatOnSave": true,
+
+    "go.lintTool": "golangci-lint",
+    "go.formatTool": "gofmt",
+    "go.delveConfig": {
+      "showRegisters": true
+    },
+    "go.testOnSave": true,
+    "go.coverOnSave": true,
+    "go.coverageDecorator": {
+      "type": "gutter",
+      "coveredHighlightColor": "rgba(64,128,128,0.5)",
+      "uncoveredHighlightColor": "rgba(128,64,64,0.25)",
+      "coveredBorderColor": "rgba(64,128,128,0.5)",
+      "uncoveredBorderColor": "rgba(128,64,64,0.25)",
+      "coveredGutterStyle": "blockblue",
+      "uncoveredGutterStyle": "slashyellow"
+    }
   }
 }
