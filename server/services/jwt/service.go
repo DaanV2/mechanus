@@ -78,7 +78,7 @@ func (s *JWTService) validate(ctx context.Context, token string, options ...jwt.
 
 	jti, err := s.jtiService.Find(claims.User.ID, claims.ID)
 	if err != nil {
-		return jToken, fmt.Errorf("error finding the JTI", err)
+		return jToken, fmt.Errorf("error finding the JTI: %w", err)
 	}
 	if jti.Revoked {
 		return jToken, authenication.ErrJTIRevoked
@@ -126,7 +126,7 @@ func (s *JWTService) findKey(token *jwt.Token) (interface{}, error) {
 
 	kid, ok := kidH.(string)
 	if !ok {
-		return nil, fmt.Errorf("kid is not a string", kidH)
+		return nil, errors.New("kid is not a string")
 	}
 
 	k := s.keys.GetKey(kid)
