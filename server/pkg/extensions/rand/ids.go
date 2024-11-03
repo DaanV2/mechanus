@@ -15,7 +15,7 @@ func MustID(length int) string {
 }
 
 func ID(length int) (string, error) {
-	data := make([]byte, length * 2)
+	data := make([]byte, length*2)
 
 	_, err := rand.Read(data)
 	if err != nil {

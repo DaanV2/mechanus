@@ -8,7 +8,7 @@ import (
 	"runtime"
 
 	"github.com/DaanV2/go-locks"
-	"github.com/DaanV2/mechanus/server/pkg/xio"
+	xio "github.com/DaanV2/mechanus/server/pkg/extensions/io"
 )
 
 var _ IOHandler = &FileIO{}

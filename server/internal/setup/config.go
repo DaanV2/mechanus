@@ -24,8 +24,6 @@ func Config() {
 func Viper() {
 	viper.SetEnvKeyReplacer(config.EnvironmentNamer())
 	viper.AutomaticEnv()
-	viper.AddConfigPath(".")
-	viper.AddConfigPath(".config/")
-	viper.AddConfigPath("/etc/mechanus/")
+	viper.AddConfigPath(config.UserConfigDir())
 	viper.SetConfigType("yaml")
 }
