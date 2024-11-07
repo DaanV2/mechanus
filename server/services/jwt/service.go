@@ -9,7 +9,7 @@ import (
 	"github.com/DaanV2/mechanus/server/internal/logging"
 	"github.com/DaanV2/mechanus/server/pkg/authenication"
 	"github.com/DaanV2/mechanus/server/pkg/config"
-	"github.com/DaanV2/mechanus/server/services/users"
+	"github.com/DaanV2/mechanus/server/pkg/models"
 	"github.com/golang-jwt/jwt/v5"
 )
 
@@ -40,7 +40,7 @@ type JWTService struct {
 
 // TODO Refresh
 
-func (s *JWTService) Create(ctx context.Context, user users.User, scope string) (string, error) {
+func (s *JWTService) Create(ctx context.Context, user models.User, scope string) (string, error) {
 	logging.From(ctx).Info("creating jwt")
 	claims := &Claims{
 		User: JWTUser{

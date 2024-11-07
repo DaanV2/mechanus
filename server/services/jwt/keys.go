@@ -48,14 +48,3 @@ func (s *JWKS) NewKey() (*Key, error) {
 	return k, nil
 }
 
-func GenerateRSAKeys() (*Key, error) {
-	privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
-	if err != nil {
-		return nil, err
-	}
-
-	return &Key{
-		id:  xrand.MustID(28),
-		key: privateKey,
-	}, nil
-}

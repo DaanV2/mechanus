@@ -3,8 +3,8 @@ package authenication
 import (
 	"errors"
 
-	"github.com/DaanV2/mechanus/server/pkg/database"
 	xrand "github.com/DaanV2/mechanus/server/pkg/extensions/rand"
+	"github.com/DaanV2/mechanus/server/pkg/storage"
 )
 
 type JTI struct {
@@ -17,7 +17,7 @@ func (j *JTI) Valid() bool {
 }
 
 type JTIService struct {
-	storage *database.Table[[]JTI]
+	storage storage.Storage[[]JTI]
 }
 
 func (s *JTIService) GetOrCreate(userId string) (string, error) {
@@ -59,5 +59,5 @@ func (s *JTIService) Find(userId string, jti string) (JTI, error) {
 		}
 	}
 
-	return JTI{}, database.ErrNotFound
+	return JTI{}, storage.ErrNotExist
 }

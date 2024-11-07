@@ -1,15 +1,31 @@
 package config
 
-import "github.com/spf13/pflag"
+import (
+	"path/filepath"
 
-type DatabaseConfig struct {
-	Folder Flag[string]
-}
+	"github.com/spf13/pflag"
+)
 
-var Database = &DatabaseConfig{
-	Folder: String("database.folder", "./db", "The folder to store database files in"),
-}
+type (
+	DatabaseConfig struct {
+		Mode Flag[string]
+	}
+
+	DatabaseIOConfig struct {
+		Folder string
+	}
+)
+
+var (
+	Database = &DatabaseConfig{
+		Mode: String("database-mode", "files", "The mode type of the database: acceptable modes: files"),
+	}
+
+	DatabaseIO = &DatabaseIOConfig{
+		Folder: filepath.Join(UserCacheDir(), "db"),
+	}
+)
 
 func (c *DatabaseConfig) AddToSet(set *pflag.FlagSet) {
-	c.Folder.AddToSet(set)
+
 }

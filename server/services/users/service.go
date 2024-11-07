@@ -5,6 +5,8 @@ import (
 	"strings"
 
 	"github.com/DaanV2/mechanus/server/pkg/database"
+	"github.com/DaanV2/mechanus/server/pkg/models"
+	"github.com/DaanV2/mechanus/server/pkg/storage"
 	"github.com/charmbracelet/log"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -14,32 +16,31 @@ const (
 )
 
 type Service struct {
-	db      *database.Database
-	userTable *database.Table[User]
-	logger  *log.Logger
+	storage storage.Storage[models.Campaign]
+	logger    *log.Logger
 }
 
 func NewService(db *database.Database) *Service {
 	return &Service{
-		db:      db,
-		userTable: database.GetTable[User](db, TABLE_USER),
-		logger:  log.Default().WithPrefix("users"),
+		db:        db,
+		userTable: database.GetTable[models.User](db, TABLE_USER),
+		logger:    log.Default().WithPrefix("users"),
 	}
 }
 
-func (s *Service) Get(id string) (User, error) {
+func (s *Service) Get(id string) (models.User, error) {
 	return s.userTable.Get(id)
 }
 
-func (s *Service) GetByUsername(username string) (User, error) {
-	return s.userTable.First(func(item User) bool {
+func (s *Service) GetByUsername(username string) (models.User, error) {
+	return s.userTable.First(func(item models.User) bool {
 		return strings.EqualFold(item.Name, username)
 	})
 }
 
 // Create makes a new entry in the database, assumes the password is set in the PasswordHash field as plain bytes, will hash that field first
-func (s *Service) Create(user User) (User, error) {
-	user.BaseItem = database.NewBaseItem()
+func (s *Service) Create(user models.User) (models.User, error) {
+	user.BaseItem = models.NewBaseItem()
 	err := HashPassword(&user)
 	if err != nil {
 		return user, err

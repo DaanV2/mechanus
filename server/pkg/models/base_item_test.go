@@ -1,17 +1,17 @@
-package database_test
+package models_test
 
 import (
 	"testing"
 	"time"
 
-	"github.com/DaanV2/mechanus/server/pkg/database"
+	"github.com/DaanV2/mechanus/server/pkg/models"
 	"github.com/stretchr/testify/require"
 )
 
 func Test_BaseItem(t *testing.T) {
 	t.Run("New created base should have valid uuid and dates", func(t *testing.T) {
 		n := time.Now()
-		b := database.NewBaseItem()
+		b := models.NewBaseItem()
 
 		require.Len(t, b.ID, 36)
 		require.GreaterOrEqual(t, b.CreatedAt, n)
@@ -21,7 +21,7 @@ func Test_BaseItem(t *testing.T) {
 	})
 
 	t.Run("If updated, then the updated field should be updated", func(t *testing.T) {
-		b := database.NewBaseItem()
+		b := models.NewBaseItem()
 
 		time.Sleep(time.Second)
 
@@ -32,7 +32,7 @@ func Test_BaseItem(t *testing.T) {
 	})
 
 	t.Run("If deleted, then the deleted field should be updated", func(t *testing.T) {
-		b := database.NewBaseItem()
+		b := models.NewBaseItem()
 
 		time.Sleep(time.Second)
 

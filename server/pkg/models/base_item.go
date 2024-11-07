@@ -1,4 +1,4 @@
-package database
+package models
 
 import (
 	"time"
@@ -22,6 +22,11 @@ func NewBaseItem() BaseItem {
 		DeletedAt: nil,
 	}
 }
+
+func (b BaseItem) GetID() string            { return b.ID }
+func (b BaseItem) GetCreatedAt() time.Time  { return b.CreatedAt }
+func (b BaseItem) GetUpdatedAt() time.Time  { return b.UpdatedAt }
+func (b BaseItem) GetDeletedAt() *time.Time { return b.DeletedAt }
 
 // IsDeleted returns true if this item has been marked as deleted
 func (b BaseItem) IsDeleted() bool {
