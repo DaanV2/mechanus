@@ -6,8 +6,8 @@ import (
 	"iter"
 	"path/filepath"
 
+	xerrors "github.com/DaanV2/mechanus/server/pkg/extensions/errors"
 	"github.com/DaanV2/mechanus/server/pkg/generics"
-	"github.com/DaanV2/mechanus/server/pkg/storage"
 	"github.com/charmbracelet/log"
 )
 
@@ -86,5 +86,5 @@ func (Storage *Storage[T]) First(predicate func(item T) bool) (T, error) {
 		}
 	}
 
-	return empty, storage.ErrNotExist
+	return empty, xerrors.ErrNotExist
 }

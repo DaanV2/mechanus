@@ -3,6 +3,7 @@ package authenication
 import (
 	"errors"
 
+	xerrors "github.com/DaanV2/mechanus/server/pkg/extensions/errors"
 	xrand "github.com/DaanV2/mechanus/server/pkg/extensions/rand"
 	"github.com/DaanV2/mechanus/server/pkg/storage"
 )
@@ -59,5 +60,5 @@ func (s *JTIService) Find(userId string, jti string) (JTI, error) {
 		}
 	}
 
-	return JTI{}, storage.ErrNotExist
+	return JTI{}, xerrors.ErrNotExist
 }

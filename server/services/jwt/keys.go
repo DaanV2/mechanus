@@ -1,23 +1,16 @@
 package jwts
 
 import (
-	"crypto/rand"
-	"crypto/rsa"
-
-	xrand "github.com/DaanV2/mechanus/server/pkg/extensions/rand"
+	xcrypto "github.com/DaanV2/mechanus/server/pkg/extensions/crypto"
 	"github.com/charmbracelet/log"
 )
 
-type Key struct {
-	id  string
-	key *rsa.PrivateKey
-}
 
 type JWKS struct {
-	keys []*Key
+	keys []*xcrypto.RSAKey
 }
 
-func (s *JWKS) GetSigningKey() (*Key, error) {
+func (s *JWKS) GetSigningKey() (*xcrypto.RSAKey, error) {
 	for _, k := range s.keys {
 		if k != nil {
 			return k, nil
@@ -27,9 +20,9 @@ func (s *JWKS) GetSigningKey() (*Key, error) {
 	return s.NewKey()
 }
 
-func (s *JWKS) GetKey(id string) *Key {
+func (s *JWKS) GetKey(id string) *xcrypto.RSAKey {
 	for _, k := range s.keys {
-		if k.id == id {
+		if k.ID() == id {
 			return k
 		}
 	}
@@ -37,14 +30,14 @@ func (s *JWKS) GetKey(id string) *Key {
 	return nil
 }
 
-func (s *JWKS) NewKey() (*Key, error) {
-	k, err := GenerateRSAKeys()
+func (s *JWKS) NewKey() (*xcrypto.RSAKey, error) {
+	key, err := xcrypto.GenerateRSAKeys()
 	if err != nil {
 		return nil, err
 	}
 
-	log.Info("generating new signing RSA key", "id", k.id)
-	s.keys = append(s.keys, k)
-	return k, nil
+	log.Info("generating new signing RSA key", "id", key.ID())
+	s.keys = append(s.keys, key)
+	return key, nil
 }
 

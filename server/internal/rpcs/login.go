@@ -7,6 +7,8 @@ import (
 	connect "connectrpc.com/connect"
 	v1 "github.com/DaanV2/mechanus/server/internal/grpc/users/v1"
 	"github.com/DaanV2/mechanus/server/internal/grpc/users/v1/usersv1connect"
+	xcrypto "github.com/DaanV2/mechanus/server/pkg/extensions/crypto"
+	"github.com/DaanV2/mechanus/server/pkg/models"
 	jwts "github.com/DaanV2/mechanus/server/services/jwt"
 	"github.com/DaanV2/mechanus/server/services/users"
 	"github.com/charmbracelet/log"
@@ -52,7 +54,7 @@ func (rpc *LoginRPC) Login(ctx context.Context, request *connect.Request[v1.Logi
 	}
 
 	// Compare passwords
-	ok, err := users.ComparePassword(user.PasswordHash, []byte(request.Msg.Password))
+	ok, err := xcrypto.ComparePassword(user.PasswordHash, []byte(request.Msg.Password))
 	if err != nil {
 		logger.Error("error during checking of the password", "error", err)
 		return nil, connect.NewError(
@@ -93,7 +95,7 @@ func (rpc *LoginRPC) Create(ctx context.Context, request *connect.Request[v1.Cre
 		)
 	}
 
-	user := users.User{
+	user := models.User{
 		Name:         request.Msg.Username,
 		Roles:        make([]string, 0),
 		Campaigns:    make([]string, 0),
@@ -131,7 +133,7 @@ func (rpc *LoginRPC) Refresh(context.Context, *connect.Request[v1.RefreshTokenRe
 	//TODO extract user from token
 }
 
-func (rpc *LoginRPC) signIn(ctx context.Context, user users.User, t LoginType) (string, error) {
+func (rpc *LoginRPC) signIn(ctx context.Context, user models.User, t LoginType) (string, error) {
 	log.Info("logging in user", "name", user.Name, "id", user.ID)
 
 	return rpc.jwtService.Create(ctx, user, t.String())

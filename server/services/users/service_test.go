@@ -5,12 +5,13 @@ import (
 	"time"
 
 	"github.com/DaanV2/mechanus/server/pkg/database"
+	"github.com/DaanV2/mechanus/server/pkg/models"
 	"github.com/DaanV2/mechanus/server/services/users"
 	"github.com/stretchr/testify/require"
 )
 
 func Test_User_Service(t *testing.T) {
-	original := users.User{
+	original := models.User{
 		Name:         "gandalf",
 		Roles:        []string{"admin"},
 		Campaigns:    []string{"homebrew"},

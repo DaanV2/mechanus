@@ -10,8 +10,8 @@ import (
 	"sync"
 
 	"github.com/DaanV2/go-locks"
+	xerrors "github.com/DaanV2/mechanus/server/pkg/extensions/errors"
 	xio "github.com/DaanV2/mechanus/server/pkg/extensions/io"
-	"github.com/DaanV2/mechanus/server/pkg/storage"
 	"github.com/charmbracelet/log"
 )
 
@@ -52,7 +52,7 @@ func (s *RawStorage) Get(id string) ([]byte, error) {
 
 	data, err := os.ReadFile(f)
 	if os.IsNotExist(err) {
-		return nil, storage.ErrNotExist
+		return nil, xerrors.ErrNotExist
 	}
 
 	return data, err

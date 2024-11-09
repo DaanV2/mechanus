@@ -113,9 +113,9 @@ func (s *JWTService) sign(claims *Claims) (string, error) {
 
 	method := jwt.GetSigningMethod(jwt.SigningMethodRS512.Alg())
 	token := jwt.NewWithClaims(method, claims)
-	token.Header["kid"] = key.id
+	token.Header["kid"] = key.ID()
 
-	strToken, err := token.SignedString(key.key)
+	strToken, err := token.SignedString(key.ID())
 
 	return strToken, err
 }
