@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"iter"
 	"path/filepath"
+	"strings"
 
 	xerrors "github.com/DaanV2/mechanus/server/pkg/extensions/errors"
 	"github.com/DaanV2/mechanus/server/pkg/generics"
@@ -19,7 +20,7 @@ type Storage[T any] struct {
 
 func NewStorage[T any](folder string) *Storage[T] {
 	t := generics.NameOf[T]()
-	f := filepath.Join(folder, t)
+	f := filepath.Join(folder, strings.ToLower(t))
 
 	return &Storage[T]{
 		name:   t,
