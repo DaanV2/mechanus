@@ -56,7 +56,7 @@ func AddUser(cmd *cobra.Command, args []string) error {
 		return errors.New("username, password or roles need to have been set")
 	}
 
-	userService := components.UserService()
+	userService := components.NewUserService()
 
 	user := models.User{
 		Name:         *username,

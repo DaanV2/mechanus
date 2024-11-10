@@ -21,7 +21,7 @@ var (
 	)
 )
 
-func UserService() *users.Service {
+func NewUserService() *users.Service {
 	wire.Build(configSet, storageSet, users.NewService)
 
 	return &users.Service{}

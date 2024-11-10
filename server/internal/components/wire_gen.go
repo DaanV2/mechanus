@@ -17,7 +17,7 @@ import (
 
 // Injectors from wire.go:
 
-func UserService() *users.Service {
+func NewUserService() *users.Service {
 	userConfig := config.GetUserConfig()
 	storage := newUserStorage(userConfig)
 	service := users.NewService(storage)
