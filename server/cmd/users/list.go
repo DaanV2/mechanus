@@ -36,7 +36,7 @@ func init() {
 }
 
 func ListUsers(cmd *cobra.Command, args []string) error {
-	userService := components.UserService()
+	userService := components.NewUserService()
 	userTable := terminal.NewTable(displayUser)
 
 	userTable.SetColumns(
