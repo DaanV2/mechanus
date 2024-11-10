@@ -7,9 +7,9 @@ import (
 	connect "connectrpc.com/connect"
 	v1 "github.com/DaanV2/mechanus/server/internal/grpc/users/v1"
 	"github.com/DaanV2/mechanus/server/internal/grpc/users/v1/usersv1connect"
+	"github.com/DaanV2/mechanus/server/pkg/authenication"
 	xcrypto "github.com/DaanV2/mechanus/server/pkg/extensions/crypto"
 	"github.com/DaanV2/mechanus/server/pkg/models"
-	jwts "github.com/DaanV2/mechanus/server/services/jwt"
 	"github.com/DaanV2/mechanus/server/services/users"
 	"github.com/charmbracelet/log"
 )
@@ -29,7 +29,7 @@ var _ usersv1connect.LoginServiceHandler = &LoginRPC{}
 
 type LoginRPC struct {
 	userService users.Service
-	jwtService  jwts.JWTService
+	jwtService  authenication.JWTService
 }
 
 func (rpc *LoginRPC) Login(ctx context.Context, request *connect.Request[v1.LoginRequest]) (*connect.Response[v1.LoginResponse], error) {

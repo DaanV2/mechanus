@@ -1,4 +1,4 @@
-package jwts
+package authenication
 
 import (
 	"context"
@@ -7,42 +7,43 @@ import (
 	"time"
 
 	"github.com/DaanV2/mechanus/server/internal/logging"
-	"github.com/DaanV2/mechanus/server/pkg/authenication"
 	"github.com/DaanV2/mechanus/server/pkg/config"
 	"github.com/DaanV2/mechanus/server/pkg/models"
 	"github.com/golang-jwt/jwt/v5"
 )
 
-type Claims struct {
-	jwt.RegisteredClaims
-	User  JWTUser `json:"user"`
-	Scope string  `json:"scope"`
-}
+type (
+	JWTClaims struct {
+		jwt.RegisteredClaims
+		User  JWTUser `json:"user"`
+		Scope string  `json:"scope"`
+	}
 
-type JWTUser struct {
-	ID        string   `json:"id"`
-	Name      string   `json:"name"`
-	Roles     []string `json:"roles"`
-	Campaigns []string `json:"campaigns"`
-}
+	JWTUser struct {
+		ID        string   `json:"id"`
+		Name      string   `json:"name"`
+		Roles     []string `json:"roles"`
+		Campaigns []string `json:"campaigns"`
+	}
 
-type JWTOptions struct {
-	TokenDuration    time.Duration
-	SigningAlgorithm string
-}
+	JWTOptions struct {
+		TokenDuration    time.Duration
+		SigningAlgorithm string
+	}
 
-type JWTService struct {
-	options    *JWTOptions
-	validator  *jwt.Validator
-	jtiService *authenication.JTIService
-	keys       JWKS
-}
+	JWTService struct {
+		options    *JWTOptions
+		validator  *jwt.Validator
+		jtiService *JTIService
+		keys       *KeyManager
+	}
+)
 
 // TODO Refresh
 
 func (s *JWTService) Create(ctx context.Context, user models.User, scope string) (string, error) {
 	logging.From(ctx).Info("creating jwt")
-	claims := &Claims{
+	claims := &JWTClaims{
 		User: JWTUser{
 			ID:        user.ID,
 			Name:      user.Name,
@@ -66,7 +67,7 @@ func (s *JWTService) validate(ctx context.Context, token string, options ...jwt.
 	logger := logging.From(ctx).With("jwt", token)
 	logger.Debug("validating jwt token")
 
-	jToken, err := jwt.ParseWithClaims(token, Claims{}, s.findKey, options...)
+	jToken, err := jwt.ParseWithClaims(token, JWTClaims{}, s.findKey, options...)
 	if err != nil {
 		logger.Error("jwt is not valid", "error", err)
 		return nil, err
@@ -75,7 +76,7 @@ func (s *JWTService) validate(ctx context.Context, token string, options ...jwt.
 	// Check the JTI is it has been revoked
 	claims, ok := GetClaims(jToken.Claims)
 	if !ok {
-		return jToken, errors.New("couldn't read claims on the jwt")
+		return jToken, ErrClaimsRead
 	}
 
 	jti, err := s.jtiService.Find(claims.User.ID, claims.ID)
@@ -83,13 +84,13 @@ func (s *JWTService) validate(ctx context.Context, token string, options ...jwt.
 		return jToken, fmt.Errorf("error finding the JTI: %w", err)
 	}
 	if jti.Revoked {
-		return jToken, authenication.ErrJTIRevoked
+		return jToken, ErrJTIRevoked
 	}
 
 	return jToken, s.validator.Validate(jToken.Claims)
 }
 
-func (s *JWTService) sign(claims *Claims) (string, error) {
+func (s *JWTService) sign(claims *JWTClaims) (string, error) {
 	// Get a token id
 	jti, err := s.jtiService.GetOrCreate(claims.User.ID)
 	if err != nil {
@@ -123,15 +124,18 @@ func (s *JWTService) sign(claims *Claims) (string, error) {
 func (s *JWTService) findKey(token *jwt.Token) (interface{}, error) {
 	kidH, ok := token.Header["kid"]
 	if !ok {
-		return nil, errors.New("couldn't find jwt kid header")
+		return nil, ErrKIDMissing
 	}
 
 	kid, ok := kidH.(string)
 	if !ok {
-		return nil, errors.New("kid is not a string")
+		return nil, ErrKIDNotString
 	}
 
-	k := s.keys.GetKey(kid)
+	k, err := s.keys.Get(kid)
+	if err != nil {
+		return nil, err
+	}
 	if k != nil {
 		return k, nil
 	}
@@ -139,13 +143,13 @@ func (s *JWTService) findKey(token *jwt.Token) (interface{}, error) {
 	return nil, errors.New("couldn't find the jwt signing key: " + kid)
 }
 
-func GetClaims(claims jwt.Claims) (Claims, bool) {
+func GetClaims(claims jwt.Claims) (JWTClaims, bool) {
 	if claims != nil {
-		c, ok := claims.(Claims)
+		c, ok := claims.(JWTClaims)
 		if ok {
 			return c, true
 		}
 	}
 
-	return Claims{}, false
+	return JWTClaims{}, false
 }

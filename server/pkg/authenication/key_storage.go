@@ -53,6 +53,30 @@ func (manager *KeyManager) New() (*KeyData, error) {
 	return key, manager.save(key)
 }
 
+// GetSigningKey
+func (manager *KeyManager) GetSigningKey() (*KeyData, error) {
+	var (
+		key *KeyData
+		err error
+	)
+
+	manager.keys.Range(func(id, value any) bool {
+		k, ok := value.(*KeyData)
+		if !ok || k.Private() == nil {
+			return true
+		}
+
+		key = k
+		return false
+	})
+
+	if key == nil {
+		key, err = manager.New()
+	}
+
+	return key, err
+}
+
 func (manager *KeyManager) load(id string) (*KeyData, error) {
 	key, err := manager.storage.Get(id)
 	if err != nil {
