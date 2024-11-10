@@ -21,6 +21,12 @@ type JTIService struct {
 	storage storage.Storage[[]JTI]
 }
 
+func NewJTIService(storage storage.Storage[[]JTI]) *JTIService {
+	return &JTIService{
+		storage,
+	}
+}
+
 func (s *JTIService) GetOrCreate(userId string) (string, error) {
 	if userId == "" {
 		return "", errors.New("userId is empty")

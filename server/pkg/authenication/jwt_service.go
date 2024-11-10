@@ -9,7 +9,13 @@ import (
 	"github.com/DaanV2/mechanus/server/internal/logging"
 	"github.com/DaanV2/mechanus/server/pkg/config"
 	"github.com/DaanV2/mechanus/server/pkg/models"
+	"github.com/DaanV2/mechanus/server/pkg/storage"
 	"github.com/golang-jwt/jwt/v5"
+)
+
+const (
+	JWT_ISSUER   = config.SERVICE_NAME
+	JWT_AUDIENCE = config.SERVICE_NAME
 )
 
 type (
@@ -27,8 +33,7 @@ type (
 	}
 
 	JWTOptions struct {
-		TokenDuration    time.Duration
-		SigningAlgorithm string
+		TokenDuration time.Duration
 	}
 
 	JWTService struct {
@@ -38,6 +43,28 @@ type (
 		keys       *KeyManager
 	}
 )
+
+func NewJWTService(jtiStorage storage.Storage[[]JTI], keyStorage storage.Storage[*KeyData]) (*JWTService, error) {
+	keys, err := NewKeyManager(keyStorage)
+	if err != nil {
+		return nil, err
+	}
+
+	service := &JWTService{
+		options: &JWTOptions{
+			TokenDuration: time.Hour * 8,
+		},
+		validator: jwt.NewValidator(
+			jwt.WithAudience(JWT_AUDIENCE),
+			jwt.WithIssuer(JWT_ISSUER),
+			jwt.WithLeeway(time.Minute*5),
+		),
+		jtiService: NewJTIService(jtiStorage),
+		keys:       keys,
+	}
+
+	return service, nil
+}
 
 // TODO Refresh
 
@@ -102,7 +129,8 @@ func (s *JWTService) sign(claims *JWTClaims) (string, error) {
 	claims.RegisteredClaims = jwt.RegisteredClaims{
 		ExpiresAt: jwt.NewNumericDate(expirationTime),
 		ID:        jti,
-		Issuer:    config.SERVICE_NAME,
+		Issuer:    JWT_ISSUER,
+		Audience:  jwt.ClaimStrings{JWT_AUDIENCE},
 		IssuedAt:  jwt.NewNumericDate(now),
 		NotBefore: jwt.NewNumericDate(now.Add(time.Minute * -1)),
 	}
