@@ -4,8 +4,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/DaanV2/mechanus/server/pkg/database"
 	"github.com/DaanV2/mechanus/server/pkg/models"
+	memory_storage "github.com/DaanV2/mechanus/server/pkg/storage/memory"
 	"github.com/DaanV2/mechanus/server/services/users"
 	"github.com/stretchr/testify/require"
 )
@@ -19,9 +19,9 @@ func Test_User_Service(t *testing.T) {
 	}
 
 	t.Run("Can create a new user", func(t *testing.T) {
-		db := database.NewDatabaseWith(database.NewMemoryIO())
+		store := memory_storage.NewStorage[models.User]()
 		now := time.Now()
-		service := users.NewService(db)
+		service := users.NewService(store)
 
 		// Create
 		u, err := service.Create(original)
