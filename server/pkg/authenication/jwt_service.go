@@ -18,19 +18,6 @@ const (
 )
 
 type (
-	JWTClaims struct {
-		jwt.RegisteredClaims `json:",inline"`
-		User                 JWTUser `json:"user"`
-		Scope                string  `json:"scope"`
-	}
-
-	JWTUser struct {
-		ID        string   `json:"id"`
-		Name      string   `json:"name"`
-		Roles     []string `json:"roles"`
-		Campaigns []string `json:"campaigns"`
-	}
-
 	JWTOptions struct {
 		TokenDuration time.Duration
 	}
