@@ -33,28 +33,28 @@ var ifaceCmd = &cobra.Command{
 				item.Flags.String(),
 			}
 		})
-		t.SetColumns([]table.Column{
-			{
+		t.SetColumns(
+			table.Column{
 				Title: "name",
 				Width: 4,
 			},
-			{
+			table.Column{
 				Title: "index",
 				Width: 5,
 			},
-			{
+			table.Column{
 				Title: "mtu",
 				Width: 3,
 			},
-			{
+			table.Column{
 				Title: "hardware address",
 				Width: 16,
 			},
-			{
+			table.Column{
 				Title: "flags",
 				Width: 5,
 			},
-		})
+		)
 		t.AddItems(ifaces)
 		t.AutoWidth()
 

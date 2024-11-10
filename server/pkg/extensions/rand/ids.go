@@ -15,12 +15,16 @@ func MustID(length int) string {
 }
 
 func ID(length int) (string, error) {
-	data := make([]byte, length*2)
+	l := length / 2
+	if length & 1 == 1 {
+		l += 1
+	}
 
+	data := make([]byte, l)
 	_, err := rand.Read(data)
 	if err != nil {
 		return "", err
 	}
 
-	return hex.EncodeToString(data), nil
+	return hex.EncodeToString(data)[:length], nil
 }

@@ -62,11 +62,11 @@ func updateLogger(logger *log.Logger, reportCaller bool, level, format string) {
 func CreateStyle() *log.Styles {
 	styles := log.DefaultStyles()
 
-	styles.Levels[log.DebugLevel] = styles.Levels[log.DebugLevel].SetString("🔎")
-	styles.Levels[log.InfoLevel] = styles.Levels[log.InfoLevel].SetString("")
-	styles.Levels[log.WarnLevel] = styles.Levels[log.WarnLevel].SetString("⚠️")
-	styles.Levels[log.ErrorLevel] = styles.Levels[log.ErrorLevel].SetString("💥")
-	styles.Levels[log.FatalLevel] = styles.Levels[log.FatalLevel].SetString("☠️")
+	styles.Levels[log.DebugLevel] = styles.Levels[log.DebugLevel].SetString("DEBUG")
+	styles.Levels[log.InfoLevel] = styles.Levels[log.InfoLevel].SetString("INFO")
+	styles.Levels[log.WarnLevel] = styles.Levels[log.WarnLevel].SetString("WARN")
+	styles.Levels[log.ErrorLevel] = styles.Levels[log.ErrorLevel].SetString("ERROR")
+	styles.Levels[log.FatalLevel] = styles.Levels[log.FatalLevel].SetString("FATAL")
 
 	styles.Keys["err"] = lipgloss.NewStyle().Foreground(lipgloss.Color("204"))
 	styles.Keys["error"] = lipgloss.NewStyle().Foreground(lipgloss.Color("204"))

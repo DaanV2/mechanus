@@ -37,7 +37,6 @@ func init() {
 	flags := serverCmd.Flags()
 	config.MDNS.AddToSet(flags)
 	config.APIServer.AddToSet(flags)
-	config.Database.AddToSet(flags)
 }
 
 func ServerWorkload(cmd *cobra.Command, args []string) {

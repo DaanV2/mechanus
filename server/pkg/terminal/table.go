@@ -41,7 +41,7 @@ func NewTable[T any](conv func(item T) []string) *Table[T] {
 	}
 }
 
-func (t *Table[T]) SetColumns(c []table.Column) {
+func (t *Table[T]) SetColumns(c ...table.Column) {
 	t.table.SetColumns(c)
 }
 
