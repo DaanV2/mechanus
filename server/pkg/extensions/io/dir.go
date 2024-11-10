@@ -11,7 +11,7 @@ import (
 func MakeDirAll(folder string) {
 	// Check if the folder exists
 	if !DirExists(folder) {
-		log.Info("Creating folder: " + folder)
+		log.Info("creating folder: " + folder)
 
 		// Folder does not exist, create it
 		err := os.MkdirAll(folder, os.ModePerm)

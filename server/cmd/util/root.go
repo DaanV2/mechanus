@@ -10,6 +10,6 @@ var utilCmd = &cobra.Command{
 	Short: "A bunch of util function to help manage",
 }
 
-func AddUtilCmd(parent *cobra.Command) {
+func AddCmds(parent *cobra.Command) {
 	parent.AddCommand(utilCmd)
 }

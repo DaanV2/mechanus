@@ -12,6 +12,7 @@ import (
 
 func main() {
 	setup.Logger()
+	setup.Folders()
 	setup.Viper()
 	setup.Config()
 
