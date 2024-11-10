@@ -9,7 +9,6 @@ import (
 	"github.com/DaanV2/mechanus/server/internal/logging"
 	"github.com/DaanV2/mechanus/server/pkg/config"
 	"github.com/DaanV2/mechanus/server/pkg/models"
-	"github.com/DaanV2/mechanus/server/pkg/storage"
 	"github.com/golang-jwt/jwt/v5"
 )
 
@@ -20,9 +19,9 @@ const (
 
 type (
 	JWTClaims struct {
-		jwt.RegisteredClaims
-		User  JWTUser `json:"user"`
-		Scope string  `json:"scope"`
+		jwt.RegisteredClaims `json:",inline"`
+		User                 JWTUser `json:"user"`
+		Scope                string  `json:"scope"`
 	}
 
 	JWTUser struct {
@@ -44,26 +43,21 @@ type (
 	}
 )
 
-func NewJWTService(jtiStorage storage.Storage[[]JTI], keyStorage storage.Storage[*KeyData]) (*JWTService, error) {
-	keys, err := NewKeyManager(keyStorage)
-	if err != nil {
-		return nil, err
-	}
-
+func NewJWTService(jtiService *JTIService, keys *KeyManager) *JWTService {
 	service := &JWTService{
 		options: &JWTOptions{
-			TokenDuration: time.Hour * 8,
+			TokenDuration: time.Hour * 1,
 		},
 		validator: jwt.NewValidator(
 			jwt.WithAudience(JWT_AUDIENCE),
 			jwt.WithIssuer(JWT_ISSUER),
 			jwt.WithLeeway(time.Minute*5),
 		),
-		jtiService: NewJTIService(jtiStorage),
+		jtiService: jtiService,
 		keys:       keys,
 	}
 
-	return service, nil
+	return service
 }
 
 // TODO Refresh
@@ -80,8 +74,7 @@ func (s *JWTService) Create(ctx context.Context, user models.User, scope string)
 		Scope: scope,
 	}
 
-	token, err := s.sign(claims)
-	return token, err
+	return s.sign(claims)
 }
 
 func (s *JWTService) Validate(ctx context.Context, token string) (*jwt.Token, error) {
@@ -94,7 +87,7 @@ func (s *JWTService) validate(ctx context.Context, token string, options ...jwt.
 	logger := logging.From(ctx).With("jwt", token)
 	logger.Debug("validating jwt token")
 
-	jToken, err := jwt.ParseWithClaims(token, JWTClaims{}, s.findKey, options...)
+	jToken, err := jwt.ParseWithClaims(token, &JWTClaims{}, s.findPublicKey, options...)
 	if err != nil {
 		logger.Error("jwt is not valid", "error", err)
 		return nil, err
@@ -121,7 +114,7 @@ func (s *JWTService) sign(claims *JWTClaims) (string, error) {
 	// Get a token id
 	jti, err := s.jtiService.GetOrCreate(claims.User.ID)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("problem getting a jti: %w", err)
 	}
 	now := time.Now()
 
@@ -144,12 +137,10 @@ func (s *JWTService) sign(claims *JWTClaims) (string, error) {
 	token := jwt.NewWithClaims(method, claims)
 	token.Header["kid"] = key.ID()
 
-	strToken, err := token.SignedString(key.ID())
-
-	return strToken, err
+	return token.SignedString(key.Private())
 }
 
-func (s *JWTService) findKey(token *jwt.Token) (interface{}, error) {
+func (s *JWTService) findPublicKey(token *jwt.Token) (interface{}, error) {
 	kidH, ok := token.Header["kid"]
 	if !ok {
 		return nil, ErrKIDMissing
@@ -165,19 +156,19 @@ func (s *JWTService) findKey(token *jwt.Token) (interface{}, error) {
 		return nil, err
 	}
 	if k != nil {
-		return k, nil
+		return k.Public(), nil
 	}
 
 	return nil, errors.New("couldn't find the jwt signing key: " + kid)
 }
 
-func GetClaims(claims jwt.Claims) (JWTClaims, bool) {
+func GetClaims(claims jwt.Claims) (*JWTClaims, bool) {
 	if claims != nil {
-		c, ok := claims.(JWTClaims)
+		c, ok := claims.(*JWTClaims)
 		if ok {
 			return c, true
 		}
 	}
 
-	return JWTClaims{}, false
+	return nil, false
 }

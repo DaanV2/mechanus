@@ -27,13 +27,15 @@ func NewJTIService(storage storage.Storage[[]JTI]) *JTIService {
 	}
 }
 
+// TODO revokaction
+
 func (s *JTIService) GetOrCreate(userId string) (string, error) {
 	if userId == "" {
 		return "", errors.New("userId is empty")
 	}
 
 	jtis, err := s.storage.Get(userId)
-	if err != nil {
+	if err != nil && !errors.Is(err, xerrors.ErrNotExist) {
 		return "", err
 	}
 
