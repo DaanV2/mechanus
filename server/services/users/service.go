@@ -2,6 +2,7 @@ package users
 
 import (
 	"errors"
+	"iter"
 	"strings"
 
 	xcrypto "github.com/DaanV2/mechanus/server/pkg/extensions/crypto"
@@ -23,10 +24,17 @@ func NewService(storage storage.Storage[models.User]) *Service {
 	}
 }
 
+// Gets looks up the user by the given id, will return a [xerrors.ErrNotExist] if nothing matched
 func (s *Service) Get(id string) (models.User, error) {
 	return s.storage.Get(id)
 }
 
+func (s *Service) Ids() iter.Seq[string] {
+	return s.storage.Ids()
+}
+
+// GetByUsername retrieve the given user by its name, instead of id.
+// returns a [xerrors.ErrNotExist] if nothing matched
 func (s *Service) GetByUsername(username string) (models.User, error) {
 	return storage.First(s.storage, func(item models.User) bool {
 		return strings.EqualFold(item.Name, username)
@@ -42,7 +50,7 @@ func (s *Service) Create(user models.User) (models.User, error) {
 	}
 	user.PasswordHash = pwhash
 
-	_, err = s.storage.Get(user.ID)
+	_, err = s.GetByUsername(user.Name)
 	if !errors.Is(err, xerrors.ErrNotExist) {
 		return user, errors.New("user already exists")
 	}

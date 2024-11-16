@@ -20,7 +20,7 @@
       "mode": "auto",
       "program": "${workspaceFolder}/main.go",
       "envFile": "${workspaceFolder}/.env",
-      "args": ["util", "iface"],
+      "args": ["users", "list"],
       "console": "integratedTerminal"
     }
   ]
