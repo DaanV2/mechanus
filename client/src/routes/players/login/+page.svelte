@@ -28,5 +28,6 @@
       required
     />
     <button type="submit" class="action-button" disabled={!isFormValid}> Login </button>
+    <a href="/players/signup" class="action-button">Dont have an account? Sign up!</a>
   </form>
 </div>
