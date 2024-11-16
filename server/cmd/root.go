@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	userscmd "github.com/DaanV2/mechanus/server/cmd/users"
 	utilcmd "github.com/DaanV2/mechanus/server/cmd/util"
 	"github.com/DaanV2/mechanus/server/internal/setup"
 	"github.com/DaanV2/mechanus/server/pkg/config"
@@ -43,5 +44,6 @@ func init() {
 	pflags := rootCmd.PersistentFlags()
 	config.Logger.AddToSet(pflags)
 
-	utilcmd.AddUtilCmd(rootCmd)
+	utilcmd.AddCmds(rootCmd)
+	userscmd.AddCmds(rootCmd)
 }

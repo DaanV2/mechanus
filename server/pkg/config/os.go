@@ -8,6 +8,18 @@ import (
 	"github.com/charmbracelet/log"
 )
 
+type UserConfig struct {
+	ConfigDir string
+	CacheDir string
+}
+
+func GetUserConfig() UserConfig{
+	return UserConfig{
+		ConfigDir: UserConfigDir(),
+		CacheDir: UserCacheDir(),
+	}
+}
+
 // UserConfigDir returns the directory the app to store its config in
 func UserConfigDir() string {
 	if xio.DirExists("./.config") {
