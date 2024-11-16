@@ -32,13 +32,21 @@ require (
 require (
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/charmbracelet/huh v0.6.0
+<<<<<<< HEAD
 	github.com/charmbracelet/x/ansi v0.4.5 // indirect
+=======
+	github.com/charmbracelet/x/ansi v0.4.2 // indirect
+>>>>>>> 26678c0e396c64359ba24480523b0b708070c590
 	github.com/charmbracelet/x/term v0.2.0 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/erikgeiser/coninput v0.0.0-20211004153227-1c3628e74d0f // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/go-logfmt/logfmt v0.6.0 // indirect
+<<<<<<< HEAD
 	github.com/google/wire v0.6.0
+=======
+	github.com/google/wire v0.6.0 // indirect
+>>>>>>> 26678c0e396c64359ba24480523b0b708070c590
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
