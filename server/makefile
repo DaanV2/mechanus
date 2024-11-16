@@ -5,5 +5,5 @@ coverage-report: test
 	go tool cover -html=reports/coverage
 
 generate:
-	wire gen
+	wire gen ./...
 	go generate ./...
