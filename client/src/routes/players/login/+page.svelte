@@ -1,6 +1,6 @@
 <script lang="ts">
-  let username = '';
-  let password = '';
+  let username = $state('');
+  let password = $state('');
 
   function handleSubmit(event: Event) {
     event.preventDefault();
@@ -10,7 +10,7 @@
   }
 
   // Computed property to check if both fields are filled
-  $: isFormValid = username.trim() !== '' && password.trim() !== '';
+  let isFormValid = $derived(username.trim() !== '' && password.trim() !== '');
 </script>
 
 <svelte:head>
@@ -18,7 +18,7 @@
 </svelte:head>
 
 <div class="centered-container">
-  <form class="box-container" on:submit={handleSubmit}>
+  <form class="box-container" onsubmit={handleSubmit}>
     <input type="text" class="login-input" placeholder="Username" bind:value={username} required />
     <input
       type="password"
