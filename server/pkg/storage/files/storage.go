@@ -80,16 +80,15 @@ func (s *Storage[T]) Set(id string, item T) error {
 
 // First returns the item that matches the given predicate first, returns [ErrNotFound] is nothing is found
 func (Storage *Storage[T]) First(predicate func(item T) bool) (T, error) {
-	var empty T
 	for id := range Storage.Ids() {
 		v, err := Storage.Get(id)
 		if err != nil {
-			return empty, err
+			return generics.Empty[T](), err
 		}
 		if predicate(v) {
 			return v, nil
 		}
 	}
 
-	return empty, xerrors.ErrNotExist
+	return generics.Empty[T](), xerrors.ErrNotExist
 }

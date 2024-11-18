@@ -2,21 +2,21 @@ package authenication
 
 import (
 	"errors"
-	"sync"
 
 	xcrypto "github.com/DaanV2/mechanus/server/pkg/extensions/crypto"
+	xsync "github.com/DaanV2/mechanus/server/pkg/extensions/sync"
 	"github.com/DaanV2/mechanus/server/pkg/storage"
 )
 
 type KeyManager struct {
 	storage storage.Storage[*KeyData]
-	keys    sync.Map
+	keys    *xsync.Map[string, *KeyData]
 }
 
 func NewKeyManager(storage storage.Storage[*KeyData]) (*KeyManager, error) {
 	manager := &KeyManager{
 		storage: storage,
-		keys:    sync.Map{},
+		keys:    xsync.NewMap[string, *KeyData](),
 	}
 
 	var err error
@@ -31,10 +31,7 @@ func NewKeyManager(storage storage.Storage[*KeyData]) (*KeyManager, error) {
 func (manager *KeyManager) Get(id string) (*KeyData, error) {
 	item, ok := manager.keys.Load(id)
 	if ok {
-		key, ok := item.(*KeyData)
-		if ok {
-			return key, nil
-		}
+		return item, nil
 	}
 
 	return manager.load(id)
@@ -60,15 +57,14 @@ func (manager *KeyManager) GetSigningKey() (*KeyData, error) {
 		err error
 	)
 
-	manager.keys.Range(func(id, value any) bool {
-		k, ok := value.(*KeyData)
-		if !ok || k.Private() == nil {
-			return true
+	for _, v := range manager.keys.Items() {
+		if v == nil || v.Private() == nil {
+			continue
 		}
 
-		key = k
-		return false
-	})
+		key = v
+		break
+	}
 
 	if key == nil {
 		key, err = manager.New()

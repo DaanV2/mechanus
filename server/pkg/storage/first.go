@@ -1,6 +1,9 @@
 package storage
 
-import xerrors "github.com/DaanV2/mechanus/server/pkg/extensions/errors"
+import (
+	xerrors "github.com/DaanV2/mechanus/server/pkg/extensions/errors"
+	"github.com/DaanV2/mechanus/server/pkg/generics"
+)
 
 type FirstQuery[T any] interface {
 	First(predicate func(item T) bool) (T, error)
@@ -13,16 +16,15 @@ func First[T any](storage Storage[T], predicate func(item T) bool) (T, error) {
 		return v.First(predicate)
 	}
 
-	var empty T
 	for id := range storage.Ids() {
 		item, err := storage.Get(id)
 		if err != nil {
-			return empty, err
+			return generics.Empty[T](), err
 		}
 		if predicate(item) {
 			return item, nil
 		}
 	}
 
-	return empty, xerrors.ErrNotExist
+	return generics.Empty[T](), xerrors.ErrNotExist
 }

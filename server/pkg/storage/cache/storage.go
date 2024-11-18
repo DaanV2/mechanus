@@ -28,7 +28,6 @@ func NewCache[T any](base storage.Storage[T]) *Cache[T] {
 
 // Get implements storage.Storage.
 func (c *Cache[T]) Get(id string) (T, error) {
-	var empty T
 	item, err := c.memory.Get(id)
 	if err == nil {
 		return item, nil
@@ -36,7 +35,7 @@ func (c *Cache[T]) Get(id string) (T, error) {
 
 	item, err = c.base.Get(id)
 	if err != nil {
-		return empty, nil
+		return generics.Empty[T](), nil
 	}
 	err = c.memory.Set(id, item) // Attempt to set
 	if err != nil {

@@ -2,18 +2,19 @@ package memory_storage
 
 import (
 	"iter"
-	"sync"
 
 	xerrors "github.com/DaanV2/mechanus/server/pkg/extensions/errors"
+	xsync "github.com/DaanV2/mechanus/server/pkg/extensions/sync"
+	"github.com/DaanV2/mechanus/server/pkg/generics"
 )
 
 type Storage[T any] struct {
-	data sync.Map
+	data *xsync.Map[string, T]
 }
 
 func NewStorage[T any]() *Storage[T] {
 	return &Storage[T]{
-		data: sync.Map{},
+		data: xsync.NewMap[string, T](),
 	}
 }
 
@@ -29,29 +30,16 @@ func (s *Storage[T]) Has(id string) bool {
 }
 
 func (s *Storage[T]) Ids() iter.Seq[string] {
-	return func(yield func(string) bool) {
-		s.data.Range(func(key, value any) bool {
-			str, ok := key.(string)
-			if !ok {
-				return true //continue
-			}
-
-			return yield(str)
-		})
-	}
+	return s.data.Keys()
 }
 
 func (s *Storage[T]) get(id string) (T, error) {
 	item, ok := s.data.Load(id)
 	if ok {
-		v, ok := item.(T)
-		if ok {
-			return v, nil
-		}
+		return item, nil
 	}
 
-	var empty T
-	return empty, xerrors.ErrNotExist
+	return generics.Empty[T](), xerrors.ErrNotExist
 }
 
 func (s *Storage[T]) set(id string, item T) error {

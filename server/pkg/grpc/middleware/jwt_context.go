@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/DaanV2/mechanus/server/pkg/authenication"
+	"github.com/DaanV2/mechanus/server/pkg/generics"
 )
 
 type JWTContext struct {
@@ -22,10 +23,9 @@ func ContextWithJWT(ctx context.Context, jwt JWTContext) context.Context {
 }
 
 func JWTFromContext(ctx context.Context) (JWTContext, bool) {
-	var empty JWTContext
 	v := ctx.Value(jwt_context_key{})
 	if v == nil {
-		return empty, false
+		return generics.Empty[JWTContext](), false
 	}
 
 	c, ok := v.(JWTContext)
