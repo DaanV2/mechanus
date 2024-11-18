@@ -6,7 +6,7 @@ require (
 	connectrpc.com/connect v1.17.0
 	github.com/DaanV2/go-locks v1.0.2
 	github.com/charmbracelet/bubbles v0.20.0
-	github.com/charmbracelet/bubbletea v1.2.1
+	github.com/charmbracelet/bubbletea v1.2.2
 	github.com/charmbracelet/lipgloss v1.0.0
 	github.com/charmbracelet/log v0.4.0
 	github.com/golang-jwt/jwt/v5 v5.2.1
@@ -18,7 +18,7 @@ require (
 	golang.org/x/crypto v0.29.0
 	golang.org/x/net v0.31.0
 	google.golang.org/grpc v1.68.0
-	google.golang.org/protobuf v1.35.1
+	google.golang.org/protobuf v1.35.2
 )
 
 require (
@@ -33,7 +33,7 @@ require (
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/charmbracelet/huh v0.6.0
 	github.com/charmbracelet/x/ansi v0.4.5 // indirect
-	github.com/charmbracelet/x/term v0.2.0 // indirect
+	github.com/charmbracelet/x/term v0.2.1 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/erikgeiser/coninput v0.0.0-20211004153227-1c3628e74d0f // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
