@@ -1,6 +1,6 @@
 <script lang="ts">
-  let username = '';
-  let password = '';
+  let username = $state('');
+  let password = $state('');
 
   function handleSubmit(event: Event) {
     event.preventDefault();
@@ -10,7 +10,7 @@
   }
 </script>
 
-<form class="login-form" on:submit={handleSubmit}>
+<form class="login-form" onsubmit={handleSubmit}>
   <input type="text" class="login-input" placeholder="Username" bind:value={username} required />
   <input
     type="password"
