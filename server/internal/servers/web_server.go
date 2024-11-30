@@ -23,5 +23,5 @@ func NewWebServer(conf config.WebConfig) (*WebServer, error) {
 	router.Handle("/", http.FileServer(http.Dir(conf.Folder.Value())))
 
 
-	return &WebServer{}
+	return &WebServer{}, nil
 }
