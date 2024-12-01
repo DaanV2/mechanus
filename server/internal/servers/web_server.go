@@ -8,11 +8,16 @@ import (
 	xio "github.com/DaanV2/mechanus/server/pkg/extensions/io"
 )
 
+var (
+	WebConfig  = config.New("server.web")
+	FolderFlag = WebConfig.String("server.web.folder", config.StorageFolder("web", "static"), "The folder where static content needs to be served from")
+)
+
 type WebServer struct {
 }
 
-func NewWebServer(conf config.WebConfig) (*WebServer, error) {
-	folder := conf.Folder.Value()
+func NewWebServer() (*WebServer, error) {
+	folder := FolderFlag.Value()
 
 	if !xio.DirExists(folder) {
 		return nil, errors.New("couldn't find the folder to serve files from: " + folder)
@@ -20,8 +25,7 @@ func NewWebServer(conf config.WebConfig) (*WebServer, error) {
 
 	router := http.NewServeMux()
 
-	router.Handle("/", http.FileServer(http.Dir(conf.Folder.Value())))
-
+	router.Handle("/", http.FileServer(http.Dir(folder)))
 
 	return &WebServer{}, nil
 }

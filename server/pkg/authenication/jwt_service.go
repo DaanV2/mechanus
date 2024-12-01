@@ -7,14 +7,14 @@ import (
 	"time"
 
 	"github.com/DaanV2/mechanus/server/internal/logging"
-	"github.com/DaanV2/mechanus/server/pkg/config"
+	"github.com/DaanV2/mechanus/server/pkg/constants"
 	"github.com/DaanV2/mechanus/server/pkg/models"
 	"github.com/golang-jwt/jwt/v5"
 )
 
 const (
-	JWT_ISSUER   = config.SERVICE_NAME
-	JWT_AUDIENCE = config.SERVICE_NAME
+	JWT_ISSUER   = constants.SERVICE_NAME
+	JWT_AUDIENCE = constants.SERVICE_NAME
 )
 
 type (
@@ -65,7 +65,7 @@ func (s *JWTService) Create(ctx context.Context, user models.User, scope string)
 }
 
 func (s *JWTService) Validate(ctx context.Context, token string) (*jwt.Token, error) {
-	jToken, err := s.validate(ctx, token, jwt.WithExpirationRequired(), jwt.WithIssuer(config.SERVICE_NAME))
+	jToken, err := s.validate(ctx, token, jwt.WithExpirationRequired(), jwt.WithIssuer(JWT_ISSUER))
 
 	return jToken, err
 }
