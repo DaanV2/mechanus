@@ -4,19 +4,21 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/DaanV2/mechanus/server/pkg/constants"
 	xio "github.com/DaanV2/mechanus/server/pkg/extensions/io"
 	"github.com/charmbracelet/log"
 )
 
 type UserConfig struct {
 	ConfigDir string
-	CacheDir string
+	CacheDir  string
 }
 
-func GetUserConfig() UserConfig{
+// GetUserConfig returns the folder for storage and config for this app
+func GetUserConfig() UserConfig {
 	return UserConfig{
 		ConfigDir: UserConfigDir(),
-		CacheDir: UserCacheDir(),
+		CacheDir:  UserCacheDir(),
 	}
 }
 
@@ -38,7 +40,7 @@ func UserConfigDir() string {
 
 	return filepath.Join(
 		dir,
-		SERVICE_NAME,
+		constants.SERVICE_NAME,
 	)
 }
 
@@ -60,6 +62,15 @@ func UserCacheDir() string {
 
 	return filepath.Join(
 		folder,
-		SERVICE_NAME,
+		constants.SERVICE_NAME,
 	)
+}
+
+// StorageFolder returns a folder where anything can be stored, expected that the given paths are relative to the storage folder
+func StorageFolder(paths ...string) string {
+	p := append([]string{UserCacheDir()}, paths...)
+	dir := filepath.Join(p...)
+
+	xio.MakeDirAll(dir)
+	return dir
 }

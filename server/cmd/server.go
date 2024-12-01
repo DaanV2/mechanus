@@ -4,7 +4,6 @@ import (
 	"syscall"
 
 	"github.com/DaanV2/mechanus/server/internal/process"
-	"github.com/DaanV2/mechanus/server/pkg/config"
 	"github.com/charmbracelet/log"
 	"github.com/spf13/cobra"
 )
@@ -34,9 +33,7 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// serverCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-	flags := serverCmd.Flags()
-	config.MDNS.AddToSet(flags)
-	config.APIServer.AddToSet(flags)
+	// flags := serverCmd.Flags()
 }
 
 func ServerWorkload(cmd *cobra.Command, args []string) {

@@ -9,10 +9,17 @@ import (
 	"github.com/charmbracelet/log"
 )
 
+var (
+	LoggerConfig     = config.New("logger")
+	ReportCallerFlag = LoggerConfig.Bool("log.report-caller", false, "Whenever or not to output the file that outputs the log")
+	LevelFlag        = LoggerConfig.String("log.level", "info", "The debug level, levels are: debug, info, warn, error, fatal")
+	FormatFlag       = LoggerConfig.String("log.format", "text", "The text format of the logger")
+)
+
 func Logger() {
 	logOptions := log.Options{
 		TimeFormat:      time.DateTime,
-		ReportCaller:    false,
+		ReportCaller:    ReportCallerFlag.Value(),
 		ReportTimestamp: true,
 		Formatter:       log.TextFormatter,
 	}
@@ -23,9 +30,9 @@ func Logger() {
 
 	log.SetDefault(logger)
 	UpdateLogger(
-		config.Logger.ReportCaller.Value(),
-		config.Logger.Level.Value(),
-		config.Logger.Format.Value(),
+		ReportCallerFlag.Value(),
+		LevelFlag.Value(),
+		FormatFlag.Value(),
 	)
 }
 

@@ -1,19 +1,21 @@
 package config
 
 import (
+	"github.com/DaanV2/mechanus/server/pkg/generics"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 )
 
-var (
-	flags = pflag.NewFlagSet("global", pflag.ContinueOnError)
-)
-
-type Flag[T any] interface {
-	Value() T
+type BaseFlag interface {
 	Name() string
 	Description() string
+	Type() string
 	AddToSet(set *pflag.FlagSet)
+}
+
+type Flag[T any] interface {
+	BaseFlag
+	Value() T
 }
 
 type infoFlag[T any] struct {
@@ -33,6 +35,10 @@ func (in *infoFlag[T]) Description() string {
 
 func (in *infoFlag[T]) Value() T {
 	return in.viperFn(in.name)
+}
+
+func (in *infoFlag[T]) Type() string {
+	return generics.NameOf[T]()
 }
 
 func (in *infoFlag[T]) AddToSet(set *pflag.FlagSet) {
