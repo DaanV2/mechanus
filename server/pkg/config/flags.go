@@ -69,6 +69,7 @@ func Bool(name string, def bool, usage string) Flag[bool] {
 
 func String(name string, def string, usage string) Flag[string] {
 	flags.String(name, def, usage)
+
 	return newFlag(name, usage, viper.GetString)
 }
 
