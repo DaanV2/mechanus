@@ -15,12 +15,14 @@ var rootCmd = &cobra.Command{
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	// Run: func(cmd *cobra.Command, args []string) { },
-	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 		setup.UpdateLogger(
 			setup.ReportCallerFlag.Value(),
 			setup.LevelFlag.Value(),
 			setup.FormatFlag.Value(),
 		)
+
+		return setup.LoggerConfig.Validate()
 	},
 }
 

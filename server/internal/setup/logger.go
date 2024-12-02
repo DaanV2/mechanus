@@ -10,11 +10,17 @@ import (
 )
 
 var (
-	LoggerConfig     = config.New("logger")
+	LoggerConfig     = config.New("logger").WithValidate(validateLogger)
 	ReportCallerFlag = LoggerConfig.Bool("log.report-caller", false, "Whenever or not to output the file that outputs the log")
 	LevelFlag        = LoggerConfig.String("log.level", "info", "The debug level, levels are: debug, info, warn, error, fatal")
-	FormatFlag       = LoggerConfig.String("log.format", "text", "The text format of the logger")
+	FormatFlag       = LoggerConfig.String("log.format", "text", "The format of the logging")
 )
+
+func validateLogger(c *config.Config) error {
+	_, err := log.ParseLevel(c.GetString("log.level"))
+
+	return err
+}
 
 func Logger() {
 	logOptions := log.Options{

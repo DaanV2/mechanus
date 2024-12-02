@@ -42,8 +42,9 @@ func Get(name string) *Config {
 }
 
 type Config struct {
-	name string
-	data *xsync.Map[string, BaseFlag]
+	name       string
+	data       *xsync.Map[string, BaseFlag]
+	validateFn func(*Config) error
 }
 
 func (c *Config) AddToSet(set *pflag.FlagSet) {
@@ -92,6 +93,21 @@ func (c *Config) Int(name string, def int, usage string) Flag[int] {
 
 func (c *Config) GetInt(name string) int {
 	return getValue[int](c, name)
+}
+
+// WithValidate couples the given function as the function used to validate this config object.
+// If nill, no checks will be made
+func (c *Config) WithValidate(validatefn func(*Config) error) *Config {
+	c.validateFn = validatefn
+	return c
+}
+
+func (c *Config) Validate() error {
+	if c.validateFn == nil {
+		return nil
+	}
+
+	return c.validateFn(c)
 }
 
 func getValue[T any](c *Config, name string) T {
