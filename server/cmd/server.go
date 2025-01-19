@@ -1,9 +1,12 @@
 package cmd
 
 import (
-	"syscall"
+	"context"
+	"time"
 
-	"github.com/DaanV2/mechanus/server/internal/process"
+	"github.com/DaanV2/mechanus/server/internal/web"
+	"github.com/DaanV2/mechanus/server/pkg/application"
+	"github.com/DaanV2/mechanus/server/pkg/servers"
 	"github.com/charmbracelet/log"
 	"github.com/spf13/cobra"
 )
@@ -37,6 +40,33 @@ func init() {
 }
 
 func ServerWorkload(cmd *cobra.Command, args []string) {
+	// Setup
+	appCtx := cmd.Context()
+	comps := new(application.ComponentManager)
 
-	process.AwaitSignal(syscall.SIGTERM, syscall.SIGKILL, syscall.SIGQUIT)
+	router := web.WebRouter(comps, "../client/build")
+
+	webServer := servers.NewHttpServer(router, servers.HttpServerConfig{
+		Port: 3000,
+		Host: "localhost",
+	})
+
+	// Execute
+	go webServer.Listen()
+
+	// Await termination signal
+	<-appCtx.Done()
+
+	// make a ctx specially for shutdown
+	shutCtx, cancel := context.WithTimeout(context.Background(), time.Second*15)
+	defer cancel()
+
+	// Shutdown
+	if err := comps.BeforeShutdown(shutCtx); err != nil {
+		log.Error("errors while performing pre shutdown calls", "error", err)
+	}
+	webServer.Shutdown()
+	if err := comps.AfterShutDown(shutCtx); err != nil {
+		log.Error("errors while performing post shutdown calls", "error", err)
+	}
 }

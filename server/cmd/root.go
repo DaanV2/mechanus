@@ -1,6 +1,10 @@
 package cmd
 
 import (
+	"context"
+	"os/signal"
+	"syscall"
+
 	userscmd "github.com/DaanV2/mechanus/server/cmd/users"
 	utilcmd "github.com/DaanV2/mechanus/server/cmd/util"
 	"github.com/DaanV2/mechanus/server/internal/setup"
@@ -28,7 +32,11 @@ var rootCmd = &cobra.Command{
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
-func Execute() {
+func Execute() {	
+	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGTERM, syscall.SIGKILL, syscall.SIGQUIT)
+	defer cancel()
+	rootCmd.SetContext(ctx)
+
 	defer func() {
 		if e := recover(); e != nil {
 			log.Fatal("uncaught error", "error", e)

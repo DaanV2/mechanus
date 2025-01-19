@@ -32,10 +32,6 @@ type ComponentManager struct {
 	readycheck     []ReadyCheck
 }
 
-func NewComponentManager() *ComponentManager {
-	return new(ComponentManager)
-}
-
 func (m *ComponentManager) AfterShutDown(ctx context.Context) error {
 	ctx, cancel := context.WithDeadline(ctx, time.Now().Add(time.Second*30))
 	defer cancel()

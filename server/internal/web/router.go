@@ -7,14 +7,14 @@ import (
 	"github.com/DaanV2/mechanus/server/pkg/application"
 )
 
-func NewRouter(comps *application.ComponentManager) *http.ServeMux {
+func WebRouter(comps *application.ComponentManager, folder string) *http.ServeMux {
 	router := http.NewServeMux()
 
 	routes.RegisterHealthChecks(router, comps)
 	routes.RegisterReadyChecks(router, comps)
 
 	// Files
-	router.Handle("/static", http.FileServer(http.Dir(FolderFlag.Value())))
+	router.Handle("/", http.FileServer(http.Dir(folder)))
 
 	return router
 }
