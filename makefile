@@ -8,3 +8,9 @@ tools:
 
 proto:
 	buf generate
+
+image:
+	docker build . -t mechanus
+
+server:
+	go build -o mechanus ./server/main.go
