@@ -20,6 +20,9 @@ jobs:
 
       - name: 🛠️ Build and push
         uses: docker/build-push-action@v6
+        id: docker-build
         with:
           push: false
-          tags: mechanus:latest,mechanus:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          tags: mechanus,mechanus:latest,mechanus:${{ github.sha }}

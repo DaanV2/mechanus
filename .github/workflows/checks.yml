@@ -35,5 +35,13 @@ jobs:
   docker-checks:
     needs:
       - proto-checks
+      - client-checks
+      - server-checks
     name: 🐳 Docker
     uses: ./.github/workflows/docker-checks.yaml
+
+  integration-tests:
+    needs:
+      - docker-checks
+    name: 🎭 Integration tests
+    uses: ./.github/workflows/integration-tests.yaml

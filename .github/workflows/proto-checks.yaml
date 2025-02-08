@@ -4,7 +4,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  buf:
+  proto:
+    name: 📋 Checks
     runs-on: ubuntu-latest
     permissions:
       contents: read

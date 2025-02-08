@@ -30,7 +30,7 @@ func NewHttpServer(router http.Handler, conf HttpServerConfig) *HttpServer {
 }
 
 func (s *HttpServer) Listen() {
-	log.Infof("Starting http server: %s", s.server.Addr)
+	log.Infof("Starting http server: http://%s", s.server.Addr)
 
 	err := s.server.ListenAndServe()
 	if err != nil {

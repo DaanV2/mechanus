@@ -11,6 +11,10 @@
     {
       "path": "../client",
       "name": "client"
+    },
+    {
+      "path": "../tests",
+      "name": "tests"
     }
   ],
   "settings": {

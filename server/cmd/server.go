@@ -37,6 +37,7 @@ func init() {
 	// is called directly, e.g.:
 	// serverCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	// flags := serverCmd.Flags()
+	web.WebConfig.AddToSet(serverCmd.Flags())
 }
 
 func ServerWorkload(cmd *cobra.Command, args []string) {
@@ -44,11 +45,10 @@ func ServerWorkload(cmd *cobra.Command, args []string) {
 	appCtx := cmd.Context()
 	comps := new(application.ComponentManager)
 
-	router := web.WebRouter(comps, "../client/build")
-
+	router := web.WebRouter(comps, web.StaticFolderFlag.Value())
 	webServer := servers.NewHttpServer(router, servers.HttpServerConfig{
-		Port: 3000,
-		Host: "localhost",
+		Port: web.PortFlag.Value(),
+		Host: web.HostFlag.Value(),
 	})
 
 	// Execute
