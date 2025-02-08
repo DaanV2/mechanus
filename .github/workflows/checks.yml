@@ -1,0 +1,26 @@
+# This is a basic workflow to help you get started with Actions
+name: ⚙️ CI
+env:
+  FORCE_COLOR: true
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  client-checks:
+    name: 🖼️ Client
+    uses: ./.github/client-checks.yaml
+
+  server-checks:
+    name: 🗄️ Server
+    uses: ./.github/server-checks.yaml
+
+  docker-checks:
+    name: 🐳 Docker
+    uses: ./.github/docker-checks.yaml

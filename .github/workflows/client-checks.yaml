@@ -4,19 +4,12 @@ env:
   FORCE_COLOR: true
 
 on:
-  pull_request:
-    paths: ["client/**"]
-    branches:
-      - main
-  push:
-    paths: ["client/**"]
-    branches:
-      - main
+  workflow_call:
   workflow_dispatch:
 
 jobs:
-  test:
-    name: 📋 Build, Test and lint; ${{ matrix.os }}
+  checks:
+    name: 📋 Checks ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false

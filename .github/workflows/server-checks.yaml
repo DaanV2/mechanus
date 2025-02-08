@@ -1,17 +1,15 @@
+# This is a basic workflow to help you get started with Actions
 name: 🗄️ Server
+env:
+  FORCE_COLOR: true
+
 on:
-  pull_request:
-    paths: ["server/**"]
-    branches:
-      - main
-  push:
-    paths: ["server/**"]
-    branches:
-      - main
-  workflow_dispatch: 
+  workflow_call:
+  workflow_dispatch:
+
 jobs:
-  checks:
-    name: 📋 Build, Test and lint; ${{ matrix.os }}
+  server-checks:
+    name: 📋 Checks ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
