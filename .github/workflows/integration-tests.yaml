@@ -24,6 +24,17 @@ jobs:
         working-directory: tests
         run: npm ci
 
+      - name: 🛠️ Build and push
+        uses: docker/build-push-action@v6
+        with:
+          push: false
+          tags: mechanus:latest,mechanus:${{ github.sha }}
+
+      - name: 🐋 Start server
+        working-directory: tests
+        run: |
+          make server
+
       - name: Run Playwright tests
         working-directory: tests
         run: npm run test
