@@ -1,5 +1,8 @@
 {
-    "recommendations": [
-        "ms-playwright.playwright"
-    ]
+  "recommendations": [
+    "ms-playwright.playwright",
+    "bufbuild.vscode-buf",
+    "zxh404.vscode-proto3",
+    "golang.go"
+  ]
 }
