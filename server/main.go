@@ -11,9 +11,9 @@ import (
 )
 
 func main() {
+	setup.Viper()
 	setup.Logger()
 	setup.Folders()
-	setup.Viper()
 	setup.Config()
 
 	cobra.OnFinalize(func() {
