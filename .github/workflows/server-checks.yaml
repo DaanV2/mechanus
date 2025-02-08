@@ -38,3 +38,7 @@ jobs:
         with:
           version: latest
           working-directory: server
+
+      - name: 📝 Reporting
+        run: |
+          echo "✅ Server - ${{ matrix.os }}" >> $GITHUB_STEP_SUMMARY

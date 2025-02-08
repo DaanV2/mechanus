@@ -42,3 +42,7 @@ jobs:
       - name: 🔍 Linting
         working-directory: client
         run: npm run lint
+
+      - name: 📝 Reporting
+        run: |
+          echo "✅ Client - ${{ matrix.os }}" >> $GITHUB_STEP_SUMMARY

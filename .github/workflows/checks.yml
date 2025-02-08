@@ -13,14 +13,24 @@ on:
   workflow_dispatch:
 
 jobs:
+  proto-checks:
+    name: 🗃️ Proto
+    uses: ./.github/workflows/proto-checks.yaml
+
   client-checks:
+    needs:
+      - proto-checks
     name: 🖼️ Client
     uses: ./.github/workflows/client-checks.yaml
 
   server-checks:
+    needs:
+      - proto-checks
     name: 🗄️ Server
     uses: ./.github/workflows/server-checks.yaml
 
   docker-checks:
+    needs:
+      - proto-checks
     name: 🐳 Docker
     uses: ./.github/workflows/docker-checks.yaml
