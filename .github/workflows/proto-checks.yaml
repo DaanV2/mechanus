@@ -21,7 +21,3 @@ jobs:
           lint: true
           breaking: true
           push: false
-
-      - name: 📝 Reporting
-        run: |
-          echo "✅ Protobuf" >> $GITHUB_STEP_SUMMARY
