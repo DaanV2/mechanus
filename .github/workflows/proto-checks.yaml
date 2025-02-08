@@ -1,12 +1,8 @@
 name: 🗃️ Proto
 on:
-  push:
-  pull_request:
-    types: [opened, synchronize, reopened, labeled, unlabeled]
-  delete:
-permissions:
-  contents: read
-  pull-requests: write
+  workflow_call:
+  workflow_dispatch:
+
 jobs:
   buf:
     runs-on: ubuntu-latest
@@ -22,3 +18,7 @@ jobs:
           lint: true
           breaking: true
           push: false
+
+      - name: 📝 Reporting
+        run: |
+          echo "✅ Protobuf" >> $GITHUB_STEP_SUMMARY
