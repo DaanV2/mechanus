@@ -22,7 +22,7 @@ jobs:
         with:
           push: false
           cache-from: type=gha
-          tags: mechanus:latest,mechanus:${{ github.sha }}
+          tags: mechanus,mechanus:latest,mechanus:${{ github.sha }}
 
       - name: ⚒️ Setup Node.js Environment
         uses: actions/setup-node@v4
