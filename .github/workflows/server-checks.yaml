@@ -23,7 +23,7 @@ jobs:
       - name: ⚒️  Setup Golang
         uses: actions/setup-go@v5
         with:
-          go-version-file: ./go.work.sum
+          go-version-file: ./server/go.sum
 
       - name: 🛠️ Build
         working-directory: server
