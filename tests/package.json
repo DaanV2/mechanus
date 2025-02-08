@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "test": "playwright test",
-    "postinstall": "npx playwright install"
+    "postinstall": "npx playwright install --with-deps"
   },
   "keywords": [],
   "author": "",
