@@ -7,11 +7,20 @@ env:
 
 jobs:
   test:
+    name: 🎭 Integration tests
     timeout-minutes: 10
     runs-on: ubuntu-latest
     steps:
       - name: 📦 Checkout Repository
         uses: actions/checkout@v4
+
+      - name: 🛠️ Build and push
+        uses: docker/build-push-action@v6
+        with:
+          push: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          tags: mechanus:latest,mechanus:${{ github.sha }}
 
       - name: ⚒️ Setup Node.js Environment
         uses: actions/setup-node@v4
@@ -23,14 +32,6 @@ jobs:
       - name: Install dependencies
         working-directory: tests
         run: npm ci
-
-      - name: 🛠️ Build and push
-        uses: docker/build-push-action@v6
-        with:
-          push: false
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-          tags: mechanus:latest,mechanus:${{ github.sha }}
 
       - name: 🐋 Start server
         working-directory: tests
