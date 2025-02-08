@@ -7,6 +7,92 @@ import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialM
 import { Message, proto3 } from "@bufbuild/protobuf";
 
 /**
+ * @generated from message users.v1.CreateAccountRequest
+ */
+export class CreateAccountRequest extends Message<CreateAccountRequest> {
+  /**
+   * The username
+   *
+   * @generated from field: string username = 1;
+   */
+  username = "";
+
+  /**
+   * The password
+   *
+   * @generated from field: string password = 2;
+   */
+  password = "";
+
+  constructor(data?: PartialMessage<CreateAccountRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "users.v1.CreateAccountRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "username", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "password", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CreateAccountRequest {
+    return new CreateAccountRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): CreateAccountRequest {
+    return new CreateAccountRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): CreateAccountRequest {
+    return new CreateAccountRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: CreateAccountRequest | PlainMessage<CreateAccountRequest> | undefined, b: CreateAccountRequest | PlainMessage<CreateAccountRequest> | undefined): boolean {
+    return proto3.util.equals(CreateAccountRequest, a, b);
+  }
+}
+
+/**
+ * @generated from message users.v1.CreateAccountResponse
+ */
+export class CreateAccountResponse extends Message<CreateAccountResponse> {
+  /**
+   * The JWT token, without prefix
+   *
+   * @generated from field: string token = 1;
+   */
+  token = "";
+
+  constructor(data?: PartialMessage<CreateAccountResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "users.v1.CreateAccountResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "token", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CreateAccountResponse {
+    return new CreateAccountResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): CreateAccountResponse {
+    return new CreateAccountResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): CreateAccountResponse {
+    return new CreateAccountResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: CreateAccountResponse | PlainMessage<CreateAccountResponse> | undefined, b: CreateAccountResponse | PlainMessage<CreateAccountResponse> | undefined): boolean {
+    return proto3.util.equals(CreateAccountResponse, a, b);
+  }
+}
+
+/**
  * @generated from message users.v1.GetUserRequest
  */
 export class GetUserRequest extends Message<GetUserRequest> {

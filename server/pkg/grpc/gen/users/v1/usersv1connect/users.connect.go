@@ -8,7 +8,7 @@ import (
 	connect "connectrpc.com/connect"
 	context "context"
 	errors "errors"
-	v1 "github.com/DaanV2/mechanus/server/internal/grpc/users/v1"
+	v1 "github.com/DaanV2/mechanus/server/pkg/grpc/gen/users/v1"
 	http "net/http"
 	strings "strings"
 )
@@ -33,18 +33,22 @@ const (
 // reflection-formatted method names, remove the leading slash and convert the remaining slash to a
 // period.
 const (
+	// UserServiceCreateProcedure is the fully-qualified name of the UserService's Create RPC.
+	UserServiceCreateProcedure = "/users.v1.UserService/Create"
 	// UserServiceGetProcedure is the fully-qualified name of the UserService's Get RPC.
 	UserServiceGetProcedure = "/users.v1.UserService/Get"
 )
 
 // These variables are the protoreflect.Descriptor objects for the RPCs defined in this package.
 var (
-	userServiceServiceDescriptor   = v1.File_users_v1_users_proto.Services().ByName("UserService")
-	userServiceGetMethodDescriptor = userServiceServiceDescriptor.Methods().ByName("Get")
+	userServiceServiceDescriptor      = v1.File_users_v1_users_proto.Services().ByName("UserService")
+	userServiceCreateMethodDescriptor = userServiceServiceDescriptor.Methods().ByName("Create")
+	userServiceGetMethodDescriptor    = userServiceServiceDescriptor.Methods().ByName("Get")
 )
 
 // UserServiceClient is a client for the users.v1.UserService service.
 type UserServiceClient interface {
+	Create(context.Context, *connect.Request[v1.CreateAccountRequest]) (*connect.Response[v1.CreateAccountResponse], error)
 	Get(context.Context, *connect.Request[v1.GetUserRequest]) (*connect.Response[v1.GetUserResponse], error)
 }
 
@@ -58,6 +62,12 @@ type UserServiceClient interface {
 func NewUserServiceClient(httpClient connect.HTTPClient, baseURL string, opts ...connect.ClientOption) UserServiceClient {
 	baseURL = strings.TrimRight(baseURL, "/")
 	return &userServiceClient{
+		create: connect.NewClient[v1.CreateAccountRequest, v1.CreateAccountResponse](
+			httpClient,
+			baseURL+UserServiceCreateProcedure,
+			connect.WithSchema(userServiceCreateMethodDescriptor),
+			connect.WithClientOptions(opts...),
+		),
 		get: connect.NewClient[v1.GetUserRequest, v1.GetUserResponse](
 			httpClient,
 			baseURL+UserServiceGetProcedure,
@@ -69,7 +79,13 @@ func NewUserServiceClient(httpClient connect.HTTPClient, baseURL string, opts ..
 
 // userServiceClient implements UserServiceClient.
 type userServiceClient struct {
-	get *connect.Client[v1.GetUserRequest, v1.GetUserResponse]
+	create *connect.Client[v1.CreateAccountRequest, v1.CreateAccountResponse]
+	get    *connect.Client[v1.GetUserRequest, v1.GetUserResponse]
+}
+
+// Create calls users.v1.UserService.Create.
+func (c *userServiceClient) Create(ctx context.Context, req *connect.Request[v1.CreateAccountRequest]) (*connect.Response[v1.CreateAccountResponse], error) {
+	return c.create.CallUnary(ctx, req)
 }
 
 // Get calls users.v1.UserService.Get.
@@ -79,6 +95,7 @@ func (c *userServiceClient) Get(ctx context.Context, req *connect.Request[v1.Get
 
 // UserServiceHandler is an implementation of the users.v1.UserService service.
 type UserServiceHandler interface {
+	Create(context.Context, *connect.Request[v1.CreateAccountRequest]) (*connect.Response[v1.CreateAccountResponse], error)
 	Get(context.Context, *connect.Request[v1.GetUserRequest]) (*connect.Response[v1.GetUserResponse], error)
 }
 
@@ -88,6 +105,12 @@ type UserServiceHandler interface {
 // By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
 // and JSON codecs. They also support gzip compression.
 func NewUserServiceHandler(svc UserServiceHandler, opts ...connect.HandlerOption) (string, http.Handler) {
+	userServiceCreateHandler := connect.NewUnaryHandler(
+		UserServiceCreateProcedure,
+		svc.Create,
+		connect.WithSchema(userServiceCreateMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
+	)
 	userServiceGetHandler := connect.NewUnaryHandler(
 		UserServiceGetProcedure,
 		svc.Get,
@@ -96,6 +119,8 @@ func NewUserServiceHandler(svc UserServiceHandler, opts ...connect.HandlerOption
 	)
 	return "/users.v1.UserService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
+		case UserServiceCreateProcedure:
+			userServiceCreateHandler.ServeHTTP(w, r)
 		case UserServiceGetProcedure:
 			userServiceGetHandler.ServeHTTP(w, r)
 		default:
@@ -106,6 +131,10 @@ func NewUserServiceHandler(svc UserServiceHandler, opts ...connect.HandlerOption
 
 // UnimplementedUserServiceHandler returns CodeUnimplemented from all methods.
 type UnimplementedUserServiceHandler struct{}
+
+func (UnimplementedUserServiceHandler) Create(context.Context, *connect.Request[v1.CreateAccountRequest]) (*connect.Response[v1.CreateAccountResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("users.v1.UserService.Create is not implemented"))
+}
 
 func (UnimplementedUserServiceHandler) Get(context.Context, *connect.Request[v1.GetUserRequest]) (*connect.Response[v1.GetUserResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("users.v1.UserService.Get is not implemented"))

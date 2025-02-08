@@ -6,7 +6,7 @@ package renderingv1connect
 
 import (
 	connect "connectrpc.com/connect"
-	v1 "github.com/DaanV2/mechanus/server/internal/grpc/rendering/v1"
+	v1 "github.com/DaanV2/mechanus/server/pkg/grpc/gen/rendering/v1"
 	http "net/http"
 )
 

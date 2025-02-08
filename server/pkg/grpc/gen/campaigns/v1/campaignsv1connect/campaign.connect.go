@@ -6,7 +6,7 @@ package campaignsv1connect
 
 import (
 	connect "connectrpc.com/connect"
-	v1 "github.com/DaanV2/mechanus/server/internal/grpc/campaigns/v1"
+	v1 "github.com/DaanV2/mechanus/server/pkg/grpc/gen/campaigns/v1"
 	http "net/http"
 )
 

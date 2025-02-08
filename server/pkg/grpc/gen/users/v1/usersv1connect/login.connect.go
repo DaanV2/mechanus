@@ -8,7 +8,7 @@ import (
 	connect "connectrpc.com/connect"
 	context "context"
 	errors "errors"
-	v1 "github.com/DaanV2/mechanus/server/internal/grpc/users/v1"
+	v1 "github.com/DaanV2/mechanus/server/pkg/grpc/gen/users/v1"
 	http "net/http"
 	strings "strings"
 )
@@ -35,8 +35,6 @@ const (
 const (
 	// LoginServiceLoginProcedure is the fully-qualified name of the LoginService's Login RPC.
 	LoginServiceLoginProcedure = "/users.v1.LoginService/Login"
-	// LoginServiceCreateProcedure is the fully-qualified name of the LoginService's Create RPC.
-	LoginServiceCreateProcedure = "/users.v1.LoginService/Create"
 	// LoginServiceRefreshProcedure is the fully-qualified name of the LoginService's Refresh RPC.
 	LoginServiceRefreshProcedure = "/users.v1.LoginService/Refresh"
 )
@@ -45,7 +43,6 @@ const (
 var (
 	loginServiceServiceDescriptor       = v1.File_users_v1_login_proto.Services().ByName("LoginService")
 	loginServiceLoginMethodDescriptor   = loginServiceServiceDescriptor.Methods().ByName("Login")
-	loginServiceCreateMethodDescriptor  = loginServiceServiceDescriptor.Methods().ByName("Create")
 	loginServiceRefreshMethodDescriptor = loginServiceServiceDescriptor.Methods().ByName("Refresh")
 )
 
@@ -53,8 +50,6 @@ var (
 type LoginServiceClient interface {
 	// Log in the user, returns a JWT token
 	Login(context.Context, *connect.Request[v1.LoginRequest]) (*connect.Response[v1.LoginResponse], error)
-	// Create a new user, returns a JWT token
-	Create(context.Context, *connect.Request[v1.CreateAccountRequest]) (*connect.Response[v1.CreateAccountResponse], error)
 	// Refresh a given token, with a new JWT token
 	Refresh(context.Context, *connect.Request[v1.RefreshTokenRequest]) (*connect.Response[v1.RefreshTokenResponse], error)
 }
@@ -75,12 +70,6 @@ func NewLoginServiceClient(httpClient connect.HTTPClient, baseURL string, opts .
 			connect.WithSchema(loginServiceLoginMethodDescriptor),
 			connect.WithClientOptions(opts...),
 		),
-		create: connect.NewClient[v1.CreateAccountRequest, v1.CreateAccountResponse](
-			httpClient,
-			baseURL+LoginServiceCreateProcedure,
-			connect.WithSchema(loginServiceCreateMethodDescriptor),
-			connect.WithClientOptions(opts...),
-		),
 		refresh: connect.NewClient[v1.RefreshTokenRequest, v1.RefreshTokenResponse](
 			httpClient,
 			baseURL+LoginServiceRefreshProcedure,
@@ -93,18 +82,12 @@ func NewLoginServiceClient(httpClient connect.HTTPClient, baseURL string, opts .
 // loginServiceClient implements LoginServiceClient.
 type loginServiceClient struct {
 	login   *connect.Client[v1.LoginRequest, v1.LoginResponse]
-	create  *connect.Client[v1.CreateAccountRequest, v1.CreateAccountResponse]
 	refresh *connect.Client[v1.RefreshTokenRequest, v1.RefreshTokenResponse]
 }
 
 // Login calls users.v1.LoginService.Login.
 func (c *loginServiceClient) Login(ctx context.Context, req *connect.Request[v1.LoginRequest]) (*connect.Response[v1.LoginResponse], error) {
 	return c.login.CallUnary(ctx, req)
-}
-
-// Create calls users.v1.LoginService.Create.
-func (c *loginServiceClient) Create(ctx context.Context, req *connect.Request[v1.CreateAccountRequest]) (*connect.Response[v1.CreateAccountResponse], error) {
-	return c.create.CallUnary(ctx, req)
 }
 
 // Refresh calls users.v1.LoginService.Refresh.
@@ -116,8 +99,6 @@ func (c *loginServiceClient) Refresh(ctx context.Context, req *connect.Request[v
 type LoginServiceHandler interface {
 	// Log in the user, returns a JWT token
 	Login(context.Context, *connect.Request[v1.LoginRequest]) (*connect.Response[v1.LoginResponse], error)
-	// Create a new user, returns a JWT token
-	Create(context.Context, *connect.Request[v1.CreateAccountRequest]) (*connect.Response[v1.CreateAccountResponse], error)
 	// Refresh a given token, with a new JWT token
 	Refresh(context.Context, *connect.Request[v1.RefreshTokenRequest]) (*connect.Response[v1.RefreshTokenResponse], error)
 }
@@ -134,12 +115,6 @@ func NewLoginServiceHandler(svc LoginServiceHandler, opts ...connect.HandlerOpti
 		connect.WithSchema(loginServiceLoginMethodDescriptor),
 		connect.WithHandlerOptions(opts...),
 	)
-	loginServiceCreateHandler := connect.NewUnaryHandler(
-		LoginServiceCreateProcedure,
-		svc.Create,
-		connect.WithSchema(loginServiceCreateMethodDescriptor),
-		connect.WithHandlerOptions(opts...),
-	)
 	loginServiceRefreshHandler := connect.NewUnaryHandler(
 		LoginServiceRefreshProcedure,
 		svc.Refresh,
@@ -150,8 +125,6 @@ func NewLoginServiceHandler(svc LoginServiceHandler, opts ...connect.HandlerOpti
 		switch r.URL.Path {
 		case LoginServiceLoginProcedure:
 			loginServiceLoginHandler.ServeHTTP(w, r)
-		case LoginServiceCreateProcedure:
-			loginServiceCreateHandler.ServeHTTP(w, r)
 		case LoginServiceRefreshProcedure:
 			loginServiceRefreshHandler.ServeHTTP(w, r)
 		default:
@@ -165,10 +138,6 @@ type UnimplementedLoginServiceHandler struct{}
 
 func (UnimplementedLoginServiceHandler) Login(context.Context, *connect.Request[v1.LoginRequest]) (*connect.Response[v1.LoginResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("users.v1.LoginService.Login is not implemented"))
-}
-
-func (UnimplementedLoginServiceHandler) Create(context.Context, *connect.Request[v1.CreateAccountRequest]) (*connect.Response[v1.CreateAccountResponse], error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("users.v1.LoginService.Create is not implemented"))
 }
 
 func (UnimplementedLoginServiceHandler) Refresh(context.Context, *connect.Request[v1.RefreshTokenRequest]) (*connect.Response[v1.RefreshTokenResponse], error) {
