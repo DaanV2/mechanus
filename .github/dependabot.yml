@@ -7,6 +7,8 @@ version: 2
 updates:
   - package-ecosystem: "npm" # See documentation for possible values
     directory: /client # Location of package manifests
+    labels:
+      - dependencies
     schedule:
       interval: "weekly"
     groups:
@@ -15,6 +17,8 @@ updates:
           - "*"
   - package-ecosystem: "github-actions" # See documentation for possible values
     directory: "/" # Location of package manifests
+    labels:
+      - dependencies
     schedule:
       interval: "monthly"
     groups:
@@ -23,6 +27,8 @@ updates:
           - "*"
   - package-ecosystem: gomod
     directory: /server
+    labels:
+      - dependencies
     schedule:
       interval: "weekly"
     groups:
