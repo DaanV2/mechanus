@@ -19,7 +19,6 @@ jobs:
         with:
           push: false
           cache-from: type=gha
-          cache-to: type=gha,mode=max
           tags: mechanus:latest,mechanus:${{ github.sha }}
 
       - name: ⚒️ Setup Node.js Environment
