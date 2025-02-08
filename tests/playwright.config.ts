@@ -29,6 +29,8 @@ const config = defineConfig({
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: "on-first-retry",
+    // headless: false,
+    baseURL: "http://127.0.0.1:8080",
   },
 
   /* Configure projects for major browsers */
@@ -71,13 +73,6 @@ const config = defineConfig({
       use: { ...devices["iPhone 12"] },
     },
   ],
-
-  /* Run your local dev server before starting the tests */
-  // webServer: {
-  //   command: 'npm run start',
-  //   url: 'http://127.0.0.1:3000',
-  //   reuseExistingServer: !process.env.CI,
-  // },
 });
 
 if (CI) {
