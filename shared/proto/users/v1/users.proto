@@ -1,19 +1,20 @@
 syntax = "proto3";
-option go_package = "github.com/DaanV2/mechanus/server/internal/grpc/users/v1;usersv1";
 package users.v1;
 
+option go_package = "github.com/DaanV2/mechanus/server/internal/grpc/users/v1;usersv1";
+
 service UserService {
-    rpc Get(GetUserRequest) returns (GetUserResponse) {};
+  rpc Get(GetUserRequest) returns (GetUserResponse) {}
 }
 
 message GetUserRequest {
-    string id = 1; // The users UUID to lookup
+  string id = 1; // The users UUID to lookup
 }
 
 message GetUserResponse {
-    User user = 1;
+  User user = 1;
 }
 
 message User {
-    string id = 1; // The users UUID
+  string id = 1; // The users UUID
 }
