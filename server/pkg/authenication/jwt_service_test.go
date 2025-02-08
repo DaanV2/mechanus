@@ -7,6 +7,7 @@ import (
 
 	"github.com/DaanV2/mechanus/server/pkg/authenication"
 	"github.com/DaanV2/mechanus/server/pkg/models"
+	"github.com/DaanV2/mechanus/server/pkg/models/users"
 	memory_storage "github.com/DaanV2/mechanus/server/pkg/storage/memory"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/stretchr/testify/require"
@@ -22,7 +23,7 @@ func Test_JWT_Service(t *testing.T) {
 	jwtService := authenication.NewJWTService(jtiService, keyManager)
 	require.NoError(t, err)
 
-	user := models.User{
+	user := users.User{
 		BaseItem:     models.NewBaseItem(),
 		Name:         "gandalf",
 		Roles:        []string{"wizard", "admin", "user"},

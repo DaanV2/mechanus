@@ -8,7 +8,7 @@ import (
 
 	"github.com/DaanV2/mechanus/server/internal/logging"
 	"github.com/DaanV2/mechanus/server/pkg/constants"
-	"github.com/DaanV2/mechanus/server/pkg/models"
+	"github.com/DaanV2/mechanus/server/pkg/models/users"
 	"github.com/golang-jwt/jwt/v5"
 )
 
@@ -49,7 +49,7 @@ func NewJWTService(jtiService *JTIService, keys *KeyManager) *JWTService {
 
 // TODO Refresh
 
-func (s *JWTService) Create(ctx context.Context, user models.User, scope string) (string, error) {
+func (s *JWTService) Create(ctx context.Context, user users.User, scope string) (string, error) {
 	logging.From(ctx).Info("creating jwt")
 	claims := &JWTClaims{
 		User: JWTUser{

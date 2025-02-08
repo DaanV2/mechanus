@@ -3,7 +3,7 @@ package authenication
 import (
 	"slices"
 
-	"github.com/DaanV2/mechanus/server/pkg/models"
+	"github.com/DaanV2/mechanus/server/pkg/models/users"
 	"github.com/golang-jwt/jwt/v5"
 )
 
@@ -22,7 +22,7 @@ type (
 	}
 )
 
-func (c *JWTClaims) HasUser(user *models.User) bool {
+func (c *JWTClaims) HasUser(user *users.User) bool {
 	return c.User.ID == user.ID
 }
 
