@@ -16,6 +16,9 @@ jobs:
   proto-checks:
     name: 🗃️ Proto
     uses: ./.github/workflows/proto-checks.yaml
+    permissions:
+      contents: read
+      pull-requests: write
 
   client-checks:
     needs:
