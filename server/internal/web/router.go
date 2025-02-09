@@ -8,13 +8,18 @@ import (
 	"github.com/charmbracelet/log"
 )
 
-func WebRouter(comps *application.ComponentManager, folder string) *http.ServeMux {
+type WEBServies struct {
+	Components *application.ComponentManager
+}
+
+func WebRouter(services WEBServies) *http.ServeMux {
 	router := http.NewServeMux()
 
-	routes.RegisterHealthChecks(router, comps)
-	routes.RegisterReadyChecks(router, comps)
+	routes.RegisterHealthChecks(router, services.Components)
+	routes.RegisterReadyChecks(router, services.Components)
 
 	// Files
+	folder := StaticFolderFlag.Value()
 	log.Debug("serving files from: " + folder)
 	router.Handle("/", http.FileServer(http.Dir(folder)))
 

@@ -4,30 +4,53 @@
 package components
 
 import (
-	"github.com/DaanV2/mechanus/server/pkg/config"
-	"github.com/DaanV2/mechanus/server/pkg/models"
-	"github.com/DaanV2/mechanus/server/pkg/storage"
-	file_storage "github.com/DaanV2/mechanus/server/pkg/storage/files"
-	"github.com/DaanV2/mechanus/server/services/users"
+	"github.com/DaanV2/mechanus/server/internal/grpc"
+	"github.com/DaanV2/mechanus/server/internal/web"
+	"github.com/DaanV2/mechanus/server/pkg/servers"
 	"github.com/google/wire"
 )
 
-var (
-	configSet = wire.NewSet(
-		config.GetUserConfig,
-	)
-	storageSet = wire.NewSet(
-		newUserStorage,
-	)
-)
+func ServerComponent(folder string) (*servers.Manager, error) {
+	wire.Build(
+		baseSet,
+		servicesSet,
+		fileStorage,
 
-func NewUserService() *users.Service {
-	wire.Build(configSet, storageSet, users.NewService)
+		wire.Struct(new(web.WEBServies), "*"),
+		wire.Struct(new(grpc.GRPCServices), "*"),
+		buildServerComponent,
+	)
 
-	return &users.Service{}
+	return nil, nil
 }
 
-// Storage
-func newUserStorage(conf config.UserConfig) storage.Storage[models.User] {
-	return file_storage.NewStorage[models.User](conf.CacheDir)
+type MockServer struct {
+	Manager *servers.Manager
+	Web     web.WEBServies
+	GRPC    grpc.GRPCServices
+}
+
+func MockServerComponent() (*MockServer, error) {
+	wire.Build(
+		baseSet,
+		servicesSet,
+		memoryStorage,
+
+		wire.Struct(new(web.WEBServies), "*"),
+		wire.Struct(new(grpc.GRPCServices), "*"),
+		wire.Struct(new(MockServer), "*"),
+		buildServerComponent,
+	)
+
+	return nil, nil
+}
+
+func buildServerComponent(wserv web.WEBServies, gserv grpc.GRPCServices) *servers.Manager {
+	manager := &servers.Manager{}
+	manager.Register(
+		web.NewServer(web.WebRouter(wserv)),
+		grpc.NewServer(grpc.NewRouter(gserv)),
+	)
+
+	return manager
 }

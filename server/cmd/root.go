@@ -5,8 +5,6 @@ import (
 	"os/signal"
 	"syscall"
 
-	userscmd "github.com/DaanV2/mechanus/server/cmd/users"
-	utilcmd "github.com/DaanV2/mechanus/server/cmd/util"
 	"github.com/DaanV2/mechanus/server/internal/setup"
 	"github.com/charmbracelet/log"
 	"github.com/spf13/cobra"
@@ -57,7 +55,4 @@ func Execute() {
 func init() {
 	pflags := rootCmd.PersistentFlags()
 	setup.LoggerConfig.AddToSet(pflags)
-
-	utilcmd.AddCmds(rootCmd)
-	userscmd.AddCmds(rootCmd)
 }

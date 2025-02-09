@@ -7,33 +7,90 @@
 package components
 
 import (
-	"github.com/DaanV2/mechanus/server/pkg/config"
-	"github.com/DaanV2/mechanus/server/pkg/models"
-	"github.com/DaanV2/mechanus/server/pkg/storage"
-	"github.com/DaanV2/mechanus/server/pkg/storage/files"
-	"github.com/DaanV2/mechanus/server/services/users"
-	"github.com/google/wire"
+	"github.com/DaanV2/mechanus/server/internal/grpc"
+	"github.com/DaanV2/mechanus/server/internal/grpc/users"
+	"github.com/DaanV2/mechanus/server/internal/web"
+	"github.com/DaanV2/mechanus/server/pkg/application"
+	"github.com/DaanV2/mechanus/server/pkg/authenication"
+	"github.com/DaanV2/mechanus/server/pkg/servers"
+	"github.com/DaanV2/mechanus/server/pkg/services/users"
+	"github.com/DaanV2/mechanus/server/pkg/storage/user"
 )
 
 // Injectors from wire.go:
 
-func NewUserService() *users.Service {
-	userConfig := config.GetUserConfig()
-	storage := newUserStorage(userConfig)
-	service := users.NewService(storage)
-	return service
+func ServerComponent(folder string) (*servers.Manager, error) {
+	componentManager := application.NewComponentManager()
+	webServies := web.WEBServies{
+		Components: componentManager,
+	}
+	storage := FileStorage(folder)
+	storageStorage := storage.Users
+	user_storageStorage := user_storage.NewStorage(storageStorage)
+	service := user_service.NewService(user_storageStorage)
+	storage2 := storage.JTIs
+	jtiService := authenication.NewJTIService(storage2)
+	storage3 := storage.AuthKeys
+	keyManager, err := authenication.NewKeyManager(storage3)
+	if err != nil {
+		return nil, err
+	}
+	jwtService := authenication.NewJWTService(jtiService, keyManager)
+	loginService := grpc_users.NewLoginService(service, jwtService)
+	userService := grpc_users.NewUserService(service)
+	grpcServices := grpc.GRPCServices{
+		Login: loginService,
+		User:  userService,
+		JWT:   jwtService,
+	}
+	manager := buildServerComponent(webServies, grpcServices)
+	return manager, nil
+}
+
+func MockServerComponent() (*MockServer, error) {
+	componentManager := application.NewComponentManager()
+	webServies := web.WEBServies{
+		Components: componentManager,
+	}
+	storage := MemoryStorage()
+	storageStorage := storage.Users
+	user_storageStorage := user_storage.NewStorage(storageStorage)
+	service := user_service.NewService(user_storageStorage)
+	storage2 := storage.JTIs
+	jtiService := authenication.NewJTIService(storage2)
+	storage3 := storage.AuthKeys
+	keyManager, err := authenication.NewKeyManager(storage3)
+	if err != nil {
+		return nil, err
+	}
+	jwtService := authenication.NewJWTService(jtiService, keyManager)
+	loginService := grpc_users.NewLoginService(service, jwtService)
+	userService := grpc_users.NewUserService(service)
+	grpcServices := grpc.GRPCServices{
+		Login: loginService,
+		User:  userService,
+		JWT:   jwtService,
+	}
+	manager := buildServerComponent(webServies, grpcServices)
+	mockServer := &MockServer{
+		Manager: manager,
+		Web:     webServies,
+		GRPC:    grpcServices,
+	}
+	return mockServer, nil
 }
 
 // wire.go:
 
-var (
-	configSet  = wire.NewSet(config.GetUserConfig)
-	storageSet = wire.NewSet(
-		newUserStorage,
-	)
-)
+type MockServer struct {
+	Manager *servers.Manager
+	Web     web.WEBServies
+	GRPC    grpc.GRPCServices
+}
 
-// Storage
-func newUserStorage(conf config.UserConfig) storage.Storage[models.User] {
-	return file_storage.NewStorage[models.User](conf.CacheDir)
+func buildServerComponent(wserv web.WEBServies, gserv grpc.GRPCServices) *servers.Manager {
+	manager := &servers.Manager{}
+	manager.Register(web.NewServer(web.WebRouter(wserv)), grpc.NewServer(grpc.NewRouter(gserv)))
+
+	return manager
 }

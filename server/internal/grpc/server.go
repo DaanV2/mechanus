@@ -3,24 +3,12 @@ package grpc
 import (
 	"net/http"
 
-	"github.com/charmbracelet/log"
-	"golang.org/x/net/http2"
-	"golang.org/x/net/http2/h2c"
+	"github.com/DaanV2/mechanus/server/pkg/servers"
 )
 
-
-type Server struct {}
-
-
-func NewServer() {
-	mux := http.NewServeMux()
-
-	err := http.ListenAndServe(
-		"localhost:8080",
-		// Use h2c so we can serve HTTP/2 without TLS.
-		h2c.NewHandler(mux, &http2.Server{}),
-	)
-	if err != nil {
-		log.Error("error while serving traffic", "error", err)
-	}
+func NewServer(router http.Handler) *servers.Server {
+	return servers.NewHttpServer(router, servers.ServerConfig{
+		Port: PortFlag.Value(),
+		Host: HostFlag.Value(),
+	})
 }

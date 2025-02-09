@@ -1,14 +1,12 @@
 syntax = "proto3";
 package users.v1;
 
-option go_package = "github.com/DaanV2/mechanus/server/internal/grpc/users/v1;usersv1";
+option go_package = "github.com/DaanV2/mechanus/server/pkg/grpc/gen/users/v1;usersv1";
 
 // A service for logging in a user, or creating their account
 service LoginService {
   // Log in the user, returns a JWT token
   rpc Login(LoginRequest) returns (LoginResponse) {}
-  // Create a new user, returns a JWT token
-  rpc Create(CreateAccountRequest) returns (CreateAccountResponse) {}
   // Refresh a given token, with a new JWT token
   rpc Refresh(RefreshTokenRequest) returns (RefreshTokenResponse) {}
 }
@@ -22,18 +20,6 @@ message LoginRequest {
 }
 
 message LoginResponse {
-  // The JWT token, without prefix
-  string token = 1;
-}
-
-message CreateAccountRequest {
-  // The username
-  string username = 1;
-  // The password
-  string password = 2;
-}
-
-message CreateAccountResponse {
   // The JWT token, without prefix
   string token = 1;
 }
