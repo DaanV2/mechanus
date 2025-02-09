@@ -79,6 +79,9 @@ func (l *LoginService) Refresh(ctx context.Context, req *connect.Request[usersv1
 	}
 
 	u, err := l.users.Get(claims.User.ID)
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInternal, err)
+	}
 
 	token, err = l.jwts.Create(ctx, u, "refresh")
 	if err != nil {
