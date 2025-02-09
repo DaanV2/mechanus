@@ -18,7 +18,7 @@ type Storage struct {
 	AuthKeys storage.Storage[*authenication.KeyData]
 }
 
-var fileStorage = wire.NewSet(
+var fileStorage = wire.NewSet( // nolint:unused
 	FileStorage,
 	user_storage.NewStorage,
 
@@ -26,7 +26,7 @@ var fileStorage = wire.NewSet(
 	wire.Bind(new(user_service.UserStorage), new(*user_storage.Storage)),
 )
 
-var memoryStorage = wire.NewSet(
+var memoryStorage = wire.NewSet( // nolint:unused
 	MemoryStorage,
 	user_storage.NewStorage,
 

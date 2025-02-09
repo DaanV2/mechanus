@@ -5,6 +5,6 @@ import (
 	"github.com/google/wire"
 )
 
-var baseSet = wire.NewSet(
+var baseSet = wire.NewSet( // nolint:unused
 	application.NewComponentManager,
 )

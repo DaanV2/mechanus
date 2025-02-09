@@ -8,7 +8,7 @@ import (
 	"github.com/google/wire"
 )
 
-var servicesSet = wire.NewSet(
+var servicesSet = wire.NewSet( // nolint:unused
 	user_service.NewService,
 	authenication.NewJTIService,
 	authenication.NewJWTService,
