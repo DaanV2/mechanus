@@ -24,6 +24,27 @@ func ServerComponent(folder string) (*servers.Manager, error) {
 	return nil, nil
 }
 
+type MockServer struct {
+	Manager *servers.Manager
+	Web     web.WEBServies
+	GRPC    grpc.GRPCServices
+}
+
+func MockServerComponent() (*MockServer, error) {
+	wire.Build(
+		baseSet,
+		servicesSet,
+		memoryStorage,
+
+		wire.Struct(new(web.WEBServies), "*"),
+		wire.Struct(new(grpc.GRPCServices), "*"),
+		wire.Struct(new(MockServer), "*"),
+		buildServerComponent,
+	)
+
+	return nil, nil
+}
+
 func buildServerComponent(wserv web.WEBServies, gserv grpc.GRPCServices) *servers.Manager {
 	manager := &servers.Manager{}
 	manager.Register(

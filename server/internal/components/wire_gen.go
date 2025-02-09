@@ -47,7 +47,46 @@ func ServerComponent(folder string) (*servers.Manager, error) {
 	return manager, nil
 }
 
+func MockServerComponent() (*MockServer, error) {
+	componentManager := application.NewComponentManager()
+	webServies := web.WEBServies{
+		Components: componentManager,
+	}
+	storage := MemoryStorage()
+	storageStorage := storage.Users
+	user_storageStorage := user_storage.NewStorage(storageStorage)
+	service := user_service.NewService(user_storageStorage)
+	storage2 := storage.JTIs
+	jtiService := authenication.NewJTIService(storage2)
+	storage3 := storage.AuthKeys
+	keyManager, err := authenication.NewKeyManager(storage3)
+	if err != nil {
+		return nil, err
+	}
+	jwtService := authenication.NewJWTService(jtiService, keyManager)
+	loginService := grpc_users.NewLoginService(service, jwtService)
+	userService := grpc_users.NewUserService(service)
+	grpcServices := grpc.GRPCServices{
+		Login: loginService,
+		User:  userService,
+		JWT:   jwtService,
+	}
+	manager := buildServerComponent(webServies, grpcServices)
+	mockServer := &MockServer{
+		Manager: manager,
+		Web:     webServies,
+		GRPC:    grpcServices,
+	}
+	return mockServer, nil
+}
+
 // wire.go:
+
+type MockServer struct {
+	Manager *servers.Manager
+	Web     web.WEBServies
+	GRPC    grpc.GRPCServices
+}
 
 func buildServerComponent(wserv web.WEBServies, gserv grpc.GRPCServices) *servers.Manager {
 	manager := &servers.Manager{}

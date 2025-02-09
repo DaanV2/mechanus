@@ -2,6 +2,8 @@ package roles
 
 import (
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestRole_Level(t *testing.T) {
@@ -33,14 +35,14 @@ func TestRole_Inherits(t *testing.T) {
 		{DEVICE, USER, true},
 		{OPERATOR, USER, true},
 		{ADMIN, OPERATOR, true},
+		{USER, ADMIN, false},
+		{DEVICE, ADMIN, false},
 		{OPERATOR, ADMIN, false},
-		{ADMIN, ADMIN, false},
+		{ADMIN, ADMIN, true},
 	}
 
 	for _, test := range tests {
-		if got := test.role.Inherits(test.inherits); got != test.expected {
-			t.Errorf("Role.Inherits(%s) = %v, want %v", test.inherits, got, test.expected)
-		}
+		require.Equal(t, test.role.Inherits(test.inherits), test.expected, "Role(%s).Inherits(%s) = %v", test.role, test.inherits, test.expected)
 	}
 }
 
