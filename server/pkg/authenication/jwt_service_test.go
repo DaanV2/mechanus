@@ -7,6 +7,7 @@ import (
 
 	"github.com/DaanV2/mechanus/server/pkg/authenication"
 	"github.com/DaanV2/mechanus/server/pkg/models"
+	"github.com/DaanV2/mechanus/server/pkg/models/roles"
 	"github.com/DaanV2/mechanus/server/pkg/models/users"
 	memory_storage "github.com/DaanV2/mechanus/server/pkg/storage/memory"
 	"github.com/golang-jwt/jwt/v5"
@@ -25,8 +26,8 @@ func Test_JWT_Service(t *testing.T) {
 
 	user := users.User{
 		BaseItem:     models.NewBaseItem(),
-		Name:         "gandalf",
-		Roles:        []string{"wizard", "admin", "user"},
+		Username:     "gandalf",
+		Roles:        []roles.Role{roles.ADMIN, roles.OPERATOR},
 		Campaigns:    []string{"lord-of-the-rings"},
 		PasswordHash: []byte("the-eagles"),
 	}
@@ -49,7 +50,7 @@ func Test_JWT_Service(t *testing.T) {
 		require.True(t, ok)
 
 		require.Equal(t, c.User.ID, user.ID)
-		require.Equal(t, c.User.Name, user.Name)
+		require.Equal(t, c.User.Name, user.Username)
 		require.Equal(t, c.User.Roles, user.Roles)
 		require.Equal(t, c.User.Campaigns, user.Campaigns)
 	})
@@ -69,7 +70,7 @@ func Test_JWT_Claims(t *testing.T) {
 		User: authenication.JWTUser{
 			ID:        "0123456789",
 			Name:      "gandalf",
-			Roles:     []string{"wizard", "admin", "user"},
+			Roles:     []roles.Role{roles.ADMIN, roles.OPERATOR},
 			Campaigns: []string{"lord-of-the-rings"},
 		},
 		Scope: "password",

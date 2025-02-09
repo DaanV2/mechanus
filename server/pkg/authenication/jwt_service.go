@@ -54,7 +54,7 @@ func (s *JWTService) Create(ctx context.Context, user users.User, scope string) 
 	claims := &JWTClaims{
 		User: JWTUser{
 			ID:        user.ID,
-			Name:      user.Name,
+			Name:      user.Username,
 			Roles:     user.Roles,
 			Campaigns: user.Campaigns,
 		},
@@ -86,6 +86,12 @@ func (s *JWTService) validate(ctx context.Context, token string, options ...jwt.
 		return jToken, ErrClaimsRead
 	}
 
+	// Validate the token, then the JTI
+	err = s.validator.Validate(jToken.Claims)
+	if err != nil {
+		return jToken, err
+	}
+
 	jti, err := s.jtiService.Find(claims.User.ID, claims.ID)
 	if err != nil {
 		return jToken, fmt.Errorf("error finding the JTI: %w", err)
@@ -94,7 +100,7 @@ func (s *JWTService) validate(ctx context.Context, token string, options ...jwt.
 		return jToken, ErrJTIRevoked
 	}
 
-	return jToken, s.validator.Validate(jToken.Claims)
+	return jToken, nil
 }
 
 func (s *JWTService) sign(claims *JWTClaims) (string, error) {

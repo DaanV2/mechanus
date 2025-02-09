@@ -1,4 +1,4 @@
-package grpc
+package web
 
 import (
 	"net/http"

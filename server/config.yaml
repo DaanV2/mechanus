@@ -1,9 +1,0 @@
-log:
-  format: text
-  level: debug
-  report-caller: false
-mdns:
-  ipv4:
-    enabled: true
-  ipv6:
-    enabled: false

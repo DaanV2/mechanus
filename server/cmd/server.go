@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/DaanV2/mechanus/server/internal/grpc"
 	"github.com/DaanV2/mechanus/server/internal/web"
 	"github.com/DaanV2/mechanus/server/pkg/application"
 	"github.com/DaanV2/mechanus/server/pkg/servers"
@@ -45,27 +46,27 @@ func ServerWorkload(cmd *cobra.Command, args []string) {
 	appCtx := cmd.Context()
 	comps := new(application.ComponentManager)
 
-	router := web.WebRouter(comps, web.StaticFolderFlag.Value())
-	webServer := servers.NewHttpServer(router, servers.HttpServerConfig{
-		Port: web.PortFlag.Value(),
-		Host: web.HostFlag.Value(),
-	})
+	manager := &servers.Manager{}
+	webRouter := web.WebRouter(comps, web.StaticFolderFlag.Value())
+	grpcRouter := grpc.NewRouter(nil)
+	manager.Register(web.NewServer(webRouter))
+	manager.Register(grpc.NewServer(grpcRouter))
 
 	// Execute
-	go webServer.Listen()
+	manager.Start()
 
 	// Await termination signal
 	<-appCtx.Done()
 
 	// make a ctx specially for shutdown
-	shutCtx, cancel := context.WithTimeout(context.Background(), time.Second*15)
+	shutCtx, cancel := context.WithTimeout(context.Background(), time.Second*60)
 	defer cancel()
 
 	// Shutdown
 	if err := comps.BeforeShutdown(shutCtx); err != nil {
 		log.Error("errors while performing pre shutdown calls", "error", err)
 	}
-	webServer.Shutdown()
+	manager.Stop(shutCtx)
 	if err := comps.AfterShutDown(shutCtx); err != nil {
 		log.Error("errors while performing post shutdown calls", "error", err)
 	}
