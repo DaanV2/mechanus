@@ -41,7 +41,6 @@ func (s *Service) GetByUsername(username string) (users.User, error) {
 
 // Create makes a new entry in the database, assumes the password is set in the PasswordHash field as plain bytes, will hash that field first
 func (s *Service) Create(user users.User) (users.User, error) {
-	user.BaseItem = models.NewBaseItem()
 	pwhash, err := xcrypto.HashPassword(user.PasswordHash)
 	if err != nil {
 		return user, err
@@ -51,6 +50,14 @@ func (s *Service) Create(user users.User) (users.User, error) {
 	_, err = s.GetByUsername(user.Username)
 	if !errors.Is(err, xerrors.ErrNotExist) {
 		return user, errors.New("user already exists")
+	}
+
+	for {
+		user.BaseItem = models.NewBaseItem()
+		_, err := s.storage.GetById(user.ID)
+		if errors.Is(err, xerrors.ErrNotExist) {
+			break
+		}
 	}
 
 	err = s.storage.Set(user)

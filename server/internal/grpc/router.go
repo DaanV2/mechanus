@@ -17,7 +17,7 @@ func NewRouter(loginSvc usersv1connect.LoginServiceHandler) http.Handler {
 	return h2c.NewHandler(router, &http2.Server{})
 }
 
-func RegisterService[T any](router *http.ServeMux, create func(data T, opts ...connect.HandlerOption) (string, http.Handler), input T) {
-	path, handler := create(input)
+func RegisterService[T any](router *http.ServeMux, create func(data T, opts ...connect.HandlerOption) (string, http.Handler), input T, opts ...connect.HandlerOption) {
+	path, handler := create(input, opts...)
 	router.Handle(path, handler)
 }

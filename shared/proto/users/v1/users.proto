@@ -16,8 +16,7 @@ message CreateAccountRequest {
 }
 
 message CreateAccountResponse {
-  // The JWT token, without prefix
-  string token = 1;
+  User user = 1;
 }
 
 

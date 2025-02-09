@@ -58,11 +58,9 @@ export class CreateAccountRequest extends Message<CreateAccountRequest> {
  */
 export class CreateAccountResponse extends Message<CreateAccountResponse> {
   /**
-   * The JWT token, without prefix
-   *
-   * @generated from field: string token = 1;
+   * @generated from field: users.v1.User user = 1;
    */
-  token = "";
+  user?: User;
 
   constructor(data?: PartialMessage<CreateAccountResponse>) {
     super();
@@ -72,7 +70,7 @@ export class CreateAccountResponse extends Message<CreateAccountResponse> {
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "users.v1.CreateAccountResponse";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "token", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: "user", kind: "message", T: User },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CreateAccountResponse {
@@ -179,6 +177,13 @@ export class User extends Message<User> {
    */
   id = "";
 
+  /**
+   * The users name
+   *
+   * @generated from field: string name = 2;
+   */
+  name = "";
+
   constructor(data?: PartialMessage<User>) {
     super();
     proto3.util.initPartial(data, this);
@@ -188,6 +193,7 @@ export class User extends Message<User> {
   static readonly typeName = "users.v1.User";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): User {
