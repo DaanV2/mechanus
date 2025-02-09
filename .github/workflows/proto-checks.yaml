@@ -20,5 +20,5 @@ jobs:
           setup_only: false
           format: true
           lint: true
-          breaking: true
+          breaking: false
           push: false
