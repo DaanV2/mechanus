@@ -3,6 +3,7 @@ package roles
 type Role string
 
 const (
+	NONE     Role = "none"
 	DEVICE   Role = "device"   // Devices dont have permission like users, but have their own set of screens
 	USER     Role = "user"     // User can only access players places, such as their characters, or screen related to characters
 	OPERATOR Role = "operator" // Admin inherits all of device or user
@@ -10,6 +11,7 @@ const (
 )
 
 var levels = map[Role]int{
+	NONE:     -1,
 	USER:     0,
 	DEVICE:   0,
 	OPERATOR: 1,
@@ -17,7 +19,7 @@ var levels = map[Role]int{
 }
 
 func (r Role) Inherits(role Role) bool {
-	return r.Level() <= role.Level()
+	return r.Level() >= role.Level()
 }
 
 func (r Role) Level() int {
@@ -31,4 +33,16 @@ func (r Role) Level() int {
 
 func (r Role) String() string {
 	return string(r)
+}
+
+func HighestRole(roles []Role) Role {
+	max := NONE
+
+	for _, r := range roles {
+		if r.Inherits(max) {
+			max = r
+		}
+	}
+
+	return max
 }

@@ -31,10 +31,10 @@ func TestRole_Inherits(t *testing.T) {
 	}{
 		{USER, DEVICE, true},
 		{DEVICE, USER, true},
-		{OPERATOR, USER, false},
-		{ADMIN, OPERATOR, false},
-		{OPERATOR, ADMIN, true},
-		{ADMIN, ADMIN, true},
+		{OPERATOR, USER, true},
+		{ADMIN, OPERATOR, true},
+		{OPERATOR, ADMIN, false},
+		{ADMIN, ADMIN, false},
 	}
 
 	for _, test := range tests {

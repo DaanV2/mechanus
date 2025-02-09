@@ -19,7 +19,6 @@ message CreateAccountResponse {
   User user = 1;
 }
 
-
 message GetUserRequest {
   string id = 1; // The users UUID to lookup
 }
