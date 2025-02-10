@@ -14,7 +14,7 @@ updates:
     groups:
       connect:
         patterns:
-          - "connect*"
+          - "@connect*"
       all:
         patterns:
           - "*"
