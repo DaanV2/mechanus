@@ -15,6 +15,7 @@ updates:
       connect:
         patterns:
           - "@connect*"
+          - "@bufbuild*"
       all:
         patterns:
           - "*"
