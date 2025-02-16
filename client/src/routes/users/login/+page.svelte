@@ -1,12 +1,15 @@
 <script lang="ts">
+  import { createClient } from '../../../lib/api/client';
+  import { createUserClient } from '../../../lib/api/users_v1';
+
   let username = $state('');
   let password = $state('');
 
   function handleSubmit(event: Event) {
     event.preventDefault();
     // Handle login logic here
-    console.log('Username:', username);
-    console.log('Password:', password);
+    const transport = createClient();
+    const userClient = createUserClient(transport);
   }
 
   // Computed property to check if both fields are filled
@@ -28,6 +31,6 @@
       required
     />
     <button type="submit" class="action-button" disabled={!isFormValid}> Login </button>
-    <a href="/players/signup" class="action-button">Dont have an account? Sign up!</a>
+    <a href="/users/signup" class="action-button">Dont have an account? Sign up!</a>
   </form>
 </div>
