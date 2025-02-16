@@ -7,9 +7,9 @@ import (
 	"time"
 
 	"github.com/DaanV2/mechanus/server/internal/components"
-	"github.com/DaanV2/mechanus/server/internal/grpc"
 	"github.com/DaanV2/mechanus/server/internal/web"
 	"github.com/DaanV2/mechanus/server/pkg/application"
+	"github.com/DaanV2/mechanus/server/pkg/grpc"
 	"github.com/charmbracelet/log"
 	"github.com/spf13/cobra"
 )
