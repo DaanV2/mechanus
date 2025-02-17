@@ -10,6 +10,9 @@
     // Handle login logic here
     const transport = createClient();
     const userClient = createUserClient(transport);
+    if (userClient) {
+      console.log('success!');
+    }
   }
 
   // Computed property to check if both fields are filled
