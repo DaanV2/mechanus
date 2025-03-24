@@ -1,6 +1,7 @@
 module github.com/DaanV2/mechanus/server
 
 go 1.24.0
+
 tool (
 	connectrpc.com/connect/cmd/protoc-gen-connect-go
 	github.com/bufbuild/buf/cmd/buf
@@ -17,7 +18,7 @@ require (
 	github.com/charmbracelet/lipgloss v1.1.0
 	github.com/charmbracelet/log v0.4.1
 	github.com/daanv2/go-locks v1.3.0
-	github.com/golang-jwt/jwt/v5 v5.2.1
+	github.com/golang-jwt/jwt/v5 v5.2.2
 	github.com/google/uuid v1.6.0
 	github.com/google/wire v0.6.0
 	github.com/spf13/cobra v1.9.1
