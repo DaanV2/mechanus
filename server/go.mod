@@ -1,7 +1,6 @@
 module github.com/DaanV2/mechanus/server
 
 go 1.24.0
-
 tool (
 	connectrpc.com/connect/cmd/protoc-gen-connect-go
 	github.com/bufbuild/buf/cmd/buf
@@ -23,11 +22,11 @@ require (
 	github.com/google/wire v0.6.0
 	github.com/spf13/cobra v1.9.1
 	github.com/spf13/pflag v1.0.6
-	github.com/spf13/viper v1.20.0
+	github.com/spf13/viper v1.20.1
 	github.com/stretchr/testify v1.10.0
 	golang.org/x/crypto v0.36.0
-	golang.org/x/net v0.37.0
-	google.golang.org/protobuf v1.36.5
+	golang.org/x/net v0.38.0
+	google.golang.org/protobuf v1.36.6
 )
 
 require (
