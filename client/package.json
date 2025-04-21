@@ -20,13 +20,13 @@
   "dependencies": {
     "@buf/connectrpc_eliza.connectrpc_es": "^1.4.0-20230913231627-233fca715f49.3",
     "@bufbuild/protobuf": "^1.10.0",
-    "@connectrpc/connect": "^1.6.1",
-    "@connectrpc/connect-web": "^1.6.1",
+    "@connectrpc/connect": "^2.0.2",
+    "@connectrpc/connect-web": "^2.0.2",
     "pixi.js": "^8.8.0"
   },
   "devDependencies": {
-    "@bufbuild/buf": "^1.50.0",
-    "@bufbuild/protoc-gen-es": "^1.10.0",
+    "@bufbuild/buf": "^1.52.1",
+    "@bufbuild/protoc-gen-es": "^2.2.5",
     "@connectrpc/protoc-gen-connect-es": "^1.6.1",
     "@playwright/test": "^1.50.1",
     "@sveltejs/adapter-auto": "^4.0.0",
