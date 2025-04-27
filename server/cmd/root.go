@@ -35,10 +35,10 @@ func Execute() {
 	defer cancel()
 	rootCmd.SetContext(ctx)
 
-  go func() {
-    <- ctx.Done()
-    log.Info("Shutdown received")
-  }()
+	go func() {
+		<- ctx.Done()
+		log.Info("Shutdown received")
+	}()
 
 	defer func() {
 		if e := recover(); e != nil {
