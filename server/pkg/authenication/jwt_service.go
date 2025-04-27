@@ -50,7 +50,7 @@ func NewJWTService(jtiService *JTIService, keys *KeyManager) *JWTService {
 // TODO Refresh
 
 func (s *JWTService) Create(ctx context.Context, user users.User, scope string) (string, error) {
-	logging.From(ctx).Info("creating jwt")
+	logging.Info(ctx,"creating jwt")
 	claims := &JWTClaims{
 		User: JWTUser{
 			ID:        user.ID,
