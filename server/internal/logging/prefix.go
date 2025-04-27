@@ -8,7 +8,7 @@ import (
 
 type Enriched struct {
 	prefix string
-	values []interface{}
+	values []any
 }
 
 func (e Enriched) WithPrefix(prefix string) Enriched {
