@@ -1,15 +1,16 @@
 package authenication
 
 import (
+	"context"
 	"errors"
 
-	xerrors "github.com/DaanV2/mechanus/server/pkg/extensions/errors"
-	xrand "github.com/DaanV2/mechanus/server/pkg/extensions/rand"
-	"github.com/DaanV2/mechanus/server/pkg/storage"
+	"github.com/DaanV2/mechanus/server/internal/logging"
+	"github.com/DaanV2/mechanus/server/pkg/database"
 )
 
 type JTI struct {
 	ID      string
+	UserId  string
 	Revoked bool
 }
 
@@ -18,55 +19,63 @@ func (j *JTI) Valid() bool {
 }
 
 type JTIService struct {
-	storage storage.Storage[[]JTI]
+	db *database.DB
+	logger logging.Enriched
 }
 
-func NewJTIService(storage storage.Storage[[]JTI]) *JTIService {
+func NewJTIService(db *database.DB) *JTIService {
 	return &JTIService{
-		storage,
+		db: db,
+		logger: logging.Enriched{}.WithPrefix("jti_service"),
 	}
 }
 
-// TODO revokaction
 
 func (s *JTIService) GetOrCreate(userId string) (string, error) {
 	if userId == "" {
 		return "", errors.New("userId is empty")
 	}
 
-	jtis, err := s.storage.Get(userId)
-	if err != nil && !errors.Is(err, xerrors.ErrNotExist) {
-		return "", err
-	}
+	return jti.ID, err
+}
 
-	// Find valid JTI
-	for _, jti := range jtis {
-		if jti.Valid() {
-			return jti.ID, nil
-		}
-	}
 
-	jti := JTI{
-		ID:      xrand.MustID(28),
-		Revoked: false,
+func (s *JTIService) Get(userId string) (string, error) {
+	if userId == "" {
+		return "", errors.New("userId is empty")
 	}
-
-	err = s.storage.Set(userId, []JTI{jti})
 
 	return jti.ID, err
 }
 
-func (s *JTIService) Find(userId string, jti string) (JTI, error) {
-	jtis, err := s.storage.Get(userId)
-	if err != nil {
-		return JTI{}, err
+
+func (s *JTIService) Create(ctx context.Context, userId string) (*JTI, error) {
+	if userId == "" {
+		return "", errors.New("userId is empty")
 	}
 
-	for _, j := range jtis {
-		if j.ID == jti {
-			return j, nil
-		}
+	result := JTI{
+		
+	}
+	tx := s.db.WithContext(ctx).Create(result)
+
+	return jti.ID, err
+}
+
+func (s *JTIService) Revoke() {
+
+}
+
+func (s *JTIService) Find(ctx context.Context, jti string) (*JTI, error) {
+	logger := s.logger.From(ctx).With("jti", jti)
+	logger.Debug("getting jti")
+
+	var result JTI
+	tx := s.db.WithContext(ctx).First(&result, "id = ? ", jti)
+
+	if tx.Error != nil {
+		return nil, tx.Error
 	}
 
-	return JTI{}, xerrors.ErrNotExist
+	return &result, nil
 }

@@ -1,6 +1,7 @@
 package database
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -12,19 +13,21 @@ import (
 	"gorm.io/gorm/logger"
 )
 
-// DB wraps the gorm.DB instance and provides a Close method
 type DB struct {
 	gormDB *gorm.DB
 }
 
-func (d *DB) Close() error {
-	sqlDB, err := d.gormDB.DB()
+func (db *DB) Close() error {
+	sqlDB, err := db.gormDB.DB()
 	if err != nil {
 		return fmt.Errorf("failed to get database: %w", err)
 	}
 	return sqlDB.Close()
 }
 
+func (db *DB) WithContext(ctx context.Context) *gorm.DB {
+	return db.gormDB.WithContext(ctx)
+}
 
 // NewDB creates a new database connection with the given options
 func NewDB(opts ...Option) (*DB, error) {
@@ -91,5 +94,5 @@ func NewDB(opts ...Option) (*DB, error) {
 	sqlDB.SetMaxOpenConns(config.MaxOpenConns)
 	sqlDB.SetConnMaxLifetime(config.ConnMaxLifetime)
 
-	return &DB{db}, nil
+	return &DB{gormDB: db}, nil
 }
