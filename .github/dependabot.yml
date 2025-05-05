@@ -12,6 +12,10 @@ updates:
     schedule:
       interval: "weekly"
     groups:
+      connect:
+        patterns:
+          - "@connect*"
+          - "@bufbuild*"
       all:
         patterns:
           - "*"

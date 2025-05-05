@@ -2,11 +2,14 @@ package cmd
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"time"
 
+	"github.com/DaanV2/mechanus/server/internal/components"
+	"github.com/DaanV2/mechanus/server/internal/grpc"
 	"github.com/DaanV2/mechanus/server/internal/web"
 	"github.com/DaanV2/mechanus/server/pkg/application"
-	"github.com/DaanV2/mechanus/server/pkg/servers"
 	"github.com/charmbracelet/log"
 	"github.com/spf13/cobra"
 )
@@ -15,7 +18,7 @@ import (
 var serverCmd = &cobra.Command{
 	Use:   "server",
 	Short: "A brief description of your command",
-	Run:   ServerWorkload,
+	RunE:  ServerWorkload,
 	PreRun: func(cmd *cobra.Command, args []string) {
 		log.Info("server starting")
 	},
@@ -38,35 +41,39 @@ func init() {
 	// serverCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	// flags := serverCmd.Flags()
 	web.WebConfig.AddToSet(serverCmd.Flags())
+	grpc.APIConfig.AddToSet(serverCmd.Flags())
 }
 
-func ServerWorkload(cmd *cobra.Command, args []string) {
+func ServerWorkload(cmd *cobra.Command, args []string) error {
 	// Setup
 	appCtx := cmd.Context()
 	comps := new(application.ComponentManager)
 
-	router := web.WebRouter(comps, web.StaticFolderFlag.Value())
-	webServer := servers.NewHttpServer(router, servers.HttpServerConfig{
-		Port: web.PortFlag.Value(),
-		Host: web.HostFlag.Value(),
-	})
+	manager, err := components.ServerComponent(web.StaticFolderFlag.Value())
+	if err != nil {
+		return fmt.Errorf("error setting up: %w", err)
+	}
 
 	// Execute
-	go webServer.Listen()
+	manager.Start()
 
 	// Await termination signal
 	<-appCtx.Done()
 
 	// make a ctx specially for shutdown
-	shutCtx, cancel := context.WithTimeout(context.Background(), time.Second*15)
+	shutCtx, cancel := context.WithTimeout(context.Background(), time.Second*60)
 	defer cancel()
 
 	// Shutdown
-	if err := comps.BeforeShutdown(shutCtx); err != nil {
-		log.Error("errors while performing pre shutdown calls", "error", err)
+	berr := comps.BeforeShutdown(shutCtx)
+	if berr != nil {
+		log.Error("errors while performing pre shutdown calls", "error", berr)
 	}
-	webServer.Shutdown()
-	if err := comps.AfterShutDown(shutCtx); err != nil {
-		log.Error("errors while performing post shutdown calls", "error", err)
+	manager.Stop(shutCtx)
+	aerr := comps.AfterShutDown(shutCtx)
+	if aerr != nil {
+		log.Error("errors while performing post shutdown calls", "error", berr)
 	}
+
+	return errors.Join(berr, aerr)
 }

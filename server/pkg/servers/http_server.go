@@ -5,23 +5,22 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/DaanV2/mechanus/server/pkg/servers/middleware"
 	"github.com/charmbracelet/log"
 )
 
-type HttpServerConfig struct {
+type ServerConfig struct {
 	Port int
 	Host string
 }
 
-type HttpServer struct {
+type Server struct {
 	server *http.Server
 }
 
-func NewHttpServer(router http.Handler, conf HttpServerConfig) *HttpServer {
-	return &HttpServer{
+func NewHttpServer(router http.Handler, conf ServerConfig) *Server {
+	return &Server{
 		server: &http.Server{
 			Addr:    fmt.Sprintf("%s:%v", conf.Host, conf.Port),
 			Handler: middleware.Logging(router),
@@ -29,7 +28,7 @@ func NewHttpServer(router http.Handler, conf HttpServerConfig) *HttpServer {
 	}
 }
 
-func (s *HttpServer) Listen() {
+func (s *Server) Listen() {
 	log.Infof("Starting http server: http://%s", s.server.Addr)
 
 	err := s.server.ListenAndServe()
@@ -42,10 +41,7 @@ func (s *HttpServer) Listen() {
 	}
 }
 
-func (s *HttpServer) Shutdown() {
-	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(time.Second * 15))
-	defer cancel()
-
+func (s *Server) Shutdown(ctx context.Context) {
 	err := s.server.Shutdown(ctx)
 	if err != nil {
 		if errors.Is(err, http.ErrServerClosed) {

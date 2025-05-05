@@ -9,10 +9,10 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/DaanV2/go-locks"
 	xerrors "github.com/DaanV2/mechanus/server/pkg/extensions/errors"
 	xio "github.com/DaanV2/mechanus/server/pkg/extensions/io"
 	"github.com/charmbracelet/log"
+	"github.com/daanv2/go-locks"
 )
 
 type RawStorage struct {
@@ -25,7 +25,7 @@ func NewRawStorage(folder string) *RawStorage {
 
 	l := max(runtime.GOMAXPROCS(0)*10, 10)
 	return &RawStorage{
-		locks:  locks.NewRWPool(l),
+		locks:  locks.NewRWPool(locks.WithSize(l)),
 		folder: folder,
 	}
 }

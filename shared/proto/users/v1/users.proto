@@ -1,10 +1,22 @@
 syntax = "proto3";
 package users.v1;
 
-option go_package = "github.com/DaanV2/mechanus/server/internal/grpc/users/v1;usersv1";
+option go_package = "github.com/DaanV2/mechanus/server/pkg/grpc/gen/users/v1;usersv1";
 
 service UserService {
+  rpc Create(CreateAccountRequest) returns (CreateAccountResponse) {}
   rpc Get(GetUserRequest) returns (GetUserResponse) {}
+}
+
+message CreateAccountRequest {
+  // The username
+  string username = 1;
+  // The password
+  string password = 2;
+}
+
+message CreateAccountResponse {
+  User user = 1;
 }
 
 message GetUserRequest {
@@ -17,4 +29,5 @@ message GetUserResponse {
 
 message User {
   string id = 1; // The users UUID
+  string name = 2; // The users name
 }

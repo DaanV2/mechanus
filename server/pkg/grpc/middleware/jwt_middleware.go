@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"connectrpc.com/connect"
+	"github.com/DaanV2/mechanus/server/internal/logging"
 	"github.com/DaanV2/mechanus/server/pkg/authenication"
 	"github.com/charmbracelet/log"
 )
@@ -67,6 +68,7 @@ func (j *JWTMiddleware) validateAndInject(ctx context.Context, headers http.Head
 			Claims: claims,
 		}
 		ctx = ContextWithJWT(ctx, c)
+		ctx = logging.Context(ctx, logging.From(ctx).With("user.valid", c.Claims, "user.id", c.Claims.User.ID, "user.name", c.Claims.User.Name))
 	} else {
 		j.logger.Error("somehow the claims are not expect as it should", "token", auth)
 	}
