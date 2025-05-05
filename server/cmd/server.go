@@ -49,7 +49,7 @@ func ServerWorkload(cmd *cobra.Command, args []string) error {
 	appCtx := cmd.Context()
 	comps := new(application.ComponentManager)
 
-	manager, err := components.ServerComponent(web.StaticFolderFlag.Value())
+	manager, err := components.WebServer(web.StaticFolderFlag.Value())
 	if err != nil {
 		return fmt.Errorf("error setting up: %w", err)
 	}
