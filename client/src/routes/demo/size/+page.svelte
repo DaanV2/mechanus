@@ -85,6 +85,8 @@
   });
 </script>
 
+<title>Size check</title>
+
 <svelte:window />
 
 <style>
