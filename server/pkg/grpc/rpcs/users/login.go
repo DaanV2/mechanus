@@ -39,7 +39,7 @@ func (l *LoginService) Login(ctx context.Context, req *connect.Request[usersv1.L
 		return nil, connect.NewError(connect.CodeUnauthenticated, ErrInvalidUserPassword)
 	}
 
-	u, err := l.users.GetByUsername(username)
+	u, err := l.users.GetByUsername(ctx, username)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeUnauthenticated, ErrInvalidUserPassword)
 	}
@@ -78,7 +78,7 @@ func (l *LoginService) Refresh(ctx context.Context, req *connect.Request[usersv1
 		return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("token not provided by mechanus"))
 	}
 
-	u, err := l.users.Get(claims.User.ID)
+	u, err := l.users.Get(ctx, claims.User.ID)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}

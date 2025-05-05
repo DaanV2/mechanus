@@ -9,7 +9,6 @@ import (
 	"github.com/DaanV2/mechanus/server/pkg/database"
 	"github.com/DaanV2/mechanus/server/pkg/database/models"
 	xcrypto "github.com/DaanV2/mechanus/server/pkg/extensions/crypto"
-	"github.com/google/uuid"
 )
 
 type Service struct {
@@ -80,23 +79,23 @@ func (s *Service) Update(ctx context.Context, user *models.User) error {
 	logger.Debug("updating user")
 
 	tx := s.db.WithContext(ctx).Omit("passwordhash").Updates(user)
-	
+
 	return tx.Error
 }
 
 // UpdatePassword will update the password field with the new password in the database
-func (s *Service) UpdatePassword(ctx context.Context, id uuid.UUID, newPassword []byte) error {
+func (s *Service) UpdatePassword(ctx context.Context, id string, newPassword []byte) error {
 	logger := s.logger.With("userId", id).From(ctx)
 	logger.Debug("updating password")
 
-	user := &models.User{Model: models.Model{ID: id }}
+	user := &models.User{Model: models.Model{ID: id}}
 	err := updatePassword(user)
 	if err != nil {
 		return err
 	}
 
 	tx := s.db.WithContext(ctx).Select("passwordhash").Updates(user)
-	
+
 	return tx.Error
 }
 

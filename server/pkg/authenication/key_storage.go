@@ -1,7 +1,7 @@
 package authenication
 
 import (
-	"errors"
+	"context"
 
 	xcrypto "github.com/DaanV2/mechanus/server/pkg/extensions/crypto"
 	xsync "github.com/DaanV2/mechanus/server/pkg/extensions/sync"
@@ -13,31 +13,30 @@ type KeyManager struct {
 	keys    *xsync.Map[string, *KeyData]
 }
 
-func NewKeyManager(storage storage.Storage[*KeyData]) (*KeyManager, error) {
-	manager := &KeyManager{
-		storage: storage,
-		keys:    xsync.NewMap[string, *KeyData](),
+func NewKeyManager(sp storage.StorageProvider[*KeyData]) (*KeyManager, error) {
+	s, err := sp.AppStorage()
+	if err != nil {
+		return nil, err
 	}
 
-	var err error
-	for id := range storage.Ids() {
-		_, cerr := manager.load(id)
-		err = errors.Join(err, cerr)
+	manager := &KeyManager{
+		storage: s,
+		keys:    xsync.NewMap[string, *KeyData](),
 	}
 
 	return manager, nil
 }
 
-func (manager *KeyManager) Get(id string) (*KeyData, error) {
+func (manager *KeyManager) Get(ctx context.Context, id string) (*KeyData, error) {
 	item, ok := manager.keys.Load(id)
 	if ok {
 		return item, nil
 	}
 
-	return manager.load(id)
+	return manager.load(ctx, id)
 }
 
-func (manager *KeyManager) New() (*KeyData, error) {
+func (manager *KeyManager) New(ctx context.Context) (*KeyData, error) {
 	item, err := xcrypto.GenerateRSAKeys()
 	if err != nil {
 		return nil, err
@@ -47,11 +46,11 @@ func (manager *KeyManager) New() (*KeyData, error) {
 		id:  item.ID(),
 		key: item.Private(),
 	}
-	return key, manager.save(key)
+	return key, manager.save(ctx, key)
 }
 
 // GetSigningKey
-func (manager *KeyManager) GetSigningKey() (*KeyData, error) {
+func (manager *KeyManager) GetSigningKey(ctx context.Context) (*KeyData, error) {
 	var (
 		key *KeyData
 		err error
@@ -67,14 +66,14 @@ func (manager *KeyManager) GetSigningKey() (*KeyData, error) {
 	}
 
 	if key == nil {
-		key, err = manager.New()
+		key, err = manager.New(ctx)
 	}
 
 	return key, err
 }
 
-func (manager *KeyManager) load(id string) (*KeyData, error) {
-	key, err := manager.storage.Get(id)
+func (manager *KeyManager) load(ctx context.Context, id string) (*KeyData, error) {
+	key, err := manager.storage.Get(ctx, id)
 	if err != nil {
 		return nil, err
 	}
@@ -83,7 +82,7 @@ func (manager *KeyManager) load(id string) (*KeyData, error) {
 	return key, nil
 }
 
-func (manager *KeyManager) save(item *KeyData) error {
+func (manager *KeyManager) save(ctx context.Context, item *KeyData) error {
 	manager.keys.Store(item.id, item)
-	return manager.storage.Set(item.id, item)
+	return manager.storage.Set(ctx, item)
 }

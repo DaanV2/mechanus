@@ -3,8 +3,7 @@ package authenication
 import (
 	"slices"
 
-	"github.com/DaanV2/mechanus/server/pkg/models/roles"
-	"github.com/DaanV2/mechanus/server/pkg/models/users"
+	"github.com/DaanV2/mechanus/server/pkg/database/models"
 	"github.com/golang-jwt/jwt/v5"
 )
 
@@ -16,14 +15,14 @@ type (
 	}
 
 	JWTUser struct {
-		ID        string       `json:"id"`
-		Name      string       `json:"name"`
-		Roles     []roles.Role `json:"roles"`
-		Campaigns []string     `json:"campaigns"`
+		ID        string   `json:"id"`
+		Name      string   `json:"name"`
+		Roles     []string `json:"roles"`
+		Campaigns []string `json:"campaigns"`
 	}
 )
 
-func (c *JWTClaims) HasUser(user *users.User) bool {
+func (c *JWTClaims) HasUser(user *models.User) bool {
 	return c.User.ID == user.ID
 }
 
@@ -31,18 +30,11 @@ func (c *JWTClaims) HasScope(scope string) bool {
 	return c.Scope == scope
 }
 
-func (u *JWTUser) HasRole(role roles.Role) bool {
-	return slices.Contains(u.Roles, role)
+func (c *JWTClaims) GetRoles() []string {
+	return c.User.Roles
 }
-
-func (u *JWTUser) HasAnyRole(roles ...roles.Role) bool {
-	for _, r := range roles {
-		if u.HasRole(r) {
-			return true
-		}
-	}
-
-	return false
+func (c *JWTClaims) SetRoles(roles ...string) {
+	c.User.Roles = roles
 }
 
 func (u *JWTUser) HasCampaign(campaign string) bool {
