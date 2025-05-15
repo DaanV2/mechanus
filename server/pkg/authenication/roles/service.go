@@ -59,6 +59,7 @@ func ParseRole(role string) (Role, error) {
 func (r *RoleService) GrantRole(container RoleContainer, role Role) {
 	roles := slices.Clone(container.GetRoles())
 	roles = append(roles, role.String())
+	container.SetRoles(roles...)
 }
 
 func (r *RoleService) HasRole(container RoleContainer, role Role) bool {
