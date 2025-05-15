@@ -6,7 +6,6 @@ import (
 	"github.com/DaanV2/mechanus/server/pkg/constants"
 )
 
-
 var (
 	ErrHomeNotFound = errors.New("unable to determine user home directory")
 	ErrCreateDir    = errors.New("failed to create directory")

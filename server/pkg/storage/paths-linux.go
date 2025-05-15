@@ -22,6 +22,7 @@ func getUserDataDir(appName string) (string, error) {
 
 	dir := filepath.Join(dataHome, appName)
 	xio.MakeDirAll(dir)
+
 	return dir, nil
 }
 
@@ -37,6 +38,7 @@ func getAppConfigDir(appName string) (string, error) {
 
 	dir := filepath.Join(configHome, appName)
 	xio.MakeDirAll(dir)
+
 	return dir, nil
 }
 
@@ -52,5 +54,6 @@ func getStateDir(appName string) (string, error) {
 
 	dir := filepath.Join(stateHome, appName)
 	xio.MakeDirAll(dir)
+
 	return dir, nil
 }

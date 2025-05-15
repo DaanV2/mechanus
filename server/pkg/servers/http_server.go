@@ -23,8 +23,8 @@ type Server struct {
 func NewHttpServer(router http.Handler, conf ServerConfig) *Server {
 	return &Server{
 		server: &http.Server{
-			Addr:    fmt.Sprintf("%s:%v", conf.Host, conf.Port),
-			Handler: middleware.Logging(router),
+			Addr:              fmt.Sprintf("%s:%v", conf.Host, conf.Port),
+			Handler:           middleware.Logging(router),
 			ReadHeaderTimeout: time.Second * 10,
 		},
 	}
