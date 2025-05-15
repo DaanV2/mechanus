@@ -71,7 +71,7 @@ func updateLogger(logger *log.Logger, reportCaller bool, level, format string) {
 		logger.SetFormatter(log.LogfmtFormatter)
 	}
 
-  logger.Debug("setup the logger", "level", level, "format", format, "report-caller", reportCaller)
+	logger.Debug("setup the logger", "level", level, "format", format, "report-caller", reportCaller)
 }
 
 func CreateStyle() *log.Styles {

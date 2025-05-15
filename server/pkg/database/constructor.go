@@ -33,13 +33,13 @@ func (db *DB) WithContext(ctx context.Context) *gorm.DB {
 func NewDB(opts ...Option) (*DB, error) {
 	// Default configuration
 	config := &Config{
-		Type:           SQLite,
-		DSN:            "db.sqlite",
-		MaxIdleConns:   10,
-		MaxOpenConns:   100,
+		Type:            SQLite,
+		DSN:             "db.sqlite",
+		MaxIdleConns:    10,
+		MaxOpenConns:    100,
 		ConnMaxLifetime: time.Hour,
-		SlowThreshold:  time.Second,
-		LogWriter:      log.Default().WithPrefix("db").StandardLog(),
+		SlowThreshold:   time.Second,
+		LogWriter:       log.Default().WithPrefix("db").StandardLog(),
 	}
 
 	// Apply options

@@ -30,13 +30,13 @@ var rootCmd = &cobra.Command{
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
-func Execute() {	
+func Execute() {
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGTERM, syscall.SIGKILL, syscall.SIGQUIT)
 	defer cancel()
 	rootCmd.SetContext(ctx)
 
 	go func() {
-		<- ctx.Done()
+		<-ctx.Done()
 		log.Info("Shutdown received")
 	}()
 

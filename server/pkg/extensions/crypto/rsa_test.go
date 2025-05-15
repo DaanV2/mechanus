@@ -11,5 +11,5 @@ func Test_Generate_RSA(t *testing.T) {
 	key, err := xcrypto.GenerateRSAKeys()
 	require.NoError(t, err)
 
-	require.Greater(t, len(key .ID()), 0)
+	require.Greater(t, len(key.ID()), 0)
 }
