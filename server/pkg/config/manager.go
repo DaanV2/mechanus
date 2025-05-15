@@ -73,7 +73,7 @@ func (c *Config) GetBool(name string) bool {
 	return getValue[bool](c, name)
 }
 
-func (c *Config) String(name string, def string, usage string) Flag[string] {
+func (c *Config) String(name, def, usage string) Flag[string] {
 	f := String(name, def, usage)
 	c.data.Store(name, f)
 

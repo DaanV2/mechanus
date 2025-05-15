@@ -9,6 +9,79 @@ linters:
     nolintlint:
       require-explanation: true
       require-specific: true
+    gocritic:
+      enabled-checks:
+        - appendCombine
+        - badLock
+        - badRegexp
+        - badSorting
+        - badSyncOnceFunc
+        - boolExprSimplify
+        - builtinShadow
+        - builtinShadowDecl
+        - commentedOutCode
+        - commentedOutImport
+        - deferInLoop
+        - deferUnlambda
+        - docStub
+        - dupImport
+        - dynamicFmtString
+        - emptyDecl
+        - emptyFallthrough
+        - emptyStringTest
+        - equalFold
+        - evalOrder
+        - exposedSyncMutex
+        - externalErrorReassign
+        - filepathJoin
+        - hexLiteral
+        - httpNoBody
+        - hugeParam
+        - importShadow
+        - indexAlloc
+        - initClause
+        - methodExprCall
+        - nestingReduce
+        - nilValReturn
+        - paramTypeCombine
+        - preferDecodeRune
+        - preferFilepathJoin
+        - preferFprint
+        - preferStringWriter
+        - preferWriteByte
+        - ptrToRefParam
+        - rangeAppendAll
+        - rangeExprCopy
+        - rangeValCopy
+        - redundantSprint
+        - regexpPattern
+        - regexpSimplify
+        - returnAfterHttpError
+        - ruleguard
+        - sliceClear
+        - sloppyReassign
+        - sortSlice
+        - sprintfQuotedString
+        - sqlQuery
+        - stringConcatSimplify
+        - stringsCompare
+        - stringXbytes
+        - syncMapLoadAndDelete
+        - timeExprSimplify
+        - todoCommentWithoutDetail
+        - tooManyResultsChecker
+        - truncateCmp
+        - typeAssertChain
+        - typeDefFirst
+        - typeUnparen
+        - uncheckedInlineErr
+        - unlabelStmt
+        - unnamedResult
+        - unnecessaryBlock
+        - unnecessaryDefer
+        - weakCond
+        - whyNoLint
+        - yodaStyleExpr
   enable:
     - asciicheck
     - bidichk
@@ -29,6 +102,7 @@ linters:
     - ginkgolinter
     - gocheckcompilerdirectives
     - goconst
+    - gocritic
     - gomoddirectives
     - goprintffuncname
     - gosec

@@ -7,5 +7,5 @@ type JTI struct {
 }
 
 func (j *JTI) Valid() bool {
-	return len(j.ID) > 0 && !j.Revoked
+	return j.ID != "" && !j.Revoked
 }

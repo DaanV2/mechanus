@@ -28,7 +28,7 @@ func setupDatabase(dbOptions ...database.Option) (*database.DB, error) {
 		return nil, err
 	}
 
-	models := []any{
+	m := []any{
 		&models.User{},
 		&models.Campaign{},
 		&models.Character{},
@@ -36,7 +36,7 @@ func setupDatabase(dbOptions ...database.Option) (*database.DB, error) {
 		&models.KeyValue{},
 	}
 
-	if err := database.ApplyMigrations(db, models...); err != nil {
+	if err := database.ApplyMigrations(db, m...); err != nil {
 		return nil, err
 	}
 

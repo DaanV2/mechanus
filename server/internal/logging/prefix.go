@@ -25,7 +25,7 @@ func (e Enriched) With(keyvalues ...interface{}) Enriched {
 
 func (p Enriched) From(ctx context.Context) *log.Logger {
 	l := From(ctx)
-	if len(p.prefix) > 0 {
+	if p.prefix != ""  {
 		l = l.WithPrefix(p.prefix)
 	}
 

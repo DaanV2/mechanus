@@ -84,15 +84,13 @@ func (t *Table[T]) AutoWidth() {
 
 // Update implements tea.Model.
 func (t *Table[T]) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	switch msg := msg.(type) {
-	case tea.KeyMsg:
-		switch msg.Type { //nolint:exhaustive //we dont need to do all types here, just the ones we want
+	if kmsg, ok := msg.(tea.KeyMsg); ok {
+		switch kmsg.Type { //nolint:exhaustive //we dont need to do all types here, just the ones we want
 		case tea.KeyCtrlC, tea.KeyCtrlD:
 			return t, tea.Quit
 		}
 
-		switch msg.String() {
-		case "q":
+		if kmsg.String() == "q" {
 			return t, tea.Quit
 		}
 	}

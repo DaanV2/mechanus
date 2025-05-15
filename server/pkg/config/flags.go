@@ -68,7 +68,7 @@ func Bool(name string, def bool, usage string) Flag[bool] {
 	return newFlag(name, usage, viper.GetBool)
 }
 
-func String(name string, def string, usage string) Flag[string] {
+func String(name, def, usage string) Flag[string] {
 	flags.String(name, def, usage)
 
 	return newFlag(name, usage, viper.GetString)
