@@ -3,15 +3,14 @@
   "go.lintOnSave": "workspace",
   "go.coverOnSave": true,
   "go.coverMode": "atomic",
-  "go.coverShowCounts": true,
   "go.coverageDecorator": {
-    "type": "highlight",
+    "type": "gutter",
     "coveredHighlightColor": "rgba(64,128,128,0.5)",
     "uncoveredHighlightColor": "rgba(128,64,64,0.25)",
     "coveredBorderColor": "rgba(64,128,128,0.5)",
     "uncoveredBorderColor": "rgba(128,64,64,0.25)",
     "coveredGutterStyle": "blockblue",
-    "uncoveredGutterStyle": "slashyellow"
+    "uncoveredGutterStyle": "blockyellow"
   },
   "go.coverageOptions": "showBothCoveredAndUncoveredCode"
 }
