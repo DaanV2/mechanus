@@ -12,5 +12,6 @@ func SizeOf[T any]() uintptr {
 
 func Empty[T any]() T {
 	var empty T
+
 	return empty
 }

@@ -99,6 +99,7 @@ func (c *Config) GetInt(name string) int {
 // If nill, no checks will be made
 func (c *Config) WithValidate(validatefn func(*Config) error) *Config {
 	c.validateFn = validatefn
+
 	return c
 }
 

@@ -87,5 +87,6 @@ func (manager *KeyManager) load(ctx context.Context, id string) (*KeyData, error
 
 func (manager *KeyManager) save(ctx context.Context, item *KeyData) error {
 	manager.keys.Store(item.id, item)
+
 	return manager.storage.Set(ctx, item)
 }

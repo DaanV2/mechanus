@@ -64,6 +64,7 @@ func newFlag[T any](name, description string, viperFn func(string) T) *infoFlag[
 
 func Bool(name string, def bool, usage string) Flag[bool] {
 	flags.Bool(name, def, usage)
+
 	return newFlag(name, usage, viper.GetBool)
 }
 
@@ -75,5 +76,6 @@ func String(name string, def string, usage string) Flag[string] {
 
 func Int(name string, def int, usage string) Flag[int] {
 	flags.Int(name, def, usage)
+
 	return newFlag(name, usage, viper.GetInt)
 }

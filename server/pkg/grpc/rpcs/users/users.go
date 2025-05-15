@@ -37,7 +37,7 @@ func NewUserService(users *user_service.Service) *UserService {
 
 // Create implements usersv1connect.UserServiceClient.
 func (u *UserService) Create(ctx context.Context, req *connect.Request[usersv1.CreateAccountRequest]) (*connect.Response[usersv1.CreateAccountResponse], error) {
-	username, password := req.Msg.Username, req.Msg.Password
+	username, password := req.Msg.GetUsername(), req.Msg.GetPassword()
 	if username == "" || password == "" {
 		return nil, connect.NewError(connect.CodeUnauthenticated, ErrInvalidUserPassword)
 	}
@@ -59,27 +59,30 @@ func (u *UserService) Create(ctx context.Context, req *connect.Request[usersv1.C
 
 // Get implements usersv1connect.UserServiceClient.
 func (u *UserService) Get(ctx context.Context, req *connect.Request[usersv1.GetUserRequest]) (*connect.Response[usersv1.GetUserResponse], error) {
-	if req.Msg.Id == "" {
+	if req.Msg.GetId() == "" {
 		return nil, connect.NewError(connect.CodeInvalidArgument, xerrors.ErrNotExist)
 	}
 
-	id := req.Msg.Id
+	id := req.Msg.GetId()
 	logger := u.logger.With("userId", id)
 
 	jwt, err := grpc_middleware.JWTFromContext(ctx)
 	if err != nil {
 		logger.From(ctx).Error("error during reading jwt", "error", err)
+
 		return nil, connect.NewError(connect.CodePermissionDenied, err)
 	}
 
 	if !u.roleService.HasRole(jwt.Claims, roles.Viewer) {
 		logger.From(ctx).Error("user does not have the correct permissions", "roles", jwt.Claims.User.Roles)
+
 		return nil, connect.NewError(connect.CodePermissionDenied, errors.New("wrong permissions"))
 	}
 
-	user, err := u.users.Get(ctx, req.Msg.Id)
+	user, err := u.users.Get(ctx, req.Msg.GetId())
 	if err != nil {
 		logger.From(ctx).Error("error during retrieve of user", "error", err)
+
 		return nil, connect.NewError(connect.CodeInvalidArgument, xerrors.ErrNotExist)
 	}
 
