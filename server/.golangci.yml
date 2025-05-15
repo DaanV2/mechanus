@@ -1,0 +1,12 @@
+# See the dedicated "version" documentation section.
+version: "2"
+linters:
+  # See the dedicated "linters" documentation section.
+  settings:
+    cyclop:
+      max-complexity: 20
+      package-average: 10
+  enable:
+    - cyclop
+    - wsl
+    - whitespace
