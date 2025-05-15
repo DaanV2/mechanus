@@ -54,10 +54,12 @@ func (t *Table[T]) AddItem(item T) {
 
 func (t *Table[T]) AddItems(items []T) {
 	rows := t.table.Rows()
+
 	for _, item := range items {
 		data := t.conv(item)
 		rows = append(rows, data)
 	}
+
 	t.table.SetRows(rows)
 }
 
@@ -88,6 +90,7 @@ func (t *Table[T]) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case tea.KeyCtrlC, tea.KeyCtrlD:
 			return t, tea.Quit
 		}
+
 		switch msg.String() {
 		case "q":
 			return t, tea.Quit
@@ -96,6 +99,7 @@ func (t *Table[T]) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	m, c := t.table.Update(msg)
 	t.table = m
+
 	return t, c
 }
 

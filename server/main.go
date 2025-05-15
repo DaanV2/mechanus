@@ -18,7 +18,9 @@ func main() {
 
 	cobra.OnFinalize(func() {
 		err := viper.SafeWriteConfig()
+
 		var verr viper.ConfigFileAlreadyExistsError
+
 		if err == nil || errors.As(err, &verr) {
 			return
 		}

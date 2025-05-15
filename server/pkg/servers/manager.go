@@ -25,6 +25,7 @@ func (m *Manager) Register(server ...*Server) {
 // Start is a non blocking operation, whereby all the api servers are started and processed
 func (m *Manager) Start() {
 	m.started = true
+
 	log.Info("starting the servers")
 
 	for _, server := range m.servers {
@@ -36,7 +37,9 @@ func (m *Manager) Start() {
 // If another kill, int or quit signal is caught, then its also cancelled
 func (m *Manager) Stop(ctx context.Context) {
 	m.started = false
+
 	log.Info("shutting down servers...")
+
 	defer log.Info("servers stopped")
 
 	// Register a signal catcher
@@ -47,6 +50,7 @@ func (m *Manager) Stop(ctx context.Context) {
 
 	for _, server := range m.servers {
 		wg.Add(1)
+
 		go m.stop(ctx, server, wg)
 	}
 

@@ -26,6 +26,7 @@ func (p Enriched) From(ctx context.Context) *log.Logger {
 	if len(p.prefix) > 0 {
 		l = l.WithPrefix(p.prefix)
 	}
+
 	if len(p.values) > 0 {
 		l = l.With(p.values...)
 	}

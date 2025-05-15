@@ -37,6 +37,7 @@ func NewRouter(services GRPCServices) http.Handler {
 
 func RegisterService[T any](router *http.ServeMux, create func(data T, opts ...connect.HandlerOption) (string, http.Handler), input T, opts ...connect.HandlerOption) {
 	log.Debug("registering grpc service", "service", generics.NameOf[T]())
+
 	path, handler := create(input, opts...)
 	router.Handle(path, handler)
 }

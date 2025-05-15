@@ -88,6 +88,7 @@ func (s *JTIService) Create(ctx context.Context, userId string) (*models.JTI, er
 		UserID:  userId,
 		Revoked: false,
 	}
+
 	tx := s.db.WithContext(ctx).Create(result)
 	if tx.Error != nil {
 		return nil, tx.Error
@@ -120,10 +121,12 @@ func (s *JTIService) Revoke(ctx context.Context, jti string) (bool, error) {
 		},
 		Revoked: true,
 	}
+
 	tx := s.db.WithContext(ctx).Create(result)
 	if tx.Error != nil {
 		return false, tx.Error
 	}
+
 	if tx.RowsAffected > 1 {
 		logger.Error("revoked alot more then 1 JTI", "amount", tx.RowsAffected)
 	}

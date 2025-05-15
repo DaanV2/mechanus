@@ -55,6 +55,7 @@ func updateLogger(logger *log.Logger, reportCaller bool, level, format string) {
 		if err != nil {
 			log.Fatal("invalid log level", "error", err)
 		}
+
 		logger.SetLevel(l)
 	}
 

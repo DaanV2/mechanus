@@ -22,6 +22,7 @@ func (s *Slice[T]) Append(items ...T) *Slice[T] {
 	defer s.lock.Unlock()
 
 	s.items = append(s.items, items...)
+
 	return s
 }
 

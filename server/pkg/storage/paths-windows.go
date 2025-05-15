@@ -14,6 +14,7 @@ func getUserDataDir(appName string) (string, error) {
 		if err != nil {
 			return "", err
 		}
+
 		appData = filepath.Join(home, "AppData", "Roaming")
 	}
 
@@ -21,6 +22,7 @@ func getUserDataDir(appName string) (string, error) {
 	if err := ensureDir(dir); err != nil {
 		return "", err
 	}
+
 	return dir, nil
 }
 
@@ -36,6 +38,7 @@ func getStateDir(appName string) (string, error) {
 		if err != nil {
 			return "", ErrHomeNotFound
 		}
+
 		localAppData = filepath.Join(home, "AppData", "Local")
 	}
 
@@ -43,5 +46,6 @@ func getStateDir(appName string) (string, error) {
 	if err := ensureDir(dir); err != nil {
 		return "", err
 	}
+
 	return dir, nil
 }

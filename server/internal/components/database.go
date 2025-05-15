@@ -16,6 +16,7 @@ func SetupDatabase(dbOptions ...database.Option) (*database.DB, error) {
 	}
 
 	opts = append(opts, dbOptions...)
+
 	return setupDatabase(opts...)
 }
 

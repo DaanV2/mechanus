@@ -21,6 +21,7 @@ func ID(length int) (string, error) {
 	}
 
 	data := make([]byte, l)
+
 	_, err := rand.Read(data)
 	if err != nil {
 		return "", err

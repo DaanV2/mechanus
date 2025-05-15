@@ -32,6 +32,7 @@ func (f *fileStorage[T]) AppStorage() (Storage[T], error) {
 	if err != nil {
 		return nil, err
 	}
+
 	dir = filepath.Join(dir, generics.NameOf[T]())
 
 	return &fileDirStorage[T]{
@@ -46,6 +47,7 @@ func (f *fileStorage[T]) StateStorage() (Storage[T], error) {
 	if err != nil {
 		return nil, err
 	}
+
 	dir = filepath.Join(dir, generics.NameOf[T]())
 
 	return &fileDirStorage[T]{
@@ -60,6 +62,7 @@ func (f *fileStorage[T]) UserStorage() (Storage[T], error) {
 	if err != nil {
 		return nil, err
 	}
+
 	dir = filepath.Join(dir, generics.NameOf[T]())
 
 	return &fileDirStorage[T]{
@@ -85,6 +88,7 @@ func (f *fileDirStorage[T]) Delete(ctx context.Context, item T) (bool, error) {
 // Get implements Storage.
 func (f *fileDirStorage[T]) Get(ctx context.Context, id string) (T, error) {
 	path := f.filepath(id)
+
 	d, err := f.read(ctx, path)
 	if err != nil {
 		return generics.Empty[T](), err
@@ -92,6 +96,7 @@ func (f *fileDirStorage[T]) Get(ctx context.Context, id string) (T, error) {
 
 	var result T
 	err = xencoding.Unmarshal(d, result)
+
 	return result, err
 }
 
@@ -103,6 +108,7 @@ func (f *fileDirStorage[T]) Set(ctx context.Context, item T) error {
 	}
 
 	path := f.filepath(item.GetID())
+
 	return f.write(ctx, path, d)
 }
 

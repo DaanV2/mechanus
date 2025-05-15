@@ -16,5 +16,6 @@ func ApplyMigrations(db *DB, models ...any) error {
 	if err != nil {
 		return fmt.Errorf("failed to apply migrations: %w", err)
 	}
+
 	return nil
 }
