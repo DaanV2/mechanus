@@ -1,5 +1,5 @@
 # build client
-FROM node AS client
+FROM node:22 AS client
 WORKDIR /app
 
 ADD ./client/package.json .
@@ -12,7 +12,7 @@ COPY ./client .
 RUN npm run build
 
 # build server
-FROM golang AS server
+FROM golang:1.24.0 AS server
 WORKDIR /app
 
 COPY ./server/go.mod .

@@ -1,72 +1,132 @@
 package authenication
 
 import (
+	"context"
 	"errors"
 
-	xerrors "github.com/DaanV2/mechanus/server/pkg/extensions/errors"
-	xrand "github.com/DaanV2/mechanus/server/pkg/extensions/rand"
-	"github.com/DaanV2/mechanus/server/pkg/storage"
+	"github.com/DaanV2/mechanus/server/internal/logging"
+	"github.com/DaanV2/mechanus/server/pkg/database"
+	"github.com/DaanV2/mechanus/server/pkg/database/models"
 )
 
-type JTI struct {
-	ID      string
-	Revoked bool
-}
-
-func (j *JTI) Valid() bool {
-	return len(j.ID) > 0 && !j.Revoked
-}
-
 type JTIService struct {
-	storage storage.Storage[[]JTI]
+	db     *database.DB
+	logger logging.Enriched
 }
 
-func NewJTIService(storage storage.Storage[[]JTI]) *JTIService {
+func NewJTIService(db *database.DB) *JTIService {
 	return &JTIService{
-		storage,
+		db:     db,
+		logger: logging.Enriched{}.WithPrefix("jti_service"),
 	}
 }
 
-// TODO revokaction
-
-func (s *JTIService) GetOrCreate(userId string) (string, error) {
+func (s *JTIService) GetByUser(ctx context.Context, userId string) ([]models.JTI, error) {
 	if userId == "" {
-		return "", errors.New("userId is empty")
+		return nil, errors.New("string is empty: userId")
 	}
 
-	jtis, err := s.storage.Get(userId)
-	if err != nil && !errors.Is(err, xerrors.ErrNotExist) {
-		return "", err
+	logger := s.logger.From(ctx).With("userId", userId)
+	logger.Debug("getting jti")
+
+	var result []models.JTI
+	tx := s.db.WithContext(ctx).Find(&result, userId)
+
+	if tx.Error != nil {
+		return nil, tx.Error
 	}
 
-	// Find valid JTI
-	for _, jti := range jtis {
-		if jti.Valid() {
-			return jti.ID, nil
-		}
+	return result, nil
+}
+
+func (s *JTIService) GetActive(ctx context.Context, userId string) ([]models.JTI, error) {
+	if userId == "" {
+		return nil, errors.New("string is empty: userId")
 	}
 
-	jti := JTI{
-		ID:      xrand.MustID(28),
+	logger := s.logger.From(ctx).With("userId", userId)
+	logger.Debug("getting active jti's")
+
+	var result []models.JTI
+	tx := s.db.WithContext(ctx).Find(&result, "id = ?", userId, "revoked = ", false)
+
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+
+	return result, nil
+}
+
+func (s *JTIService) Get(ctx context.Context, jti string) (*models.JTI, error) {
+	if jti == "" {
+		return nil, errors.New("string is empty: jti")
+	}
+
+	logger := s.logger.From(ctx).With("jti", jti)
+	logger.Debug("getting jti")
+
+	var result models.JTI
+	tx := s.db.WithContext(ctx).First(&result, jti)
+
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+
+	return &result, nil
+}
+
+func (s *JTIService) Create(ctx context.Context, userId string) (*models.JTI, error) {
+	if userId == "" {
+		return nil, errors.New("string is empty: userId")
+	}
+
+	logger := s.logger.From(ctx).With("userId", userId)
+	logger.Debug("creating jti")
+
+	result := models.JTI{
+		Model:   models.Model{},
+		UserID:  userId,
 		Revoked: false,
 	}
+	tx := s.db.WithContext(ctx).Create(result)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
 
-	err = s.storage.Set(userId, []JTI{jti})
-
-	return jti.ID, err
+	return &result, nil
 }
 
-func (s *JTIService) Find(userId string, jti string) (JTI, error) {
-	jtis, err := s.storage.Get(userId)
-	if err != nil {
-		return JTI{}, err
+// GetOrCreate is optimistic, and epics that all gets will almost always succeed
+func (s *JTIService) GetActiveOrCreate(ctx context.Context, userId string) (*models.JTI, error) {
+	v, err := s.GetActive(ctx, userId)
+	if err == nil && len(v) > 0 {
+		return &v[0], nil
 	}
 
-	for _, j := range jtis {
-		if j.ID == jti {
-			return j, nil
-		}
+	return s.Create(ctx, userId)
+}
+
+func (s *JTIService) Revoke(ctx context.Context, jti string) (bool, error) {
+	if jti == "" {
+		return false, errors.New("string is empty: jti")
 	}
 
-	return JTI{}, xerrors.ErrNotExist
+	logger := s.logger.From(ctx).With("jti", jti)
+	logger.Debug("revoking jti")
+
+	result := models.JTI{
+		Model: models.Model{
+			ID: jti,
+		},
+		Revoked: true,
+	}
+	tx := s.db.WithContext(ctx).Create(result)
+	if tx.Error != nil {
+		return false, tx.Error
+	}
+	if tx.RowsAffected > 1 {
+		logger.Error("revoked alot more then 1 JTI", "amount", tx.RowsAffected)
+	}
+
+	return tx.RowsAffected > 0, nil
 }

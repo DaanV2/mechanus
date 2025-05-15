@@ -16,7 +16,7 @@ func MustID(length int) string {
 
 func ID(length int) (string, error) {
 	l := length / 2
-	if length & 1 == 1 {
+	if length&1 == 1 {
 		l += 1
 	}
 

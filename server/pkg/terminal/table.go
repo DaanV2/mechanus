@@ -36,7 +36,7 @@ func NewTable[T any](conv func(item T) []string) *Table[T] {
 	t.Help.ShowAll = true
 
 	return &Table[T]{
-		conv: conv,
+		conv:  conv,
 		table: t,
 	}
 }
@@ -65,7 +65,6 @@ func (t *Table[T]) AddItems(items []T) {
 func (t *Table[T]) Init() tea.Cmd {
 	return nil
 }
-
 
 func (t *Table[T]) AutoWidth() {
 	cols := t.table.Columns()

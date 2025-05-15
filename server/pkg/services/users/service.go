@@ -1,96 +1,109 @@
 package user_service
 
 import (
+	"context"
 	"errors"
+	"fmt"
 
+	"github.com/DaanV2/mechanus/server/internal/logging"
+	"github.com/DaanV2/mechanus/server/pkg/database"
+	"github.com/DaanV2/mechanus/server/pkg/database/models"
 	xcrypto "github.com/DaanV2/mechanus/server/pkg/extensions/crypto"
-	xerrors "github.com/DaanV2/mechanus/server/pkg/extensions/errors"
-	"github.com/DaanV2/mechanus/server/pkg/models"
-	"github.com/DaanV2/mechanus/server/pkg/models/users"
-	"github.com/charmbracelet/log"
 )
 
-type UserStorage interface {
-	GetById(id string) (users.User, error)
-	GetByUsername(id string) (users.User, error)
-	Set(users.User) error
-}
-
 type Service struct {
-	storage UserStorage
-	logger  *log.Logger
+	db     *database.DB
+	logger logging.Enriched
 }
 
-func NewService(storage UserStorage) *Service {
+func NewService(db *database.DB) *Service {
 	return &Service{
-		storage: storage,
-		logger:  log.Default().WithPrefix("users"),
+		db:     db,
+		logger: logging.Enriched{}.WithPrefix("users"),
 	}
 }
 
 // Gets looks up the user by the given id, will return a [xerrors.ErrNotExist] if nothing matched
-func (s *Service) Get(id string) (users.User, error) {
-	return s.storage.GetById(id)
+func (s *Service) Get(ctx context.Context, userId string) (*models.User, error) {
+	logger := s.logger.With("userId", userId).From(ctx)
+	logger.Debug("Getting user by id")
+
+	var user models.User
+	tx := s.db.WithContext(ctx).First(&user, userId)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+
+	return &user, nil
 }
 
 // GetByUsername retrieve the given user by its name, instead of id.
 // returns a [xerrors.ErrNotExist] if nothing matched
-func (s *Service) GetByUsername(username string) (users.User, error) {
-	return s.storage.GetByUsername(username)
+func (s *Service) GetByUsername(ctx context.Context, username string) (*models.User, error) {
+	logger := s.logger.With("username", username).From(ctx)
+	logger.Debug("Getting user by username")
+
+	var user models.User
+	tx := s.db.WithContext(ctx).First(&user, "name = ?", username)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+
+	return &user, nil
 }
 
 // Create makes a new entry in the database, assumes the password is set in the PasswordHash field as plain bytes, will hash that field first
-func (s *Service) Create(user users.User) (users.User, error) {
-	pwhash, err := xcrypto.HashPassword(user.PasswordHash)
+// It updates the user with the new password hash and sets the ID to a new UUID
+func (s *Service) Create(ctx context.Context, user *models.User) error {
+	logger := s.logger.With("username", user.Name).From(ctx)
+	logger.Debug("Creating user")
+
+	err := updatePassword(user)
 	if err != nil {
-		return user, err
-	}
-	user.PasswordHash = pwhash
-
-	_, err = s.GetByUsername(user.Username)
-	if !errors.Is(err, xerrors.ErrNotExist) {
-		return user, errors.New("user already exists")
+		return err
 	}
 
-	for {
-		user.BaseItem = models.NewBaseItem()
-		_, err := s.storage.GetById(user.ID)
-		if errors.Is(err, xerrors.ErrNotExist) {
-			break
-		}
+	_, err = s.GetByUsername(ctx, user.Name)
+	if !database.IsNotExist(err) {
+		return errors.New("user already exists")
 	}
 
-	err = s.storage.Set(user)
-	return user, err
+	tx := s.db.WithContext(ctx).Create(user)
+
+	return tx.Error
 }
 
 // Update will take the new information in the user and update the database entry. Note, this does not update the password or the ID
-func (s *Service) Update(user users.User) (users.User, error) {
-	duser, err := s.Get(user.ID)
-	if err != nil {
-		return user, err
-	}
+func (s *Service) Update(ctx context.Context, user *models.User) error {
+	logger := s.logger.With("userId", user.ID).From(ctx)
+	logger.Debug("updating user")
 
-	// These field may not be updated
-	user.BaseItem = duser.BaseItem.Update()
-	user.PasswordHash = duser.PasswordHash
+	tx := s.db.WithContext(ctx).Omit("passwordhash").Updates(user)
 
-	return user, s.storage.Set(user)
+	return tx.Error
 }
 
 // UpdatePassword will update the password field with the new password in the database
-func (s *Service) UpdatePassword(id string, newPassword []byte) error {
-	user, err := s.Get(id)
+func (s *Service) UpdatePassword(ctx context.Context, id string, newPassword []byte) error {
+	logger := s.logger.With("userId", id).From(ctx)
+	logger.Debug("updating password")
+
+	user := &models.User{Model: models.Model{ID: id}}
+	err := updatePassword(user)
 	if err != nil {
 		return err
 	}
 
-	user.BaseItem = user.BaseItem.Update()
-	pwhash, err := xcrypto.HashPassword(newPassword)
+	tx := s.db.WithContext(ctx).Select("passwordhash").Updates(user)
+
+	return tx.Error
+}
+
+func updatePassword(user *models.User) error {
+	pwhash, err := xcrypto.HashPassword(user.PasswordHash)
 	if err != nil {
-		return err
+		return fmt.Errorf("error hashing the password: %w", err)
 	}
 	user.PasswordHash = pwhash
-
-	return s.storage.Set(user)
+	return nil
 }

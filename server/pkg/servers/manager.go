@@ -50,7 +50,7 @@ func (m *Manager) Stop(ctx context.Context) {
 		go m.stop(ctx, server, wg)
 	}
 
-	wg.Done()
+	wg.Wait()
 }
 
 func (m *Manager) stop(ctx context.Context, server *Server, wg *sync.WaitGroup) {

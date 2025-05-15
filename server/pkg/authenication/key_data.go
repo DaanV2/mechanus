@@ -22,7 +22,7 @@ type (
 	}
 )
 
-func (k *KeyData) ID() string {
+func (k *KeyData) GetID() string {
 	return k.id
 }
 

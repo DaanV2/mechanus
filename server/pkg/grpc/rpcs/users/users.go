@@ -2,15 +2,16 @@ package grpc_users
 
 import (
 	"context"
+	"errors"
 
 	"connectrpc.com/connect"
 	"github.com/DaanV2/mechanus/server/internal/logging"
+	"github.com/DaanV2/mechanus/server/pkg/authenication/roles"
+	"github.com/DaanV2/mechanus/server/pkg/database/models"
 	xerrors "github.com/DaanV2/mechanus/server/pkg/extensions/errors"
 	usersv1 "github.com/DaanV2/mechanus/server/pkg/grpc/gen/users/v1"
 	"github.com/DaanV2/mechanus/server/pkg/grpc/gen/users/v1/usersv1connect"
 	grpc_middleware "github.com/DaanV2/mechanus/server/pkg/grpc/middleware"
-	"github.com/DaanV2/mechanus/server/pkg/models/roles"
-	"github.com/DaanV2/mechanus/server/pkg/models/users"
 	user_service "github.com/DaanV2/mechanus/server/pkg/services/users"
 )
 
@@ -19,14 +20,18 @@ var _ usersv1connect.UserServiceClient = &UserService{}
 type UserService struct {
 	users  *user_service.Service
 	logger logging.Enriched
+
+	roleService *roles.RoleService
 }
 
 func NewUserService(users *user_service.Service) *UserService {
 	logger := logging.Enriched{}.WithPrefix("grpc-users")
+	roleService := &roles.RoleService{}
 
 	return &UserService{
 		users,
 		logger,
+		roleService,
 	}
 }
 
@@ -37,14 +42,14 @@ func (u *UserService) Create(ctx context.Context, req *connect.Request[usersv1.C
 		return nil, connect.NewError(connect.CodeUnauthenticated, ErrInvalidUserPassword)
 	}
 
-	user := users.User{
-		Username:     username,
+	user := models.User{
+		Name:         username,
 		PasswordHash: []byte(password),
-		Roles:        []roles.Role{roles.USER},
+		Roles:        []string{"user"},
 		Campaigns:    []string{},
 	}
 
-	user, err := u.users.Create(user)
+	err := u.users.Create(ctx, &user)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
@@ -58,19 +63,23 @@ func (u *UserService) Get(ctx context.Context, req *connect.Request[usersv1.GetU
 		return nil, connect.NewError(connect.CodeInvalidArgument, xerrors.ErrNotExist)
 	}
 
+	id := req.Msg.Id
+	logger := u.logger.With("userId", id)
+
 	jwt, err := grpc_middleware.JWTFromContext(ctx)
 	if err != nil {
+		logger.From(ctx).Error("error during reading jwt", "error", err)
 		return nil, connect.NewError(connect.CodePermissionDenied, err)
 	}
 
-	r := roles.HighestRole(jwt.Claims.User.Roles)
-	if r == roles.NONE {
-		return nil, connect.NewError(connect.CodePermissionDenied, roles.ErrNotRightRole)
+	if !u.roleService.HasRole(jwt.Claims, roles.Viewer) {
+		logger.From(ctx).Error("user does not have the correct permissions", "roles", jwt.Claims.User.Roles)
+		return nil, connect.NewError(connect.CodePermissionDenied, errors.New("wrong permissions"))
 	}
 
-	user, err := u.users.Get(req.Msg.Id)
+	user, err := u.users.Get(ctx, req.Msg.Id)
 	if err != nil {
-		u.logger.From(ctx).Error("error during retrieve of user", "error", err, "id", req.Msg.Id)
+		logger.From(ctx).Error("error during retrieve of user", "error", err)
 		return nil, connect.NewError(connect.CodeInvalidArgument, xerrors.ErrNotExist)
 	}
 
@@ -80,8 +89,8 @@ func (u *UserService) Get(ctx context.Context, req *connect.Request[usersv1.GetU
 		},
 	}
 
-	if r.Inherits(roles.USER) {
-		msg.User.Name = user.Username
+	if u.roleService.HasRole(jwt.Claims, roles.User) {
+		msg.User.Name = user.Name
 	}
 
 	return connect.NewResponse(&msg), nil
