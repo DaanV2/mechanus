@@ -27,7 +27,5 @@ type Config struct {
 	MaxIdleConns    int
 	MaxOpenConns    int
 	ConnMaxLifetime time.Duration
-	SlowThreshold   time.Duration
-	LogWriter       logger.Writer
 	LogLevel        logger.LogLevel
 }

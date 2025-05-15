@@ -1,8 +1,6 @@
 package models
 
-import "gorm.io/gorm"
-
 type Campaign struct {
-	gorm.Model
+	Model
 	Name string
 }

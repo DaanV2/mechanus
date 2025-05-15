@@ -5,12 +5,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/charmbracelet/log"
+	xgorm "github.com/DaanV2/mechanus/server/pkg/extensions/gorm"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
 )
 
 type DB struct {
@@ -38,8 +37,6 @@ func NewDB(opts ...Option) (*DB, error) {
 		MaxIdleConns:    10,
 		MaxOpenConns:    100,
 		ConnMaxLifetime: time.Hour,
-		SlowThreshold:   time.Second,
-		LogWriter:       log.Default().WithPrefix("db").StandardLog(),
 	}
 
 	// Apply options
@@ -47,20 +44,9 @@ func NewDB(opts ...Option) (*DB, error) {
 		opt(config)
 	}
 
-	// Configure GORM logger
-	gormLogger := logger.New(
-		config.LogWriter,
-		logger.Config{
-			SlowThreshold:             config.SlowThreshold,
-			LogLevel:                  config.LogLevel,
-			IgnoreRecordNotFoundError: true,
-			Colorful:                  true,
-		},
-	)
-
 	// GORM configuration
 	gormConfig := &gorm.Config{
-		Logger: gormLogger,
+		Logger: xgorm.NewGormlogger().LogMode(config.LogLevel),
 	}
 
 	var dailer gorm.Dialector

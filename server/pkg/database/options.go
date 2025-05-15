@@ -44,20 +44,6 @@ func WithConnMaxLifetime(d time.Duration) Option {
 	}
 }
 
-// WithSlowThreshold sets the threshold for slow query logging
-func WithSlowThreshold(d time.Duration) Option {
-	return func(c *Config) {
-		c.SlowThreshold = d
-	}
-}
-
-// WithLogWriter sets the log writer
-func WithLogWriter(w logger.Writer) Option {
-	return func(c *Config) {
-		c.LogWriter = w
-	}
-}
-
 // WithDBLogLevel sets the log level for the database
 func WithDBLogLevel(level logger.LogLevel) Option {
 	return func(c *Config) {
