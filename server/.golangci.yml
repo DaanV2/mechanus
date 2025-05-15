@@ -6,8 +6,39 @@ linters:
     cyclop:
       max-complexity: 20
       package-average: 10
+    nolintlint:
+      require-explanation: true
+      require-specific: true
   enable:
+    - asciicheck
+    - bidichk
+    - bodyclose
+    - canonicalheader
+    - containedctx
+    - contextcheck
+    - copyloopvar
     - cyclop
+    - dupl
+    - durationcheck
+    - errcheck
+    - errchkjson
+    - errorlint
+    - exhaustive
+    - exptostd
+    - fatcontext
+    - ginkgolinter
+    - gocheckcompilerdirectives
+    - goconst
+    - gomoddirectives
+    - goprintffuncname
+    - gosec
+    - gosmopolitan
+    - govet
+    - ineffassign
+    - intrange
+    - makezero
+    - mirror
+    - misspell
     - nestif
     - nilerr
     - nilnesserr
@@ -21,12 +52,14 @@ linters:
     - protogetter
     - reassign
     - sqlclosecheck
+    - staticcheck
     - testableexamples
     - testifylint
     - testpackage
     - thelper
     - tparallel
     - unconvert
+    - unused
     - usestdlibvars
     - usetesting
     - whitespace

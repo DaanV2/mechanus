@@ -61,7 +61,7 @@ func ServerWorkload(cmd *cobra.Command, args []string) error {
 	<-appCtx.Done()
 
 	// make a ctx specially for shutdown
-	shutCtx, cancel := context.WithTimeout(context.Background(), time.Second*60)
+	shutCtx, cancel := context.WithTimeout(context.Background(), time.Minute*1)
 	defer cancel()
 
 	// Shutdown

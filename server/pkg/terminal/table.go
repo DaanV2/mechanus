@@ -74,7 +74,7 @@ func (t *Table[T]) AutoWidth() {
 
 	for _, r := range rows {
 		length := min(len(cols), len(r))
-		for c := 0; c < length; c++ {
+		for c := range length {
 			cols[c].Width = max(len(r[c]), cols[c].Width)
 		}
 	}
@@ -86,7 +86,7 @@ func (t *Table[T]) AutoWidth() {
 func (t *Table[T]) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
-		switch msg.Type {
+		switch msg.Type { //nolint:exhaustive //we dont need to do all types here, just the ones we want
 		case tea.KeyCtrlC, tea.KeyCtrlD:
 			return t, tea.Quit
 		}

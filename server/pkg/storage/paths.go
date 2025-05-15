@@ -2,14 +2,10 @@ package storage
 
 import (
 	"errors"
-	"os"
 
 	"github.com/DaanV2/mechanus/server/pkg/constants"
 )
 
-const (
-	DEFAULT_PERMISSIONS = 0755
-)
 
 var (
 	ErrHomeNotFound = errors.New("unable to determine user home directory")
@@ -29,8 +25,4 @@ func GetAppConfigDir() (string, error) {
 // GetStateDir returns the directory for storing application state
 func GetStateDir() (string, error) {
 	return getStateDir(constants.SERVICE_NAME)
-}
-
-func ensureDir(dir string) error {
-	return os.MkdirAll(dir, DEFAULT_PERMISSIONS)
 }

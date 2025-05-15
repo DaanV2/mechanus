@@ -7,6 +7,7 @@ import (
 
 	"github.com/DaanV2/mechanus/server/internal/logging"
 	xencoding "github.com/DaanV2/mechanus/server/pkg/extensions/encoding"
+	xio "github.com/DaanV2/mechanus/server/pkg/extensions/io"
 	"github.com/daanv2/go-kit/generics"
 	"github.com/daanv2/go-locks"
 )
@@ -34,11 +35,12 @@ func (f *fileStorage[T]) AppStorage() (Storage[T], error) {
 	}
 
 	dir = filepath.Join(dir, generics.NameOf[T]())
+	xio.MakeDirAll(dir)
 
 	return &fileDirStorage[T]{
 		base: f,
 		dir:  dir,
-	}, ensureDir(dir)
+	}, nil
 }
 
 // StateStorage implements StorageProvider.
@@ -49,11 +51,12 @@ func (f *fileStorage[T]) StateStorage() (Storage[T], error) {
 	}
 
 	dir = filepath.Join(dir, generics.NameOf[T]())
+	xio.MakeDirAll(dir)
 
 	return &fileDirStorage[T]{
 		base: f,
 		dir:  dir,
-	}, ensureDir(dir)
+	}, nil
 }
 
 // UserStorage implements StorageProvider.
@@ -64,11 +67,12 @@ func (f *fileStorage[T]) UserStorage() (Storage[T], error) {
 	}
 
 	dir = filepath.Join(dir, generics.NameOf[T]())
+	xio.MakeDirAll(dir)
 
 	return &fileDirStorage[T]{
 		base: f,
 		dir:  dir,
-	}, ensureDir(dir)
+	}, nil
 }
 
 // Delete implements Storage.
@@ -124,6 +128,7 @@ func (f *fileDirStorage[T]) read(ctx context.Context, path string) ([]byte, erro
 	l.RLock()
 	defer l.RUnlock()
 
+	//nolint:gosec //file checking should be done higher up the chain
 	return os.ReadFile(path)
 }
 
@@ -135,5 +140,5 @@ func (f *fileDirStorage[T]) write(ctx context.Context, path string, data []byte)
 	l.Lock()
 	defer l.Unlock()
 
-	return os.WriteFile(path, data, DEFAULT_PERMISSIONS)
+	return os.WriteFile(path, data, xio.DEFAULT_FILE_PERMISSIONS)
 }
