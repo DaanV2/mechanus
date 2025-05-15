@@ -15,9 +15,11 @@ func Config() {
 		if errors.As(err, &verr) {
 			log.Debug("couldn't find a log file, falling back to defaults, arguments and environment files", "error", err)
 			// Config file not found; ignore error if desired
-		} else {
-			log.Fatal("error during reading config file", "error", err)
+
+			return
 		}
+
+		log.Fatal("error during reading config file", "error", err)
 	}
 }
 
