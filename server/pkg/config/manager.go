@@ -73,7 +73,7 @@ func (c *Config) GetBool(name string) bool {
 	return getValue[bool](c, name)
 }
 
-func (c *Config) String(name string, def string, usage string) Flag[string] {
+func (c *Config) String(name, def, usage string) Flag[string] {
 	f := String(name, def, usage)
 	c.data.Store(name, f)
 
@@ -99,6 +99,7 @@ func (c *Config) GetInt(name string) int {
 // If nill, no checks will be made
 func (c *Config) WithValidate(validatefn func(*Config) error) *Config {
 	c.validateFn = validatefn
+
 	return c
 }
 

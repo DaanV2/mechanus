@@ -61,7 +61,7 @@ func ServerWorkload(cmd *cobra.Command, args []string) error {
 	<-appCtx.Done()
 
 	// make a ctx specially for shutdown
-	shutCtx, cancel := context.WithTimeout(context.Background(), time.Second*60)
+	shutCtx, cancel := context.WithTimeout(context.Background(), time.Minute*1)
 	defer cancel()
 
 	// Shutdown
@@ -69,7 +69,9 @@ func ServerWorkload(cmd *cobra.Command, args []string) error {
 	if berr != nil {
 		log.Error("errors while performing pre shutdown calls", "error", berr)
 	}
+
 	manager.Stop(shutCtx)
+
 	aerr := comps.AfterShutDown(shutCtx)
 	if aerr != nil {
 		log.Error("errors while performing post shutdown calls", "error", berr)

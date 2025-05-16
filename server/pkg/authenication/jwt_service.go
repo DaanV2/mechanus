@@ -51,6 +51,7 @@ func NewJWTService(jtiService *JTIService, keys *KeyManager) *JWTService {
 
 func (s *JWTService) Create(ctx context.Context, user *models.User, scope string) (string, error) {
 	logging.Info(ctx, "creating jwt")
+
 	claims := &JWTClaims{
 		User: JWTUser{
 			ID:        user.ID,
@@ -82,6 +83,7 @@ func (s *JWTService) validate(ctx context.Context, token string, options ...jwt.
 	jToken, err := jwt.ParseWithClaims(token, &JWTClaims{}, s.findPublicKeyFn(ctx), options...)
 	if err != nil {
 		logger.Error("jwt is not valid", "error", err)
+
 		return nil, err
 	}
 
@@ -90,6 +92,7 @@ func (s *JWTService) validate(ctx context.Context, token string, options ...jwt.
 	if !ok {
 		return jToken, ErrClaimsRead
 	}
+
 	logger = logger.With(
 		"jti", claims.ID,
 		"userId", claims.User.ID,
@@ -105,8 +108,10 @@ func (s *JWTService) validate(ctx context.Context, token string, options ...jwt.
 	if err != nil {
 		return jToken, fmt.Errorf("error finding the JTI: %w", err)
 	}
+
 	if jti.UserID != claims.User.ID {
 		logger.Error("a JTI has the wrong userId")
+
 		return jToken, errors.New("this token doesn't belong to the user")
 	}
 
@@ -163,6 +168,7 @@ func (s *JWTService) findPublicKey(ctx context.Context, token *jwt.Token) (inter
 	if err != nil {
 		return nil, err
 	}
+
 	if k != nil {
 		return k.Public(), nil
 	}

@@ -53,7 +53,7 @@ func (j *JWTMiddleware) WrapUnary(next connect.UnaryFunc) connect.UnaryFunc {
 // validateAndInject retrieves the bearer jwt from the request, validates it and stores the result on the context
 // Which can be retrieved with [JWTFromContext]
 func (j *JWTMiddleware) validateAndInject(ctx context.Context, headers http.Header) context.Context {
-	auth := headers.Get("authorization")
+	auth := headers.Get("Authorization")
 	if !strings.HasPrefix(auth, "Bearer ") {
 		return ctx
 	}

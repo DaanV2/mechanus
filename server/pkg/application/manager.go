@@ -94,12 +94,15 @@ func (m *ComponentManager) add(component any) {
 	if v, ok := component.(AfterShutDown); ok {
 		m.aftershutdown = append(m.aftershutdown, v)
 	}
+
 	if v, ok := component.(BeforeShutdown); ok {
 		m.beforeshutdown = append(m.beforeshutdown, v)
 	}
+
 	if v, ok := component.(HealthCheck); ok {
 		m.healthcheck = append(m.healthcheck, v)
 	}
+
 	if v, ok := component.(ReadyCheck); ok {
 		m.readycheck = append(m.readycheck, v)
 	}
@@ -117,16 +120,19 @@ func (m *ComponentManager) remove(component any) {
 			return item == v
 		})
 	}
+
 	if v, ok := component.(BeforeShutdown); ok {
 		m.beforeshutdown = slices.DeleteFunc(m.beforeshutdown, func(item BeforeShutdown) bool {
 			return item == v
 		})
 	}
+
 	if v, ok := component.(HealthCheck); ok {
 		m.healthcheck = slices.DeleteFunc(m.healthcheck, func(item HealthCheck) bool {
 			return item == v
 		})
 	}
+
 	if v, ok := component.(ReadyCheck); ok {
 		m.readycheck = slices.DeleteFunc(m.readycheck, func(item ReadyCheck) bool {
 			return item == v

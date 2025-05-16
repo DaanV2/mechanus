@@ -38,5 +38,6 @@ func JWTFromContext(ctx context.Context) (JWTContext, error) {
 	if !ok {
 		return c, ErrNoToken
 	}
+
 	return c, nil
 }

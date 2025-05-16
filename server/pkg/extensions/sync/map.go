@@ -24,6 +24,7 @@ func (m *Map[K, V]) Load(key K) (V, bool) {
 	}
 
 	value, ok := v.(V)
+
 	return value, ok
 }
 
@@ -59,6 +60,7 @@ func (m *Map[K, V]) Items() iter.Seq2[K, V] {
 		m.data.Range(func(key, value any) bool {
 			k, kok := key.(K)
 			v, vok := value.(V)
+
 			if kok && vok {
 				if !yield(k, v) {
 					return false

@@ -46,6 +46,7 @@ func (manager *KeyManager) New(ctx context.Context) (*KeyData, error) {
 		id:  item.ID(),
 		key: item.Private(),
 	}
+
 	return key, manager.save(ctx, key)
 }
 
@@ -62,6 +63,7 @@ func (manager *KeyManager) GetSigningKey(ctx context.Context) (*KeyData, error) 
 		}
 
 		key = v
+
 		break
 	}
 
@@ -79,10 +81,12 @@ func (manager *KeyManager) load(ctx context.Context, id string) (*KeyData, error
 	}
 
 	manager.keys.Store(id, key)
+
 	return key, nil
 }
 
 func (manager *KeyManager) save(ctx context.Context, item *KeyData) error {
 	manager.keys.Store(item.id, item)
+
 	return manager.storage.Set(ctx, item)
 }

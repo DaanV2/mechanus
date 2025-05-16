@@ -5,6 +5,8 @@ package storage
 import (
 	"os"
 	"path/filepath"
+
+	xio "github.com/DaanV2/mechanus/server/pkg/extensions/io"
 )
 
 func getUserDataDir(appName string) (string, error) {
@@ -14,13 +16,13 @@ func getUserDataDir(appName string) (string, error) {
 		if err != nil {
 			return "", err
 		}
+
 		appData = filepath.Join(home, "AppData", "Roaming")
 	}
 
 	dir := filepath.Join(appData, appName)
-	if err := ensureDir(dir); err != nil {
-		return "", err
-	}
+	xio.MakeDirAll(dir)
+
 	return dir, nil
 }
 
@@ -36,12 +38,12 @@ func getStateDir(appName string) (string, error) {
 		if err != nil {
 			return "", ErrHomeNotFound
 		}
+
 		localAppData = filepath.Join(home, "AppData", "Local")
 	}
 
 	dir := filepath.Join(localAppData, appName)
-	if err := ensureDir(dir); err != nil {
-		return "", err
-	}
+	xio.MakeDirAll(dir)
+
 	return dir, nil
 }

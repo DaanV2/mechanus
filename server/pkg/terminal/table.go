@@ -54,10 +54,12 @@ func (t *Table[T]) AddItem(item T) {
 
 func (t *Table[T]) AddItems(items []T) {
 	rows := t.table.Rows()
+
 	for _, item := range items {
 		data := t.conv(item)
 		rows = append(rows, data)
 	}
+
 	t.table.SetRows(rows)
 }
 
@@ -72,7 +74,7 @@ func (t *Table[T]) AutoWidth() {
 
 	for _, r := range rows {
 		length := min(len(cols), len(r))
-		for c := 0; c < length; c++ {
+		for c := range length {
 			cols[c].Width = max(len(r[c]), cols[c].Width)
 		}
 	}
@@ -82,20 +84,20 @@ func (t *Table[T]) AutoWidth() {
 
 // Update implements tea.Model.
 func (t *Table[T]) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	switch msg := msg.(type) {
-	case tea.KeyMsg:
-		switch msg.Type {
+	if kmsg, ok := msg.(tea.KeyMsg); ok {
+		switch kmsg.Type { //nolint:exhaustive //we dont need to do all types here, just the ones we want
 		case tea.KeyCtrlC, tea.KeyCtrlD:
 			return t, tea.Quit
 		}
-		switch msg.String() {
-		case "q":
+
+		if kmsg.String() == "q" {
 			return t, tea.Quit
 		}
 	}
 
 	m, c := t.table.Update(msg)
 	t.table = m
+
 	return t, c
 }
 

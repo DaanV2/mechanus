@@ -22,6 +22,7 @@ func (s *Slice[T]) Append(items ...T) *Slice[T] {
 	defer s.lock.Unlock()
 
 	s.items = append(s.items, items...)
+
 	return s
 }
 
@@ -62,6 +63,7 @@ func (s *Slice[T]) WalkE(callfn func(item T) error) error {
 func (s *Slice[T]) Walk(callfn func(item T)) {
 	_ = s.WalkE(func(item T) error {
 		callfn(item)
+
 		return nil
 	})
 }

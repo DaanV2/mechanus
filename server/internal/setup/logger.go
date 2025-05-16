@@ -55,6 +55,7 @@ func updateLogger(logger *log.Logger, reportCaller bool, level, format string) {
 		if err != nil {
 			log.Fatal("invalid log level", "error", err)
 		}
+
 		logger.SetLevel(l)
 	}
 
@@ -62,6 +63,7 @@ func updateLogger(logger *log.Logger, reportCaller bool, level, format string) {
 	switch format {
 	default:
 		log.Warn("unknown log format, falling back to text, expected text, json or logfmt", "format", format)
+
 		fallthrough
 	case "text", "":
 		logger.SetFormatter(log.TextFormatter)

@@ -48,6 +48,7 @@ func Execute() {
 
 	err := rootCmd.Execute()
 	if err != nil {
+		// nolint:gocritic // exitAfterDefer fine in this case, we already report the error
 		log.Fatal("error during executing command", "error", err)
 	}
 }

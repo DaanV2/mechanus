@@ -26,6 +26,7 @@ func BindFlag(flag *pflag.Flag) {
 	if err := viper.BindPFlag(flag.Name, flag); err != nil {
 		logger.Fatal("error during binding of the flag to viper configuration")
 	}
+
 	if err := viper.BindEnv(env, flag.Name); err != nil {
 		logger.Fatal("error binding the flag to the environment value")
 	}

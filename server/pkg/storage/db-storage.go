@@ -70,6 +70,7 @@ func (d *dbStorage[T]) Get(ctx context.Context, id string) (T, error) {
 	logging.FromPrefix(ctx, "db-storage").Debug("reading item: " + id)
 
 	var kv models.KeyValue
+
 	tx := d.db.WithContext(ctx).Take(&kv, id)
 	if tx.Error != nil {
 		return generics.Empty[T](), tx.Error

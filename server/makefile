@@ -6,3 +6,6 @@ coverage-report: test
 
 generate:
 	go generate ./...
+
+lint:
+	go tool golangci-lint run -v --fix

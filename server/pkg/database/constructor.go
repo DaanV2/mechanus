@@ -21,6 +21,7 @@ func (db *DB) Close() error {
 	if err != nil {
 		return fmt.Errorf("failed to get database: %w", err)
 	}
+
 	return sqlDB.Close()
 }
 

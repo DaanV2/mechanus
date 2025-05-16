@@ -11,6 +11,7 @@ func FirstIFace() (net.Interface, error) {
 	if err != nil {
 		return net.Interface{}, err
 	}
+
 	if len(ifaces) < 1 {
 		return net.Interface{}, errors.New("couldn't find any network interfaces")
 	}
@@ -23,6 +24,7 @@ func FindIFace(name string) (net.Interface, error) {
 	if err != nil {
 		return net.Interface{}, err
 	}
+
 	if len(ifaces) < 1 {
 		return net.Interface{}, errors.New("couldn't find any network interfaces")
 	}

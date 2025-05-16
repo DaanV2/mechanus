@@ -72,5 +72,6 @@ func StorageFolder(paths ...string) string {
 	dir := filepath.Join(p...)
 
 	xio.MakeDirAll(dir)
+
 	return dir
 }

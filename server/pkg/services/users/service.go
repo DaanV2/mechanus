@@ -29,6 +29,7 @@ func (s *Service) Get(ctx context.Context, userId string) (*models.User, error) 
 	logger.Debug("Getting user by id")
 
 	var user models.User
+
 	tx := s.db.WithContext(ctx).First(&user, userId)
 	if tx.Error != nil {
 		return nil, tx.Error
@@ -44,6 +45,7 @@ func (s *Service) GetByUsername(ctx context.Context, username string) (*models.U
 	logger.Debug("Getting user by username")
 
 	var user models.User
+
 	tx := s.db.WithContext(ctx).First(&user, "name = ?", username)
 	if tx.Error != nil {
 		return nil, tx.Error
@@ -89,6 +91,7 @@ func (s *Service) UpdatePassword(ctx context.Context, id string, newPassword []b
 	logger.Debug("updating password")
 
 	user := &models.User{Model: models.Model{ID: id}}
+
 	err := updatePassword(user)
 	if err != nil {
 		return err
@@ -104,6 +107,8 @@ func updatePassword(user *models.User) error {
 	if err != nil {
 		return fmt.Errorf("error hashing the password: %w", err)
 	}
+
 	user.PasswordHash = pwhash
+
 	return nil
 }

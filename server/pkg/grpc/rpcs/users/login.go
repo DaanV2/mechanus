@@ -34,7 +34,7 @@ func NewLoginService(users *user_service.Service, jwts *authenication.JWTService
 // Login implements usersv1connect.LoginServiceHandler.
 func (l *LoginService) Login(ctx context.Context, req *connect.Request[usersv1.LoginRequest]) (*connect.Response[usersv1.LoginResponse], error) {
 	// Check user
-	username, password := req.Msg.Username, req.Msg.Password
+	username, password := req.Msg.GetUsername(), req.Msg.GetPassword()
 	if username == "" || password == "" {
 		return nil, connect.NewError(connect.CodeUnauthenticated, ErrInvalidUserPassword)
 	}
@@ -62,7 +62,7 @@ func (l *LoginService) Login(ctx context.Context, req *connect.Request[usersv1.L
 
 // Refresh implements usersv1connect.LoginServiceHandler.
 func (l *LoginService) Refresh(ctx context.Context, req *connect.Request[usersv1.RefreshTokenRequest]) (*connect.Response[usersv1.RefreshTokenResponse], error) {
-	token := req.Msg.Token
+	token := req.Msg.GetToken()
 	if token == "" {
 		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("missing token"))
 	}

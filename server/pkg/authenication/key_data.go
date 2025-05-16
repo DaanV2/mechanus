@@ -49,12 +49,14 @@ func (k *KeyData) UnmarshalText(text []byte) error {
 	if !ok {
 		return errors.New("should have an id in the header of the file")
 	}
+
 	k.id = id
 
 	akey, err := x509.ParsePKCS8PrivateKey(data.Bytes)
 	if err != nil {
 		return err
 	}
+
 	if akey == nil {
 		return errors.New("no private key returned")
 	}
@@ -63,6 +65,7 @@ func (k *KeyData) UnmarshalText(text []byte) error {
 	if !ok {
 		return errors.New("no private key returned")
 	}
+
 	k.key = key
 
 	return nil

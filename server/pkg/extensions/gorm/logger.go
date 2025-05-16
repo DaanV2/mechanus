@@ -67,9 +67,11 @@ func (g *GormLogger) Trace(ctx context.Context, begin time.Time, fc func() (sql 
 	}
 
 	sql, rows := fc()
-	logger := g.logger.From(ctx).With("rows", rows, "duration", time.Since(begin))
+
+	writer := g.logger.From(ctx).With("rows", rows, "duration", time.Since(begin))
 	if err != nil {
-		logger = logger.With("err", err)
+		writer = writer.With("err", err)
 	}
-	logger.Debug("[Query]: " + sql)
+
+	writer.Debug("[Query]: " + sql)
 }
