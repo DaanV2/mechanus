@@ -1,6 +1,6 @@
 //go:build linux
 
-package storage
+package paths
 
 import (
 	"os"

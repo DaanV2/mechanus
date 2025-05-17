@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/DaanV2/mechanus/server/pkg/config"
+	"github.com/DaanV2/mechanus/server/mechanus/paths"
 	"github.com/spf13/cobra"
 )
 
@@ -28,12 +28,22 @@ func init() {
 
 func PrintInfo(cmd *cobra.Command, args []string) error {
 	log.Println("printing info")
-	printInfo("User Config Dir", config.UserConfigDir())
-	printInfo("User Cache Dir", config.UserCacheDir())
+	printInfoFn("app config dir", paths.GetAppConfigDir)
+	printInfoFn("state dir", paths.GetStateDir)
+	printInfoFn("user data dir", paths.GetUserDataDir)
 
 	return nil
 }
 
-func printInfo(key, value string) {
+func printInfo(key, value any) {
 	fmt.Println(key, "=", value)
+}
+
+func printInfoFn(key string, call func() (string, error)) {
+	v, err := call()
+	if err != nil {
+		log.Fatal("error during reading of key/value", "key", key, "value", v, "error", err)
+	}
+
+	printInfo(key, v)
 }

@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/DaanV2/mechanus/server/internal/logging"
-	"github.com/DaanV2/mechanus/server/pkg/constants"
+	"github.com/DaanV2/mechanus/server/mechanus/constants"
 	"github.com/DaanV2/mechanus/server/pkg/database/models"
 	"github.com/golang-jwt/jwt/v5"
 )
