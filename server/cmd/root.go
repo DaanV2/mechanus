@@ -5,6 +5,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	cmd_config "github.com/DaanV2/mechanus/server/cmd/config"
 	"github.com/DaanV2/mechanus/server/internal/setup"
 	"github.com/charmbracelet/log"
 	"github.com/spf13/cobra"
@@ -27,6 +28,14 @@ var rootCmd = &cobra.Command{
 		return setup.LoggerConfig.Validate()
 	},
 }
+
+func init() {
+	pflags := rootCmd.PersistentFlags()
+	setup.LoggerConfig.AddToSet(pflags)
+
+	cmd_config.AddCommand(rootCmd)
+}
+
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
@@ -51,9 +60,4 @@ func Execute() {
 		// nolint:gocritic // exitAfterDefer fine in this case, we already report the error
 		log.Fatal("error during executing command", "error", err)
 	}
-}
-
-func init() {
-	pflags := rootCmd.PersistentFlags()
-	setup.LoggerConfig.AddToSet(pflags)
 }

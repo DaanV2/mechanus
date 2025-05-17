@@ -3,6 +3,7 @@ package setup
 import (
 	"errors"
 
+	"github.com/DaanV2/mechanus/server/internal/logging"
 	"github.com/DaanV2/mechanus/server/pkg/config"
 	"github.com/charmbracelet/log"
 	"github.com/spf13/viper"
@@ -10,6 +11,7 @@ import (
 
 // Config loads the necassary files, and values
 func Config() {
+	viper.AutomaticEnv()
 	if err := viper.ReadInConfig(); err != nil {
 		var verr viper.ConfigFileNotFoundError
 		if errors.As(err, &verr) {
@@ -25,7 +27,12 @@ func Config() {
 
 func Viper() {
 	viper.SetEnvKeyReplacer(config.EnvironmentNamer())
-	viper.AutomaticEnv()
-	viper.AddConfigPath(config.UserConfigDir())
 	viper.SetConfigType("yaml")
+	viper.SetOptions(
+		viper.WithLogger(logging.Slog()),
+	)
+
+	for _, v := range config.ConfigPaths() {
+		viper.AddConfigPath(v)
+	}
 }

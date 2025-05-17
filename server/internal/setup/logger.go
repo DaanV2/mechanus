@@ -25,7 +25,7 @@ func validateLogger(c *config.Config) error {
 func Logger() {
 	logOptions := log.Options{
 		TimeFormat:      time.DateTime,
-		ReportCaller:    ReportCallerFlag.Value(),
+		ReportCaller:    true,
 		ReportTimestamp: true,
 		Formatter:       log.TextFormatter,
 	}
@@ -35,7 +35,8 @@ func Logger() {
 	logger.SetStyles(CreateStyle())
 
 	log.SetDefault(logger)
-	UpdateLogger(
+	updateLogger(
+		logger,
 		ReportCallerFlag.Value(),
 		LevelFlag.Value(),
 		FormatFlag.Value(),
@@ -43,6 +44,7 @@ func Logger() {
 }
 
 func UpdateLogger(reportCaller bool, level, format string) {
+	defer log.Debug("setup the logger", "level", level, "format", format, "report-caller", reportCaller)
 	updateLogger(log.Default(), reportCaller, level, format)
 }
 
@@ -72,8 +74,6 @@ func updateLogger(logger *log.Logger, reportCaller bool, level, format string) {
 	case "logfmt":
 		logger.SetFormatter(log.LogfmtFormatter)
 	}
-
-	logger.Debug("setup the logger", "level", level, "format", format, "report-caller", reportCaller)
 }
 
 func CreateStyle() *log.Styles {
@@ -87,8 +87,8 @@ func CreateStyle() *log.Styles {
 
 	styles.Keys["err"] = lipgloss.NewStyle().Foreground(lipgloss.Color("204"))
 	styles.Keys["error"] = lipgloss.NewStyle().Foreground(lipgloss.Color("204"))
-	styles.Values["error"] = lipgloss.NewStyle().Bold(true)
-	styles.Values["error"] = lipgloss.NewStyle().Bold(true)
+	styles.Values["error"] = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("204")).Faint(true)
+	styles.Values["error"] = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("204")).Faint(true)
 
 	return styles
 }
