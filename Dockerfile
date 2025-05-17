@@ -22,14 +22,16 @@ RUN go mod download
 
 COPY ./server .
 
-RUN go build -o mechanus main.go
+# using mechanus-result because of collision with the folder
+RUN go build -o mechanus-result main.go
 
 # Combine
 FROM busybox AS final
-#FROM gcr.io/distroless/static-debian12 AS final
+# FROM gcr.io/distroless/static-debian12 AS final
 WORKDIR /app
 COPY --from=client /app/build /web
-COPY --from=server /app/mechanus .
+COPY --from=server /app/mechanus-result /app/mechanus
+
 
 EXPOSE 8080
 EXPOSE 8443
@@ -41,4 +43,4 @@ ENV WEB_PORT=8080
 ENV WEB_STATIC_FOLDER=/web
 ENV LOG_FORMAT=json
 
-ENTRYPOINT ["./mechanus", "server"]
+CMD ["/app/mechanus", "server"]
