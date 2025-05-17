@@ -11,24 +11,24 @@ var (
 	ErrNotExist = errors.New("item does not exist")
 )
 
-func Must[T any](call func() (v T, err error)) T {
-	v, err := call()
+func Must[T any](call func() (T, error)) T {
+	first, err := call()
 	if err != nil {
 		logger := log.Default()
 		logger.Helper()
 		logger.Fatal("couldn't perform call", "function", reflect.TypeOf(call).Name(), "error", err)
 	}
 
-	return v
+	return first
 }
 
-func Must2[T any, U any](call func() (a T, b U, err error)) (T, U) {
-	a, b, err := call()
+func Must2[T any, U any](call func() (T, U, error)) (first T, second U) {
+	first, second, err := call()
 	if err != nil {
 		logger := log.Default()
 		logger.Helper()
 		logger.Fatal("couldn't perform call", "function", reflect.TypeOf(call).Name(), "error", err)
 	}
 
-	return a, b
+	return first, second
 }

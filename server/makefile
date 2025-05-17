@@ -9,3 +9,9 @@ generate:
 
 lint:
 	go tool golangci-lint run -v --fix
+
+checks:
+	go build ./...
+	make generate
+	make test
+	make lint
