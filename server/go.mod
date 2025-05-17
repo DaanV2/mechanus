@@ -23,6 +23,7 @@ require (
 	github.com/daanv2/go-locks v1.3.0
 	github.com/glebarez/sqlite v1.11.0
 	github.com/golang-jwt/jwt/v5 v5.2.2
+	github.com/google/uuid v1.6.0
 	github.com/onsi/ginkgo/v2 v2.23.4
 	github.com/onsi/gomega v1.37.0
 	github.com/spf13/cobra v1.9.1
@@ -35,8 +36,6 @@ require (
 	gorm.io/driver/postgres v1.5.11
 	gorm.io/gorm v1.25.11
 )
-
-require filippo.io/edwards25519 v1.1.0 // indirect
 
 require (
 	4d63.com/gocheckcompilerdirectives v1.3.0 // indirect
@@ -52,6 +51,7 @@ require (
 	cel.dev/expr v0.19.1 // indirect
 	cloud.google.com/go/compute/metadata v0.6.0 // indirect
 	connectrpc.com/otelconnect v0.7.1 // indirect
+	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/4meepo/tagalign v1.4.2 // indirect
 	github.com/Abirdcfly/dupword v0.1.3 // indirect
 	github.com/Antonboom/errname v1.1.0 // indirect
@@ -172,7 +172,6 @@ require (
 	github.com/google/go-containerregistry v0.20.2 // indirect
 	github.com/google/pprof v0.0.0-20250403155104-27863c87afa6 // indirect
 	github.com/google/subcommands v1.2.0 // indirect
-	github.com/google/uuid v1.6.0 // indirect
 	github.com/google/wire v0.6.0 // indirect
 	github.com/gordonklaus/ineffassign v0.1.0 // indirect
 	github.com/gostaticanalysis/analysisutil v0.7.1 // indirect
@@ -210,7 +209,7 @@ require (
 	github.com/ldez/tagliatelle v0.7.1 // indirect
 	github.com/ldez/usetesting v0.4.3 // indirect
 	github.com/leonklingele/grouper v1.1.2 // indirect
-	github.com/lib/pq v1.10.9 // indirect
+	github.com/lib/pq v1.10.9
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/macabu/inamedparam v0.2.0 // indirect
 	github.com/manuelarte/funcorder v0.2.1 // indirect
@@ -345,7 +344,6 @@ require (
 	google.golang.org/grpc v1.71.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	gorm.io/datatypes v1.2.5
 	honnef.co/go/tools v0.6.1 // indirect
 	modernc.org/libc v1.22.5 // indirect
 	modernc.org/mathutil v1.5.0 // indirect
