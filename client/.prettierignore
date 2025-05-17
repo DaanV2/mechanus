@@ -4,3 +4,7 @@ pnpm-lock.yaml
 yarn.lock
 test-results
 src/proto/**/*
+
+build/**
+node_modules/**
+.svelte-kit/**
