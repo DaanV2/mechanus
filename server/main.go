@@ -2,10 +2,10 @@ package main
 
 import (
 	"errors"
-	"log"
 
 	"github.com/DaanV2/mechanus/server/cmd"
 	"github.com/DaanV2/mechanus/server/internal/setup"
+	"github.com/charmbracelet/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
