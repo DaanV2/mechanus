@@ -46,7 +46,7 @@ func (u *UserService) Create(ctx context.Context, req *connect.Request[usersv1.C
 		Name:         username,
 		PasswordHash: []byte(password),
 		Roles:        []string{"user"},
-		Campaigns:    []string{},
+		Campaigns:    []*models.Campaign{},
 	}
 
 	err := u.users.Create(ctx, &user)

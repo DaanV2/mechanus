@@ -9,6 +9,7 @@ import (
 	"github.com/DaanV2/mechanus/server/internal/logging"
 	"github.com/DaanV2/mechanus/server/mechanus/constants"
 	"github.com/DaanV2/mechanus/server/pkg/database/models"
+	xslices "github.com/DaanV2/mechanus/server/pkg/extensions/slices"
 	"github.com/golang-jwt/jwt/v5"
 )
 
@@ -57,7 +58,7 @@ func (s *JWTService) Create(ctx context.Context, user *models.User, scope string
 			ID:        user.ID,
 			Name:      user.Name,
 			Roles:     user.Roles,
-			Campaigns: user.Campaigns,
+			Campaigns: xslices.CollectIDs(user.Campaigns),
 		},
 		Scope: scope,
 	}

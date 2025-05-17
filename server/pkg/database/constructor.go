@@ -6,9 +6,9 @@ import (
 	"time"
 
 	xgorm "github.com/DaanV2/mechanus/server/pkg/extensions/gorm"
+	"github.com/glebarez/sqlite"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
-	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
 
@@ -48,6 +48,10 @@ func NewDB(opts ...Option) (*DB, error) {
 	// GORM configuration
 	gormConfig := &gorm.Config{
 		Logger: xgorm.NewGormlogger().LogMode(config.LogLevel),
+	}
+
+	if config.Logger != nil {
+		gormConfig.Logger = config.Logger
 	}
 
 	var dailer gorm.Dialector

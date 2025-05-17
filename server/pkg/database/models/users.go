@@ -1,10 +1,13 @@
 package models
 
+import "github.com/lib/pq"
+
 type User struct {
 	Model
 	Name         string
-	Roles        []string
-	Campaigns    []string
+	Roles        pq.StringArray `gorm:"type:text[]"`
+	Campaigns    []*Campaign    `gorm:"many2many:user_campaigns"`
+	Characters   []*Character   `gorm:"many2many:user_characters"`
 	PasswordHash []byte
 }
 

@@ -50,3 +50,10 @@ func WithDBLogLevel(level logger.LogLevel) Option {
 		c.LogLevel = level
 	}
 }
+
+// WithDBLogger provides the db with a new logger, ignores [WithDBLogLevel]
+func WithDBLogger(logger logger.Interface) Option {
+	return func(c *Config) {
+		c.Logger = logger
+	}
+}

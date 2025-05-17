@@ -30,7 +30,7 @@ func (s *Service) Get(ctx context.Context, userId string) (*models.User, error) 
 
 	var user models.User
 
-	tx := s.db.WithContext(ctx).First(&user, userId)
+	tx := s.db.WithContext(ctx).First(&user, "id = ?", userId)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
@@ -80,6 +80,7 @@ func (s *Service) Update(ctx context.Context, user *models.User) error {
 	logger := s.logger.With("userId", user.ID).From(ctx)
 	logger.Debug("updating user")
 
+	// TODO ensure that the name cannot be updated, or stays unique
 	tx := s.db.WithContext(ctx).Omit("passwordhash").Updates(user)
 
 	return tx.Error
