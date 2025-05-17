@@ -31,8 +31,9 @@ func GetStateDir() (string, error) {
 // StorageFolder will return a [GetStateDir] folder appended with the subfolder
 func StorageFolder(subfolder string) string {
 	path, err := GetStateDir()
-
-	log.Fatal("couldn't setup state directory", "error", err)
+	if err != nil {
+		log.Fatal("couldn't setup state directory", "error", err)
+	}
 
 	return filepath.Join(path, subfolder)
 }
@@ -40,8 +41,9 @@ func StorageFolder(subfolder string) string {
 // ConfigFolder will return a [GetAppConfigDir] folder appended with the subfolder
 func ConfigFolder(subfolder string) string {
 	path, err := GetAppConfigDir()
-
-	log.Fatal("couldn't setup app config directory", "error", err)
+	if err != nil {
+		log.Fatal("couldn't setup app config directory", "error", err)
+	}
 
 	return filepath.Join(path, subfolder)
 }
@@ -49,8 +51,9 @@ func ConfigFolder(subfolder string) string {
 // UserFolder will return a [GetUserDataDir] folder appended with the subfolder
 func UserFolder(subfolder string) string {
 	path, err := GetAppConfigDir()
-
-	log.Fatal("couldn't setup user data directory", "error", err)
+	if err != nil {
+		log.Fatal("couldn't setup user data directory", "error", err)
+	}
 
 	return filepath.Join(path, subfolder)
 }
