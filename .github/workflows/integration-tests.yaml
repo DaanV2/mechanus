@@ -11,11 +11,16 @@ jobs:
     name: 🎭 Integration tests
     timeout-minutes: 10
     runs-on: ubuntu-latest
-    container:
-      image: mcr.microsoft.com/playwright:latest
     steps:
       - name: 📦 Checkout Repository
         uses: actions/checkout@v4
+
+      - name: ⚒️ Setup Node.js Environment
+        uses: actions/setup-node@v4
+        with:
+          cache: npm
+          cache-dependency-path: tests/package-lock.json
+          node-version-file: tests/package.json
 
       - name: ⚒️ Install dependencies
         working-directory: tests
@@ -35,7 +40,7 @@ jobs:
         run: npm run test
 
       - uses: actions/upload-artifact@v4
-        if: ${{ always() }}
+        if: ${{ !cancelled() }}
         with:
           name: playwright-report
           path: tests/playwright-report/
