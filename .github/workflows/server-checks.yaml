@@ -27,11 +27,13 @@ jobs:
 
       - name: 🛠️ Build
         working-directory: server
-        run: go build ./...
+        run: |
+          go build ./...
 
       - name: 📋 Run Tests
         working-directory: server
-        run: go test ./... --cover -coverprofile=reports/coverage
+        run: |
+          go tool ginkgo --output-dir reports --cover -coverprofile=coverage.out --github-output ./...
 
       - name: 🔍 Run linting
         uses: golangci/golangci-lint-action@v8
