@@ -21,9 +21,7 @@ const config = defineConfig({
     // headless: false,
     // When running in Docker, we need to use the host.docker.internal hostname
     // to access services running on the host machine
-    baseURL: process.env.CI
-      ? "http://host.docker.internal:8080"
-      : "http://127.0.0.1:8080",
+    baseURL: "http://127.0.0.1:8080",
   },
 
   /* Configure projects for major browsers */
