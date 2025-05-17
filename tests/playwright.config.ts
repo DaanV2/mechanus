@@ -1,13 +1,5 @@
 import { defineConfig, devices } from "@playwright/test";
 
-/**
- * Read environment variables from file.
- * https://github.com/motdotla/dotenv
- */
-// import dotenv from 'dotenv';
-// import path from 'path';
-// dotenv.config({ path: path.resolve(__dirname, '.env') });
-
 const CI = process.env.CI === "true" || false;
 
 /**
@@ -24,12 +16,11 @@ const config = defineConfig({
   reporter: [["html", {}], ["list"]],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
-    /* Base URL to use in actions like `await page.goto('/')`. */
-    // baseURL: 'http://127.0.0.1:3000',
-
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: "on-first-retry",
     // headless: false,
+    // When running in Docker, we need to use the host.docker.internal hostname
+    // to access services running on the host machine
     baseURL: "http://127.0.0.1:8080",
   },
 
@@ -50,6 +41,9 @@ const config = defineConfig({
       name: "Desktop Webkit",
       use: { ...devices["Desktop Safari"] },
     },
+    // The following browsers require specific installations that aren't included in the Docker image
+    // You should comment these out when running in Docker
+    /*
     {
       testMatch: ["browsers/edge/**", "general/**"],
       name: "Desktop Microsoft Edge",
@@ -60,6 +54,7 @@ const config = defineConfig({
       name: "Desktop Google Chrome",
       use: { ...devices["Desktop Chrome"], channel: "chrome" },
     },
+    */
     {
       testMatch: ["devices/pixel/**", "general/**"],
       name: "Mobile Chrome",
