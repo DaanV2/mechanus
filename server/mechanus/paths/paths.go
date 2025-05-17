@@ -1,9 +1,9 @@
-package storage
+package paths
 
 import (
 	"errors"
 
-	"github.com/DaanV2/mechanus/server/pkg/constants"
+	"github.com/DaanV2/mechanus/server/mechanus/constants"
 )
 
 var (

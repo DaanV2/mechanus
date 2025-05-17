@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 
 	"github.com/DaanV2/mechanus/server/internal/logging"
+	"github.com/DaanV2/mechanus/server/mechanus/paths"
 	xencoding "github.com/DaanV2/mechanus/server/pkg/extensions/encoding"
 	xio "github.com/DaanV2/mechanus/server/pkg/extensions/io"
 	"github.com/daanv2/go-kit/generics"
@@ -29,7 +30,7 @@ type fileDirStorage[T Identifiable] struct {
 
 // AppStorage implements StorageProvider.
 func (f *fileStorage[T]) AppStorage() (Storage[T], error) {
-	dir, err := GetAppConfigDir()
+	dir, err := paths.GetAppConfigDir()
 	if err != nil {
 		return nil, err
 	}
@@ -45,7 +46,7 @@ func (f *fileStorage[T]) AppStorage() (Storage[T], error) {
 
 // StateStorage implements StorageProvider.
 func (f *fileStorage[T]) StateStorage() (Storage[T], error) {
-	dir, err := GetStateDir()
+	dir, err := paths.GetStateDir()
 	if err != nil {
 		return nil, err
 	}
@@ -61,7 +62,7 @@ func (f *fileStorage[T]) StateStorage() (Storage[T], error) {
 
 // UserStorage implements StorageProvider.
 func (f *fileStorage[T]) UserStorage() (Storage[T], error) {
-	dir, err := GetUserDataDir()
+	dir, err := paths.GetUserDataDir()
 	if err != nil {
 		return nil, err
 	}

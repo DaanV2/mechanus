@@ -5,7 +5,7 @@ import (
 
 	"connectrpc.com/connect"
 	"github.com/DaanV2/mechanus/server/internal/logging"
-	"github.com/DaanV2/mechanus/server/pkg/constants"
+	"github.com/DaanV2/mechanus/server/mechanus/constants"
 )
 
 var _ connect.Interceptor = &MetadataInterceptor{}

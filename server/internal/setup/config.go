@@ -27,10 +27,12 @@ func Config() {
 
 func Viper() {
 	viper.SetEnvKeyReplacer(config.EnvironmentNamer())
-	viper.AddConfigPath(config.UserConfigDir())
-	viper.AddConfigPath("./.config")
 	viper.SetConfigType("yaml")
 	viper.SetOptions(
 		viper.WithLogger(logging.Slog()),
 	)
+
+	for _, v := range config.ConfigPaths() {
+		viper.AddConfigPath(v)
+	}
 }

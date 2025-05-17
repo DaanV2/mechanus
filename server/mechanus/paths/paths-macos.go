@@ -1,6 +1,6 @@
 //go:build darwin
 
-package storage
+package paths
 
 import (
 	"os"
