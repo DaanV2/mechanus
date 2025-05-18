@@ -81,7 +81,7 @@ func (s *Service) Update(ctx context.Context, user *models.User) error {
 	logger.Debug("updating user")
 
 	// TODO ensure that the name cannot be updated, or stays unique
-	tx := s.db.WithContext(ctx).Omit("password_hash").Updates(user)
+	tx := s.db.WithContext(ctx).Omit("password_hash", "id").Updates(user)
 
 	return tx.Error
 }
