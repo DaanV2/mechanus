@@ -40,7 +40,7 @@ var _ = Describe("User Service", func() {
 		Expect(user.Name).To(Equal(u.Name))
 		Expect(user.PasswordHash).To(Equal(u.PasswordHash))
 		Expect(u.PasswordHash).ToNot(Equal([]byte("the-one-ring")))
-		Expect(u.Roles).ToNot(BeEquivalentTo([]string{"wizard"}))
+		Expect(u.Roles).To(BeEquivalentTo([]string{"wizard"}))
 	})
 
 	It("can get a user by name", func(ctx SpecContext) {
@@ -59,5 +59,4 @@ var _ = Describe("User Service", func() {
 		Expect(user.ID).To(Equal(u.ID))
 		Expect(user.Name).To(Equal(u.Name))
 	})
-
 })
