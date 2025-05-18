@@ -34,7 +34,7 @@ jobs:
       - name: 📋 Run Tests
         working-directory: server
         run: |
-          go tool ginkgo run --output-dir reports --cover -coverprofile=coverage.out --github-output ./...
+          go tool ginkgo run --output-dir reports --cover --covermode atomic -coverprofile=coverage.out ./...
 
       - name: 🔍 Run linting
         uses: golangci/golangci-lint-action@v8
