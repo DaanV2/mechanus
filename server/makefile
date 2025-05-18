@@ -1,8 +1,15 @@
-test:
-	go test ./... --cover -coverprofile=reports/coverage
+include .env
+export
 
-coverage-report: test
-	go tool cover -html=reports/coverage
+build:
+	go build ./...
+
+test:
+	go tool ginkgo run --output-dir reports --cover --covermode atomic -coverprofile=coverage.out ./...
+
+coverage-report:
+	go test ./... --cover -coverprofile=reports/coverage.out --covermode atomic --coverpkg=./...
+	go tool cover -html=reports/coverage.out
 
 generate:
 	go generate ./...
@@ -11,7 +18,7 @@ lint:
 	go tool golangci-lint run -v --fix
 
 checks:
-	go build ./...
-	make generate
-	make test
-	make lint
+	$(MAKE) build
+	$(MAKE) generate
+	$(MAKE) test
+	$(MAKE) lint

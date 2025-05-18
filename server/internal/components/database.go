@@ -6,8 +6,10 @@ import (
 	"github.com/charmbracelet/log"
 )
 
-func SetupTestDatabase() (*database.DB, error) {
-	return setupDatabase(database.WithType(database.InMemory))
+func SetupTestDatabase(dbOptions ...database.Option) (*database.DB, error) {
+	dbOptions = append(dbOptions, database.WithType(database.InMemory) )
+
+	return setupDatabase(dbOptions...)
 }
 
 func SetupDatabase(dbOptions ...database.Option) (*database.DB, error) {

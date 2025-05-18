@@ -1,15 +1,19 @@
 package xcrypto_test
 
 import (
-	"testing"
-
 	xcrypto "github.com/DaanV2/mechanus/server/pkg/extensions/crypto"
-	"github.com/stretchr/testify/require"
+
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 )
 
-func Test_Generate_RSA(t *testing.T) {
-	key, err := xcrypto.GenerateRSAKeys()
-	require.NoError(t, err)
+var _ = Describe("RSA", func() {
+	Context("Generation", func() {
+		It("should be able to generate a pair of keys for RSA", func() {
+			key, err := xcrypto.GenerateRSAKeys()
+			Expect(err).ToNot(HaveOccurred())
 
-	require.NotEmpty(t, key.ID())
-}
+			Expect(key.ID()).ToNot(BeEmpty())
+		})
+	})
+})

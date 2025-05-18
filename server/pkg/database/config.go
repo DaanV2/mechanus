@@ -28,4 +28,5 @@ type Config struct {
 	MaxOpenConns    int
 	ConnMaxLifetime time.Duration
 	LogLevel        logger.LogLevel
+	Logger          logger.Interface
 }

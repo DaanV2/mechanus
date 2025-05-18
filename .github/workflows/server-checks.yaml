@@ -24,14 +24,17 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version-file: ./server/go.mod
+          cache-dependency-path: ./server/go.sum
 
       - name: 🛠️ Build
         working-directory: server
-        run: go build ./...
+        run: |
+          go build ./...
 
       - name: 📋 Run Tests
         working-directory: server
-        run: go test ./... --cover -coverprofile=reports/coverage
+        run: |
+          go tool ginkgo run --output-dir reports --cover --covermode atomic -coverprofile=coverage.out ./...
 
       - name: 🔍 Run linting
         uses: golangci/golangci-lint-action@v8
