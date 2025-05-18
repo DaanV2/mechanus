@@ -15,7 +15,10 @@ func CreateDatabase() *database.DB {
 	ginkgo.GinkgoHelper()
 
 	db, err := components.SetupTestDatabase(database.WithDBLogger(&GinkgoDBLogger{}))
-	gomega.Expect(err).ToNot(gomega.HaveOccurred())
+	gomega.Expect(err).ToNot(gomega.HaveOccurred(), "database setup")
+	ginkgo.DeferCleanup(func() {
+		gomega.Expect(db.Close()).To(gomega.Succeed(), "database close")
+	})
 
 	return db
 }

@@ -81,7 +81,7 @@ func (s *Service) Update(ctx context.Context, user *models.User) error {
 	logger.Debug("updating user")
 
 	// TODO ensure that the name cannot be updated, or stays unique
-	tx := s.db.WithContext(ctx).Omit("passwordhash").Updates(user)
+	tx := s.db.WithContext(ctx).Omit("password_hash").Updates(user)
 
 	return tx.Error
 }
@@ -98,7 +98,7 @@ func (s *Service) UpdatePassword(ctx context.Context, id string, newPassword []b
 		return err
 	}
 
-	tx := s.db.WithContext(ctx).Select("passwordhash").Updates(user)
+	tx := s.db.WithContext(ctx).Select("password_hash").Updates(user)
 
 	return tx.Error
 }
