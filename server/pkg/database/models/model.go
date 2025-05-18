@@ -19,6 +19,7 @@ func (m *Model) GetID() string {
 }
 
 func (u *Model) BeforeCreate(tx *gorm.DB) (err error) {
-  u.ID = uuid.NewString()
-  return
+	u.ID = uuid.NewString()
+
+	return
 }

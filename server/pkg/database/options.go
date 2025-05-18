@@ -52,8 +52,8 @@ func WithDBLogLevel(level logger.LogLevel) Option {
 }
 
 // WithDBLogger provides the db with a new logger, ignores [WithDBLogLevel]
-func WithDBLogger(logger logger.Interface) Option {
+func WithDBLogger(gormLogger logger.Interface) Option {
 	return func(c *Config) {
-		c.Logger = logger
+		c.Logger = gormLogger
 	}
 }

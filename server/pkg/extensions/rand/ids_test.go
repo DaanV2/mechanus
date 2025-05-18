@@ -10,7 +10,7 @@ import (
 var _ = Describe("Random ID Generation", func() {
 	Context("MustID function", func() {
 		It("should generate IDs of the requested length", func() {
-			for l := 0; l < 64; l++ {
+			for l := range 64 {
 				id := xrand.MustID(l)
 				Expect(id).To(HaveLen(l))
 			}
