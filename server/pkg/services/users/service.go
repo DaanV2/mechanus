@@ -103,6 +103,14 @@ func (s *Service) UpdatePassword(ctx context.Context, id string, newPassword []b
 	return tx.Error
 }
 
+func (s *Service) Find(ctx context.Context, queries *models.User) ([]*models.User, error) {
+	var users []*models.User
+
+	tx := s.db.WithContext(ctx).Model(queries).Find(&users)
+
+	return users, tx.Error
+}
+
 func updatePassword(user *models.User) error {
 	pwhash, err := xcrypto.HashPassword(user.PasswordHash)
 	if err != nil {

@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"os"
 	"os/signal"
 	"syscall"
 
@@ -59,5 +60,8 @@ func Execute() {
 	if err != nil {
 		// nolint:gocritic // exitAfterDefer fine in this case, we already report the error
 		log.Fatal("error during executing command", "error", err)
+		os.Exit(1)
+	} else {
+		os.Exit(0)
 	}
 }

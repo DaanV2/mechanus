@@ -8,11 +8,11 @@ import (
 	"github.com/charmbracelet/log"
 )
 
-type WEBServies struct {
+type WEBServices struct {
 	Components *application.ComponentManager
 }
 
-func WebRouter(services WEBServies) *http.ServeMux {
+func WebRouter(services WEBServices) *http.ServeMux {
 	router := http.NewServeMux()
 
 	routes.RegisterHealthChecks(router, services.Components)

@@ -1,4 +1,4 @@
-package grpc_users
+package rpcs_users
 
 import (
 	"context"
@@ -15,7 +15,7 @@ import (
 	user_service "github.com/DaanV2/mechanus/server/pkg/services/users"
 )
 
-var _ usersv1connect.UserServiceClient = &UserService{}
+var _ usersv1connect.UserServiceHandler = &UserService{}
 
 type UserService struct {
 	users  *user_service.Service

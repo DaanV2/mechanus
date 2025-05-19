@@ -1,4 +1,4 @@
-package grpc_users
+package rpcs_users
 
 import (
 	"context"

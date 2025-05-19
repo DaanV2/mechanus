@@ -6,8 +6,8 @@ import (
 	"github.com/DaanV2/mechanus/server/pkg/servers"
 )
 
-func NewServer(router http.Handler) *servers.Server {
-	return servers.NewHttpServer(router, servers.ServerConfig{
+func NewServer(router http.Handler) servers.Server {
+	return servers.NewHttpServer("web", router, servers.Config{
 		Port: PortFlag.Value(),
 		Host: HostFlag.Value(),
 	})
