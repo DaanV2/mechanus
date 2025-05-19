@@ -18,7 +18,7 @@ require (
 	github.com/charmbracelet/bubbles v0.21.0
 	github.com/charmbracelet/bubbletea v1.3.5
 	github.com/charmbracelet/lipgloss v1.1.0
-	github.com/charmbracelet/log v0.4.1
+	github.com/charmbracelet/log v0.4.2
 	github.com/daanv2/go-kit v1.0.3
 	github.com/daanv2/go-locks v1.3.0
 	github.com/glebarez/sqlite v1.11.0
@@ -34,7 +34,7 @@ require (
 	google.golang.org/protobuf v1.36.6
 	gorm.io/driver/mysql v1.5.7
 	gorm.io/driver/postgres v1.5.11
-	gorm.io/gorm v1.25.11
+	gorm.io/gorm v1.26.1
 )
 
 require (
