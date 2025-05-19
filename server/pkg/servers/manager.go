@@ -10,11 +10,11 @@ import (
 )
 
 type Manager struct {
-	servers []*Server
+	servers []Server
 	started bool
 }
 
-func (m *Manager) Register(server ...*Server) {
+func (m *Manager) Register(server ...Server) {
 	m.servers = append(m.servers, server...)
 
 	if m.started {
@@ -57,7 +57,7 @@ func (m *Manager) Stop(ctx context.Context) {
 	wg.Wait()
 }
 
-func (m *Manager) stop(ctx context.Context, server *Server, wg *sync.WaitGroup) {
+func (m *Manager) stop(ctx context.Context, server Server, wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	server.Shutdown(ctx)

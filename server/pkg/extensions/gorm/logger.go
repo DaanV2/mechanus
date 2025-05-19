@@ -28,16 +28,28 @@ func NewGormlogger() *GormLogger {
 
 // Error implements logger.Interface.
 func (g *GormLogger) Error(ctx context.Context, msg string, args ...any) {
+	if IsSilent(ctx) {
+		return
+	}
+
 	g.logger.From(ctx).Errorf(msg, args...)
 }
 
 // Info implements logger.Interface.
 func (g *GormLogger) Info(ctx context.Context, msg string, args ...any) {
+	if IsSilent(ctx) {
+		return
+	}
+
 	g.logger.From(ctx).Infof(msg, args...)
 }
 
 // Warn implements logger.Interface.
 func (g *GormLogger) Warn(ctx context.Context, msg string, args ...any) {
+	if IsSilent(ctx) {
+		return
+	}
+
 	g.logger.From(ctx).Warnf(msg, args...)
 }
 
@@ -59,6 +71,10 @@ func (g *GormLogger) LogMode(l logger.LogLevel) logger.Interface {
 
 // Trace implements logger.Interface.
 func (g *GormLogger) Trace(ctx context.Context, begin time.Time, fc func() (sql string, rowsAffected int64), err error) {
+	if IsSilent(ctx) {
+		return
+	}
+
 	// If we are warn or higher (fatal) then we only report if we have an error
 	if g.level >= log.WarnLevel {
 		if err == nil {
@@ -67,11 +83,15 @@ func (g *GormLogger) Trace(ctx context.Context, begin time.Time, fc func() (sql 
 	}
 
 	sql, rows := fc()
+	msg := "[QUERY]"
+	if str, ok := GetPrefix(ctx); ok {
+		msg = "[" + str + "]"
+	}
 
 	writer := g.logger.From(ctx).With("rows", rows, "duration", time.Since(begin))
 	if err != nil {
 		writer = writer.With("err", err)
 	}
 
-	writer.Debug("[Query]: " + sql)
+	writer.Debug(msg + ": " + sql)
 }

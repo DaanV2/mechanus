@@ -11,17 +11,19 @@ import (
 	"github.com/charmbracelet/log"
 )
 
-type ServerConfig struct {
+type Config struct {
 	Port int
 	Host string
 }
 
-type Server struct {
+type HTTPServer struct {
+	name   string
 	server *http.Server
 }
 
-func NewHttpServer(router http.Handler, conf ServerConfig) *Server {
-	return &Server{
+func NewHttpServer(name string, router http.Handler, conf Config) Server {
+	return &HTTPServer{
+		name: name,
 		server: &http.Server{
 			Addr:              fmt.Sprintf("%s:%v", conf.Host, conf.Port),
 			Handler:           middleware.Logging(router),
@@ -30,8 +32,8 @@ func NewHttpServer(router http.Handler, conf ServerConfig) *Server {
 	}
 }
 
-func (s *Server) Listen() {
-	log.Infof("Starting http server: http://%s", s.server.Addr)
+func (s *HTTPServer) Listen() {
+	log.Infof("Starting %s server: http://%s", s.name, s.server.Addr)
 
 	err := s.server.ListenAndServe()
 	if err != nil {
@@ -39,17 +41,17 @@ func (s *Server) Listen() {
 			return
 		}
 
-		log.Errorf("error listening for server: %s => %s", s.server.Addr, err)
+		log.Errorf("error listening for server: %s %s => %s", s.name, s.server.Addr, err)
 	}
 }
 
-func (s *Server) Shutdown(ctx context.Context) {
+func (s *HTTPServer) Shutdown(ctx context.Context) {
 	err := s.server.Shutdown(ctx)
 	if err != nil {
 		if errors.Is(err, http.ErrServerClosed) {
 			return
 		}
 
-		log.Errorf("error listening for server: %s => %v", s.server.Addr, err)
+		log.Errorf("error listening for server: %s %s => %v", s.name, s.server.Addr, err)
 	}
 }

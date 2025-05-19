@@ -5,7 +5,6 @@ import (
 
 	"connectrpc.com/connect"
 	"github.com/DaanV2/mechanus/server/pkg/authenication"
-	"github.com/DaanV2/mechanus/server/pkg/generics"
 	"github.com/DaanV2/mechanus/server/pkg/grpc/gen/users/v1/usersv1connect"
 	grpc_middleware "github.com/DaanV2/mechanus/server/pkg/grpc/middleware"
 	"github.com/charmbracelet/log"
@@ -13,13 +12,13 @@ import (
 	"golang.org/x/net/http2/h2c"
 )
 
-type GRPCServices struct {
+type RPCS struct {
 	Login usersv1connect.LoginServiceHandler
 	User  usersv1connect.UserServiceHandler
 	JWT   *authenication.JWTService
 }
 
-func NewRouter(services GRPCServices) http.Handler {
+func NewRouter(services RPCS) http.Handler {
 	router := http.NewServeMux()
 
 	opts := []connect.HandlerOption{
@@ -36,8 +35,8 @@ func NewRouter(services GRPCServices) http.Handler {
 }
 
 func RegisterService[T any](router *http.ServeMux, create func(data T, opts ...connect.HandlerOption) (string, http.Handler), input T, opts ...connect.HandlerOption) {
-	log.Debug("registering grpc service", "service", generics.NameOf[T]())
-
 	path, handler := create(input, opts...)
+	log.Debug("registering grpc service", "service", path)
+	
 	router.Handle(path, handler)
 }

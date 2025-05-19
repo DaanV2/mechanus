@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/DaanV2/mechanus/server/internal/checks"
 	"github.com/DaanV2/mechanus/server/internal/components"
 	"github.com/DaanV2/mechanus/server/internal/grpc"
 	"github.com/DaanV2/mechanus/server/internal/web"
@@ -42,23 +43,25 @@ func init() {
 	// flags := serverCmd.Flags()
 	web.WebConfig.AddToSet(serverCmd.Flags())
 	grpc.APIConfig.AddToSet(serverCmd.Flags())
+	checks.InitializeConfig.AddToSet(serverCmd.Flags())
 }
 
 func ServerWorkload(cmd *cobra.Command, args []string) error {
 	// Setup
-	appCtx := cmd.Context()
 	comps := new(application.ComponentManager)
 
-	manager, err := components.WebServer(web.StaticFolderFlag.Value())
+	server, err := components.BuildServer()
 	if err != nil {
-		return fmt.Errorf("error setting up: %w", err)
+		return fmt.Errorf("couldn't setup the server: %w", err)
 	}
+	checks.InitializeServer(cmd.Context(), server)
+	manager := server.Manager
 
 	// Execute
 	manager.Start()
 
 	// Await termination signal
-	<-appCtx.Done()
+	<-cmd.Context().Done()
 
 	// make a ctx specially for shutdown
 	shutCtx, cancel := context.WithTimeout(context.Background(), time.Minute*1)
