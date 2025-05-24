@@ -1,6 +1,7 @@
 {
   "go.lintTool": "golangci-lint",
   "go.lintOnSave": "workspace",
+  "go.lintFlags": ["--fix"],
   "go.coverOnSave": true,
   "go.coverMode": "atomic",
   "go.coverageDecorator": {

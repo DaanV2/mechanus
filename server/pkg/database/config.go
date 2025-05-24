@@ -49,10 +49,10 @@ var (
 	ConnMaxLifetimeFlag = DatabaseConfig.Duration("database.connMaxLifetime", 1*time.Hour, "Sets the maximum amount of time a connection may be reused. If d <= 0, connections are not closed due to a connection's age.")
 )
 
-func validateDatabaseFlags(config *config.Config) error {
+func validateDatabaseFlags(conf *config.Config) error {
 	var err error
 
-	dbt := config.GetString("database.type")
+	dbt := conf.GetString("database.type")
 	switch DBType(dbt) {
 	case MySQL, SQLite, InMemory, PostgreSQL:
 	default:

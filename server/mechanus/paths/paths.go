@@ -19,6 +19,7 @@ func GetUserDataDir() (string, error) {
 	fp, err := filepath.Abs(".user")
 	if err == nil && xio.DirExists(fp) {
 		log.WithPrefix("paths").Debug("found local .user dir")
+
 		return fp, nil
 	}
 
@@ -30,6 +31,7 @@ func GetAppConfigDir() (string, error) {
 	fp, err := filepath.Abs(".config")
 	if err == nil && xio.DirExists(fp) {
 		log.WithPrefix("paths").Debug("found local .config dir")
+
 		return fp, nil
 	}
 
@@ -41,6 +43,7 @@ func GetStateDir() (string, error) {
 	fp, err := filepath.Abs(".local")
 	if err == nil && xio.DirExists(fp) {
 		log.WithPrefix("paths").Debug("found local .local dir")
+
 		return fp, nil
 	}
 
