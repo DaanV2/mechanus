@@ -7,6 +7,7 @@ import (
 	"syscall"
 
 	cmd_config "github.com/DaanV2/mechanus/server/cmd/config"
+	cmd_mdns "github.com/DaanV2/mechanus/server/cmd/mdns"
 	"github.com/DaanV2/mechanus/server/internal/setup"
 	"github.com/charmbracelet/log"
 	"github.com/spf13/cobra"
@@ -35,6 +36,7 @@ func init() {
 	setup.LoggerConfig.AddToSet(pflags)
 
 	cmd_config.AddCommand(rootCmd)
+	cmd_mdns.AddCommand(rootCmd)
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
