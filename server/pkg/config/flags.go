@@ -1,6 +1,8 @@
 package config
 
 import (
+	"time"
+
 	"github.com/DaanV2/mechanus/server/pkg/generics"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
@@ -78,4 +80,10 @@ func Int(name string, def int, usage string) Flag[int] {
 	flags.Int(name, def, usage)
 
 	return newFlag(name, usage, viper.GetInt)
+}
+
+func Duration(name string, def time.Duration, usage string) Flag[time.Duration] {
+	flags.Duration(name, def, usage)
+
+	return newFlag(name, usage, viper.GetDuration)
 }

@@ -2,6 +2,7 @@ package config
 
 import (
 	"sync"
+	"time"
 
 	xsync "github.com/DaanV2/mechanus/server/pkg/extensions/sync"
 	"github.com/spf13/pflag"
@@ -93,6 +94,18 @@ func (c *Config) Int(name string, def int, usage string) Flag[int] {
 
 func (c *Config) GetInt(name string) int {
 	return getValue[int](c, name)
+}
+
+
+func (c *Config) Duration(name string, def time.Duration, usage string) Flag[time.Duration] {
+	f := Duration(name, def, usage)
+	c.data.Store(name, f)
+
+	return f
+}
+
+func (c *Config) GetDuration(name string) time.Duration {
+	return getValue[time.Duration](c, name)
 }
 
 // WithValidate couples the given function as the function used to validate this config object.

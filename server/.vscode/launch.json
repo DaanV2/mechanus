@@ -11,6 +11,7 @@
       "mode": "auto",
       "program": "${workspaceFolder}/main.go",
       "envFile": "${workspaceFolder}/.env",
+      "console": "integratedTerminal",
       "args": ["server"]
     },
     {

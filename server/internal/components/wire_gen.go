@@ -23,7 +23,10 @@ import (
 // Injectors from wire.go:
 
 func BuildServer() (*Server, error) {
-	v := GetDatabaseOptions()
+	v, err := GetDatabaseOptions()
+	if err != nil {
+		return nil, err
+	}
 	db, err := SetupDatabase(v...)
 	if err != nil {
 		return nil, err

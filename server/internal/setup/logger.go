@@ -4,8 +4,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/DaanV2/mechanus/server/mechanus/styles"
 	"github.com/DaanV2/mechanus/server/pkg/config"
-	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/log"
 )
 
@@ -32,7 +32,7 @@ func Logger() {
 
 	// Initialize the default logger.
 	logger := log.NewWithOptions(os.Stderr, logOptions)
-	logger.SetStyles(CreateStyle())
+	logger.SetStyles(styles.LogStyle())
 
 	log.SetDefault(logger)
 	updateLogger(
@@ -74,21 +74,4 @@ func updateLogger(logger *log.Logger, reportCaller bool, level, format string) {
 	case "logfmt":
 		logger.SetFormatter(log.LogfmtFormatter)
 	}
-}
-
-func CreateStyle() *log.Styles {
-	styles := log.DefaultStyles()
-
-	styles.Levels[log.DebugLevel] = styles.Levels[log.DebugLevel].SetString("DEBUG")
-	styles.Levels[log.InfoLevel] = styles.Levels[log.InfoLevel].SetString("INFO")
-	styles.Levels[log.WarnLevel] = styles.Levels[log.WarnLevel].SetString("WARN")
-	styles.Levels[log.ErrorLevel] = styles.Levels[log.ErrorLevel].SetString("ERROR")
-	styles.Levels[log.FatalLevel] = styles.Levels[log.FatalLevel].SetString("FATAL")
-
-	styles.Keys["err"] = lipgloss.NewStyle().Foreground(lipgloss.Color("204"))
-	styles.Keys["error"] = lipgloss.NewStyle().Foreground(lipgloss.Color("204"))
-	styles.Values["error"] = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("204")).Faint(true)
-	styles.Values["error"] = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("204")).Faint(true)
-
-	return styles
 }
