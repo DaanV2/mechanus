@@ -6,6 +6,7 @@ import (
 	"time"
 
 	xgorm "github.com/DaanV2/mechanus/server/pkg/extensions/gorm"
+	"github.com/charmbracelet/log"
 	"github.com/glebarez/sqlite"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
@@ -35,7 +36,7 @@ func NewDB(opts ...Option) (*DB, error) {
 	config := &Config{
 		Type:            SQLite,
 		DSN:             "db.sqlite",
-		MaxIdleConns:    10,
+		MaxIdleConns:    2,
 		MaxOpenConns:    100,
 		ConnMaxLifetime: time.Hour,
 	}
@@ -54,9 +55,9 @@ func NewDB(opts ...Option) (*DB, error) {
 		gormConfig.Logger = config.Logger
 	}
 
-	var dailer gorm.Dialector
-
 	// Connect to the database based on the type
+	log.WithPrefix("db").Debug("opening database", "type", config.Type, "dsn", config.DSN)
+	var dailer gorm.Dialector
 	switch config.Type {
 	case SQLite:
 		dailer = sqlite.Open(config.DSN)
@@ -81,6 +82,7 @@ func NewDB(opts ...Option) (*DB, error) {
 		return nil, fmt.Errorf("failed to get database connection: %w", err)
 	}
 
+	log.WithPrefix("db").Debug("applying database settings", "max idle conns", config.MaxIdleConns, "max open conns", config.MaxOpenConns, "conn max lifetime", config.ConnMaxLifetime)
 	sqlDB.SetMaxIdleConns(config.MaxIdleConns)
 	sqlDB.SetMaxOpenConns(config.MaxOpenConns)
 	sqlDB.SetConnMaxLifetime(config.ConnMaxLifetime)

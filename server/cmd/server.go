@@ -11,6 +11,7 @@ import (
 	"github.com/DaanV2/mechanus/server/internal/grpc"
 	"github.com/DaanV2/mechanus/server/internal/web"
 	"github.com/DaanV2/mechanus/server/pkg/application"
+	"github.com/DaanV2/mechanus/server/pkg/database"
 	"github.com/charmbracelet/log"
 	"github.com/spf13/cobra"
 )
@@ -43,6 +44,7 @@ func init() {
 	// flags := serverCmd.Flags()
 	web.WebConfig.AddToSet(serverCmd.Flags())
 	grpc.APIConfig.AddToSet(serverCmd.Flags())
+	database.DatabaseConfig.AddToSet(serverCmd.Flags())
 	checks.InitializeConfig.AddToSet(serverCmd.Flags())
 }
 

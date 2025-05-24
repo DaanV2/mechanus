@@ -8,20 +8,18 @@ import (
 	"github.com/charmbracelet/log"
 )
 
+func GetDatabaseOptions() ([]database.Option, error) {
+	return database.GetOptions()
+}
+
 func SetupTestDatabase(dbOptions ...database.Option) (*database.DB, error) {
-	dbOptions = append(dbOptions, database.WithType(database.InMemory) )
+	dbOptions = append(dbOptions, database.WithType(database.InMemory))
 
 	return setupDatabase(context.Background(), dbOptions...)
 }
 
 func SetupDatabase(dbOptions ...database.Option) (*database.DB, error) {
-	opts := []database.Option{
-		database.WithType(database.SQLite),
-	}
-
-	opts = append(opts, dbOptions...)
-
-	return setupDatabase(context.Background(), opts...)
+	return setupDatabase(context.Background(), dbOptions...)
 }
 
 func setupDatabase(ctx context.Context, dbOptions ...database.Option) (*database.DB, error) {
@@ -45,8 +43,4 @@ func setupDatabase(ctx context.Context, dbOptions ...database.Option) (*database
 	}
 
 	return db, nil
-}
-
-func GetDatabaseOptions() []database.Option {
-	return []database.Option{}
 }

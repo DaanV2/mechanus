@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 
 	"github.com/DaanV2/mechanus/server/mechanus/constants"
+	xio "github.com/DaanV2/mechanus/server/pkg/extensions/io"
 	"github.com/charmbracelet/log"
 )
 
@@ -15,16 +16,37 @@ var (
 
 // GetUserDataDir returns the directory for storing user data
 func GetUserDataDir() (string, error) {
+	fp, err := filepath.Abs(".user")
+	if err == nil && xio.DirExists(fp) {
+		log.WithPrefix("paths").Debug("found local .user dir")
+
+		return fp, nil
+	}
+
 	return getUserDataDir(constants.SERVICE_NAME)
 }
 
 // GetAppConfigDir returns the directory for storing application configuration
 func GetAppConfigDir() (string, error) {
+	fp, err := filepath.Abs(".config")
+	if err == nil && xio.DirExists(fp) {
+		log.WithPrefix("paths").Debug("found local .config dir")
+
+		return fp, nil
+	}
+
 	return getAppConfigDir(constants.SERVICE_NAME)
 }
 
 // GetStateDir returns the directory for storing application state
 func GetStateDir() (string, error) {
+	fp, err := filepath.Abs(".local")
+	if err == nil && xio.DirExists(fp) {
+		log.WithPrefix("paths").Debug("found local .local dir")
+
+		return fp, nil
+	}
+
 	return getStateDir(constants.SERVICE_NAME)
 }
 
