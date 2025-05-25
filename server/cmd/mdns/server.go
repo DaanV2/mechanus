@@ -7,8 +7,8 @@ import (
 
 // mdns/serverCmd represents the mdns/server command
 var serverCmd = &cobra.Command{
-	Use:   "server",
-	RunE:  serverCmdWorkload,
+	Use:  "server",
+	RunE: serverCmdWorkload,
 }
 
 func init() {
@@ -26,16 +26,15 @@ func init() {
 
 func serverCmdWorkload(cmd *cobra.Command, args []string) error {
 
-	conf := mdns.NewServerConfig(8080)
-
-	serv, err := mdns.NewServer(conf)
+	conf := mdns.GetServerConfig(8080)
+	serv, err := mdns.NewServer(cmd.Context(), conf)
 	if err != nil {
 		return err
 	}
 
-	serv.Start()
+	go serv.Listen()
 
-	<- cmd.Context().Done()
+	<-cmd.Context().Done()
 
 	return nil
 }

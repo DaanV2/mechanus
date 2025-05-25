@@ -52,7 +52,7 @@ func ServerWorkload(cmd *cobra.Command, args []string) error {
 	// Setup
 	comps := new(application.ComponentManager)
 
-	server, err := components.BuildServer()
+	server, err := components.BuildServer(cmd.Context())
 	if err != nil {
 		return fmt.Errorf("couldn't setup the server: %w", err)
 	}

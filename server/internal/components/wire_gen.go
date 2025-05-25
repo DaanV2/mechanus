@@ -7,6 +7,7 @@
 package components
 
 import (
+	"context"
 	"github.com/DaanV2/mechanus/server/internal/grpc"
 	"github.com/DaanV2/mechanus/server/internal/web"
 	"github.com/DaanV2/mechanus/server/pkg/application"
@@ -14,6 +15,7 @@ import (
 	"github.com/DaanV2/mechanus/server/pkg/database"
 	"github.com/DaanV2/mechanus/server/pkg/grpc/gen/users/v1/usersv1connect"
 	"github.com/DaanV2/mechanus/server/pkg/grpc/rpcs/rpcs_users"
+	"github.com/DaanV2/mechanus/server/pkg/networking/mdns"
 	"github.com/DaanV2/mechanus/server/pkg/servers"
 	"github.com/DaanV2/mechanus/server/pkg/services/users"
 	"github.com/DaanV2/mechanus/server/pkg/storage"
@@ -22,7 +24,7 @@ import (
 
 // Injectors from wire.go:
 
-func BuildServer() (*Server, error) {
+func BuildServer(ctx context.Context) (*Server, error) {
 	v, err := GetDatabaseOptions()
 	if err != nil {
 		return nil, err
@@ -50,7 +52,10 @@ func BuildServer() (*Server, error) {
 	webServices := web.WEBServices{
 		Components: componentManager,
 	}
-	manager := createServerManager(rpcs, webServices)
+	manager, err := createServerManager(ctx, rpcs, webServices)
+	if err != nil {
+		return nil, err
+	}
 	server := &Server{
 		Manager: manager,
 		Users:   service,
@@ -74,11 +79,20 @@ var dbSet = wire.NewSet(
 
 var servicesSet = wire.NewSet(application.NewComponentManager, rpcs_users.NewLoginService, rpcs_users.NewUserService, wire.Bind(new(usersv1connect.LoginServiceHandler), new(*rpcs_users.LoginService)), wire.Bind(new(usersv1connect.UserServiceHandler), new(*rpcs_users.UserService)), user_service.NewService, authenication.NewJWTService, authenication.NewJTIService, authenication.NewKeyManager, provideKeyStorage)
 
-func createServerManager(rpcs grpc.RPCS, serv web.WEBServices) *servers.Manager {
+func createServerManager(ctx context.Context, rpcs grpc.RPCS, serv web.WEBServices) (*servers.Manager, error) {
+	wconf := web.GetConfig()
+	gconf := grpc.GetConfig()
+	mconf := mdns.GetServerConfig(wconf.Port)
+	s, err := MDNSServer(ctx, mconf)
+	if err != nil {
+		return nil, err
+	}
+
 	return ServerManager(
-		APIServer(rpcs),
-		WebServer(serv),
-	)
+		APIServer(gconf, rpcs),
+		WebServer(wconf, serv),
+		s,
+	), nil
 }
 
 func provideKeyStorage(db *database.DB) storage.StorageProvider[*authenication.KeyData] {
