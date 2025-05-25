@@ -53,6 +53,8 @@ func (s *Server) registerServer(network, ip string, port int) error {
 
 // Listen implements [servers.Server.Listen]
 func (s *Server) Listen() {
+	s.logger.From(s.ctx).Info("starting mdns server")
+
 	for _, conn := range s.conns {
 		go conn.Listen()
 	}

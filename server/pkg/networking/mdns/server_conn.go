@@ -37,11 +37,13 @@ func newServerCon(ctx context.Context, conf *ServerConfig, logger logging.Enrich
 }
 
 func (s *serverConn) Listen() {
+	s.logger.From(s.ctx).Debug("starting mdns server")
+
 	buffer := make([]byte, 2048)
 	logger := s.logger.From(s.ctx)
 
 	n := s.conn.LocalAddr().Network()
-	if n == "upd" || n == "upd4" {
+	if n == "udp" || n == "udp4" {
 		go s.announceLoop()
 	}
 
