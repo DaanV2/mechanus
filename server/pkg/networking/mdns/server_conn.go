@@ -50,10 +50,12 @@ func (s *serverConn) Listen() {
 		if err != nil {
 			if errors.Is(err, net.ErrClosed) {
 				logger.Debug("connection closed on upd server")
+
 				return
 			}
 
 			logger.Error("error reading from UPD stream", "error", err, "source", src)
+
 			continue
 		}
 
@@ -83,18 +85,19 @@ func (s *serverConn) handlePacket(data []byte, src *net.UDPAddr) {
 	err := msg.Unpack(data)
 	if err != nil {
 		logger.Error("couldn't read message", "error", err)
+
 		return
 	}
 
-	if msg.Header.Response {
+	if msg.Response {
 		return // ignore
 	}
 
 	// Ensure trailing dot
 	var answers []dnsmessage.Resource
 
-	for _, q := range msg.Questions {
-		ans, cerr := s.checkQuestion(q)
+	for _, q := range msg.Questions { //nolint:gocritic // mdns isn't performed that much
+		ans, cerr := s.checkQuestion(&q)
 		if cerr != nil {
 			logger.Error("couldn't make answer to error", "error", cerr, "question", q)
 		} else if len(ans) > 0 {
@@ -104,7 +107,7 @@ func (s *serverConn) handlePacket(data []byte, src *net.UDPAddr) {
 		}
 	}
 
-	if len(answers) <= 0 {
+	if len(answers) == 0 {
 		return // nothing to answer
 	}
 
@@ -118,13 +121,13 @@ func (s *serverConn) handlePacket(data []byte, src *net.UDPAddr) {
 		Questions: msg.Questions,
 		Answers:   answers,
 	}
-	err = s.sendMsg(src, resp)
+	err = s.sendMsg(src, &resp)
 	if err != nil {
 		logger.Error("failed to send mDNS response", "error", err)
 	}
 }
 
-func (s *serverConn) checkQuestion(q dnsmessage.Question) ([]dnsmessage.Resource, error) {
+func (s *serverConn) checkQuestion(q *dnsmessage.Question) ([]dnsmessage.Resource, error) {
 	var answers []dnsmessage.Resource
 
 	serviceType := dnsmessage.MustNewName(s.conf.ServiceType + ".")
@@ -136,7 +139,7 @@ func (s *serverConn) checkQuestion(q dnsmessage.Question) ([]dnsmessage.Resource
 		answers = append(answers, BuildPTRRecord(serviceType, instanceName))
 
 	case q.Name == instanceName && q.Type == dnsmessage.TypeSRV:
-		answers = append(answers, BuildSRVRecord(instanceName, hostname, uint16(s.conf.Port)))
+		answers = append(answers, BuildSRVRecord(instanceName, hostname, s.conf.Port))
 
 	case q.Name == instanceName && q.Type == dnsmessage.TypeTXT:
 		answers = append(answers, BuildTXTRecord(instanceName, []string{"path=/", "version=1.0"}))
@@ -152,8 +155,8 @@ func (s *serverConn) checkQuestion(q dnsmessage.Question) ([]dnsmessage.Resource
 	return answers, nil
 }
 
-func (s *serverConn) sendMsg(receiver *net.UDPAddr, msg dnsmessage.Message) error {
-	s.logger.From(s.ctx).Debug("sending a dns message", "msgId", msg.Header.ID)
+func (s *serverConn) sendMsg(receiver *net.UDPAddr, msg *dnsmessage.Message) error {
+	s.logger.From(s.ctx).Debug("sending a dns message", "msgId", msg.ID)
 	packed, err := msg.Pack()
 	if err != nil {
 		return fmt.Errorf("error packing dns message: %w", err)
@@ -203,7 +206,7 @@ func (s *serverConn) sendAnnouncement() error {
 
 	records := []dnsmessage.Resource{
 		BuildPTRRecord(serviceType, instanceName),
-		BuildSRVRecord(instanceName, hostname, uint16(s.conf.Port)),
+		BuildSRVRecord(instanceName, hostname, s.conf.Port),
 		BuildTXTRecord(instanceName, []string{"path=/", "version=1.0"}),
 		BuildARecord(hostname, ip),
 	}
@@ -221,7 +224,8 @@ func (s *serverConn) sendAnnouncement() error {
 		IP:   net.ParseIP(MDNS_ADDRESS_IPV4),
 		Port: MDNS_PORT,
 	}
-	return s.sendMsg(addr, msg)
+
+	return s.sendMsg(addr, &msg)
 }
 
 func getIPBytes() [4]byte {
@@ -263,5 +267,6 @@ func getLocalIPv4() net.IP {
 			}
 		}
 	}
+
 	return nil
 }

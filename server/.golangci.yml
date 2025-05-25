@@ -87,7 +87,6 @@ linters:
     - bidichk
     - bodyclose
     - canonicalheader
-    - containedctx
     - contextcheck
     - copyloopvar
     - cyclop

@@ -20,7 +20,7 @@ type ServerConfig struct {
 	IFace       *net.Interface
 	HostName    string
 	ServiceType string
-	Port        int
+	Port        uint16
 	IPV6        bool
 }
 
@@ -39,7 +39,7 @@ func validateServerConfig(c *config.Config) error {
 	return err
 }
 
-func GetServerConfig(webport int) ServerConfig {
+func GetServerConfig(webport uint16) ServerConfig {
 	return ServerConfig{
 		IFace:       nil,
 		HostName:    HostNameFlag.Value(),

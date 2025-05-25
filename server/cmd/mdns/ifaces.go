@@ -43,6 +43,7 @@ func ifacesCmdWorkload(cmd *cobra.Command, args []string) error {
 	t.AutoWidth()
 
 	_, err = tea.NewProgram(t).Run()
+
 	return err
 }
 

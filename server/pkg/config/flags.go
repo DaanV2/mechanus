@@ -82,6 +82,12 @@ func Int(name string, def int, usage string) Flag[int] {
 	return newFlag(name, usage, viper.GetInt)
 }
 
+func UInt16(name string, def int, usage string) Flag[uint16] {
+	flags.Int(name, def, usage)
+
+	return newFlag(name, usage, viper.GetUint16)
+}
+
 func Duration(name string, def time.Duration, usage string) Flag[time.Duration] {
 	flags.Duration(name, def, usage)
 
