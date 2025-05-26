@@ -33,7 +33,9 @@ jobs:
 
       - name: 🛠️ Compile
         working-directory: client
-        run: npm run build
+        run: |
+          npm run build
+          echo "### Build completed on ${{ matrix.os }}" >> $GITHUB_STEP_SUMMARY
 
       - name: 📋 Test
         working-directory: client
@@ -41,8 +43,11 @@ jobs:
 
       - name: 🔍 Linting
         working-directory: client
-        run: npm run lint
+        run: |
+          npm run lint
+          echo "### Linting (${{ matrix.os }})" >> $GITHUB_STEP_SUMMARY
+          echo "- Linting completed. See workflow logs for details." >> $GITHUB_STEP_SUMMARY
 
       - name: 📝 Reporting
         run: |
-          echo "✅ Client - ${{ matrix.os }}" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Client checks completed for ${{ matrix.os }}." >> $GITHUB_STEP_SUMMARY

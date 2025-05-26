@@ -22,3 +22,8 @@ jobs:
           lint: true
           breaking: false
           push: false
+      - name: 📝 Proto Summary
+        run: |
+          echo "### Proto checks completed" >> $GITHUB_STEP_SUMMARY
+          echo "- Formatting and linting performed using buf." >> $GITHUB_STEP_SUMMARY
+          echo "- See workflow logs for details." >> $GITHUB_STEP_SUMMARY
