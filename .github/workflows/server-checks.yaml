@@ -30,30 +30,18 @@ jobs:
         working-directory: server
         run: |
           go build ./...
-          echo "### Build completed on ${{ matrix.os }}" >> $GITHUB_STEP_SUMMARY
 
       - name: 📋 Run Tests
         working-directory: server
         run: |
           go tool ginkgo run --output-dir reports --cover --covermode atomic -coverprofile=coverage.out ./...
-          echo "### Test Results (${{ matrix.os }})" >> $GITHUB_STEP_SUMMARY
-          if [ -f reports/coverage.out ]; then
-            COVERAGE=$(go tool cover -func=reports/coverage.out | grep total | awk '{print $3}')
-            echo "- Code coverage: $COVERAGE" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "- No coverage report found." >> $GITHUB_STEP_SUMMARY
-          fi
 
       - name: 🔍 Run linting
         uses: golangci/golangci-lint-action@v8
         with:
           version: latest
           working-directory: server
-      - name: 📝 Lint Summary
-        run: |
-          echo "### Linting (${{ matrix.os }})" >> $GITHUB_STEP_SUMMARY
-          echo "- Linting completed. See workflow logs for details." >> $GITHUB_STEP_SUMMARY
 
       - name: 📝 Reporting
         run: |
-          echo "✅ Server checks completed for ${{ matrix.os }}." >> $GITHUB_STEP_SUMMARY
+          echo "✅ Server - ${{ matrix.os }}" >> $GITHUB_STEP_SUMMARY

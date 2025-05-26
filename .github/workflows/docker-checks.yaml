@@ -26,9 +26,3 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           tags: mechanus,mechanus:latest,mechanus:${{ github.sha }}
-
-      - name: 📝 Docker Summary
-        run: |
-          echo "### Docker build summary" >> $GITHUB_STEP_SUMMARY
-          echo "- Docker images built and tagged (mechanus, latest, SHA)." >> $GITHUB_STEP_SUMMARY
-          echo "- Buildx and cache used for efficient builds." >> $GITHUB_STEP_SUMMARY
