@@ -3,7 +3,6 @@ package mdns
 import (
 	"errors"
 	"net"
-	"runtime"
 
 	"github.com/DaanV2/mechanus/server/mechanus/constants"
 	"github.com/DaanV2/mechanus/server/pkg/config"
@@ -13,7 +12,7 @@ var (
 	MDNSConfig      = config.New("mdns").WithValidate(validateServerConfig)
 	HostNameFlag    = MDNSConfig.String("mdns.hostname", constants.SERVICE_NAME, "The host name to broadcast on")
 	ServiceTypeFlag = MDNSConfig.String("mdns.servicetype", "_http._tcp.local", "The MDNS type to broadcast as")
-	IPV6Flag        = MDNSConfig.Bool("mdns.ipv6", runtime.GOOS != "windows", "Whenever or not to support ipv6 as well")
+	IPV6Flag        = MDNSConfig.Bool("mdns.ipv6", false, "Whenever or not to support ipv6 as well")
 )
 
 type ServerConfig struct {

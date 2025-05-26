@@ -37,7 +37,15 @@ jobs:
 
       - name: 🎭 Run Playwright tests
         working-directory: tests
-        run: npm run test
+        run: |
+          npm run test
+
+      - name: ✒️ export server logs
+        if: ${{ !cancelled() }}
+        working-directory: tests
+        run: |
+          mkdir ./playwright-report/server
+          docker-compose logs > ./playwright-report/server/logs.txt
 
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
