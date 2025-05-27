@@ -1,0 +1,8 @@
+package mdns
+
+const (
+	MDNS_PORT = 5353
+
+	MDNS_ADDRESS_IPV4 = "224.0.0.251"
+	MDNS_ADDRESS_IPV6 = "FF02::FB"
+)

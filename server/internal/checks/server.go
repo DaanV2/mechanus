@@ -19,6 +19,7 @@ var (
 	AdminPassword    = InitializeConfig.String("initialize.admin.password", "", "The admin password to use when initializing")
 )
 
+// Runs the necessary checks to check if the server has been properly initialized
 func InitializeServer(ctx context.Context, server *components.Server) {
 	ctx = xgorm.WithPrefix(ctx, "checks")
 

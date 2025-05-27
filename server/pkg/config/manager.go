@@ -96,6 +96,16 @@ func (c *Config) GetInt(name string) int {
 	return getValue[int](c, name)
 }
 
+func (c *Config) UInt16(name string, def int, usage string) Flag[uint16] {
+	f := UInt16(name, def, usage)
+	c.data.Store(name, f)
+
+	return f
+}
+
+func (c *Config) GetUInt16(name string) uint16 {
+	return getValue[uint16](c, name)
+}
 
 func (c *Config) Duration(name string, def time.Duration, usage string) Flag[time.Duration] {
 	f := Duration(name, def, usage)

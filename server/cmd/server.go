@@ -12,6 +12,7 @@ import (
 	"github.com/DaanV2/mechanus/server/internal/web"
 	"github.com/DaanV2/mechanus/server/pkg/application"
 	"github.com/DaanV2/mechanus/server/pkg/database"
+	"github.com/DaanV2/mechanus/server/pkg/networking/mdns"
 	"github.com/charmbracelet/log"
 	"github.com/spf13/cobra"
 )
@@ -46,13 +47,14 @@ func init() {
 	grpc.APIConfig.AddToSet(serverCmd.Flags())
 	database.DatabaseConfig.AddToSet(serverCmd.Flags())
 	checks.InitializeConfig.AddToSet(serverCmd.Flags())
+	mdns.MDNSConfig.AddToSet(serverCmd.Flags())
 }
 
 func ServerWorkload(cmd *cobra.Command, args []string) error {
 	// Setup
 	comps := new(application.ComponentManager)
 
-	server, err := components.BuildServer()
+	server, err := components.BuildServer(cmd.Context())
 	if err != nil {
 		return fmt.Errorf("couldn't setup the server: %w", err)
 	}

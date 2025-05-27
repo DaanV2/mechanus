@@ -12,7 +12,7 @@ import (
 )
 
 type Config struct {
-	Port int
+	Port uint16
 	Host string
 }
 

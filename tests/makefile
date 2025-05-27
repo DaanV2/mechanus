@@ -20,8 +20,11 @@ browsers:
 	@echo "🌐 Installing browsers..."
 	npx playwright install
 
+setup:
+	-mkdir playwright-report
+
 # Start all required services
-start-services:
+start-services: setup
 	@echo "🚀 Starting services..."
 	-$(MAKE) stop-services
 	@echo "Starting server..."
@@ -29,17 +32,26 @@ start-services:
 	@echo "Waiting for services to be ready..."
 	@timeout /t 5 >nul 2>&1 || sleep 5
 
-# Start server in Docker with host networking (for Linux)
-docker-server-linux:
-	docker run --env-file .env -d --name mechanus-server --network host mechanus server --log.level debug --log.format text --log.report-caller
-
 # Start server in Docker with port mapping (works on all platforms)
 docker-server: server
 
-# Start server in Docker with port mapping
+# Start server using Docker Compose
+default-compose-file := docker-compose.yaml
+compose-up:
+	docker compose -f $(default-compose-file) up -d mechanus-server --build
+
+compose-down:
+	docker compose -f $(default-compose-file) down
+
+# Start server in Docker Compose (replaces old server target)
 server:
-	-docker rm mechanus-server
-	docker run --name mechanus-server --env-file .env -d -p 8080:8080 -p 8443:8443 -p 8666:8666 mechanus ./mechanus server --log.level debug --log.format text --log.report-caller
+	docker compose -f $(default-compose-file) rm -sf mechanus-server || true
+	docker compose -f $(default-compose-file) up -d mechanus-server --build
+
+server-logs:
+	-mkdir ./playwright-report/server
+	docker-compose logs > ./playwright-report/server/logs.txt
+
 
 # Start local server for development
 local-server:
@@ -48,8 +60,8 @@ local-server:
 # Stop services
 stop-services:
 	@echo "Stopping services..."
-	-docker stop mechanus-server >nul 2>&1 || docker stop mechanus-server >/dev/null 2>&1
-	-docker rm mechanus-server >nul 2>&1 || docker rm mechanus-server >/dev/null 2>&1
+	docker compose -f $(default-compose-file) stop mechanus-server || true
+	docker compose -f $(default-compose-file) rm -sf mechanus-server || true
 
 # Run tests
 test:
@@ -59,4 +71,4 @@ test:
 clean: stop-services
 	@echo "🧹 Cleaning up..."
 
-.PHONY: setup browsers server docker-server docker-server-linux local-server test clean dev-setup test-setup setup start-services stop-services
+.PHONY: setup browsers server docker-server local-server test clean dev-setup test-setup setup start-services stop-services

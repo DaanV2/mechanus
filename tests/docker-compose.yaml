@@ -1,0 +1,23 @@
+version: "3.8"
+services:
+  mechanus-server:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    container_name: mechanus-server
+    env_file:
+      - .env
+    command: ./mechanus server --log.level debug --log.format text --log.report-caller
+    ports:
+      - "8080:8080"
+      - "8443:8443"
+      - "8666:8666"
+    restart: unless-stopped
+    networks:
+      - mechanus-public
+
+networks:
+  mechanus-public:
+    driver: bridge
+    # This network is attachable and accessible for development
+    attachable: true

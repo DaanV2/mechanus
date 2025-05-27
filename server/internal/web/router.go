@@ -12,16 +12,15 @@ type WEBServices struct {
 	Components *application.ComponentManager
 }
 
-func WebRouter(services WEBServices) *http.ServeMux {
+func WebRouter(conf ServerConfig, services WEBServices) *http.ServeMux {
 	router := http.NewServeMux()
 
 	routes.RegisterHealthChecks(router, services.Components)
 	routes.RegisterReadyChecks(router, services.Components)
 
 	// Files
-	folder := StaticFolderFlag.Value()
-	log.Debug("serving files from: " + folder)
-	router.Handle("/", http.FileServer(http.Dir(folder)))
+	log.Debug("serving files from: " + conf.StaticFolder)
+	router.Handle("/", http.FileServer(http.Dir(conf.StaticFolder)))
 
 	return router
 }
