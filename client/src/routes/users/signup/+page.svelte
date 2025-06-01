@@ -1,13 +1,28 @@
 <script lang="ts">
+  import type { Client } from '@connectrpc/connect';
+  import { onMount } from 'svelte';
+  import { createLoginClient, createUserClient } from '../../../lib/stores/clients';
+  import type { UserService } from '../../../proto/users/v1/users_connect';
+
   let username = $state('');
   let password = $state('');
   let confirm_password = $state('');
 
-  function handleSubmit(event: Event) {
-    event.preventDefault();
-    // Handle login logic here
-    console.log('Username:', username);
-    console.log('Password:', password);
+  let userClient: Client<typeof UserService>;
+
+  onMount(() => {
+    userClient = createUserClient();
+  });
+
+  async function handleSubmit(event: Event) {
+    if (!userClient) {
+      throw new Error("couldn't grab login rpcs");
+    }
+    if (password != confirm_password) {
+      throw new Error('passwords not the same');
+    }
+
+    const response = await userClient.create({ username, password });
   }
 
   // Computed property to check if both fields are filled
@@ -25,14 +40,14 @@
     <input type="text" class="login-input" placeholder="Username" bind:value={username} required />
     <input
       type="password"
-      class="login-input resizable-box"
+      class="login-input p-2 border rounded resizable-box"
       placeholder="Password"
       bind:value={password}
       required
     />
     <input
       type="password"
-      class="p-2 border border-gray-300 rounded resizable-box"
+      class="login-input p-2 border rounded resizable-box"
       placeholder="Confirm Password"
       bind:value={confirm_password}
       required
