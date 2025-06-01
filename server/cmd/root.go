@@ -39,6 +39,11 @@ func init() {
 	cmd_mdns.AddCommand(rootCmd)
 }
 
+// RootCommand returns the top level command of this package
+func RootCommand() *cobra.Command {
+	return rootCmd
+}
+
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {

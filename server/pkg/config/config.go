@@ -1,6 +1,8 @@
 package config
 
 import (
+	"errors"
+	"iter"
 	"time"
 
 	xsync "github.com/DaanV2/mechanus/server/pkg/extensions/sync"
@@ -19,13 +21,26 @@ func (c *Config) AddToSet(set *pflag.FlagSet) {
 	}
 }
 
-func (c *Config) MustLoad(name string) BaseFlag {
+func (c *Config) Load(name string) (BaseFlag, error) {
 	i, ok := c.data.Load(name)
 	if !ok {
-		panic("couldn't find " + name + " from " + c.name)
+		return nil, errors.New("couldn't find " + name + " from " + c.name)
 	}
 
-	return i
+	return i, nil
+}
+
+func (c *Config) MustLoad(name string) BaseFlag {
+	item, err := c.Load(name)
+	if err != nil {
+		panic(err)
+	}
+
+	return item
+}
+
+func (c *Config) All() iter.Seq2[string, BaseFlag] {
+	return c.data.Items()
 }
 
 func (c *Config) Bool(name string, def bool, usage string) Flag[bool] {
