@@ -41,3 +41,17 @@ func Get(name string) *Config {
 	return c
 }
 
+func AllConfigs() []*Config {
+	result := make([]*Config, 0)
+
+	manager.configs.Range(func(key, value any) bool {
+		c, ok := value.(*Config)
+		if ok {
+			result = append(result, c)
+		}
+
+		return true
+	})
+
+	return result
+}

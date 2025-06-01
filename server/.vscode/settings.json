@@ -4,6 +4,7 @@
   "go.lintFlags": ["--fix"],
   "go.coverOnSave": true,
   "go.coverMode": "atomic",
+  "go.coverageOptions": "showBothCoveredAndUncoveredCode",
   "go.coverageDecorator": {
     "type": "gutter",
     "coveredHighlightColor": "rgba(64,128,128,0.5)",
@@ -13,5 +14,8 @@
     "coveredGutterStyle": "blockblue",
     "uncoveredGutterStyle": "blockyellow"
   },
-  "go.coverageOptions": "showBothCoveredAndUncoveredCode"
+
+  "[markdown]": {
+    "editor.wordWrap": "off"
+  }
 }

@@ -6,11 +6,6 @@ import (
 	"github.com/charmbracelet/log"
 )
 
-const (
-	DEFAULT_DIR_PERMISSIONS  = 0750
-	DEFAULT_FILE_PERMISSIONS = 0600
-)
-
 // MakeDirAll creates the given folder, with all its parents.
 // Logs any potential error instead of return them
 func MakeDirAll(folder string) {

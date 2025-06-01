@@ -1,0 +1,6 @@
+package xio
+
+const (
+	DEFAULT_DIR_PERMISSIONS  = 0750
+	DEFAULT_FILE_PERMISSIONS = 0600
+)

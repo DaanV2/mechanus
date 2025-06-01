@@ -22,3 +22,7 @@ checks:
 	$(MAKE) generate
 	$(MAKE) test
 	$(MAKE) lint
+	$(MAKE) documentation
+
+documentation:
+	go run ./scripts/documentation
