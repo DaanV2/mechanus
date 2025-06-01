@@ -26,3 +26,6 @@ checks:
 
 documentation:
 	go run ./scripts/documentation
+
+start-server:
+	go run main.go server
