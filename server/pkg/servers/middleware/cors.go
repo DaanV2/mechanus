@@ -10,6 +10,7 @@ func GRPCCORS(next http.Handler) http.Handler {
 		w.Header().Set("Access-Control-Expose-Headers", "Grpc-Status, Grpc-Message, Grpc-Status-Details-Bin, X-Grpc-Web, X-User-Agent, connect-protocol-version")
 		if r.Method == http.MethodOptions {
 			w.WriteHeader(http.StatusOK)
+
 			return
 		}
 		next.ServeHTTP(w, r)

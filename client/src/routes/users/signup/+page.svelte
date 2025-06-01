@@ -1,28 +1,18 @@
 <script lang="ts">
-  import type { Client } from '@connectrpc/connect';
-  import { onMount } from 'svelte';
   import { createLoginClient, createUserClient } from '../../../lib/stores/clients';
-  import type { UserService } from '../../../proto/users/v1/users_connect';
 
   let username = $state('');
   let password = $state('');
   let confirm_password = $state('');
 
-  let userClient: Client<typeof UserService>;
-
-  onMount(() => {
-    userClient = createUserClient();
-  });
-
-  async function handleSubmit(event: Event) {
-    if (!userClient) {
-      throw new Error("couldn't grab login rpcs");
-    }
+  async function handleSubmit() {
     if (password != confirm_password) {
       throw new Error('passwords not the same');
     }
 
-    const response = await userClient.create({ username, password });
+    await createUserClient().create({ username, password });
+    const login = await createLoginClient().login({ username, password });
+    console.log(login.token, login.type);
   }
 
   // Computed property to check if both fields are filled
