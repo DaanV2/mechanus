@@ -49,6 +49,7 @@ func AllConfigs() []*Config {
 		if ok {
 			result = append(result, c)
 		}
+
 		return true
 	})
 

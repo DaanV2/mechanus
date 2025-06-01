@@ -36,9 +36,10 @@ const settings_section_template = `{{ $header := repeat "#" .Depth }}
 
 func repeat(s string, count int) string {
 	result := ""
-	for i := 0; i < count; i++ {
+	for range count {
 		result += s
 	}
+
 	return result
 }
 

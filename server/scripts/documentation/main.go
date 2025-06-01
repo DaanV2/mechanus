@@ -18,10 +18,6 @@ import (
 	"golang.org/x/text/language"
 )
 
-var (
-	output_dir = filepath.Join(".", "docs", "cmd")
-)
-
 type markdownBuilder struct {
 	sections []*Settings
 }
@@ -121,6 +117,7 @@ func createField(key, configKey string, value any) Field {
 	f := findFlags(configKey)
 	if f == nil {
 		log.Error("cannot find flag", "config", configKey)
+
 		return result
 	}
 
