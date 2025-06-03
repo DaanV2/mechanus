@@ -55,9 +55,10 @@ func (l *LoginService) Login(ctx context.Context, req *connect.Request[usersv1.L
 		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("cannot create token: %w", err))
 	}
 
-	return connect.NewResponse(&usersv1.LoginResponse{
-		Token: token,
-	}), nil
+	resp := connect.NewResponse(&usersv1.LoginResponse{Token: token, Type: "Bearer"})
+	resp.Header().Set("Set-Cookie", "access-token=Bearer "+token+"; Path=/; HttpOnly; SameSite=Lax")
+
+	return resp, nil
 }
 
 // Refresh implements usersv1connect.LoginServiceHandler.
@@ -88,5 +89,8 @@ func (l *LoginService) Refresh(ctx context.Context, req *connect.Request[usersv1
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
 
-	return connect.NewResponse(&usersv1.RefreshTokenResponse{Token: token}), nil
+	resp := connect.NewResponse(&usersv1.RefreshTokenResponse{Token: token, Type: "Bearer"})
+	resp.Header().Set("Set-Cookie", "access-token=Bearer "+token+"; Path=/; HttpOnly; SameSite=Lax")
+
+	return resp, nil
 }

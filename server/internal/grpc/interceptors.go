@@ -43,6 +43,9 @@ func (m *MetadataInterceptor) WrapUnary(next connect.UnaryFunc) connect.UnaryFun
 		))
 
 		resp, err := next(ctx, req)
+		if err != nil {
+			return resp, err
+		}
 		if resp != nil && resp.Header() != nil {
 			resp.Header().Set("Server", constants.SERVICE_NAME)
 		}

@@ -66,6 +66,13 @@ export class LoginResponse extends Message<LoginResponse> {
    */
   token = "";
 
+  /**
+   * The prefix to be used, so far always Bearer
+   *
+   * @generated from field: string type = 2;
+   */
+  type = "";
+
   constructor(data?: PartialMessage<LoginResponse>) {
     super();
     proto3.util.initPartial(data, this);
@@ -75,6 +82,7 @@ export class LoginResponse extends Message<LoginResponse> {
   static readonly typeName = "users.v1.LoginResponse";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "token", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "type", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): LoginResponse {
@@ -144,6 +152,13 @@ export class RefreshTokenResponse extends Message<RefreshTokenResponse> {
    */
   token = "";
 
+  /**
+   * The prefix to be used, so far always Bearer
+   *
+   * @generated from field: string type = 2;
+   */
+  type = "";
+
   constructor(data?: PartialMessage<RefreshTokenResponse>) {
     super();
     proto3.util.initPartial(data, this);
@@ -153,6 +168,7 @@ export class RefreshTokenResponse extends Message<RefreshTokenResponse> {
   static readonly typeName = "users.v1.RefreshTokenResponse";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "token", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "type", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): RefreshTokenResponse {

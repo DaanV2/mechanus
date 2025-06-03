@@ -22,6 +22,8 @@ message LoginRequest {
 message LoginResponse {
   // The JWT token, without prefix
   string token = 1;
+  // The prefix to be used, so far always Bearer
+  string type = 2;
 }
 
 message RefreshTokenRequest {
@@ -32,4 +34,6 @@ message RefreshTokenRequest {
 message RefreshTokenResponse {
   // The JWT token, without prefix
   string token = 1;
+  // The prefix to be used, so far always Bearer
+  string type = 2;
 }

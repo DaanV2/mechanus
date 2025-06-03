@@ -1,13 +1,18 @@
 <script lang="ts">
+  import { createLoginClient, createUserClient } from '../../../lib/stores/clients';
+
   let username = $state('');
   let password = $state('');
   let confirm_password = $state('');
 
-  function handleSubmit(event: Event) {
-    event.preventDefault();
-    // Handle login logic here
-    console.log('Username:', username);
-    console.log('Password:', password);
+  async function handleSubmit() {
+    if (password != confirm_password) {
+      throw new Error('passwords not the same');
+    }
+
+    await createUserClient().create({ username, password });
+    const login = await createLoginClient().login({ username, password });
+    console.log(login.token, login.type);
   }
 
   // Computed property to check if both fields are filled
@@ -25,14 +30,14 @@
     <input type="text" class="login-input" placeholder="Username" bind:value={username} required />
     <input
       type="password"
-      class="login-input resizable-box"
+      class="login-input p-2 border rounded resizable-box"
       placeholder="Password"
       bind:value={password}
       required
     />
     <input
       type="password"
-      class="p-2 border border-gray-300 rounded resizable-box"
+      class="login-input p-2 border rounded resizable-box"
       placeholder="Confirm Password"
       bind:value={confirm_password}
       required
