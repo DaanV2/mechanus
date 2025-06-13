@@ -53,13 +53,13 @@ func (j *JWTMiddleware) WrapUnary(next connect.UnaryFunc) connect.UnaryFunc {
 // validateAndInject retrieves the bearer jwt from the request, validates it and stores the result on the context
 // Which can be retrieved with [JWTFromContext]
 func (j *JWTMiddleware) validateAndInject(ctx context.Context, headers http.Header) context.Context {
-	auth := headers.Get("Authorization")
-	if !strings.HasPrefix(auth, "Bearer ") {
+	jwtStr := getJwtValue(headers)
+	if jwtStr == "" {
 		return ctx
 	}
 
-	auth = strings.TrimPrefix(auth, "Bearer ")
-	token, err := j.jwtService.Validate(ctx, auth)
+	jwtStr = strings.TrimPrefix(jwtStr, "Bearer ")
+	token, err := j.jwtService.Validate(ctx, jwtStr)
 
 	claims, ok := authenication.GetClaims(token.Claims)
 	if !ok {
@@ -70,8 +70,31 @@ func (j *JWTMiddleware) validateAndInject(ctx context.Context, headers http.Head
 		ctx = ContextWithJWT(ctx, c)
 		ctx = logging.Context(ctx, logging.From(ctx).With("user.valid", c.Claims, "user.id", c.Claims.User.ID, "user.name", c.Claims.User.Name))
 	} else {
-		j.logger.Error("somehow the claims are not expect as it should", "token", auth)
+		j.logger.Error("somehow the claims are not expect as it should", "token", jwtStr)
 	}
 
 	return ctx
+}
+
+func getJwtValue(headers http.Header) string {
+	for _, auth := range headers.Values("Authorization") {
+		if strings.HasPrefix(auth, "Bearer ") {
+			return auth
+		}
+	}
+
+	for _, cookieData := range headers.Values("Cookie") {
+		cookies, err := http.ParseCookie(cookieData)
+		if err != nil {
+			continue
+		}
+
+		for _, cookie := range cookies {
+			if cookie.Name == "access-token" && strings.HasPrefix(cookie.Value, "Bearer ") {
+				return cookie.Value
+			}
+		}
+	}
+
+	return ""
 }
