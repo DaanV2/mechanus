@@ -1,22 +1,25 @@
 import type { Interceptor } from '@connectrpc/connect';
 import { type Transport } from '@connectrpc/connect';
 import { createConnectTransport } from '@connectrpc/connect-web';
+import { getCookie, KEY_ACCESS_TOKEN } from '../cookies';
 
 export const GRPC_PORT = 8666;
 
-// Helper to get a cookie value by name
-function getCookie(name: string): string | undefined {
-  const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
-  return match ? decodeURIComponent(match[2]) : undefined;
-}
-
 // Interceptor to inject access-token as Authorization header
 const accessTokenInterceptor: Interceptor = (next) => async (req) => {
-  const token = getCookie('access-token');
+  const token = getCookie(KEY_ACCESS_TOKEN);
   if (token) {
     req.header.set('Authorization', `Bearer ${token}`);
   }
-  return next(req);
+
+  const response = await next(req);
+  const s = response.header.get('Set-Cookie');
+  if (s) {
+    console.log('setting cookie');
+    document.cookie = s;
+  }
+
+  return response;
 };
 
 export function createClient(): Transport {

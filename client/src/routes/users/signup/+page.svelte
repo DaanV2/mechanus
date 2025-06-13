@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { redirect } from '@sveltejs/kit';
   import { createLoginClient, createUserClient } from '../../../lib/stores/clients';
 
   let username = $state('');
@@ -13,6 +14,8 @@
     await createUserClient().create({ username, password });
     const login = await createLoginClient().login({ username, password });
     console.log(login.token, login.type);
+
+    redirect(302, '/users/profile');
   }
 
   // Computed property to check if both fields are filled
@@ -46,7 +49,8 @@
       <p class="text-red-500 resizable-box">The password doesn't match the confirmed password</p>
     {/if}
 
-    <button type="submit" class="action-button" disabled={!isFormValid}> Login </button>
+    <button type="submit" class="action-button" disabled={!isFormValid}> Signup </button>
+    <a href="/users/login" class="action-button">Already have an account?</a>
   </form>
 </div>
 
