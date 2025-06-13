@@ -1,6 +1,6 @@
 package models
 
 type KeyValue struct {
-	Key   string
+	Key   string `gorm:"primaryKey;index"`
 	Value []byte
 }
