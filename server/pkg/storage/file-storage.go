@@ -2,6 +2,7 @@ package storage
 
 import (
 	"context"
+	"iter"
 	"os"
 	"path/filepath"
 
@@ -115,6 +116,34 @@ func (f *fileDirStorage[T]) Set(ctx context.Context, item T) error {
 	path := f.filepath(item.GetID())
 
 	return f.write(ctx, path, d)
+}
+
+func (f *fileDirStorage[T]) Keys(ctx context.Context) iter.Seq[string] {
+	return func(yield func(string) bool) {
+		entries, err := os.ReadDir(f.dir)
+		if err != nil {
+			return
+		}
+		for _, entry := range entries {
+			select {
+			case <-ctx.Done():
+				return
+			default:
+			}
+			if entry.IsDir() {
+				continue
+			}
+			name := entry.Name()
+			ext := filepath.Ext(name)
+			if ext != ".dat" {
+				continue
+			}
+			id := name[:len(name)-len(ext)]
+			if !yield(id) {
+				return
+			}
+		}
+	}
 }
 
 func (f *fileDirStorage[T]) filepath(id string) string {

@@ -3,12 +3,15 @@ package storage
 import (
 	"context"
 	"fmt"
+	"iter"
+	"strings"
 
 	"github.com/DaanV2/mechanus/server/internal/logging"
 	"github.com/DaanV2/mechanus/server/pkg/database"
 	"github.com/DaanV2/mechanus/server/pkg/database/models"
 	xencoding "github.com/DaanV2/mechanus/server/pkg/extensions/encoding"
-	"github.com/DaanV2/mechanus/server/pkg/generics"
+	"github.com/daanv2/go-kit/generics"
+
 	"gorm.io/gorm/clause"
 )
 
@@ -103,4 +106,25 @@ func (d *dbStorage[T]) Set(ctx context.Context, item T) error {
 	tx := d.db.WithContext(ctx).Clauses(cl).Create(&kv)
 
 	return tx.Error
+}
+
+func (d *dbStorage[T]) Keys(ctx context.Context) iter.Seq[string] {
+	return func(yield func(string) bool) {
+		var kvs []models.KeyValue
+		tx := d.db.WithContext(ctx).Where("`key` LIKE ?", d.prefix+"%").Select("key").Find(&kvs)
+		if tx.Error != nil {
+			return
+		}
+		for _, kv := range kvs {
+			select {
+			case <-ctx.Done():
+				return
+			default:
+			}
+			dbID, _ := strings.CutPrefix(kv.Key, d.prefix)
+			if !yield(dbID) {
+				return
+			}
+		}
+	}
 }
