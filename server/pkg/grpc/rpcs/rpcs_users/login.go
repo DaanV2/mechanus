@@ -96,10 +96,10 @@ func (l *LoginService) Refresh(ctx context.Context, req *connect.Request[usersv1
 	resp := connect.NewResponse(result)
 
 	cookies.Set(resp, &http.Cookie{
-		Name: "access-token",
-		Value: fmt.Sprintf("%s %s", result.Type, result.Token),
-		Path: "/",
-		Expires: time.Now().Add(l.jwts.Options().TokenDuration),
+		Name:     "access-token",
+		Value:    fmt.Sprintf("%s %s", result.GetType(), result.GetToken()),
+		Path:     "/",
+		Expires:  time.Now().Add(l.jwts.Options().TokenDuration),
 		SameSite: http.SameSiteStrictMode,
 	})
 

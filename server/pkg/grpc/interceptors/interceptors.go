@@ -45,6 +45,7 @@ func (m *LoggingInterceptor) WrapUnary(next connect.UnaryFunc) connect.UnaryFunc
 		resp, err := next(ctx, req)
 		if err != nil {
 			logger.Error("unary error", "error", err)
+
 			return resp, err
 		}
 		if resp != nil && resp.Header() != nil {

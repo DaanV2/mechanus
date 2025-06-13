@@ -14,5 +14,6 @@ func NewKeyManager(
 	if err == nil {
 		return application.Register(cm, manager), nil
 	}
+
 	return nil, err
 }

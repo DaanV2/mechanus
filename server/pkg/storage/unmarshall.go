@@ -24,7 +24,7 @@ func unmarshallGeneric[T any](data []byte) (T, error) {
 
 	err := xencoding.Unmarshal(data, unmarshalTarget)
 	if err != nil {
-		return generics.Empty[T](), nil
+		return generics.Empty[T](), err
 	}
 
 	if v, ok := unmarshalTarget.(T); ok {
