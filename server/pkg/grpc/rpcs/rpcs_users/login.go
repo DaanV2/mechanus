@@ -4,12 +4,15 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
+	"time"
 
 	"connectrpc.com/connect"
 	"github.com/DaanV2/mechanus/server/pkg/authenication"
 	xcrypto "github.com/DaanV2/mechanus/server/pkg/extensions/crypto"
 	usersv1 "github.com/DaanV2/mechanus/server/pkg/grpc/gen/users/v1"
 	"github.com/DaanV2/mechanus/server/pkg/grpc/gen/users/v1/usersv1connect"
+	"github.com/DaanV2/mechanus/server/pkg/http/cookies"
 	user_service "github.com/DaanV2/mechanus/server/pkg/services/users"
 )
 
@@ -89,8 +92,16 @@ func (l *LoginService) Refresh(ctx context.Context, req *connect.Request[usersv1
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
 
-	resp := connect.NewResponse(&usersv1.RefreshTokenResponse{Token: token, Type: "Bearer"})
-	resp.Header().Set("Set-Cookie", "access-token=Bearer "+token+"; Path=/; HttpOnly; SameSite=Lax")
+	result := &usersv1.RefreshTokenResponse{Token: token, Type: "Bearer"}
+	resp := connect.NewResponse(result)
+
+	cookies.Set(resp, &http.Cookie{
+		Name: "access-token",
+		Value: fmt.Sprintf("%s %s", result.Type, result.Token),
+		Path: "/",
+		Expires: time.Now().Add(l.jwts.Options().TokenDuration),
+		SameSite: http.SameSiteStrictMode,
+	})
 
 	return resp, nil
 }

@@ -78,27 +78,52 @@ func (u *UserService) Get(ctx context.Context, req *connect.Request[usersv1.GetU
 	}
 
 	if !u.roleService.HasRole(jwt.Claims, roles.Viewer) {
-		logger.From(ctx).Error("user does not have the correct permissions", "roles", jwt.Claims.User.Roles)
-
-		return nil, connect.NewError(connect.CodePermissionDenied, errors.New("wrong permissions"))
+		return nil, connect.NewError(connect.CodePermissionDenied, errors.New("expecting atleast a viewer role"))
 	}
 
-	user, err := u.users.Get(ctx, req.Msg.GetId())
+	// If admin or current user
+	if u.roleService.HasRole(jwt.Claims, roles.Admin) || jwt.Claims.User.ID == id {
+		user, cerr := u.getFullInfo(ctx, id)
+		if cerr != nil {
+			logger.From(ctx).Error("error during retrieve of user", "error", cerr)
+
+			return nil, connect.NewError(connect.CodeInvalidArgument, xerrors.ErrNotExist)
+		}
+
+		return connect.NewResponse(&usersv1.GetUserResponse{User: user}), nil
+	}
+
+	user, err := u.getReducedInfo(ctx, id)
 	if err != nil {
 		logger.From(ctx).Error("error during retrieve of user", "error", err)
 
 		return nil, connect.NewError(connect.CodeInvalidArgument, xerrors.ErrNotExist)
 	}
 
-	msg := usersv1.GetUserResponse{
-		User: &usersv1.User{
-			Id: user.ID,
-		},
+	return connect.NewResponse(&usersv1.GetUserResponse{User: user}), nil
+}
+
+func (u *UserService) getFullInfo(ctx context.Context, id string) (*usersv1.User, error) {
+	user, err := u.users.Get(ctx, id)
+	if err != nil {
+		return nil, err
 	}
 
-	if u.roleService.HasRole(jwt.Claims, roles.User) {
-		msg.User.Name = user.Name
+	return &usersv1.User{
+		Id: user.ID,
+		Name: user.Name,
+	}, nil
+}
+
+func (u *UserService) getReducedInfo(ctx context.Context, id string) (*usersv1.User, error) {
+	user, err := u.users.Get(ctx, id)
+	if err != nil {
+		return nil, err
 	}
 
-	return connect.NewResponse(&msg), nil
+	return &usersv1.User{
+		Id: user.ID,
+		Name: user.Name,
+	}, nil
+
 }

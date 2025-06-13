@@ -20,5 +20,17 @@
 </script>
 
 <svelte:head>
-  <title>User</title>
+  {#if user}
+    <title>User - {user.name}</title>
+  {:else}
+    <title>User</title>
+  {/if}
 </svelte:head>
+
+<div class="centered-container">
+  <div class="box-container">
+    {#if user}
+      <p id="user.name">name: {user.name}</p>
+    {/if}
+  </div>
+</div>

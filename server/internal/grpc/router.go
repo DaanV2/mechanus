@@ -33,7 +33,7 @@ func NewRouter(services RPCS) http.Handler {
 	RegisterService(router, usersv1connect.NewUserServiceHandler, services.User, opts...)
 
 	// Wrap the router with CORS middleware before h2c
-	return h2c.NewHandler(grpc_handlers.CORS((router)), &http2.Server{})
+	return h2c.NewHandler(grpc_handlers.CORS(router), &http2.Server{})
 }
 
 func RegisterService[T any](router *http.ServeMux, create func(data T, opts ...connect.HandlerOption) (string, http.Handler), input T, opts ...connect.HandlerOption) {

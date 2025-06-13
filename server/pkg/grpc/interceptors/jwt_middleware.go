@@ -62,7 +62,7 @@ func (j *JWTMiddleware) validateAndInject(ctx context.Context, headers http.Head
 	token, err := j.jwtService.Validate(ctx, jwtStr)
 
 	claims, ok := authenication.GetClaims(token.Claims)
-	if !ok {
+	if ok {
 		c := JWTContext{
 			Valid:  err == nil,
 			Claims: claims,
