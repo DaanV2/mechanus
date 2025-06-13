@@ -100,10 +100,7 @@ func (f *fileDirStorage[T]) Get(ctx context.Context, id string) (T, error) {
 		return generics.Empty[T](), err
 	}
 
-	var result T
-	err = xencoding.Unmarshal(d, result)
-
-	return result, err
+	return unmarshallGeneric[T](d)
 }
 
 // Set implements Storage.

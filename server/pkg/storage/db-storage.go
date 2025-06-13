@@ -72,17 +72,16 @@ func (d *dbStorage[T]) Get(ctx context.Context, id string) (T, error) {
 	id = d.dbID(id)
 	logging.FromPrefix(ctx, "db-storage").Debug("reading item: " + id)
 
-	var kv models.KeyValue
+	kv := models.KeyValue{
+		Key: id,
+	}
 
-	tx := d.db.WithContext(ctx).Take(&kv, id)
+	tx := d.db.WithContext(ctx).Take(&kv)
 	if tx.Error != nil {
 		return generics.Empty[T](), tx.Error
 	}
 
-	var result T
-	err := xencoding.Unmarshal(kv.Value, result)
-
-	return result, err
+	return unmarshallGeneric[T](kv.Value)
 }
 
 // Set implements Storage.
