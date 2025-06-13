@@ -51,6 +51,10 @@ func (u *UserService) Create(ctx context.Context, req *connect.Request[usersv1.C
 
 	err := u.users.Create(ctx, &user)
 	if err != nil {
+		if errors.Is(err, user_service.ErrUserAlreadyExists) {
+			return nil, connect.NewError(connect.CodeAlreadyExists, err)
+		}
+
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
 
