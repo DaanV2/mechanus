@@ -58,7 +58,7 @@ func ServerWorkload(cmd *cobra.Command, args []string) error {
 	// Start initial components
 	err = server.Components.AfterInitialize(cmd.Context())
 	if err != nil {
-		log.Error("errors while performing initialization calls", "error", err)
+		log.Fatal("errors while performing initialization calls", "error", err)
 	}
 
 	checks.InitializeServer(cmd.Context(), server)
