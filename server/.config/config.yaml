@@ -1,23 +1,22 @@
 api:
-    host: ""
-    port: 8666
+  host: ""
+  port: 8666
 database:
-    connmaxlifetime: 1h0m0s
-    dsn: db.sqlite
-    maxidleconns: 2
-    maxopenconns: 0
-    type: sqlite
+  connmaxlifetime: 1h0m0s
+  dsn: db.sqlite
+  maxidleconns: 2
+  maxopenconns: 0
+  type: sqlite
 initialize:
-    admin:
-        password: ""
-        username: ""
+  admin:
+    password: "admin"
+    username: "admin"
 log:
-    format: text
-    level: debug
-    report-caller: false
-log_level: debug
+  format: text
+  level: debug
+  report-caller: false
 web:
-    host: ""
-    port: 8080
-    static:
-        folder: /web
+  host: ""
+  port: 8080
+  static:
+    folder: /web
