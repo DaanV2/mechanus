@@ -1,7 +1,8 @@
 <script lang="ts">
-  import type { ConnectError } from '@connectrpc/connect';
   import { Code } from '@connectrpc/connect';
-  export let error: ConnectError | Error | any | null = null;
+  import type { MechanusError } from './errors.svelte';
+
+  export let error: MechanusError = null;
 
   $: isVisible = !!error;
 
@@ -58,7 +59,7 @@
         {/if}
       </ul>
     {:else}
-      <strong>Error:</strong> {error?.message || error}
+      <strong>Error:</strong> {typeof error === 'object' ? (error?.message ?? error) : error}
     {/if}
   </div>
 {/if}

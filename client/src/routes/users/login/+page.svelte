@@ -1,36 +1,47 @@
 <script lang="ts">
-  import { redirect } from '@sveltejs/kit';
+  import { goto } from '$app/navigation';
+  import ErrorMessage from '$lib/components/error-message.svelte';
+  import { Code, ConnectError } from '@connectrpc/connect';
   import { createClient } from '../../../lib/api/client';
   import { createLoginClient } from '../../../lib/api/users_v1';
-  import { ConnectError } from '@connectrpc/connect';
-  import ErrorMessage from '$lib/components/error-message.svelte';
+  import type { MechanusError } from '../../../lib/components/errors.svelte';
+  import { KEY_ACCESS_TOKEN, setCookie } from '../../../lib/cookies';
 
-  let username = '';
-  let password = '';
-  let errorObj: ConnectError | Error | null = null;
+  let username = $state('');
+  let password = $state('');
+  let errorObj = $state<MechanusError>(null);
 
-  $: isFormValid = username.trim() !== '' && password.trim() !== '';
+  let isFormValid = $derived(username.trim() !== '' && password.trim() !== '');
 
   async function handleSubmit(event: Event) {
     event.preventDefault();
     errorObj = null;
     if (!isFormValid) return;
 
-    const transport = createClient();
-    const loginClient = createLoginClient(transport);
-
-    try {
-      const login = await loginClient.login({ username, password });
-      redirect(302, '/users/profile');
-    } catch (err) {
+    return login().catch((err) => {
       if (err instanceof ConnectError) {
         errorObj = err;
+
+        if (err.code == Code.Unauthenticated) {
+          errorObj = 'wrong password / username';
+        }
       } else if (err instanceof Error) {
         errorObj = err;
       } else {
         errorObj = new Error('An unexpected error occurred.');
       }
-    }
+    });
+  }
+
+  async function login() {
+    if (!isFormValid) return;
+
+    const transport = createClient();
+    const loginClient = createLoginClient(transport);
+    const login = await loginClient.login({ username, password });
+    setCookie(KEY_ACCESS_TOKEN, `${login.type} ${login.token}`);
+
+    goto('/users/profile');
   }
 </script>
 
@@ -39,7 +50,7 @@
 </svelte:head>
 
 <div class="centered-container">
-  <form class="box-container" on:submit={handleSubmit}>
+  <form class="box-container" onsubmit={handleSubmit}>
     <input type="text" class="login-input" placeholder="Username" bind:value={username} required />
     <input
       type="password"

@@ -4,6 +4,10 @@ export function getCookie(name: string): string | undefined {
   return match ? decodeURIComponent(match[2]) : undefined;
 }
 
-export function setCookie(value: string) {
-  document.cookie = value;
+export function hasCookie(name: string): boolean {
+  return document.cookie.includes(`${name}=`);
+}
+
+export function setCookie(key: string, value: string) {
+  document.cookie = `${key}=${value}`;
 }

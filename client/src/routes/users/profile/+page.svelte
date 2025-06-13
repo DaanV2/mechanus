@@ -1,15 +1,21 @@
 <script lang="ts">
-  import { redirect } from '@sveltejs/kit';
+  import { goto } from '$app/navigation';
   import { onMount } from 'svelte';
   import { UserHandler } from '../../../lib/handlers/user';
+  import { User } from '../../../proto/users/v1/users_pb';
 
-  onMount(() => {
+  let user = $state<User | undefined>(undefined);
+
+  onMount(async () => {
     const handler = new UserHandler();
 
-    if (handler.IsLoggedIn()) {
+    if (!handler.hasLoggedinUser) {
       // redirect to login
-      redirect(302, '/users/login');
+      return goto('/users/login');
     }
+
+    const data = await handler.serverData();
+    user = data.user;
   });
 </script>
 

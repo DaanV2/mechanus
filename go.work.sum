@@ -69,8 +69,8 @@ github.com/containernetworking/plugins v1.2.0/go.mod h1:/VjX4uHecW5vVimFa1wkG4s+
 github.com/containers/ocicrypt v1.1.10/go.mod h1:YfzSSr06PTHQwSTUKqDSjish9BeW1E4HUmreluQcMd8=
 github.com/coreos/go-systemd/v22 v22.5.0/go.mod h1:Y58oyj3AT4RCenI/lSvhwexgC+NSVTIJ3seZv2GcEnc=
 github.com/cristalhq/acmd v0.12.0/go.mod h1:LG5oa43pE/BbxtfMoImHCQN++0Su7dzipdgBjMCBVDQ=
-github.com/daanv2/go-kit v1.0.4 h1:MZx39jba7hRkJKHRxZN/tUCVyeMpgD+PgIcSj8pcvc4=
-github.com/daanv2/go-kit v1.0.4/go.mod h1:/MtjrAqMmy7Y7UJQTuniUZGivN//b6eoKtYx7DbB1n0=
+github.com/daanv2/go-kit v1.0.6 h1:3IpTgrX72ydF0MUvUZvhCpKcVtYSGrE31NMWDSSTetY=
+github.com/daanv2/go-kit v1.0.6/go.mod h1:/MtjrAqMmy7Y7UJQTuniUZGivN//b6eoKtYx7DbB1n0=
 github.com/danieljoos/wincred v1.2.1/go.mod h1:uGaFL9fDn3OLTvzCGulzE+SzjEe5NGlh5FdCcyfPwps=
 github.com/decred/dcrd/dcrec/secp256k1/v4 v4.2.0/go.mod h1:v57UDF4pDQJcEfFUCRop3lJL149eHGSe9Jvczhzjo/0=
 github.com/docker/go-events v0.0.0-20190806004212-e31b211e4f1c/go.mod h1:Uw6UezgYA44ePAFQYUehOuCzmy5zmg/+nl2ZfMWGkpA=

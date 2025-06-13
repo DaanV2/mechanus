@@ -1,25 +1,20 @@
 import type { Interceptor } from '@connectrpc/connect';
 import { type Transport } from '@connectrpc/connect';
 import { createConnectTransport } from '@connectrpc/connect-web';
-import { getCookie, KEY_ACCESS_TOKEN } from '../cookies';
 
 export const GRPC_PORT = 8666;
 
 // Interceptor to inject access-token as Authorization header
-const accessTokenInterceptor: Interceptor = (next) => async (req) => {
-  const token = getCookie(KEY_ACCESS_TOKEN);
-  if (token) {
-    req.header.set('Authorization', `Bearer ${token}`);
+const cookInjector: Interceptor = (next) => (req) => {
+  // Get all cookies as a string
+  const cookies = document.cookie;
+  if (cookies && cookies.length > 0) {
+    console.log('injecting cookies');
+    req.header.append('Cookie', cookies);
+    const h = Array.from(req.header.values());
+    console.log(h);
   }
-
-  const response = await next(req);
-  const s = response.header.get('Set-Cookie');
-  if (s) {
-    console.log('setting cookie');
-    document.cookie = s;
-  }
-
-  return response;
+  return next(req);
 };
 
 export function createClient(): Transport {
@@ -27,6 +22,6 @@ export function createClient(): Transport {
     baseUrl: `${window.location.protocol}//${window.location.hostname}:${GRPC_PORT}`,
     credentials: 'same-origin',
     defaultTimeoutMs: 5000,
-    interceptors: [accessTokenInterceptor]
+    interceptors: [cookInjector]
   });
 }
