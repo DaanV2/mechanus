@@ -22,9 +22,10 @@ import (
 )
 
 type Server struct {
-	Manager *servers.Manager
-	Users   *user_service.Service
-	DB      *database.DB
+	Manager    *servers.Manager
+	Users      *user_service.Service
+	DB         *database.DB
+	Components *application.ComponentManager
 }
 
 func BuildServer(ctx context.Context) (*Server, error) {
@@ -58,14 +59,14 @@ var servicesSet = wire.NewSet(
 	user_service.NewService,
 	authenication.NewJWTService,
 	authenication.NewJTIService,
-	authenication.NewKeyManager,
+	NewKeyManager,
 	provideKeyStorage,
 )
 
 func createServerManager(ctx context.Context, rpcs grpc.RPCS, serv web.WEBServices) (*servers.Manager, error) {
 	wconf := web.GetConfig()
 	gconf := grpc.GetConfig()
-	mconf := mdns.NewServerConfig(wconf.Port)
+	mconf := mdns.GetServerConfig(wconf.Port)
 	s, err := MDNSServer(ctx, mconf)
 	if err != nil {
 		return nil, err
@@ -81,3 +82,4 @@ func createServerManager(ctx context.Context, rpcs grpc.RPCS, serv web.WEBServic
 func provideKeyStorage(db *database.DB) storage.StorageProvider[*authenication.KeyData] {
 	return storage.DBStorage[*authenication.KeyData](db)
 }
+
