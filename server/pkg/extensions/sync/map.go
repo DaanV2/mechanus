@@ -4,7 +4,7 @@ import (
 	"iter"
 	"sync"
 
-	"github.com/DaanV2/mechanus/server/pkg/generics"
+	"github.com/daanv2/go-kit/generics"
 )
 
 type Map[K, V any] struct {
