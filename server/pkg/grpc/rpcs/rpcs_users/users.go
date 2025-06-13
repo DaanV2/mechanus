@@ -11,7 +11,7 @@ import (
 	xerrors "github.com/DaanV2/mechanus/server/pkg/extensions/errors"
 	usersv1 "github.com/DaanV2/mechanus/server/pkg/grpc/gen/users/v1"
 	"github.com/DaanV2/mechanus/server/pkg/grpc/gen/users/v1/usersv1connect"
-	grpc_middleware "github.com/DaanV2/mechanus/server/pkg/grpc/middleware"
+	grpc_interceptors "github.com/DaanV2/mechanus/server/pkg/grpc/interceptors"
 	user_service "github.com/DaanV2/mechanus/server/pkg/services/users"
 )
 
@@ -66,7 +66,7 @@ func (u *UserService) Get(ctx context.Context, req *connect.Request[usersv1.GetU
 	id := req.Msg.GetId()
 	logger := u.logger.With("userId", id)
 
-	jwt, err := grpc_middleware.JWTFromContext(ctx)
+	jwt, err := grpc_interceptors.JWTFromContext(ctx)
 	if err != nil {
 		logger.From(ctx).Error("error during reading jwt", "error", err)
 
