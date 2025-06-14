@@ -1,0 +1,28 @@
+client:
+  - changed-files:
+      - "client/**"
+server:
+  - changed-files:
+      - "server/**"
+proto:
+  - changed-files:
+      - "*.proto"
+integration-tests:
+  - changed-files:
+      - "tests/**"
+CI/CD:
+  - changed-files:
+      - ".github/**"
+documentation:
+  - changed-files:
+      - "**/docs/**"
+      - "*.md"
+
+bug:
+  - head-branch: ["^bug", "bug"]
+feature:
+  - head-branch: ["^feature", "feature"]
+
+  # Add 'release' label to any PR that is opened against the `main` branch
+release:
+  - base-branch: "main"
