@@ -6,7 +6,7 @@
 <div class="centered-container">
   <div class="box-container">
     <ul class="subpage-list">
-      {#each subpages as { name, path }}
+      {#each subpages as { name, path } (name)}
         <li class="subpage-item">
           <a href={path} class="action-button">{name}</a>
         </li>

@@ -24,6 +24,16 @@ documentation:
           - "**/docs/**"
           - "*.md"
 
+dependencies:
+  - changed-files:
+      - any-glob-to-any-file:
+          - package.json
+          - package-lock.json
+          - go.mod
+          - go.sum
+          - go.work
+          - go.work.sum
+
 bug:
   - head-branch: ["^bug", "bug"]
 feature:

@@ -19,6 +19,8 @@ updates:
       all:
         patterns:
           - "*"
+          - "!@connect*"
+          - "!@bufbuild*"
   - package-ecosystem: "github-actions" # See documentation for possible values
     directory: "/" # Location of package manifests
     labels:
@@ -31,6 +33,28 @@ updates:
           - "*"
   - package-ecosystem: gomod
     directory: /server
+    labels:
+      - dependencies
+    schedule:
+      interval: "weekly"
+    groups:
+      all:
+        patterns:
+          - "*"
+
+  - package-ecosystem: docker
+    directory: /
+    labels:
+      - dependencies
+    schedule:
+      interval: "weekly"
+    groups:
+      all:
+        patterns:
+          - "*"
+
+  - package-ecosystem: docker-compose
+    directory: /
     labels:
       - dependencies
     schedule:

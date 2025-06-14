@@ -14,4 +14,3 @@ plugins:
   - remote: buf.build/bufbuild/connect-es
     out: client/src/proto
     opt: target=ts
-
