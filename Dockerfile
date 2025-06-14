@@ -1,5 +1,5 @@
 # build client
-FROM node:22 AS client
+FROM node:24 AS client
 WORKDIR /app
 
 ADD ./client/package.json .
