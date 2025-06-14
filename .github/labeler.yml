@@ -1,22 +1,28 @@
 client:
   - changed-files:
-      - "client/**"
+      - any-glob-to-any-file:
+          - "client/**"
 server:
   - changed-files:
-      - "server/**"
+      - any-glob-to-any-file:
+          - "server/**"
 proto:
   - changed-files:
-      - "*.proto"
+      - any-glob-to-any-file:
+          - "*.proto"
 integration-tests:
   - changed-files:
-      - "tests/**"
+      - any-glob-to-any-file:
+          - "tests/**"
 CI/CD:
   - changed-files:
-      - ".github/**"
+      - any-glob-to-any-file:
+          - ".github/**"
 documentation:
   - changed-files:
-      - "**/docs/**"
-      - "*.md"
+      - any-glob-to-any-file:
+          - "**/docs/**"
+          - "*.md"
 
 bug:
   - head-branch: ["^bug", "bug"]
