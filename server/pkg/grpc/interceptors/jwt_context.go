@@ -1,11 +1,11 @@
-package grpc_middleware
+package grpc_interceptors
 
 import (
 	"context"
 	"errors"
 
 	"github.com/DaanV2/mechanus/server/pkg/authenication"
-	"github.com/DaanV2/mechanus/server/pkg/generics"
+	"github.com/daanv2/go-kit/generics"
 )
 
 var (

@@ -3,7 +3,7 @@ package config
 import (
 	"time"
 
-	"github.com/DaanV2/mechanus/server/pkg/generics"
+	"github.com/daanv2/go-kit/generics"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 )

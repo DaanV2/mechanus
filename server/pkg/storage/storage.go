@@ -1,6 +1,9 @@
 package storage
 
-import "context"
+import (
+	"context"
+	"iter"
+)
 
 type Identifiable interface {
 	GetID() string
@@ -9,6 +12,7 @@ type Identifiable interface {
 type Storage[T Identifiable] interface {
 	Get(ctx context.Context, id string) (T, error)
 	Set(ctx context.Context, item T) error
+	Keys(ctx context.Context) iter.Seq[string]
 	Delete(ctx context.Context, item T) (bool, error)
 }
 

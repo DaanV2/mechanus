@@ -35,8 +35,9 @@ func BuildServer(ctx context.Context) (*Server, error) {
 	}
 	service := user_service.NewService(db)
 	jtiService := authenication.NewJTIService(db)
+	componentManager := application.NewComponentManager()
 	storageProvider := provideKeyStorage(db)
-	keyManager, err := authenication.NewKeyManager(storageProvider)
+	keyManager, err := NewKeyManager(componentManager, storageProvider)
 	if err != nil {
 		return nil, err
 	}
@@ -48,7 +49,6 @@ func BuildServer(ctx context.Context) (*Server, error) {
 		User:  userService,
 		JWT:   jwtService,
 	}
-	componentManager := application.NewComponentManager()
 	webServices := web.WEBServices{
 		Components: componentManager,
 	}
@@ -57,9 +57,10 @@ func BuildServer(ctx context.Context) (*Server, error) {
 		return nil, err
 	}
 	server := &Server{
-		Manager: manager,
-		Users:   service,
-		DB:      db,
+		Manager:    manager,
+		Users:      service,
+		DB:         db,
+		Components: componentManager,
 	}
 	return server, nil
 }
@@ -67,9 +68,10 @@ func BuildServer(ctx context.Context) (*Server, error) {
 // wire.go:
 
 type Server struct {
-	Manager *servers.Manager
-	Users   *user_service.Service
-	DB      *database.DB
+	Manager    *servers.Manager
+	Users      *user_service.Service
+	DB         *database.DB
+	Components *application.ComponentManager
 }
 
 var dbSet = wire.NewSet(
@@ -77,7 +79,9 @@ var dbSet = wire.NewSet(
 	GetDatabaseOptions,
 )
 
-var servicesSet = wire.NewSet(application.NewComponentManager, rpcs_users.NewLoginService, rpcs_users.NewUserService, wire.Bind(new(usersv1connect.LoginServiceHandler), new(*rpcs_users.LoginService)), wire.Bind(new(usersv1connect.UserServiceHandler), new(*rpcs_users.UserService)), user_service.NewService, authenication.NewJWTService, authenication.NewJTIService, authenication.NewKeyManager, provideKeyStorage)
+var servicesSet = wire.NewSet(application.NewComponentManager, rpcs_users.NewLoginService, rpcs_users.NewUserService, wire.Bind(new(usersv1connect.LoginServiceHandler), new(*rpcs_users.LoginService)), wire.Bind(new(usersv1connect.UserServiceHandler), new(*rpcs_users.UserService)), user_service.NewService, authenication.NewJWTService, authenication.NewJTIService, NewKeyManager,
+	provideKeyStorage,
+)
 
 func createServerManager(ctx context.Context, rpcs grpc.RPCS, serv web.WEBServices) (*servers.Manager, error) {
 	wconf := web.GetConfig()

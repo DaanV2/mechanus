@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/DaanV2/mechanus/server/pkg/servers/middleware"
 	"github.com/charmbracelet/log"
 )
 
@@ -26,7 +25,7 @@ func NewHttpServer(name string, router http.Handler, conf Config) Server {
 		name: name,
 		server: &http.Server{
 			Addr:              fmt.Sprintf("%s:%v", conf.Host, conf.Port),
-			Handler:           middleware.Logging(router),
+			Handler:           router,
 			ReadHeaderTimeout: time.Second * 10,
 		},
 	}

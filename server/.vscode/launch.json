@@ -12,7 +12,7 @@
       "program": "${workspaceFolder}/main.go",
       "envFile": "${workspaceFolder}/.env",
       "console": "integratedTerminal",
-      "args": ["mdns", "server"]
+      "args": ["server"]
     },
     {
       "name": "Playground",

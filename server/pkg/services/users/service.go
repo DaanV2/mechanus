@@ -11,6 +11,10 @@ import (
 	xcrypto "github.com/DaanV2/mechanus/server/pkg/extensions/crypto"
 )
 
+var (
+	ErrUserAlreadyExists = errors.New("user already exists")
+)
+
 type Service struct {
 	db     *database.DB
 	logger logging.Enriched
@@ -67,7 +71,7 @@ func (s *Service) Create(ctx context.Context, user *models.User) error {
 
 	_, err = s.GetByUsername(ctx, user.Name)
 	if !database.IsNotExist(err) {
-		return errors.New("user already exists")
+		return ErrUserAlreadyExists
 	}
 
 	tx := s.db.WithContext(ctx).Create(user)

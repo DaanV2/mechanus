@@ -54,6 +54,7 @@ func (s *JWTService) Create(ctx context.Context, user *models.User, scope string
 	logging.Info(ctx, "creating jwt")
 
 	claims := &JWTClaims{
+
 		User: JWTUser{
 			ID:        user.ID,
 			Name:      user.Name,
@@ -69,6 +70,10 @@ func (s *JWTService) Create(ctx context.Context, user *models.User, scope string
 	}
 
 	return s.sign(ctx, jti.ID, claims)
+}
+
+func (s *JWTService) Options() *JWTOptions {
+	return s.options
 }
 
 func (s *JWTService) Validate(ctx context.Context, token string) (*jwt.Token, error) {
@@ -134,6 +139,7 @@ func (s *JWTService) sign(ctx context.Context, jti string, claims *JWTClaims) (s
 		Audience:  jwt.ClaimStrings{JWT_AUDIENCE},
 		IssuedAt:  jwt.NewNumericDate(now),
 		NotBefore: jwt.NewNumericDate(now.Add(time.Minute * -1)),
+		Subject:   claims.User.ID,
 	}
 
 	key, err := s.keys.GetSigningKey(ctx)

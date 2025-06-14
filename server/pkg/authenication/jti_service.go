@@ -30,7 +30,7 @@ func (s *JTIService) GetByUser(ctx context.Context, userId string) ([]models.JTI
 	logger.Debug("getting jti")
 
 	var result []models.JTI
-	tx := s.db.WithContext(ctx).Find(&result, userId)
+	tx := s.db.WithContext(ctx).Find(&result, "user_id = ?", userId)
 
 	if tx.Error != nil {
 		return nil, tx.Error
@@ -48,7 +48,7 @@ func (s *JTIService) GetActive(ctx context.Context, userId string) ([]models.JTI
 	logger.Debug("getting active jti's")
 
 	var result []models.JTI
-	tx := s.db.WithContext(ctx).Find(&result, "id = ?", userId, "revoked = ", false)
+	tx := s.db.WithContext(ctx).Model(models.JTI{UserID: userId, Revoked: false}).Find(&result)
 
 	if tx.Error != nil {
 		return nil, tx.Error
@@ -89,7 +89,7 @@ func (s *JTIService) Create(ctx context.Context, userId string) (*models.JTI, er
 		Revoked: false,
 	}
 
-	tx := s.db.WithContext(ctx).Create(result)
+	tx := s.db.WithContext(ctx).Create(&result)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}

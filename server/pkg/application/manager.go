@@ -8,6 +8,10 @@ import (
 )
 
 type (
+	AfterInitialize interface {
+		AfterInitialize(ctx context.Context) error
+	}
+
 	AfterShutDown interface {
 		AfterShutDown(ctx context.Context) error
 	}
@@ -26,14 +30,27 @@ type (
 )
 
 type ComponentManager struct {
-	aftershutdown  []AfterShutDown
-	beforeshutdown []BeforeShutdown
-	healthcheck    []HealthCheck
-	readycheck     []ReadyCheck
+	afterInitialize []AfterInitialize
+	aftershutdown   []AfterShutDown
+	beforeshutdown  []BeforeShutdown
+	healthcheck     []HealthCheck
+	readycheck      []ReadyCheck
 }
 
 func NewComponentManager() *ComponentManager {
 	return &ComponentManager{}
+}
+
+func (m *ComponentManager) AfterInitialize(ctx context.Context) error {
+	ctx, cancel := context.WithDeadline(ctx, time.Now().Add(time.Second*30))
+	defer cancel()
+
+	var err error
+	for _, comp := range m.afterInitialize {
+		err = errors.Join(err, comp.AfterInitialize(ctx))
+	}
+
+	return err
 }
 
 func (m *ComponentManager) AfterShutDown(ctx context.Context) error {
@@ -105,6 +122,10 @@ func (m *ComponentManager) add(component any) {
 
 	if v, ok := component.(ReadyCheck); ok {
 		m.readycheck = append(m.readycheck, v)
+	}
+
+	if v, ok := component.(AfterInitialize); ok {
+		m.afterInitialize = append(m.afterInitialize, v)
 	}
 }
 

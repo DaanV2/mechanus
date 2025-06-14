@@ -10,7 +10,6 @@ import (
 	"github.com/DaanV2/mechanus/server/internal/components"
 	"github.com/DaanV2/mechanus/server/internal/grpc"
 	"github.com/DaanV2/mechanus/server/internal/web"
-	"github.com/DaanV2/mechanus/server/pkg/application"
 	"github.com/DaanV2/mechanus/server/pkg/database"
 	"github.com/DaanV2/mechanus/server/pkg/networking/mdns"
 	"github.com/charmbracelet/log"
@@ -52,12 +51,16 @@ func init() {
 
 func ServerWorkload(cmd *cobra.Command, args []string) error {
 	// Setup
-	comps := new(application.ComponentManager)
-
 	server, err := components.BuildServer(cmd.Context())
 	if err != nil {
 		return fmt.Errorf("couldn't setup the server: %w", err)
 	}
+	// Start initial components
+	err = server.Components.AfterInitialize(cmd.Context())
+	if err != nil {
+		log.Fatal("errors while performing initialization calls", "error", err)
+	}
+
 	checks.InitializeServer(cmd.Context(), server)
 	manager := server.Manager
 
@@ -72,14 +75,14 @@ func ServerWorkload(cmd *cobra.Command, args []string) error {
 	defer cancel()
 
 	// Shutdown
-	berr := comps.BeforeShutdown(shutCtx)
+	berr := server.Components.BeforeShutdown(shutCtx)
 	if berr != nil {
 		log.Error("errors while performing pre shutdown calls", "error", berr)
 	}
 
 	manager.Stop(shutCtx)
 
-	aerr := comps.AfterShutDown(shutCtx)
+	aerr := server.Components.AfterShutDown(shutCtx)
 	if aerr != nil {
 		log.Error("errors while performing post shutdown calls", "error", berr)
 	}

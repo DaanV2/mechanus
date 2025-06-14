@@ -1,6 +1,6 @@
 module github.com/DaanV2/mechanus/server
 
-go 1.24.0
+go 1.24.4
 
 tool (
 	connectrpc.com/connect/cmd/protoc-gen-connect-go
@@ -19,7 +19,7 @@ require (
 	github.com/charmbracelet/bubbletea v1.3.5
 	github.com/charmbracelet/lipgloss v1.1.0
 	github.com/charmbracelet/log v0.4.2
-	github.com/daanv2/go-kit v1.0.3
+	github.com/daanv2/go-kit v1.0.6
 	github.com/daanv2/go-locks v1.3.0
 	github.com/glebarez/sqlite v1.11.0
 	github.com/golang-jwt/jwt/v5 v5.2.2

@@ -64,7 +64,7 @@ func (r *RoleService) GrantRole(container RoleContainer, role Role) {
 
 func (r *RoleService) HasRole(container RoleContainer, role Role) bool {
 	for _, r := range container.GetRoles() {
-		if role.Inherits(Role(r)) {
+		if Role(r).Inherits(role) {
 			return true
 		}
 	}
