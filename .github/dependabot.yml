@@ -19,6 +19,8 @@ updates:
       all:
         patterns:
           - "*"
+          - "!@connect*"
+          - "!@bufbuild*"
   - package-ecosystem: "github-actions" # See documentation for possible values
     directory: "/" # Location of package manifests
     labels:
