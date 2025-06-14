@@ -120,7 +120,7 @@ var _ = Describe("JtiServer", func() {
 
 			jtis, err := service.GetActive(ctx, userId)
 			Expect(err).ShouldNot(HaveOccurred())
-			Expect(jtis).To(HaveLen(0))
+			Expect(jtis).To(BeEmpty())
 		})
 
 		It("returns error if userId is empty", func(ctx SpecContext) {

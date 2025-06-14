@@ -11,6 +11,8 @@ import (
 )
 
 var _ = Describe("JwtService", func() {
+	const scope = "password"
+
 	var (
 		db         *database.DB
 		jtiService *authenication.JTIService
@@ -33,7 +35,6 @@ var _ = Describe("JwtService", func() {
 	Describe("Create", func() {
 		It("should create a JWT with a new JTI and reuse it while active", func(ctx SpecContext) {
 			user := util_test.CreateUser()
-			scope := "password"
 
 			// Create first JWT
 			token1, err := service.Create(ctx, user, scope)
@@ -62,7 +63,6 @@ var _ = Describe("JwtService", func() {
 
 		It("should create a new JTI if the previous one is revoked", func(ctx SpecContext) {
 			user := util_test.CreateUser()
-			scope := "password"
 
 			token1, err := service.Create(ctx, user, scope)
 			Expect(err).ShouldNot(HaveOccurred())
@@ -90,7 +90,6 @@ var _ = Describe("JwtService", func() {
 	Describe("Validate", func() {
 		It("should validate a valid JWT and return claims", func(ctx SpecContext) {
 			user := util_test.CreateUser()
-			scope := "password"
 			token, err := service.Create(ctx, user, scope)
 			Expect(err).ShouldNot(HaveOccurred())
 
@@ -104,7 +103,6 @@ var _ = Describe("JwtService", func() {
 
 		It("should fail validation if the JTI is revoked", func(ctx SpecContext) {
 			user := util_test.CreateUser()
-			scope := "password"
 			token, err := service.Create(ctx, user, scope)
 			Expect(err).ShouldNot(HaveOccurred())
 

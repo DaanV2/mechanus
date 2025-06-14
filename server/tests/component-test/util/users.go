@@ -11,18 +11,19 @@ func CreateUserID() string {
 	return xrand.MustID(36)
 }
 
-func CreateUser() *models.User{
+func CreateUser() *models.User {
 	id := CreateUserID()
+
 	return &models.User{
 		Model: models.Model{
-			ID: id,
+			ID:        id,
 			CreatedAt: time.Now(),
 			UpdatedAt: time.Now(),
 		},
-		Name: "username_" + id,
-		Roles: []string{"user"},
-		Campaigns: []*models.Campaign{},
-		Characters: []*models.Character{},
+		Name:         "username_" + id,
+		Roles:        []string{"user"},
+		Campaigns:    []*models.Campaign{},
+		Characters:   []*models.Character{},
 		PasswordHash: []byte("password12345"),
 	}
 }
