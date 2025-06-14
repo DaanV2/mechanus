@@ -48,7 +48,8 @@ func (s *JTIService) GetActive(ctx context.Context, userId string) ([]models.JTI
 	logger.Debug("getting active jti's")
 
 	var result []models.JTI
-	tx := s.db.WithContext(ctx).Model(models.JTI{UserID: userId, Revoked: false}).Find(&result)
+	// Fix: Use Where to filter by user_id and revoked = false
+	tx := s.db.WithContext(ctx).Where("user_id = ? AND revoked = ?", userId, false).Find(&result)
 
 	if tx.Error != nil {
 		return nil, tx.Error
@@ -66,7 +67,7 @@ func (s *JTIService) Get(ctx context.Context, jti string) (*models.JTI, error) {
 	logger.Debug("getting jti")
 
 	var result models.JTI
-	tx := s.db.WithContext(ctx).First(&result, jti)
+	tx := s.db.WithContext(ctx).First(&result, "id = ?", jti)
 
 	if tx.Error != nil {
 		return nil, tx.Error
@@ -115,14 +116,7 @@ func (s *JTIService) Revoke(ctx context.Context, jti string) (bool, error) {
 	logger := s.logger.From(ctx).With("jti", jti)
 	logger.Debug("revoking jti")
 
-	result := models.JTI{
-		Model: models.Model{
-			ID: jti,
-		},
-		Revoked: true,
-	}
-
-	tx := s.db.WithContext(ctx).Create(result)
+	tx := s.db.WithContext(ctx).Model(&models.JTI{}).Where("id = ?", jti).Update("revoked", true)
 	if tx.Error != nil {
 		return false, tx.Error
 	}

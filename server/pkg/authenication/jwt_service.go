@@ -54,7 +54,6 @@ func (s *JWTService) Create(ctx context.Context, user *models.User, scope string
 	logging.Info(ctx, "creating jwt")
 
 	claims := &JWTClaims{
-
 		User: JWTUser{
 			ID:        user.ID,
 			Name:      user.Name,
@@ -154,13 +153,13 @@ func (s *JWTService) sign(ctx context.Context, jti string, claims *JWTClaims) (s
 	return token.SignedString(key.Private())
 }
 
-func (s *JWTService) findPublicKeyFn(ctx context.Context) func(token *jwt.Token) (interface{}, error) {
-	return func(token *jwt.Token) (interface{}, error) {
+func (s *JWTService) findPublicKeyFn(ctx context.Context) func(token *jwt.Token) (any, error) {
+	return func(token *jwt.Token) (any, error) {
 		return s.findPublicKey(ctx, token)
 	}
 }
 
-func (s *JWTService) findPublicKey(ctx context.Context, token *jwt.Token) (interface{}, error) {
+func (s *JWTService) findPublicKey(ctx context.Context, token *jwt.Token) (any, error) {
 	kidH, ok := token.Header["kid"]
 	if !ok {
 		return nil, ErrKIDMissing
