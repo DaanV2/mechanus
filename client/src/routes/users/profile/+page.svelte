@@ -3,6 +3,7 @@
   import { onMount } from 'svelte';
   import { UserHandler } from '../../../lib/handlers/user';
   import { User } from '../../../proto/users/v1/users_pb';
+  import NavBar from '../../../components/nav-bar.svelte';
 
   let user = $state<User | undefined>(undefined);
 
@@ -26,6 +27,8 @@
     <title>User</title>
   {/if}
 </svelte:head>
+
+<NavBar />
 
 <div class="centered-container">
   <div class="box-container">

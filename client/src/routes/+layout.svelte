@@ -1,7 +1,8 @@
 <script lang="ts">
-	import '../app.css';
+  import { Navbar, NavBrand, NavHamburger, NavUl, NavLi } from 'flowbite-svelte';
+  import '../app.css';
 
-	let { children } = $props();
+  let { children } = $props();
 </script>
 
 {@render children()}
