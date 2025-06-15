@@ -1,5 +1,8 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import NavBar from '../components/nav-bar.svelte';
+  import Footer from '../components/footer.svelte';
+  import { Card } from 'flowbite-svelte';
 
   onMount(() => {
     console.log('cookies', document.cookie);
@@ -10,11 +13,21 @@
   <title>Mechanus</title>
 </svelte:head>
 
-<div class="centered-container">
-  <div class="box-container">
-    <h1 class="page-title">Mechanus</h1>
-    <a href="./devices" class="action-button">Devices</a>
-    <a href="./users/login" class="action-button">Login</a>
-    <a href="./users/signup" class="action-button">Signup</a>
-  </div>
+<NavBar />
+
+<div class="flex min-h-screen flex-col items-center py-5">
+  <Card href="/devices" class="m-5 p-4 sm:p-6 md:p-8">
+    <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Devices</h5>
+    <p class="font-normal leading-tight text-gray-700 dark:text-gray-400">Manage the devices</p>
+  </Card>
+  <Card href="/demo" class="m-5 p-4 sm:p-6 md:p-8">
+    <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+      Demos & Tools
+    </h5>
+    <p class="font-normal leading-tight text-gray-700 dark:text-gray-400">
+      A bunch of demos and tools to ensure everything is working
+    </p>
+  </Card>
 </div>
+
+<Footer />
