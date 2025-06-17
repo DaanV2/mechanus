@@ -14,7 +14,7 @@
 <NavBar />
 
 <div class="flex min-h-screen flex-col items-center py-5">
-  {#each subpages as { name, path }}
+  {#each subpages as { name, path } (name)}
     <Card href={path} class="m-5 p-4 sm:p-6 md:p-8">
       <h3 class="font-normal leading-tight text-gray-700 dark:text-gray-400">{name}</h3>
     </Card>

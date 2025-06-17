@@ -2,30 +2,143 @@
 
 @plugin 'flowbite/plugin';
 
+/* Dark theme */
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --color-primary-50: #fff5f2;
-  --color-primary-100: #fff1ee;
-  --color-primary-200: #ffe4de;
-  --color-primary-300: #ffd5cc;
-  --color-primary-400: #ffbcad;
-  --color-primary-500: #fe795d;
-  --color-primary-600: #ef562f;
-  --color-primary-700: #eb4f27;
-  --color-primary-800: #cc4522;
-  --color-primary-900: #a5371b;
+  --color-primary: #dc5f00;
+  --color-secondary: #373a40;
+  --color-tertiary: #686d76;
+  --color-quaternary: #eeeeee;
 
-  --color-secondary-50: #f0f9ff;
-  --color-secondary-100: #e0f2fe;
-  --color-secondary-200: #bae6fd;
-  --color-secondary-300: #7dd3fc;
-  --color-secondary-400: #38bdf8;
-  --color-secondary-500: #0ea5e9;
-  --color-secondary-600: #0284c7;
-  --color-secondary-700: #0369a1;
-  --color-secondary-800: #075985;
-  --color-secondary-900: #0c4a6e;
+  --color-primary-50: #fafaf9;
+  --color-primary-100: #f5f5f4;
+  --color-primary-200: #e7e5e4;
+  --color-primary-300: #d6d3d1;
+  --color-primary-400: #a6a09b;
+  --color-primary-500: #79716b;
+  --color-primary-600: #57534d;
+  --color-primary-700: #44403b;
+  --color-primary-800: #292524;
+  --color-primary-900: #1c1917;
+  --color-primary-950: #0c0a09;
+
+  --color-text-50: #fafaf9;
+  --color-text-100: #f5f5f4;
+  --color-text-200: #e7e5e4;
+  --color-text-300: #d6d3d1;
+  --color-text-400: #a6a09b;
+  --color-text-500: #79716b;
+  --color-text-600: #57534d;
+  --color-text-700: #44403b;
+  --color-text-800: #292524;
+  --color-text-900: #1c1917;
+  --color-text-950: #0c0a09;
+
+  /* Amber */
+  --color-action-50: #fffbeb;
+  --color-action-100: #fef3c6;
+  --color-action-200: #fee685;
+  --color-action-300: #ffd230;
+  --color-action-400: #ffb900;
+  --color-action-500: #fe9a00;
+  --color-action-600: #e17100;
+  --color-action-700: #bb4d00;
+  --color-action-800: #973c00;
+  --color-action-900: #7b3306;
+  --color-action-950: #461901;
+
+  --color-ok-50: #f0fdf4;
+  --color-ok-100: #dcfce7;
+  --color-ok-200: #b9f8cf;
+  --color-ok-300: #7bf1a8;
+  --color-ok-400: #05df72;
+  --color-ok-500: #00c950;
+  --color-ok-600: #00a63e;
+  --color-ok-700: #008236;
+  --color-ok-800: #016630;
+  --color-ok-900: #0d542b;
+  --color-ok-950: #032e15;
+
+  --color-error-50: #fef2f2;
+  --color-error-100: #ffe2e2;
+  --color-error-200: #ffc9c9;
+  --color-error-300: #ffa2a2;
+  --color-error-400: #ff6467;
+  --color-error-500: #fb2c36;
+  --color-error-600: #e7000b;
+  --color-error-700: #c10007;
+  --color-error-800: #9f0712;
+  --color-error-900: #82181a;
+  --color-error-950: #460809;
+}
+
+:root {
+  --color-primary: #dc5f00;
+  --color-secondary: #373a40;
+  --color-tertiary: #686d76;
+  --color-quaternary: #eeeeee;
+
+  --color-primary-50: #fafaf9;
+  --color-primary-100: #f5f5f4;
+  --color-primary-200: #e7e5e4;
+  --color-primary-300: #d6d3d1;
+  --color-primary-400: #a6a09b;
+  --color-primary-500: #79716b;
+  --color-primary-600: #57534d;
+  --color-primary-700: #44403b;
+  --color-primary-800: #292524;
+  --color-primary-900: #1c1917;
+  --color-primary-950: #0c0a09;
+
+  --color-text-50: #fafaf9;
+  --color-text-100: #f5f5f4;
+  --color-text-200: #e7e5e4;
+  --color-text-300: #d6d3d1;
+  --color-text-400: #a6a09b;
+  --color-text-500: #79716b;
+  --color-text-600: #57534d;
+  --color-text-700: #44403b;
+  --color-text-800: #292524;
+  --color-text-900: #1c1917;
+  --color-text-950: #0c0a09;
+
+  /* Amber */
+  --color-action-50: #fff7ed;
+  --color-action-100: #ffedd4;
+  --color-action-200: #ffd6a7;
+  --color-action-300: #ffb86a;
+  --color-action-400: #ff8904;
+  --color-action-500: #ff6900;
+  --color-action-600: #f54900;
+  --color-action-700: #ca3500;
+  --color-action-800: #9f2d00;
+  --color-action-900: #7e2a0c;
+  --color-action-950: #441306;
+
+  --color-ok-50: #f0fdf4;
+  --color-ok-100: #dcfce7;
+  --color-ok-200: #b9f8cf;
+  --color-ok-300: #7bf1a8;
+  --color-ok-400: #05df72;
+  --color-ok-500: #00c950;
+  --color-ok-600: #00a63e;
+  --color-ok-700: #008236;
+  --color-ok-800: #016630;
+  --color-ok-900: #0d542b;
+  --color-ok-950: #032e15;
+
+  --color-error-50: #fef2f2;
+  --color-error-100: #ffe2e2;
+  --color-error-200: #ffc9c9;
+  --color-error-300: #ffa2a2;
+  --color-error-400: #ff6467;
+  --color-error-500: #fb2c36;
+  --color-error-600: #e7000b;
+  --color-error-700: #c10007;
+  --color-error-800: #9f0712;
+  --color-error-900: #82181a;
+  --color-error-950: #460809;
 }
 
 @source "../node_modules/flowbite-svelte/dist";
@@ -39,37 +152,7 @@
 }
 
 body {
-  /* Ocean wave gradient animation with animated angle */
-  --ocean-angle: 120deg;
-  background: linear-gradient(var(--ocean-angle), #38bdf8 0%, #0ea5e9 50%, #075985 100%);
-  background-size: 200% 200%;
-  animation:
-    ocean-wave 12s ease-in-out infinite,
-    ocean-angle 16s ease-in-out infinite;
-}
-
-@keyframes ocean-wave {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
-}
-
-@keyframes ocean-angle {
-  0% {
-    --ocean-angle: 100deg;
-  }
-  50% {
-    --ocean-angle: 140deg;
-  }
-  100% {
-    --ocean-angle: 100deg;
-  }
+  background: var(--color-primary-100);
 }
 
 form {
