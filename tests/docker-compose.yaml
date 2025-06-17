@@ -3,7 +3,12 @@ services:
   mechanus-server:
     build:
       context: ..
+      tags:
+        - mechanus
       dockerfile: Dockerfile
+      cache_from:
+        - mechanus:latest
+        - type=gha
     container_name: mechanus-server
     env_file:
       - .env
