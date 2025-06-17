@@ -29,9 +29,14 @@ jobs:
         working-directory: tests
         run: npm ci
 
-      - name: 🐋 Make server
-        run: |
-          make image
+      - name: 🐋 Make image
+        uses: docker/build-push-action@v6
+        id: docker-build
+        with:
+          push: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          tags: mechanus,mechanus:latest,mechanus:${{ github.sha }}
 
       - name: 🐋 Start server
         working-directory: tests

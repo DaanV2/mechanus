@@ -1,8 +1,9 @@
-version: "3.8"
 services:
   mechanus-server:
     build:
       context: ..
+      tags:
+        - mechanus
       dockerfile: Dockerfile
     container_name: mechanus-server
     env_file:

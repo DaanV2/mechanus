@@ -1,38 +1,18 @@
-# create-svelte
+# Web Server
 
-Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/main/packages/create-svelte).
+this is the client side of the Mechanus project, which is the UI for the players and DM in a tabletop RPG game. It connects to the server to display information, manage player interactions, and provide a seamless gaming experience.
 
-## Creating a project
+The webpages are rendered as static files, which are served by the server. The client is built using Svelte, Tailwind CSS and connectRPC for gRPC communication to the server. We use Playwright for end-to-end testing to ensure the client behaves correctly across different browsers and devices. and [Flowbite](https://flowbite-svelte.com/) for UI components.
 
-If you're seeing this, you've probably already done this step. Congrats!
+## Development
 
-```bash
-# create a new project in the current directory
-npm create svelte@latest
-
-# create a new project in my-app
-npm create svelte@latest my-app
-```
-
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+To set up the client for development, you can use the following commands:
 
 ```bash
+npm install
 npm run dev
 
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
+# To start up the server: (this requires golang)
+cd ../server
+make start-server
 ```
-
-## Building
-
-To create a production version of your app:
-
-```bash
-npm run build
-```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.

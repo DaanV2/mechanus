@@ -8,13 +8,17 @@ test.describe("admin account", () => {
     const user = User.createAdmin();
 
     await test.step("by logging", async () => {
-      await page.goto("http://localhost:8080/users/login/");
-      await page.getByRole("textbox", { name: "Username" }).fill(user.name);
-      await page.getByRole("textbox", { name: "Password" }).fill(user.password);
-      await page.getByRole("button", { name: "Login" }).click();
+      await page.goto("/users/login/");
+      await page
+        .getByRole("textbox", { name: "Your username" })
+        .fill(user.name);
+      await page
+        .getByRole("textbox", { name: "Your password eye slash" })
+        .fill(user.password);
+      await page.locator("button").filter({ hasText: "Login" }).click();
     });
 
-    await test.step("by awaiting until we are on the user profile page", async () => {
+    await test.step("by awaiting until we are on await page.getByRole('button', { name: 'Sign in' }).click();the user profile page", async () => {
       await page.waitForURL(/\/users\/profile\//);
       await expect(page).toHaveTitle("User - " + user.name);
     });

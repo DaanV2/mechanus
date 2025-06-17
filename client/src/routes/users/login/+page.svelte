@@ -2,15 +2,21 @@
   import { goto } from '$app/navigation';
   import ErrorMessage from '$lib/components/error-message.svelte';
   import { Code, ConnectError } from '@connectrpc/connect';
+  import { Button, ButtonGroup, Input, InputAddon, Label } from 'flowbite-svelte';
+  import { EyeOutline, EyeSlashOutline } from 'flowbite-svelte-icons';
+  import NavBar from '../../../components/nav-bar.svelte';
   import { createClient } from '../../../lib/api/client';
   import { createLoginClient } from '../../../lib/api/users_v1';
-  import type { MechanusError } from '../../../lib/components/errors.svelte';
+  import type { MechanusError } from '../../../lib/components/errors';
   import { KEY_ACCESS_TOKEN, setCookie } from '../../../lib/cookies';
+  import Footer from '../../../components/footer.svelte';
+  import { onMount } from 'svelte';
+  import { UserHandler } from '../../../lib/handlers/user';
 
   let username = $state('');
   let password = $state('');
   let errorObj = $state<MechanusError>(null);
-
+  let showPassword = $state(false);
   let isFormValid = $derived(username.trim() !== '' && password.trim() !== '');
 
   async function handleSubmit(event: Event) {
@@ -41,26 +47,68 @@
     const login = await loginClient.login({ username, password });
     setCookie(KEY_ACCESS_TOKEN, `${login.type} ${login.token}`);
 
+    UserHandler.instance().reload();
     goto('/users/profile');
   }
+
+  onMount(() => {
+    if (UserHandler.instance().hasLoggedinUser) {
+      goto('/users/profile');
+    }
+  });
 </script>
 
 <svelte:head>
-  <title>LargestContentfulPaint</title>
+  <title>Login</title>
 </svelte:head>
 
-<div class="centered-container">
-  <form class="box-container" onsubmit={handleSubmit}>
-    <input type="text" class="login-input" placeholder="Username" bind:value={username} required />
-    <input
-      type="password"
-      class="login-input"
-      placeholder="Password"
-      bind:value={password}
-      required
-    />
-    <button type="submit" class="action-button" disabled={!isFormValid}> Login </button>
-    <a href="/users/signup" class="action-button">Don't have an account? Sign up!</a>
+<NavBar />
+
+<div class="flex min-h-screen items-center justify-center">
+  <form class="space-y-6" onsubmit={handleSubmit}>
+    <h3 class="p-0 text-xl font-medium text-white dark:text-white">Login</h3>
+    <Label class="space-y-2">
+      <Label for="username" class="font-bold text-white">Your username</Label>
+      <Input
+        id="username"
+        type="username"
+        name="username"
+        placeholder="monotron"
+        required
+        bind:value={username}
+      />
+    </Label>
+    <Label class="space-y-2">
+      <Label for="password" class="font-bold text-white">Your password</Label>
+      <ButtonGroup class="w-full">
+        <Input
+          id="password"
+          type={showPassword ? 'text' : 'password'}
+          placeholder="Your password here"
+          required
+          bind:value={password}
+        />
+        <InputAddon class="rounded-r-lg">
+          <button onclick={() => (showPassword = !showPassword)}>
+            {#if showPassword}
+              <EyeOutline class="h-6 w-6" />
+            {:else}
+              <EyeSlashOutline class="h-6 w-6" />
+            {/if}
+          </button>
+        </InputAddon>
+      </ButtonGroup>
+    </Label>
+    <Button type="submit" class="w-full1" disabled={!isFormValid}>Login</Button>
+    <p class="text-sm font-light text-white dark:text-white">
+      Don't have an account yet? <a
+        href="/users/signup"
+        class="text-primary-600 dark:text-primary-500 font-medium hover:underline">Sign up</a
+      >
+    </p>
+
     <ErrorMessage error={errorObj} />
   </form>
 </div>
+
+<Footer />
