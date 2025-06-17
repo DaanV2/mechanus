@@ -6,6 +6,16 @@ import { createUserClient } from '../stores/clients';
 import type { UserService } from '../../proto/users/v1/users_connect';
 
 export class UserHandler {
+  private static _singleton: UserHandler | undefined;
+
+  static instance(): UserHandler {
+    if (UserHandler._singleton === undefined) {
+      UserHandler._singleton = new UserHandler();
+    }
+
+    return UserHandler._singleton;
+  }
+
   private _current: JWTClaims | undefined;
   private _client: Client<typeof UserService>;
 
@@ -20,6 +30,15 @@ export class UserHandler {
 
   data(): JWTClaims | undefined {
     return this._current;
+  }
+
+  logout() {
+    // TODO disscard session tokens
+  }
+
+  reload() {
+    this._current = getCurrent();
+    this._client = createUserClient();
   }
 
   async serverData() {

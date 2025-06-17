@@ -1,51 +1,55 @@
 <script lang="ts">
   import {
+    Avatar,
+    Button,
+    DarkMode,
+    Dropdown,
+    DropdownGroup,
+    DropdownHeader,
+    DropdownItem,
     Navbar,
     NavBrand,
-    Avatar,
     NavHamburger,
-    Dropdown,
-    DropdownHeader,
-    DropdownGroup,
-    DropdownItem,
-    NavUl,
     NavLi,
-    Button,
-    DarkMode
+    NavUl
   } from 'flowbite-svelte';
-  import { UserHandler } from '../lib/handlers/user';
   import { onMount } from 'svelte';
+  import type { JWTClaims } from '../lib/authenication/jwt/parse';
+  import { UserHandler } from '../lib/handlers/user';
 
   let user: UserHandler | undefined = $state(undefined);
+  let userData: JWTClaims | undefined = $state(undefined);
 
   onMount(() => {
-    user = new UserHandler();
+    user = UserHandler.instance();
+    userData = user.data();
   });
+
+  function logout() {
+    user?.logout();
+  }
 </script>
 
-<Navbar class="bg-primary shadow-2xl">
+<Navbar class="bg-primary">
   <NavBrand href="/">
     <!-- <img src="/images/flowbite-svelte-icon-logo.svg" class="me-3 h-6 sm:h-9" alt="Flowbite Logo" /> -->
-    <span class="text-text-100 self-center text-xl font-semibold whitespace-nowrap">Mechanus</span>
+    <span class="text-text-100 self-center whitespace-nowrap text-xl font-semibold">Mechanus</span>
   </NavBrand>
 
   <div class="flex flex-row items-center">
     <!-- User or Login -->
-    {#if user?.hasLoggedinUser}
+    {#if userData}
       <div class="flex items-center md:order-3">
-        <Avatar id="avatar-menu" src="/images/profile-picture-3.webp" />
+        <Avatar id="avatar-menu">{userData.user.name.slice(0, 2)}</Avatar>
       </div>
       <Dropdown placement="bottom" triggeredBy="#avatar-menu">
         <DropdownHeader>
-          <span class="block text-sm">Bonnie Green</span>
-          <span class="block truncate text-sm font-medium">name@flowbite.com</span>
+          <span class="block text-sm">{userData.user.name}</span>
         </DropdownHeader>
         <DropdownGroup>
-          <DropdownItem>Dashboard</DropdownItem>
-          <DropdownItem>Settings</DropdownItem>
-          <DropdownItem>Earnings</DropdownItem>
+          <DropdownItem href="/users/login">Profile</DropdownItem>
         </DropdownGroup>
-        <DropdownHeader>Sign out</DropdownHeader>
+        <DropdownHeader onclick={logout}>Sign out</DropdownHeader>
       </Dropdown>
     {:else}
       <Button
@@ -68,6 +72,14 @@
         nonActiveClass="hover:text-text-100 text-secondary transition-colors"
         href="/">Home</NavLi
       >
+
+      {#if userData}
+        <NavLi
+          activeClass="text-secondary hover:bg-tertiary hover:text-quaternary transition-colors"
+          nonActiveClass="hover:text-text-100 text-secondary transition-colors"
+          href="/campaigns">Campaigns</NavLi
+        >
+      {/if}
       <NavLi
         activeClass="text-secondary hover:bg-tertiary hover:text-quaternary transition-colors"
         nonActiveClass="hover:text-text-100 text-secondary transition-colors"

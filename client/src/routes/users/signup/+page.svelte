@@ -3,11 +3,13 @@
   import { Code, ConnectError } from '@connectrpc/connect';
   import { Button, ButtonGroup, Input, InputAddon, Label } from 'flowbite-svelte';
   import { EyeOutline, EyeSlashOutline } from 'flowbite-svelte-icons';
+  import Footer from '../../../components/footer.svelte';
+  import NavBar from '../../../components/nav-bar.svelte';
   import ErrorMessage from '../../../lib/components/error-message.svelte';
-  import type { MechanusError } from '../../../lib/components/errors.svelte';
+  import type { MechanusError } from '../../../lib/components/errors';
   import { KEY_ACCESS_TOKEN, setCookie } from '../../../lib/cookies';
   import { createLoginClient, createUserClient } from '../../../lib/stores/clients';
-  import NavBar from '../../../components/nav-bar.svelte';
+  import { UserHandler } from '../../../lib/handlers/user';
 
   let username = $state('');
   let password = $state('');
@@ -51,6 +53,7 @@
     const login = await createLoginClient().login({ username, password });
     setCookie(KEY_ACCESS_TOKEN, `${login.type} ${login.token}`);
 
+    UserHandler.instance().reload();
     goto('/users/profile');
   }
 </script>
@@ -131,3 +134,5 @@
     <ErrorMessage error={errorObj} />
   </form>
 </div>
+
+<Footer />

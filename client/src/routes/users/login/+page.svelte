@@ -4,11 +4,14 @@
   import { Code, ConnectError } from '@connectrpc/connect';
   import { Button, ButtonGroup, Input, InputAddon, Label } from 'flowbite-svelte';
   import { EyeOutline, EyeSlashOutline } from 'flowbite-svelte-icons';
+  import NavBar from '../../../components/nav-bar.svelte';
   import { createClient } from '../../../lib/api/client';
   import { createLoginClient } from '../../../lib/api/users_v1';
-  import type { MechanusError } from '../../../lib/components/errors.svelte';
+  import type { MechanusError } from '../../../lib/components/errors';
   import { KEY_ACCESS_TOKEN, setCookie } from '../../../lib/cookies';
-  import NavBar from '../../../components/nav-bar.svelte';
+  import Footer from '../../../components/footer.svelte';
+  import { onMount } from 'svelte';
+  import { UserHandler } from '../../../lib/handlers/user';
 
   let username = $state('');
   let password = $state('');
@@ -44,8 +47,15 @@
     const login = await loginClient.login({ username, password });
     setCookie(KEY_ACCESS_TOKEN, `${login.type} ${login.token}`);
 
+    UserHandler.instance().reload();
     goto('/users/profile');
   }
+
+  onMount(() => {
+    if (UserHandler.instance().hasLoggedinUser) {
+      goto('/users/profile');
+    }
+  });
 </script>
 
 <svelte:head>
@@ -89,7 +99,7 @@
         </InputAddon>
       </ButtonGroup>
     </Label>
-    <Button type="submit" class="w-full1" disabled={!isFormValid}>Sign in</Button>
+    <Button type="submit" class="w-full1" disabled={!isFormValid}>Login</Button>
     <p class="text-sm font-light text-white dark:text-white">
       Don't have an account yet? <a
         href="/users/signup"
@@ -100,3 +110,5 @@
     <ErrorMessage error={errorObj} />
   </form>
 </div>
+
+<Footer />
