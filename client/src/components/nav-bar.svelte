@@ -14,7 +14,6 @@
     NavLi,
     NavUl
   } from 'flowbite-svelte';
-  import { loadBasis } from 'pixi.js';
   import { onMount } from 'svelte';
 
   let currentUser: UserState = $state(UserState.LOGGED_OUT);
@@ -32,7 +31,7 @@
 <Navbar class="bg-primary">
   <NavBrand href="/">
     <!-- <img src="/images/flowbite-svelte-icon-logo.svg" class="me-3 h-6 sm:h-9" alt="Flowbite Logo" /> -->
-    <span class="text-text-100 self-center whitespace-nowrap text-xl font-semibold">Mechanus</span>
+    <span class="text-text-100 self-center text-xl font-semibold whitespace-nowrap">Mechanus</span>
   </NavBrand>
 
   <div class="flex flex-row items-center">

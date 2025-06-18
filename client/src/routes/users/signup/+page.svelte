@@ -49,7 +49,7 @@
       throw new Error('passwords not the same');
     }
 
-    await userHandler.create(username, password);
+    await userHandler.create(username, 'password');
 
     await sleep(100);
     goto('/users/profile');

@@ -23,7 +23,7 @@ function getCurrentUser(): UserState {
 function updateCurrentUser(data: LoginResponse): UserState {
   if (data === undefined || data.token === '') return { loggedin: false };
 
-  Cookie.set('access-token', data.token);
+  Cookie.set('access-token', `${data.type} ${data.token}`);
 
   return parseToken(data.token);
 }

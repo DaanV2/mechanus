@@ -9,6 +9,9 @@
   let user = $state<User | undefined>(undefined);
 
   onMount(async () => {
+    console.log('document.cookie:', document.cookie);
+    console.log('userHandler.current:', userHandler.current);
+
     if (!userHandler.current.loggedin) {
       console.error('not logged in');
       // redirect to login

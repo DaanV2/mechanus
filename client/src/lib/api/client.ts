@@ -9,7 +9,7 @@ const tokenInjector: Interceptor = (next) => (req) => {
   // Get all cookies as a string
   const token = Cookie.get('access-token');
   if (token && token.length > 0) {
-    req.header.append('Authorization', token);
+    req.header.set('Authorization', token);
   }
   return next(req);
 };
