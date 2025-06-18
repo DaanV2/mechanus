@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { userHandler, UserState } from '$lib/handlers/user';
   import {
     Avatar,
     Button,
@@ -13,20 +14,18 @@
     NavLi,
     NavUl
   } from 'flowbite-svelte';
+  import { loadBasis } from 'pixi.js';
   import { onMount } from 'svelte';
-  import type { JWTClaims } from '../lib/authenication/jwt/parse';
-  import { UserHandler } from '../lib/handlers/user';
 
-  let user: UserHandler | undefined = $state(undefined);
-  let userData: JWTClaims | undefined = $state(undefined);
+  let currentUser: UserState = $state(UserState.LOGGED_OUT);
+  let userData = $derived(currentUser.loggedin ? currentUser.data : undefined);
 
   onMount(() => {
-    user = UserHandler.instance();
-    userData = user.data();
+    currentUser = userHandler.current;
   });
 
-  function logout() {
-    user?.logout();
+  async function logout() {
+    return userHandler.logout();
   }
 </script>
 

@@ -1,17 +1,14 @@
 <script lang="ts">
+  import { userHandler, UserState } from '$lib/handlers/user';
   import { Card } from 'flowbite-svelte';
   import { onMount } from 'svelte';
   import Footer from '../components/footer.svelte';
   import NavBar from '../components/nav-bar.svelte';
-  import type { JWTClaims } from '../lib/authenication/jwt/parse';
-  import { UserHandler } from '../lib/handlers/user';
 
-  let user: UserHandler | undefined = $state(undefined);
-  let userData: JWTClaims | undefined = $state(undefined);
+  let userData: UserState = $state(UserState.LOGGED_OUT);
 
   onMount(() => {
-    user = UserHandler.instance();
-    userData = user.data();
+    userData = userHandler.current;
   });
 </script>
 
@@ -30,7 +27,7 @@
       </h5>
       <p class="font-normal leading-tight text-gray-700 dark:text-gray-400">see your campaigns</p>
     </Card>
-    <Card href="/profile" class="m-5 p-4 sm:p-6 md:p-8">
+    <Card href="/users/profile" class="m-5 p-4 sm:p-6 md:p-8">
       <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Profile</h5>
       <p class="font-normal leading-tight text-gray-700 dark:text-gray-400">
         Manage your user Profile

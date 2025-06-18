@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
-import { User } from "../../lib/users/create";
+import { User } from "../../../lib/users/create";
 
-test.describe("admin account", () => {
+test.describe("admin account", { tag: ["@users", "@admin"] }, () => {
   test("can login as the admin using the default initialize credentials", async ({
     page,
   }) => {
