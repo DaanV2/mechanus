@@ -1,11 +1,13 @@
 import { expect, test } from "@playwright/test";
-import { User } from "../../lib/users/create";
+import { User } from "../../../lib/users/create";
 
-test.describe("when logged in", () => {
+test.describe("when logged in", { tag: ["@users"] }, () => {
   test("creating a new user via the homepage, expecting to end on the profile page", async ({
-    page,
+    browser,
   }) => {
     const user = User.createRandom();
+    const context = await browser.newContext();
+    const page = await context.newPage();
 
     await test.step("by signing up", async () => {
       await page.goto("/");
@@ -30,11 +32,6 @@ test.describe("when logged in", () => {
       await page.waitForURL(/\/users\/profile\//);
       await expect(page).toHaveTitle("User - " + user.name);
     });
-
-    await test.step("by awaiting until we are on the user profile page", async () => {
-      await page.waitForURL(/\/users\/profile\//);
-      await expect(page).toHaveTitle("User - " + user.name);
-    });
   });
 });
 
@@ -43,6 +40,6 @@ test.describe("not logged in", () => {
     page,
   }) => {
     await page.goto("/users/profile/");
-    await page.waitForURL(/\/users\/profile\//);
+    await page.waitForURL(/\/users\/login\//);
   });
 });

@@ -1,66 +1,74 @@
-import type { Client } from '@connectrpc/connect';
+import type { LoginResponse } from '../../proto/users/v1/login_pb';
 import { parseJwt, type JWTClaims } from '../authenication/jwt/parse';
-import { KEY_ACCESS_TOKEN } from '../cookies';
-import { getCookie } from '../cookies/cookies';
-import { createUserClient } from '../stores/clients';
-import type { UserService } from '../../proto/users/v1/users_connect';
+import { Cookie } from '../storage';
+import { createLoginClient, createUserClient } from '../stores/clients';
 
-export class UserHandler {
-  private static _singleton: UserHandler | undefined;
+export type UserState = { loggedin: false; data?: undefined } | { loggedin: true; data: JWTClaims };
 
-  static instance(): UserHandler {
-    if (UserHandler._singleton === undefined) {
-      UserHandler._singleton = new UserHandler();
-    }
-
-    return UserHandler._singleton;
-  }
-
-  private _current: JWTClaims | undefined;
-  private _client: Client<typeof UserService>;
-
-  constructor() {
-    this._current = getCurrent();
-    this._client = createUserClient();
-  }
-
-  get hasLoggedinUser(): boolean {
-    return this._current !== undefined;
-  }
-
-  data(): JWTClaims | undefined {
-    return this._current;
-  }
-
-  logout() {
-    // TODO disscard session tokens
-  }
-
-  reload() {
-    this._current = getCurrent();
-    this._client = createUserClient();
-  }
-
-  async serverData() {
-    const d = this.data();
-    if (d === undefined) return Promise.reject('not logged in');
-    const id = d.user.id;
-
-    return this._client.get({ id: id });
-  }
+export namespace UserState {
+  export const LOGGED_OUT: UserState = { loggedin: false };
 }
 
-function getCurrent(): JWTClaims | undefined {
-  const jwt = getCookie(KEY_ACCESS_TOKEN);
-  if (jwt === undefined) {
-    return undefined;
+function getCurrentUser(): UserState {
+  const jwt = Cookie.get('access-token');
+  if (!jwt) {
+    return {
+      loggedin: false
+    };
   }
 
+  return parseToken(jwt);
+}
+
+function updateCurrentUser(data: LoginResponse): UserState {
+  if (data === undefined || data.token === '') return { loggedin: false };
+
+  Cookie.set('access-token', data.token);
+
+  return parseToken(data.token);
+}
+
+function parseToken(jwt: string): UserState {
   try {
-    return parseJwt(jwt);
+    return {
+      loggedin: true,
+      data: parseJwt(jwt)
+    };
   } catch (err) {
     console.log('something is weird with the jwt', jwt, err);
   }
 
-  return undefined;
+  return {
+    loggedin: false
+  };
 }
+
+export class UserHandler {
+  constructor() {}
+
+  get current() {
+    return getCurrentUser();
+  }
+
+  async create(username: string, password: string) {
+    await createUserClient().create({ username, password });
+
+    return this.login(username, password);
+  }
+
+  async login(username: string, password: string) {
+    const login = await createLoginClient().login({ username, password });
+
+    return updateCurrentUser(login);
+  }
+
+  async logout() {
+    // TODO;
+  }
+
+  async serverData(id?: string) {
+    return createUserClient().get({ id: id ?? this.current.data?.user.id });
+  }
+}
+
+export const userHandler = new UserHandler();
