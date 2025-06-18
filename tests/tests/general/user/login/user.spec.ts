@@ -3,11 +3,9 @@ import { User } from "../../../lib/users/create";
 
 test.describe("when logged in", { tag: ["@users"] }, () => {
   test("creating a new user via the homepage, expecting to end on the profile page", async ({
-    browser,
+    page,
   }) => {
     const user = User.createRandom();
-    const context = await browser.newContext();
-    const page = await context.newPage();
 
     await test.step("by signing up", async () => {
       await page.goto("/");

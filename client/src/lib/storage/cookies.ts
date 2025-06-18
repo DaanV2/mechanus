@@ -8,12 +8,14 @@ export namespace Cookie {
       console.log('got a cookie', match);
       return decodeURIComponent(match[2]);
     }
-    console.log('no match?', document.cookie);
+    const c = document.cookie;
+    console.log('no match?', { key, c });
 
     return null;
   }
   export function set(key: cookieKeys, value: string) {
-    const msg = `${key}=${value}`;
+    // Set cookie with path and SameSite=Strict for maximum first-party security (no Secure since HTTPS is not available yet)
+    const msg = `${key}=${encodeURIComponent(value)}; path=/; SameSite=Lax;`;
     console.log('setting cookie', msg);
     document.cookie = msg;
   }

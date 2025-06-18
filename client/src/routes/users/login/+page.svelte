@@ -7,10 +7,9 @@
   import { onMount } from 'svelte';
   import Footer from '../../../components/footer.svelte';
   import NavBar from '../../../components/nav-bar.svelte';
-  import { createClient } from '../../../lib/api/client';
-  import { createLoginClient } from '../../../lib/api/users_v1';
   import type { MechanusError } from '../../../lib/components/errors';
-  import { userHandler, UserHandler } from '../../../lib/handlers/user';
+  import { userHandler } from '../../../lib/handlers/user';
+  import { sleep } from '../../../lib/timings/sleep';
   let username = $state('');
   let password = $state('');
   let errorObj = $state<MechanusError>(null);
@@ -41,8 +40,8 @@
     if (!isFormValid) return;
 
     await userHandler.login(username, password);
-
-    goto('/users/profile');
+    await sleep(100);
+    goto('/users/profile', {});
   }
 
   onMount(() => {
