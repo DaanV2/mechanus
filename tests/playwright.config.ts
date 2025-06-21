@@ -11,17 +11,18 @@ const config = defineConfig({
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: CI,
-  retries: 2,
+  retries: CI ? 2 : 0,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: [["html", {}], ["list"]],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
-    trace: "on-first-retry",
+    trace: "retain-on-failure",
+    screenshot: "only-on-failure",
     // headless: false,
     // When running in Docker, we need to use the host.docker.internal hostname
     // to access services running on the host machine
-    baseURL: "http://127.0.0.1:8080",
+    baseURL: "http://localhost:8080",
   },
 
   /* Configure projects for major browsers */
