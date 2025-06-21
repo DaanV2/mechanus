@@ -15,7 +15,7 @@ export namespace Cookie {
   }
   export function set(key: cookieKeys, value: string) {
     // Set cookie with path and SameSite=Strict for maximum first-party security (no Secure since HTTPS is not available yet)
-    const msg = `${key}=${encodeURIComponent(value)}; path=/; SameSite=Lax;`;
+    const msg = `${key}=${encodeURIComponent(value)}; path=/; SameSite=Lax`;
     console.log('setting cookie', msg);
     document.cookie = msg;
   }
