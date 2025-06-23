@@ -37,5 +37,6 @@ func extractDomain(req HeaderContainer) string {
 	if idx := strings.Index(origin, ":"); idx != -1 {
 		origin = origin[:idx]
 	}
+
 	return origin
 }

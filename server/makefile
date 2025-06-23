@@ -19,7 +19,6 @@ lint:
 
 checks:
 	$(MAKE) build
-	$(MAKE) generate
 	$(MAKE) test
 	$(MAKE) lint
 	$(MAKE) documentation
