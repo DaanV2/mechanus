@@ -5,6 +5,10 @@ import (
 	"strings"
 )
 
+type Cookie struct {
+	Name, Value string
+}
+
 func SetCookies(resp, req HeaderContainer, cs ...*Cookie) {
 	domain := extractDomain(req)
 	for _, c := range cs {
