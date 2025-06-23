@@ -65,6 +65,21 @@ func (c *Config) GetString(name string) string {
 	return getValue[string](c, name)
 }
 
+func (c *Config) StringArray(name string, def []string, usage string) Flag[[]string] {
+	if def == nil {
+		def = []string{}
+	}
+
+	f := Strings(name, def, usage)
+	c.data.Store(name, f)
+
+	return f
+}
+
+func (c *Config) GetStringArray(name string) []string {
+	return getValue[[]string](c, name)
+}
+
 func (c *Config) Int(name string, def int, usage string) Flag[int] {
 	f := Int(name, def, usage)
 	c.data.Store(name, f)
