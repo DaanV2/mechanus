@@ -7,12 +7,13 @@ import (
 
 	"github.com/DaanV2/mechanus/server/pkg/config"
 	xurl "github.com/DaanV2/mechanus/server/pkg/extensions/url"
+	"github.com/charmbracelet/log"
 )
 
 var (
 	CorsConfig         = config.New("api.cors")
-	OriginsFlag        = CorsConfig.StringArray("allowed-origins", []string{"*"}, "The origins that are allowed to be used by requesters, if empty will skip this header. Allowed strings are matched via prefix check")
-	AllowLocalHostFlag = CorsConfig.Bool("allow-localhost", true, "Whenever or not as an origin, localhost are allowed")
+	OriginsFlag        = CorsConfig.StringArray("api.cors.allowed-origins", []string{"*"}, "The origins that are allowed to be used by requesters, if empty will skip this header. Allowed strings are matched via prefix check")
+	AllowLocalHostFlag = CorsConfig.Bool("api.cors.allow-localhost", true, "Whenever or not as an origin, localhost are allowed")
 )
 
 type CORSConfig struct {
@@ -52,6 +53,7 @@ func (hand *CORSHandler) AllowOrigin(w http.ResponseWriter, r *http.Request) boo
 
 	if hand.AllowLocalHost && xurl.IsLocalHostOrigin(origin) {
 		header.Set("Access-Control-Allow-Origin", origin)
+
 		return true
 	}
 
@@ -59,19 +61,23 @@ func (hand *CORSHandler) AllowOrigin(w http.ResponseWriter, r *http.Request) boo
 	case 0:
 	case 1:
 		header.Set("Access-Control-Allow-Origin", hand.AllowedOrigins[0])
+
 		return origin == hand.AllowedOrigins[0] || hand.AllowedOrigins[0] == "*"
 	default:
 		for _, o := range hand.AllowedOrigins {
 			if o == "*" {
 				header.Set("Access-Control-Allow-Origin", origin)
+
 				return true
 			}
 			if strings.HasPrefix(origin, o) {
 				header.Set("Access-Control-Allow-Origin", origin)
+
 				return true
 			}
 		}
 	}
+
 	return false
 }
 
@@ -85,12 +91,17 @@ func Wrap(handler *CORSHandler, next http.Handler) http.Handler {
 
 		if !handler.AllowOrigin(w, r) {
 			w.WriteHeader(http.StatusForbidden)
-			w.Write([]byte("CORS: Origin not allowed"))
+			_, err := w.Write([]byte("CORS: Origin not allowed"))
+			if err != nil {
+				log.WithPrefix("cors").Error("error during writing 403: CORS origin not allowed", "error", err)
+			}
+
 			return
 		}
 
 		if r.Method == http.MethodOptions {
 			w.WriteHeader(http.StatusOK)
+
 			return
 		}
 
