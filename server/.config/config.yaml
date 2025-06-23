@@ -1,4 +1,8 @@
 api:
+  cors:
+    allow-localhost: true
+    allowed-origins:
+      - "*"
   host: ""
   port: 8666
 database:
@@ -9,12 +13,16 @@ database:
   type: sqlite
 initialize:
   admin:
-    password: "admin"
-    username: "admin"
+    password: admin
+    username: admin
 log:
   format: text
   level: debug
   report-caller: false
+mdns:
+  hostname: mechanus
+  ipv6: false
+  servicetype: _http._tcp.local
 web:
   host: ""
   port: 8080

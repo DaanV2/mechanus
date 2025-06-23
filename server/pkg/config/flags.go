@@ -76,6 +76,12 @@ func String(name, def, usage string) Flag[string] {
 	return newFlag(name, usage, viper.GetString)
 }
 
+func Strings(name string, def []string, usage string) Flag[[]string] {
+	flags.StringArray(name, def, usage)
+
+	return newFlag(name, usage, viper.GetStringSlice)
+}
+
 func Int(name string, def int, usage string) Flag[int] {
 	flags.Int(name, def, usage)
 

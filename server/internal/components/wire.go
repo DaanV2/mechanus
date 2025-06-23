@@ -12,6 +12,7 @@ import (
 	"github.com/DaanV2/mechanus/server/pkg/authenication"
 	"github.com/DaanV2/mechanus/server/pkg/database"
 	"github.com/DaanV2/mechanus/server/pkg/grpc/gen/users/v1/usersv1connect"
+	grpc_handlers "github.com/DaanV2/mechanus/server/pkg/grpc/handlers"
 	"github.com/DaanV2/mechanus/server/pkg/grpc/rpcs/rpcs_users"
 	"github.com/DaanV2/mechanus/server/pkg/networking/mdns"
 	"github.com/DaanV2/mechanus/server/pkg/servers"
@@ -32,6 +33,7 @@ func BuildServer(ctx context.Context) (*Server, error) {
 	wire.Build(
 		dbSet,
 		servicesSet,
+		handlersSet,
 
 		createServerManager,
 
@@ -46,6 +48,11 @@ func BuildServer(ctx context.Context) (*Server, error) {
 var dbSet = wire.NewSet(
 	SetupDatabase,
 	GetDatabaseOptions,
+)
+
+var handlersSet = wire.NewSet(
+	grpc_handlers.GetCORSConfig,
+	grpc_handlers.NewCORSHandler,
 )
 
 var servicesSet = wire.NewSet(
