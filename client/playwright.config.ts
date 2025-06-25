@@ -1,6 +1,11 @@
 import { defineConfig } from '@playwright/test';
 
-export default defineConfig({
+const CI = process.env.CI === 'true' || false;
+
+const config = defineConfig({
+  fullyParallel: true,
+  forbidOnly: CI,
+  reporter: [['html', {}], ['list']],
   webServer: {
     command: 'npm run build && npm run preview',
     port: 4173
@@ -8,3 +13,11 @@ export default defineConfig({
   testDir: 'tests',
   testMatch: /(.+\.)?(test|spec|gui)\.[jt]s/
 });
+
+if (CI) {
+  if (Array.isArray(config.reporter)) {
+    config.reporter.push(['github']);
+  }
+}
+
+export default config;
