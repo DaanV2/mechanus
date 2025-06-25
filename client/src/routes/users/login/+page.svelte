@@ -4,15 +4,12 @@
   import { Code, ConnectError } from '@connectrpc/connect';
   import { Button, ButtonGroup, Input, InputAddon, Label } from 'flowbite-svelte';
   import { EyeOutline, EyeSlashOutline } from 'flowbite-svelte-icons';
-  import NavBar from '../../../components/nav-bar.svelte';
-  import { createClient } from '../../../lib/api/client';
-  import { createLoginClient } from '../../../lib/api/users_v1';
-  import type { MechanusError } from '../../../lib/components/errors';
-  import { KEY_ACCESS_TOKEN, setCookie } from '../../../lib/cookies';
-  import Footer from '../../../components/footer.svelte';
   import { onMount } from 'svelte';
-  import { UserHandler } from '../../../lib/handlers/user';
-
+  import Footer from '../../../components/footer.svelte';
+  import NavBar from '../../../components/nav-bar.svelte';
+  import type { MechanusError } from '../../../lib/components/errors';
+  import { userHandler } from '../../../lib/handlers/user';
+  import { sleep } from '../../../lib/timings/sleep';
   let username = $state('');
   let password = $state('');
   let errorObj = $state<MechanusError>(null);
@@ -42,17 +39,14 @@
   async function login() {
     if (!isFormValid) return;
 
-    const transport = createClient();
-    const loginClient = createLoginClient(transport);
-    const login = await loginClient.login({ username, password });
-    setCookie(KEY_ACCESS_TOKEN, `${login.type} ${login.token}`);
-
-    UserHandler.instance().reload();
-    goto('/users/profile');
+    await userHandler.login(username, password);
+    await sleep(100);
+    goto('/users/profile', {});
   }
 
   onMount(() => {
-    if (UserHandler.instance().hasLoggedinUser) {
+    if (userHandler.current.loggedin) {
+      console.error('already logged in');
       goto('/users/profile');
     }
   });

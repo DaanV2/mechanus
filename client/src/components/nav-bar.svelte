@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { userHandler, UserState } from '$lib/handlers/user';
   import {
     Avatar,
     Button,
@@ -14,26 +15,23 @@
     NavUl
   } from 'flowbite-svelte';
   import { onMount } from 'svelte';
-  import type { JWTClaims } from '../lib/authenication/jwt/parse';
-  import { UserHandler } from '../lib/handlers/user';
 
-  let user: UserHandler | undefined = $state(undefined);
-  let userData: JWTClaims | undefined = $state(undefined);
+  let currentUser: UserState = $state(UserState.LOGGED_OUT);
+  let userData = $derived(currentUser.loggedin ? currentUser.data : undefined);
 
   onMount(() => {
-    user = UserHandler.instance();
-    userData = user.data();
+    currentUser = userHandler.current;
   });
 
-  function logout() {
-    user?.logout();
+  async function logout() {
+    return userHandler.logout();
   }
 </script>
 
 <Navbar class="bg-primary">
   <NavBrand href="/">
     <!-- <img src="/images/flowbite-svelte-icon-logo.svg" class="me-3 h-6 sm:h-9" alt="Flowbite Logo" /> -->
-    <span class="text-text-100 self-center whitespace-nowrap text-xl font-semibold">Mechanus</span>
+    <span class="text-text-100 self-center text-xl font-semibold whitespace-nowrap">Mechanus</span>
   </NavBrand>
 
   <div class="flex flex-row items-center">
