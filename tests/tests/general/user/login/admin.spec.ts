@@ -1,10 +1,9 @@
-import { test, expect } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 import { User } from "../../../lib/users/create";
 
 test.describe("admin account", { tag: ["@users", "@admin"] }, () => {
   test("can login as the admin using the default initialize credentials", async ({
     page,
-    browser,
   }) => {
     const user = User.createAdmin();
 
@@ -25,8 +24,6 @@ test.describe("admin account", { tag: ["@users", "@admin"] }, () => {
       const cookie = await page.evaluate(() => {
         return document.cookie;
       });
-      const cs = await Promise.all(browser.contexts().map((c) => c.cookies()));
-      console.log(cs);
       expect(cookie).toContain("access-token=");
 
       await expect(page).toHaveTitle("User - " + user.name);
