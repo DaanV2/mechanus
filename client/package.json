@@ -18,14 +18,14 @@
     "postinstall": "npx playwright install"
   },
   "dependencies": {
-    "@bufbuild/protobuf": "^1.10.0",
-    "@connectrpc/connect": "^1.6.1",
-    "@connectrpc/connect-web": "^1.6.1",
+    "@bufbuild/protobuf": "^2.6.0",
+    "@connectrpc/connect": "^2.0.2",
+    "@connectrpc/connect-web": "^2.0.2",
     "pixi.js": "^8.8.0"
   },
   "devDependencies": {
-    "@bufbuild/buf": "^1.50.0",
-    "@bufbuild/protoc-gen-es": "^1.10.0",
+    "@bufbuild/buf": "^1.55.1",
+    "@bufbuild/protoc-gen-es": "^2.6.0",
     "@connectrpc/protoc-gen-connect-es": "^1.6.1",
     "@eslint/compat": "^1.2.5",
     "@eslint/js": "^9.18.0",
