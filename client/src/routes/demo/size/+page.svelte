@@ -1,6 +1,6 @@
 <script>
   import { Application, Assets, Sprite } from 'pixi.js';
-  import { onMount } from 'svelte';
+  import { onDestroy, onMount } from 'svelte';
 
   const app = new Application();
 
@@ -83,6 +83,7 @@
       moveSprite(arrowRightBottom, app.renderer.width, app.renderer.height, time.deltaTime);
     });
   });
+  onDestroy(() => app.destroy());
 </script>
 
 <svelte:window />

@@ -1,9 +1,11 @@
 <script lang="ts">
-  import { userHandler, UserState } from '$lib/handlers/user';
-  import { Card } from 'flowbite-svelte';
-  import { onMount } from 'svelte';
+  import SimpleCard from '$lib/components/cards/simple.svelte';
+  import Fluid from '$lib/components/collections/fluid.svelte';
   import Footer from '$lib/components/footer.svelte';
   import NavBar from '$lib/components/nav-bar.svelte';
+  import { userHandler, UserState } from '$lib/handlers/user';
+  import { Heading, Hr } from 'flowbite-svelte';
+  import { onMount } from 'svelte';
 
   let userData: UserState = $state(UserState.LOGGED_OUT);
 
@@ -18,39 +20,23 @@
 
 <NavBar />
 
-<div class="flex min-h-screen flex-col items-center py-5">
+<Heading tag="h2" class="px-5 py-3">Choose your adventure</Heading>
+<Hr />
+
+<Fluid>
   <!-- User Data -->
   {#if userData}
-    <Card href="/campaigns" class="m-5 p-4 sm:p-6 md:p-8">
-      <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
-        Campaigns
-      </h5>
-      <p class="font-normal leading-tight text-gray-700 dark:text-gray-400">see your campaigns</p>
-    </Card>
-    <Card href="/users/profile" class="m-5 p-4 sm:p-6 md:p-8">
-      <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Profile</h5>
-      <p class="font-normal leading-tight text-gray-700 dark:text-gray-400">
-        Manage your user Profile
-      </p>
-    </Card>
-    <Card href="/devices" class="m-5 p-4 sm:p-6 md:p-8">
-      <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Devices</h5>
-      <p class="font-normal leading-tight text-gray-700 dark:text-gray-400">Manage the devices</p>
-    </Card>
+    <SimpleCard href="/campaigns" title="Campaigns" text="see your campaigns" />
+    <SimpleCard href="/users/profile" title="Profile" text="Manage your user Profile" />
+    <SimpleCard href="/devices" title="Devices" text="Manage the devices" />
   {/if}
   <!-- Aviable for all -->
-  <Card href="/views" class="m-5 p-4 sm:p-6 md:p-8">
-    <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Views</h5>
-    <p class="font-normal leading-tight text-gray-700 dark:text-gray-400">...</p>
-  </Card>
-  <Card href="/demo" class="m-5 p-4 sm:p-6 md:p-8">
-    <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
-      Demos & Tools
-    </h5>
-    <p class="font-normal leading-tight text-gray-700 dark:text-gray-400">
-      A bunch of demos and tools to ensure everything is working
-    </p>
-  </Card>
-</div>
+  <SimpleCard href="/views" title="Views" text="..." />
+  <SimpleCard
+    href="/demo"
+    title="Demos & Tools"
+    text="A bunch of demos and tools to ensure everything is working"
+  />
+</Fluid>
 
 <Footer />

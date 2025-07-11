@@ -4,6 +4,8 @@
   import { onMount } from 'svelte';
   import Footer from '$lib/components/footer.svelte';
   import NavBar from '$lib/components/nav-bar.svelte';
+  import SimpleCard from '$lib/components/cards/simple.svelte';
+  import Fluid from '$lib/components/collections/fluid.svelte';
 
   let userData: UserState = $state(UserState.LOGGED_OUT);
 
@@ -19,20 +21,13 @@
 <NavBar />
 
 <div class="flex min-h-screen flex-col items-center py-5">
-  <!-- User Data -->
-  {#if userData}
-    <Card href="./game-master" class="m-5 p-4 sm:p-6 md:p-8">
-      <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
-        Game Master
-      </h5>
-    </Card>
-    <Card href="./players" class="m-5 p-4 sm:p-6 md:p-8">
-      <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Player</h5>
-    </Card>
-  {/if}
-  <Card href="./devices" class="m-5 p-4 sm:p-6 md:p-8">
-    <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Devices</h5>
-  </Card>
+  <Fluid>
+    {#if userData}
+      <SimpleCard href="/views/game-master" title="Game Master" />
+      <SimpleCard href="/views/players" title="Player" />
+    {/if}
+    <SimpleCard href="/views//devices" title="Devices" />
+  </Fluid>
 </div>
 
 <Footer />

@@ -24,4 +24,8 @@ export class Application {
     }
     document.body.appendChild(this._app.canvas);
   }
+
+  destroy() {
+    this._app.destroy();
+  }
 }
