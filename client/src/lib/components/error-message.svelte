@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Code } from '@connectrpc/connect';
-  import type { MechanusError } from './errors.svelte';
+  import type { MechanusError } from './errors';
 
   export let error: MechanusError = null;
 
