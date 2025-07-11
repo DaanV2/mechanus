@@ -1,15 +1,15 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
   import ErrorMessage from '$lib/components/error-message.svelte';
-  import type { MechanusError } from '$lib/components/errors';
   import { Code, ConnectError } from '@connectrpc/connect';
   import { Button, ButtonGroup, Input, InputAddon, Label } from 'flowbite-svelte';
   import { EyeOutline, EyeSlashOutline } from 'flowbite-svelte-icons';
-  import Footer from '../../../components/footer.svelte';
-  import NavBar from '../../../components/nav-bar.svelte';
+  import Footer from '$lib/components/footer.svelte';
+  import NavBar from '$lib/components/nav-bar.svelte';
   import { userHandler } from '../../../lib/handlers/user';
   import { sleep } from '../../../lib/timings/sleep';
   import { onMount } from 'svelte';
+  import type { MechanusError } from '$lib/components/errors';
 
   let username = $state('');
   let password = $state('');

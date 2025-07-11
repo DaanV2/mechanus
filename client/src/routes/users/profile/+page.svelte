@@ -2,8 +2,8 @@
   import { goto } from '$app/navigation';
   import { userHandler } from '$lib/handlers/user';
   import { onMount } from 'svelte';
-  import Footer from '../../../components/footer.svelte';
-  import NavBar from '../../../components/nav-bar.svelte';
+  import Footer from '$lib/components/footer.svelte';
+  import NavBar from '$lib/components/nav-bar.svelte';
   import { User } from '../../../proto/users/v1/users_pb';
 
   let user = $state<User | undefined>(undefined);
