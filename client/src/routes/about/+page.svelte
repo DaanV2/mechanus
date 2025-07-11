@@ -1,7 +1,7 @@
 <script>
   import { Blockquote, Card, Heading, Hr } from 'flowbite-svelte';
-  import Footer from '../../lib/components/footer.svelte';
-  import NavBar from '../../lib/components/nav-bar.svelte';
+  import Footer from '$lib/components/footer.svelte';
+  import NavBar from '$lib/components/nav-bar.svelte';
 </script>
 
 <svelte:head>

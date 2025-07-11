@@ -2,8 +2,8 @@
   import { userHandler, UserState } from '$lib/handlers/user';
   import { Card } from 'flowbite-svelte';
   import { onMount } from 'svelte';
-  import Footer from '../lib/components/footer.svelte';
-  import NavBar from '../lib/components/nav-bar.svelte';
+  import Footer from '$lib/components/footer.svelte';
+  import NavBar from '$lib/components/nav-bar.svelte';
 
   let userData: UserState = $state(UserState.LOGGED_OUT);
 
@@ -33,11 +33,15 @@
         Manage your user Profile
       </p>
     </Card>
+    <Card href="/devices" class="m-5 p-4 sm:p-6 md:p-8">
+      <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Devices</h5>
+      <p class="font-normal leading-tight text-gray-700 dark:text-gray-400">Manage the devices</p>
+    </Card>
   {/if}
   <!-- Aviable for all -->
-  <Card href="/devices" class="m-5 p-4 sm:p-6 md:p-8">
-    <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Devices</h5>
-    <p class="font-normal leading-tight text-gray-700 dark:text-gray-400">Manage the devices</p>
+  <Card href="/views" class="m-5 p-4 sm:p-6 md:p-8">
+    <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Views</h5>
+    <p class="font-normal leading-tight text-gray-700 dark:text-gray-400">...</p>
   </Card>
   <Card href="/demo" class="m-5 p-4 sm:p-6 md:p-8">
     <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">

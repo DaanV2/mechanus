@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Card } from 'flowbite-svelte';
-  import NavBar from '../../lib/components/nav-bar.svelte';
-  import Footer from '../../lib/components/footer.svelte';
+  import NavBar from '$lib/components/nav-bar.svelte';
+  import Footer from '$lib/components/footer.svelte';
 
   // Define an array of subpage objects
   const subpages = [{ name: 'Size check', path: '/demo/size' }];
