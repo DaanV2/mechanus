@@ -83,7 +83,6 @@
       moveSprite(arrowRightBottom, app.renderer.width, app.renderer.height, time.deltaTime);
     });
   });
-  onDestroy(() => app.destroy());
 </script>
 
 <svelte:window />

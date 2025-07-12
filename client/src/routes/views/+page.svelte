@@ -26,7 +26,7 @@
       <SimpleCard href="/views/game-master" title="Game Master" />
       <SimpleCard href="/views/players" title="Player" />
     {/if}
-    <SimpleCard href="/views//devices" title="Devices" />
+    <SimpleCard href="/views/devices" title="Devices" />
   </Fluid>
 </div>
 

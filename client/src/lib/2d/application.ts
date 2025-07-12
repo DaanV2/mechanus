@@ -26,6 +26,7 @@ export class Application {
   }
 
   destroy() {
+    document.body.removeChild(this._app.canvas);
     this._app.destroy();
   }
 }

@@ -7,5 +7,4 @@
   onMount(async () => {
     await app.init();
   });
-  onDestroy(() => app.destroy());
 </script>
