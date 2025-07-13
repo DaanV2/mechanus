@@ -3,9 +3,12 @@ package cmd
 import (
 	"fmt"
 	"log"
+	"sort"
 
 	"github.com/DaanV2/mechanus/server/mechanus/paths"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+	"gopkg.in/yaml.v3"
 )
 
 // infoCmd represents the info command
@@ -27,23 +30,31 @@ func init() {
 }
 
 func PrintInfo(cmd *cobra.Command, args []string) error {
+	values := []string{
+		printInfoFn("app config dir", paths.GetAppConfigDir),
+		printInfoFn("state dir", paths.GetStateDir),
+		printInfoFn("user data dir", paths.GetUserDataDir),
+	}
+	// TODO use bubbles
 	log.Println("printing info")
-	printInfoFn("app config dir", paths.GetAppConfigDir)
-	printInfoFn("state dir", paths.GetStateDir)
-	printInfoFn("user data dir", paths.GetUserDataDir)
+
+	fmt.Println("\n==== Info ====")
+	sort.Strings(values)
+	for _, v := range values {
+		fmt.Println(v)
+	}
+
+	data, _ := yaml.Marshal(viper.AllSettings())
+	fmt.Println(string(data))
 
 	return nil
 }
 
-func printInfo(key, value any) {
-	fmt.Println(key, "=", value)
-}
-
-func printInfoFn(key string, call func() (string, error)) {
+func printInfoFn(key string, call func() (string, error)) string {
 	v, err := call()
 	if err != nil {
 		log.Fatal("error during reading of key/value", "key", key, "value", v, "error", err)
 	}
 
-	printInfo(key, v)
+	return fmt.Sprintf("%s=%s", key, v)
 }

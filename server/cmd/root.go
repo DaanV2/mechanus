@@ -9,14 +9,16 @@ import (
 	cmd_config "github.com/DaanV2/mechanus/server/cmd/config"
 	cmd_mdns "github.com/DaanV2/mechanus/server/cmd/mdns"
 	"github.com/DaanV2/mechanus/server/internal/setup"
+	"github.com/charmbracelet/fang"
 	"github.com/charmbracelet/log"
 	"github.com/spf13/cobra"
 )
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "mechanus",
-	Short: "🤖",
+	Use:                        "mechanus",
+	Short:                      "🤖",
+	SuggestionsMinimumDistance: 10,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	// Run: func(cmd *cobra.Command, args []string) { },
@@ -33,7 +35,7 @@ var rootCmd = &cobra.Command{
 
 func init() {
 	pflags := rootCmd.PersistentFlags()
-	setup.LoggerConfig.AddToSet(pflags)
+	setup.LoggerConfig.AddToSet( pflags)
 
 	cmd_config.AddCommand(rootCmd)
 	cmd_mdns.AddCommand(rootCmd)
@@ -62,7 +64,7 @@ func Execute() {
 		}
 	}()
 
-	err := rootCmd.Execute()
+	err := fang.Execute(context.Background(), rootCmd)
 	if err != nil {
 		// nolint:gocritic // exitAfterDefer fine in this case, we already report the error
 		log.Fatal("error during executing command", "error", err)
