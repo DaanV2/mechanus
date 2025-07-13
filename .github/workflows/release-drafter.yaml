@@ -1,4 +1,4 @@
-name: Release Drafter
+name: 📋 Release
 
 on:
   push:
@@ -16,6 +16,7 @@ jobs:
       pull-requests: write
 
     runs-on: ubuntu-latest
+    name: "✒️ Release Drafter"
     steps:
       # Drafts your next Release notes as Pull Requests are merged into "master"
       - uses: release-drafter/release-drafter@v6

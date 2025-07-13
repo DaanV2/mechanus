@@ -1,4 +1,4 @@
-name: ⚙️ CI
+name: 🏷️ Labels
 
 on:
   pull_request:
