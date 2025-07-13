@@ -12,5 +12,5 @@ jobs:
       issues: write
     runs-on: ubuntu-latest
     steps:
-    - name: Label issues
-      uses: actions/labeler@v5
+      - name: Label issues
+        uses: actions/labeler@v5
