@@ -1,0 +1,38 @@
+syntax = "proto3";
+package screens.v1;
+
+import "screens/v1/scene_actions.proto";
+import "screens/v1/splash_screen.proto";
+
+option go_package = "github.com/DaanV2/mechanus/server/pkg/grpc/gen/screens/v1;screensv1";
+
+service ScreensService {
+  rpc ListenUpdate(ScreenListenRequest) returns (stream ScreenUpdate);
+}
+
+enum ScreenRole {
+  Admin = 0;
+  Player = 1;
+  Viewer = 2;
+  Device = 3;
+}
+
+message ScreenListenRequest {
+  ScreenRole role = 1;
+  // For certain roles a identifiying token is required
+  optional string token = 2;
+  // For certain roles (such as devices) and identifier is needed
+  optional string id = 3;
+}
+
+message ScreenUpdate {
+  repeated ScreenAction action = 1;
+}
+
+message ScreenAction {
+  oneof action {
+    SplashScreen splash_screen = 1;
+    SceneChange scene_change = 2;
+    SceneChangeCompleted scene_change_completed = 3;
+  };
+}
