@@ -1,11 +1,10 @@
 <script lang="ts">
-  import { userHandler, UserState } from '$lib/handlers/user';
-  import { Card } from 'flowbite-svelte';
-  import { onMount } from 'svelte';
-  import Footer from '$lib/components/footer.svelte';
-  import NavBar from '$lib/components/nav-bar.svelte';
   import SimpleCard from '$lib/components/cards/simple.svelte';
   import Fluid from '$lib/components/collections/fluid.svelte';
+  import Footer from '$lib/components/footer.svelte';
+  import NavBar from '$lib/components/nav-bar.svelte';
+  import { userHandler, UserState } from '$lib/handlers/user';
+  import { onMount } from 'svelte';
 
   let userData: UserState = $state(UserState.LOGGED_OUT);
 

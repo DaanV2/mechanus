@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Application } from '$lib/2d/application';
-  import { onDestroy, onMount } from 'svelte';
+  import { onMount } from 'svelte';
 
   const app = new Application();
 

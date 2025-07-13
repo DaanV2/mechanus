@@ -13,7 +13,7 @@
 <div class="flex min-h-screen flex-col items-center py-5">
   <Heading tag="h2" class="py-2 text-white dark:text-white">About</Heading>
   <Blockquote class="p-4 sm:p-6 md:p-8">
-    <p class="font-normal leading-tight text-gray-700 dark:text-gray-400">TODO</p>
+    <p class="leading-tight font-normal text-gray-700 dark:text-gray-400">TODO</p>
   </Blockquote>
 
   <Hr class="mx-auto my-4 h-1 w-48 rounded md:my-10" />

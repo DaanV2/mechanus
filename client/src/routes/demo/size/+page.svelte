@@ -1,6 +1,6 @@
 <script>
   import { Application, Assets, Sprite } from 'pixi.js';
-  import { onDestroy, onMount } from 'svelte';
+  import { onMount } from 'svelte';
 
   const app = new Application();
 
