@@ -11,7 +11,7 @@ on:
     branches:
       - main
   workflow_dispatch:
-  merge_group: 
+  merge_group:
 
 jobs:
   proto-checks:
@@ -36,13 +36,11 @@ jobs:
   docker-checks:
     needs:
       - proto-checks
-      - client-checks
-      - server-checks
     name: 🐳 Docker
     uses: ./.github/workflows/docker-checks.yaml
 
   integration-tests:
     needs:
-      - docker-checks
+      - proto-checks
     name: 🎭 Integration tests
     uses: ./.github/workflows/integration-tests.yaml
