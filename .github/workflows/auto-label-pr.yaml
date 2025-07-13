@@ -1,4 +1,4 @@
-name: Auto Label PR
+name: ⚙️ CI
 
 on:
   pull_request:
@@ -6,11 +6,12 @@ on:
 
 jobs:
   labeler:
+    name: 🏷️ Labeler
     permissions:
       contents: read
       pull-requests: write
       issues: write
     runs-on: ubuntu-latest
     steps:
-      - name: Label issues
+      - name: Label PR
         uses: actions/labeler@v5
