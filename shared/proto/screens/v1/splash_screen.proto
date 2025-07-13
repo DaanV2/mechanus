@@ -1,0 +1,11 @@
+syntax = "proto3";
+package screens.v1;
+
+option go_package = "github.com/DaanV2/mechanus/server/pkg/grpc/gen/screens/v1;screensv1";
+
+message SplashScreen {
+  bool show = 1;
+  optional string title = 2;
+  optional string subtitle = 3;
+  optional string background_hex = 4;
+}
