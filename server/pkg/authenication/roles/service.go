@@ -56,14 +56,22 @@ func ParseRole(role string) (Role, error) {
 	}
 }
 
-func (r *RoleService) GrantRole(container RoleContainer, role Role) {
-	roles := slices.Clone(container.GetRoles())
+func (r *RoleService) GrantRole(grants RoleContainer, role Role) {
+	roles := slices.Clone(grants.GetRoles())
+	if slices.Contains(roles, role.String()) {
+		return // already granted
+	}
 	roles = append(roles, role.String())
-	container.SetRoles(roles...)
+	grants.SetRoles(roles...)
 }
 
-func (r *RoleService) HasRole(container RoleContainer, role Role) bool {
-	for _, r := range container.GetRoles() {
+// HasRole checks if the grants contains a role that has the given role, or inherits it.
+func (r *RoleService) HasRole(grants RoleContainer, role Role) bool {
+	return GrantsHasRole(grants, role)
+}
+
+func GrantsHasRole(grants RoleContainer, role Role) bool {
+	for _, r := range grants.GetRoles() {
 		if Role(r).Inherits(role) {
 			return true
 		}
