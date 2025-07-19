@@ -1,6 +1,9 @@
 include .env
 export
 
+assembly:
+	go build -gcflags="-S" ./mechanus/screens > cmd.S 2>&1
+
 build:
 	go build ./...
 

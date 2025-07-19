@@ -3,10 +3,12 @@ plugins:
   # Server
   - local: protoc-gen-go
     out: server/pkg/grpc/gen
-    opt: paths=source_relative
+    opt:
+      - paths=source_relative
   - local: protoc-gen-connect-go
     out: server/pkg/grpc/gen
-    opt: paths=source_relative
+    opt:
+      - paths=source_relative
   # Client
   - remote: buf.build/bufbuild/es:v1.10.0
     out: client/src/proto

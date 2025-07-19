@@ -2,3 +2,6 @@
 *_pb.ts linguist-generated=true
 *_connect.ts linguist-generated=true
 * text=auto eol=lf
+
+*.dd2vtt text
+*.dungeondraft_map text
