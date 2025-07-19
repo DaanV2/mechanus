@@ -11,12 +11,12 @@ service ScreensService {
 }
 
 enum ScreenRole {
-  Unknown = 0;
-  Device = 1;
-  Viewer = 2;
-  Player = 3;
-  Operator = 4;
-  Admin = 5;
+  SCREEN_ROLE_UNKNOWN_UNSPECIFIED = 0;
+  SCREEN_ROLE_DEVICE = 1;
+  SCREEN_ROLE_VIEWER = 2;
+  SCREEN_ROLE_PLAYER = 3;
+  SCREEN_ROLE_OPERATOR = 4;
+  SCREEN_ROLE_ADMIN = 5;
 }
 
 message ScreenListenRequest {
