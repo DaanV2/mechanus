@@ -51,16 +51,15 @@ func authenicateRequest(ctx context.Context, req *screensv1.ScreenListenRequest)
 	}
 
 	switch req.GetRole() {
-	case screensv1.ScreenRole_Admin:
+	case screensv1.ScreenRole_SCREEN_ROLE_ADMIN:
 		info.valid = authenication.IsAuthenicatedWithRole(ctx, roles.Admin)
-	case screensv1.ScreenRole_Operator:
+	case screensv1.ScreenRole_SCREEN_ROLE_OPERATOR:
 		info.valid = authenication.IsAuthenicatedWithRole(ctx, roles.Operator)
-	case screensv1.ScreenRole_Player:
+	case screensv1.ScreenRole_SCREEN_ROLE_PLAYER:
 		info.valid = authenication.IsAuthenicatedWithRole(ctx, roles.User)
-	case screensv1.ScreenRole_Viewer:
+	case screensv1.ScreenRole_SCREEN_ROLE_VIEWER:
 		info.valid = authenication.IsAuthenicatedWithRole(ctx, roles.Viewer)
-	case screensv1.ScreenRole_Device:
-	case screensv1.ScreenRole_Unknown:
+	case screensv1.ScreenRole_SCREEN_ROLE_UNKNOWN_UNSPECIFIED, screensv1.ScreenRole_SCREEN_ROLE_DEVICE:
 		info.valid = true // Unknown/Device roles do not require authentication
 	}
 

@@ -23,12 +23,16 @@ var _ = Describe("ScreenID", func() {
 	})
 
 	Describe("Creation and Basic Properties", func() {
-		It("should create a valid ScreenID with role and UUID", func() {
-			for _, role := range []string{adminRole, operatorRole, userRole, viewerRole} {
+		DescribeTable("should create a valid ScreenID with role and UUID",
+			func(role string) {
 				id := screens.NewScreenID(role, testUUID)
 				Expect(id.String()).To(Equal(role + ":" + testUUID))
-			}
-		})
+			},
+			Entry("admin role", adminRole),
+			Entry("operator role", operatorRole),
+			Entry("user role", userRole),
+			Entry("viewer role", viewerRole),
+		)
 
 		It("should extract role correctly", func() {
 			Expect(testID.Role()).To(Equal(adminRole))
@@ -43,16 +47,35 @@ var _ = Describe("ScreenID", func() {
 			Expect(func() { invalidID.Role() }).To(Panic())
 			Expect(func() { invalidID.ID() }).To(Panic())
 		})
+
+		DescribeTable("should be able to handle bogus inputs", func(role string, id string) {
+			screen := screens.NewScreenID(role, id)
+			Expect(screen).ToNot(BeEmpty())
+			arole, aid := screen.Info()
+			Expect(arole).To(Equal(role))
+			Expect(aid).To(Equal(id))
+		},
+			Entry("empty role", "", testUUID),
+			Entry("nil role", nil, testUUID),
+			Entry("empty ID", adminRole, ""),
+			Entry("nil ID", adminRole, nil),
+			Entry("both empty", "", ""),
+			Entry("both nil", nil, nil),
+		)
 	})
 
 	Describe("Role Checks", func() {
-		It("should correctly identify its role", func() {
-			for _, role := range []string{adminRole, operatorRole, userRole, viewerRole} {
+		DescribeTable("should correctly identify its role",
+			func(role string) {
 				id := screens.NewScreenID(role, testUUID)
 				Expect(id.HasRole(role)).To(BeTrue())
 				Expect(id.HasRole("invalid-role")).To(BeFalse())
-			}
-		})
+			},
+			Entry("admin role", adminRole),
+			Entry("operator role", operatorRole),
+			Entry("user role", userRole),
+			Entry("viewer role", viewerRole),
+		)
 	})
 
 	Describe("ID Checks", func() {
@@ -73,7 +96,7 @@ var _ = Describe("ScreenID", func() {
 			id1 := screens.NewScreenID(adminRole, testUUID)
 			id2 := screens.NewScreenID(adminRole, uuid.New().String())
 			id3 := screens.NewScreenID(operatorRole, testUUID)
-			
+
 			Expect(id1.Equals(id2)).To(BeFalse(), "Different UUIDs should not be equal")
 			Expect(id1.Equals(id3)).To(BeFalse(), "Different roles should not be equal")
 		})
@@ -88,12 +111,16 @@ var _ = Describe("ScreenID", func() {
 	})
 
 	Describe("String Representation", func() {
-		It("should return correct string format", func() {
-			for _, role := range []string{adminRole, operatorRole, userRole, viewerRole} {
+		DescribeTable("should return correct string format",
+			func(role string) {
 				id := screens.NewScreenID(role, testUUID)
 				expected := role + ":" + testUUID
 				Expect(id.String()).To(Equal(expected))
-			}
-		})
+			},
+			Entry("admin role", adminRole),
+			Entry("operator role", operatorRole),
+			Entry("user role", userRole),
+			Entry("viewer role", viewerRole),
+		)
 	})
 })
