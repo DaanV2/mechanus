@@ -1,6 +1,8 @@
 package screens
 
-import "strings"
+import (
+	"strings"
+)
 
 var (
 	ErrInvalidScreenIDFormat = "invalid ScreenID format, missing role separator ':'"
@@ -16,28 +18,31 @@ func NewScreenID(role, id string) ScreenID {
 	return ScreenID(role + ":" + id)
 }
 
-// Role returns the role portion of the ScreenID.
-// Panics if the ScreenID format is invalid (missing ':' separator).
-func (s ScreenID) Role() string {
-	i := strings.Index(string(s), ":")
-	if i == -1 {
-		// Note: this should not happen if the ID is created correctly
+// Info returns the role and ID from the ScreenID.
+// It splits the ScreenID at the first ':' character.
+func (s ScreenID) Info() (role, id string) {
+	role, id, found := strings.Cut(string(s), ":")
+	if !found {
 		panic(ErrInvalidScreenIDFormat)
 	}
 
-	return string(s)[:i]
+	return role, id
+}
+
+// Role returns the role portion of the ScreenID.
+// Panics if the ScreenID format is invalid (missing ':' separator).
+func (s ScreenID) Role() string {
+	role, _ := s.Info()
+
+	return role
 }
 
 // ID returns the identifier portion of the ScreenID.
 // Panics if the ScreenID format is invalid (missing ':' separator).
 func (s ScreenID) ID() string {
-	i := strings.Index(string(s), ":")
-	if i == -1 {
-		// Note: this should not happen if the ID is created correctly
-		panic(ErrInvalidScreenIDFormat)
-	}
+	_, id := s.Info()
 
-	return string(s)[i+1:]
+	return id
 }
 
 // HasRole checks if the ScreenID has the specified role.
