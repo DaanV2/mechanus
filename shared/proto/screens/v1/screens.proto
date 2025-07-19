@@ -11,10 +11,12 @@ service ScreensService {
 }
 
 enum ScreenRole {
-  Admin = 0;
-  Player = 1;
+  Unknown = 0;
+  Device = 1;
   Viewer = 2;
-  Device = 3;
+  Player = 3;
+  Operator = 4;
+  Admin = 5;
 }
 
 message ScreenListenRequest {
