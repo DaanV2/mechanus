@@ -9,3 +9,11 @@ type Manager struct {
 func NewManager() *Manager {
 	return &Manager{}
 }
+
+func (m *Manager) ScreenIDForRole(role string) (string, error) {
+	panic("not implemented")
+}
+
+func (m *Manager) ScreenIDForDevice(deviceID string) (string, error) {
+	panic("not implemented")
+}
