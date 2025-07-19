@@ -13,14 +13,14 @@ import { SceneChange, SceneChangeCompleted } from "./scene_actions_pb.js";
  */
 export enum ScreenRole {
   /**
-   * @generated from enum value: Admin = 0;
+   * @generated from enum value: Unknown = 0;
    */
-  Admin = 0,
+  Unknown = 0,
 
   /**
-   * @generated from enum value: Player = 1;
+   * @generated from enum value: Device = 1;
    */
-  Player = 1,
+  Device = 1,
 
   /**
    * @generated from enum value: Viewer = 2;
@@ -28,16 +28,28 @@ export enum ScreenRole {
   Viewer = 2,
 
   /**
-   * @generated from enum value: Device = 3;
+   * @generated from enum value: Player = 3;
    */
-  Device = 3,
+  Player = 3,
+
+  /**
+   * @generated from enum value: Operator = 4;
+   */
+  Operator = 4,
+
+  /**
+   * @generated from enum value: Admin = 5;
+   */
+  Admin = 5,
 }
 // Retrieve enum metadata with: proto3.getEnumType(ScreenRole)
 proto3.util.setEnumType(ScreenRole, "screens.v1.ScreenRole", [
-  { no: 0, name: "Admin" },
-  { no: 1, name: "Player" },
+  { no: 0, name: "Unknown" },
+  { no: 1, name: "Device" },
   { no: 2, name: "Viewer" },
-  { no: 3, name: "Device" },
+  { no: 3, name: "Player" },
+  { no: 4, name: "Operator" },
+  { no: 5, name: "Admin" },
 ]);
 
 /**
@@ -47,7 +59,7 @@ export class ScreenListenRequest extends Message<ScreenListenRequest> {
   /**
    * @generated from field: screens.v1.ScreenRole role = 1;
    */
-  role = ScreenRole.Admin;
+  role = ScreenRole.Unknown;
 
   /**
    * For certain roles a identifiying token is required
