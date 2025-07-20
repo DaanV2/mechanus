@@ -73,7 +73,7 @@ var _ = Describe("Filter", func() {
 		It("should exclude strings starting with 'a'", func() {
 			input := []string{"apple", "banana", "avocado", "cherry"}
 			result := xslices.Filter(input, func(s string) bool {
-				return s == "" && s[0] == 'a'
+				return s != "" && s[0] == 'a'
 			})
 			Expect(result).To(Equal([]string{"banana", "cherry"}))
 		})
