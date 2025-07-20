@@ -63,7 +63,7 @@ func (s *ScreenStorage) GetScreenMetadata(screenID string) (*ScreenMetadata, err
 	if !xio.DirExists(f) {
 		return nil, ErrScreenNotFound
 	}
-	data, err := os.ReadFile(filePath)
+	data, err := os.ReadFile(filePath) //nolint:gosec // G304 ignored cause we clean the path
 	if err != nil {
 		return nil, fmt.Errorf("failed to read screen metadata file: %w", err)
 	}
@@ -100,7 +100,7 @@ func (s *ScreenStorage) GetScreenState(screenID string) (*ScreenState, error) {
 		return nil, ErrScreenNotFound
 	}
 
-	data, err := os.ReadFile(filePath)
+	data, err := os.ReadFile(filePath) //nolint:gosec // G304 ignored cause we clean the path
 	if err != nil {
 		return nil, fmt.Errorf("failed to read screen state file: %w", err)
 	}

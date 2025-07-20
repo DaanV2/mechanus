@@ -16,12 +16,12 @@ import (
 var _ screensv1connect.ScreensServiceHandler = &ScreenService{}
 
 type ScreenService struct {
-	scenes *scenes.Manager
+	manager *scenes.Manager
 }
 
-func NewScreenService(scenes *scenes.Manager) *ScreenService {
+func NewScreenService(manager *scenes.Manager) *ScreenService {
 	return &ScreenService{
-		scenes,
+		manager,
 	}
 }
 

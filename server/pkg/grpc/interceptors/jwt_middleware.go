@@ -30,7 +30,7 @@ func NewJWTMiddleware(jwtService *authenication.JWTService) *JWTMiddleware {
 // WrapStreamingClient implements connect.Interceptor.
 func (j *JWTMiddleware) WrapStreamingClient(next connect.StreamingClientFunc) connect.StreamingClientFunc {
 	return func(ctx context.Context, s connect.Spec) connect.StreamingClientConn {
-		// TODO
+		// TODO: See how we can inject the JWT into the request headers
 		return next(ctx, s)
 	}
 }
