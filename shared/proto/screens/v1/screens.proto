@@ -36,5 +36,5 @@ message ScreenAction {
     SplashScreen splash_screen = 1;
     SceneChange scene_change = 2;
     SceneChangeCompleted scene_change_completed = 3;
-  };
+  }
 }

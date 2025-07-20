@@ -9,6 +9,4 @@ message SceneChange {
 }
 
 // Marks that the server thinks the scene load is complete
-message SceneChangeCompleted {
-
-}
+message SceneChangeCompleted {}

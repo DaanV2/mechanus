@@ -1,0 +1,49 @@
+syntax = "proto3";
+package screens.v1;
+
+import "google/protobuf/timestamp.proto";
+import "screens/v1/splash_screen.proto";
+
+option go_package = "github.com/DaanV2/mechanus/server/pkg/grpc/gen/screens/v1;screensv1";
+
+message ScreenState {
+  Environment environment = 1;
+  GridSettings grid = 2;
+  repeated Layer layer = 3;
+  optional SplashScreen splash_screen = 20;
+}
+
+message Environment {
+  google.protobuf.Timestamp current_time = 1;
+  string background_color = 2;
+  double light_intensity = 3;
+}
+
+message GridSettings {
+  int32 x_offset = 1;
+  int32 y_offset = 2;
+  int32 x_ratio = 3;
+  int32 y_ratio = 4;
+}
+
+message Layer {
+  repeated Entity entity = 1;
+}
+
+message Entity {
+  string id = 1;
+  Asset asset = 2;
+  Vector2 position = 3;
+  Vector2 scale = 4;
+  double rotation = 5;
+}
+
+message Asset {
+  string name = 1;
+  string url = 2;
+}
+
+message Vector2 {
+  double x = 1;
+  double y = 2;
+}
