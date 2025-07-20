@@ -1,7 +1,6 @@
 package cmd_maps
 
 import (
-	"github.com/charmbracelet/log"
 	"github.com/spf13/cobra"
 )
 
@@ -29,8 +28,7 @@ func init() {
 }
 
 func importCmdWorkload(cmd *cobra.Command, args []string) error {
-	v, _ := cmd.Flags().GetString("path")
-	log.Debug("saving config file", "path", v)
+	// TODO: Implement the import functionality
 
 	return nil
 }
