@@ -58,11 +58,11 @@ func (s *ScreenStorage) ListScreens() ([]string, error) {
 // GetScreenMetadata retrieves the metadata for a screen by its ID.
 // returns [ErrScreenNotFound] if the screen does not exist.
 func (s *ScreenStorage) GetScreenMetadata(screenID string) (*ScreenMetadata, error) {
-	if !xio.DirExists(filepath.Join(s.folder, screenID)) {
+	f := filepath.Clean(filepath.Join(s.folder, screenID))
+	filePath := filepath.Join(f, "metadata.json")
+	if !xio.DirExists(f) {
 		return nil, ErrScreenNotFound
 	}
-
-	filePath := filepath.Join(s.folder, screenID, "metadata.json")
 	data, err := os.ReadFile(filePath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read screen metadata file: %w", err)
@@ -71,14 +71,16 @@ func (s *ScreenStorage) GetScreenMetadata(screenID string) (*ScreenMetadata, err
 	if err := json.Unmarshal(data, &metadata); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal screen metadata: %w", err)
 	}
+
 	return &metadata, nil
 }
 
 // SaveScreenMetadata saves the metadata for a screen.
 func (s *ScreenStorage) SaveScreenMetadata(screenID string, metadata *ScreenMetadata) error {
-	xio.MakeDirAll(s.folder)
+	f := filepath.Clean(filepath.Join(s.folder, screenID))
+	filePath := filepath.Join(f, "metadata.json")
+	xio.MakeDirAll(f)
 
-	filePath := filepath.Join(s.folder, screenID, "metadata.json")
 	data, err := json.Marshal(metadata)
 	if err != nil {
 		return fmt.Errorf("failed to marshal screen metadata: %w", err)
@@ -92,11 +94,12 @@ func (s *ScreenStorage) SaveScreenMetadata(screenID string, metadata *ScreenMeta
 
 // GetScreenState retrieves the state for a screen by its ID.
 func (s *ScreenStorage) GetScreenState(screenID string) (*ScreenState, error) {
-	if !xio.DirExists(filepath.Join(s.folder, screenID)) {
+	f := filepath.Clean(filepath.Join(s.folder, screenID))
+	filePath := filepath.Join(f, "state.json")
+	if !xio.DirExists(f) {
 		return nil, ErrScreenNotFound
 	}
 
-	filePath := filepath.Join(s.folder, screenID, "state.json")
 	data, err := os.ReadFile(filePath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read screen state file: %w", err)
@@ -105,14 +108,16 @@ func (s *ScreenStorage) GetScreenState(screenID string) (*ScreenState, error) {
 	if err := json.Unmarshal(data, &state); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal screen state: %w", err)
 	}
+
 	return &state, nil
 }
 
 // SaveScreenState saves the state for a screen.
 func (s *ScreenStorage) SaveScreenState(screenID string, state *ScreenState) error {
-	xio.MakeDirAll(s.folder)
+	f := filepath.Clean(filepath.Join(s.folder, screenID))
+	filePath := filepath.Join(f, "state.json")
+	xio.MakeDirAll(f)
 
-	filePath := filepath.Join(s.folder, screenID, "state.json")
 	data, err := json.Marshal(state)
 	if err != nil {
 		return fmt.Errorf("failed to marshal screen state: %w", err)
