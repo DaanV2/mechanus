@@ -13,7 +13,8 @@ var _ = Describe("Map", func() {
 			result := xslices.Map(input, func(n int) int {
 				return n * 2
 			})
-			Expect(result).To(BeNil())
+			Expect(result).To(BeEmpty())
+			Expect(result).ToNot(BeNil())
 		})
 
 		It("should handle empty slice", func() {
@@ -22,7 +23,7 @@ var _ = Describe("Map", func() {
 				return n * 2
 			})
 			Expect(result).To(BeEmpty())
-			Expect(result).NotTo(BeNil())
+			Expect(result).ToNot(BeNil())
 		})
 	})
 

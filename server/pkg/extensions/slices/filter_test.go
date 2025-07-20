@@ -13,7 +13,8 @@ var _ = Describe("Filter", func() {
 			result := xslices.Filter(input, func(n int) bool {
 				return true
 			})
-			Expect(result).To(BeNil())
+			Expect(result).To(BeEmpty())
+			Expect(result).ToNot(BeNil())
 		})
 
 		It("should handle empty slice", func() {
@@ -22,7 +23,7 @@ var _ = Describe("Filter", func() {
 				return true
 			})
 			Expect(result).To(BeEmpty())
-			Expect(result).NotTo(BeNil())
+			Expect(result).ToNot(BeNil())
 		})
 	})
 
