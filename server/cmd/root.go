@@ -7,6 +7,7 @@ import (
 	"syscall"
 
 	cmd_config "github.com/DaanV2/mechanus/server/cmd/config"
+	cmd_maps "github.com/DaanV2/mechanus/server/cmd/maps"
 	cmd_mdns "github.com/DaanV2/mechanus/server/cmd/mdns"
 	"github.com/DaanV2/mechanus/server/internal/setup"
 	"github.com/charmbracelet/fang"
@@ -39,6 +40,7 @@ func init() {
 
 	cmd_config.AddCommand(rootCmd)
 	cmd_mdns.AddCommand(rootCmd)
+	cmd_maps.AddCommand(rootCmd)
 }
 
 // RootCommand returns the top level command of this package

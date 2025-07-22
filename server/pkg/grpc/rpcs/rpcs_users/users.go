@@ -6,12 +6,12 @@ import (
 
 	"connectrpc.com/connect"
 	"github.com/DaanV2/mechanus/server/internal/logging"
+	"github.com/DaanV2/mechanus/server/pkg/authenication"
 	"github.com/DaanV2/mechanus/server/pkg/authenication/roles"
 	"github.com/DaanV2/mechanus/server/pkg/database/models"
 	xerrors "github.com/DaanV2/mechanus/server/pkg/extensions/errors"
 	usersv1 "github.com/DaanV2/mechanus/server/pkg/grpc/gen/users/v1"
 	"github.com/DaanV2/mechanus/server/pkg/grpc/gen/users/v1/usersv1connect"
-	grpc_interceptors "github.com/DaanV2/mechanus/server/pkg/grpc/interceptors"
 	user_service "github.com/DaanV2/mechanus/server/pkg/services/users"
 )
 
@@ -45,7 +45,7 @@ func (u *UserService) Create(ctx context.Context, req *connect.Request[usersv1.C
 	user := models.User{
 		Name:         username,
 		PasswordHash: []byte(password),
-		Roles:        []string{"user"},
+		Roles:        []string{roles.User.String()},
 		Campaigns:    []*models.Campaign{},
 	}
 
@@ -70,19 +70,19 @@ func (u *UserService) Get(ctx context.Context, req *connect.Request[usersv1.GetU
 	id := req.Msg.GetId()
 	logger := u.logger.With("userId", id)
 
-	jwt, err := grpc_interceptors.JWTFromContext(ctx)
+	jwt, err := authenication.JWTFromContext(ctx)
 	if err != nil {
 		logger.From(ctx).Error("error during reading jwt", "error", err)
 
 		return nil, connect.NewError(connect.CodePermissionDenied, err)
 	}
 
-	if !u.roleService.HasRole(jwt.Claims, roles.Viewer) {
+	if !jwt.IsAuthenicatedWithRole(roles.Viewer) {
 		return nil, connect.NewError(connect.CodePermissionDenied, errors.New("expecting atleast a viewer role"))
 	}
 
 	// If admin or current user
-	if u.roleService.HasRole(jwt.Claims, roles.Admin) || jwt.Claims.User.ID == id {
+	if jwt.IsAuthenicatedWithRole(roles.Admin) || jwt.Claims.User.ID == id {
 		user, cerr := u.getFullInfo(ctx, id)
 		if cerr != nil {
 			logger.From(ctx).Error("error during retrieve of user", "error", cerr)
@@ -110,7 +110,7 @@ func (u *UserService) getFullInfo(ctx context.Context, id string) (*usersv1.User
 	}
 
 	return &usersv1.User{
-		Id: user.ID,
+		Id:   user.ID,
 		Name: user.Name,
 	}, nil
 }
@@ -122,7 +122,7 @@ func (u *UserService) getReducedInfo(ctx context.Context, id string) (*usersv1.U
 	}
 
 	return &usersv1.User{
-		Id: user.ID,
+		Id:   user.ID,
 		Name: user.Name,
 	}, nil
 

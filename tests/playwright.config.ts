@@ -23,6 +23,7 @@ const config = defineConfig({
     // When running in Docker, we need to use the host.docker.internal hostname
     // to access services running on the host machine
     baseURL: "http://localhost:8080",
+    // headless: false,
   },
 
   /* Configure projects for major browsers */

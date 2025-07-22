@@ -14,7 +14,7 @@ import (
 var _ connect.Interceptor = &JWTMiddleware{}
 
 // JWTMiddleware checks incoming requests and validates the jwt if present
-// The result is stored on the context and can be retrieved with [JWTFromContext]
+// The result is stored on the context and can be retrieved with [authenication.JWTFromContext]
 type JWTMiddleware struct {
 	jwtService *authenication.JWTService
 	logger     *log.Logger
@@ -29,7 +29,10 @@ func NewJWTMiddleware(jwtService *authenication.JWTService) *JWTMiddleware {
 
 // WrapStreamingClient implements connect.Interceptor.
 func (j *JWTMiddleware) WrapStreamingClient(next connect.StreamingClientFunc) connect.StreamingClientFunc {
-	return next // dont do anything from client side
+	return func(ctx context.Context, s connect.Spec) connect.StreamingClientConn {
+		// TODO: See how we can inject the JWT into the request headers
+		return next(ctx, s)
+	}
 }
 
 // WrapStreamingHandler implements connect.Interceptor.
@@ -51,7 +54,7 @@ func (j *JWTMiddleware) WrapUnary(next connect.UnaryFunc) connect.UnaryFunc {
 }
 
 // validateAndInject retrieves the bearer jwt from the request, validates it and stores the result on the context
-// Which can be retrieved with [JWTFromContext]
+// Which can be retrieved with [authenication.JWTFromContext]
 func (j *JWTMiddleware) validateAndInject(ctx context.Context, headers http.Header) context.Context {
 	jwtStr := getJwtValue(headers)
 	if jwtStr == "" {
@@ -63,12 +66,9 @@ func (j *JWTMiddleware) validateAndInject(ctx context.Context, headers http.Head
 
 	claims, ok := authenication.GetClaims(token.Claims)
 	if ok {
-		c := JWTContext{
-			Valid:  err == nil,
-			Claims: claims,
-		}
-		ctx = ContextWithJWT(ctx, c)
-		ctx = logging.Context(ctx, logging.From(ctx).With("user.valid", c.Claims, "user.id", c.Claims.User.ID, "user.name", c.Claims.User.Name))
+		logger := logging.From(ctx).With("user.valid", err == nil, "user.id", claims.User.ID, "user.name", claims.User.Name)
+		ctx = authenication.ContextWithJWT(ctx, claims, err == nil)
+		ctx = logging.Context(ctx, logger)
 	} else {
 		j.logger.Error("somehow the claims are not expect as it should", "token", jwtStr)
 	}

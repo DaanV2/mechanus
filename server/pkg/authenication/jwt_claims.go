@@ -33,8 +33,8 @@ func (c *JWTClaims) HasScope(scope string) bool {
 func (c *JWTClaims) GetRoles() []string {
 	return c.User.Roles
 }
-func (c *JWTClaims) SetRoles(roles ...string) {
-	c.User.Roles = roles
+func (c *JWTClaims) SetRoles(newroles ...string) {
+	c.User.Roles = newroles
 }
 
 func (u *JWTUser) HasCampaign(campaign string) bool {

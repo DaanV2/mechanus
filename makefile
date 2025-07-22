@@ -5,6 +5,9 @@ proto:
 proto-format:
 	buf format --write
 
+proto-lint:
+	buf lint
+
 image:
 	docker build . -t mechanus
 

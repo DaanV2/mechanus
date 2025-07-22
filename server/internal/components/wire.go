@@ -3,16 +3,21 @@
 
 package components
 
+//go:generate go tool wire
+
 import (
 	"context"
 
 	"github.com/DaanV2/mechanus/server/internal/grpc"
 	"github.com/DaanV2/mechanus/server/internal/web"
+	"github.com/DaanV2/mechanus/server/mechanus/scenes"
 	"github.com/DaanV2/mechanus/server/pkg/application"
 	"github.com/DaanV2/mechanus/server/pkg/authenication"
 	"github.com/DaanV2/mechanus/server/pkg/database"
+	"github.com/DaanV2/mechanus/server/pkg/grpc/gen/screens/v1/screensv1connect"
 	"github.com/DaanV2/mechanus/server/pkg/grpc/gen/users/v1/usersv1connect"
 	grpc_handlers "github.com/DaanV2/mechanus/server/pkg/grpc/handlers"
+	"github.com/DaanV2/mechanus/server/pkg/grpc/rpcs/rpcs_screens"
 	"github.com/DaanV2/mechanus/server/pkg/grpc/rpcs/rpcs_users"
 	"github.com/DaanV2/mechanus/server/pkg/networking/mdns"
 	"github.com/DaanV2/mechanus/server/pkg/servers"
@@ -60,12 +65,15 @@ var servicesSet = wire.NewSet(
 
 	rpcs_users.NewLoginService,
 	rpcs_users.NewUserService,
+	rpcs_screens.NewScreenService,
 	wire.Bind(new(usersv1connect.LoginServiceHandler), new(*rpcs_users.LoginService)),
 	wire.Bind(new(usersv1connect.UserServiceHandler), new(*rpcs_users.UserService)),
+	wire.Bind(new(screensv1connect.ScreensServiceHandler), new(*rpcs_screens.ScreenService)),
 
 	user_service.NewService,
 	authenication.NewJWTService,
 	authenication.NewJTIService,
+	scenes.NewManager,
 	NewKeyManager,
 	provideKeyStorage,
 )

@@ -1,2 +1,5 @@
 reports/coverage
 *.out
+*.S
+
+ginkgo.report
