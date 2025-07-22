@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"maps"
 	"path/filepath"
 	"reflect"
 	"slices"
@@ -74,8 +75,15 @@ func markdownStruct(builder *markdownBuilder, key, configKey string, value map[s
 	builder.add(s)
 
 	l := make([]Field, 0)
+	keys := slices.Collect(maps.Keys(value))
+	slices.Sort(keys)
 
-	for k, v := range value {
+	for _, k := range keys {
+		v := value[k]
+		if v == nil {
+			continue
+		}
+
 		switch item := v.(type) {
 		case map[string]any:
 			ck := strings.Trim(configKey+"."+k, " .")

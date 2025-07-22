@@ -50,20 +50,6 @@
 | password | string | The admin password to use when initializing |  | INITIALIZE_ADMIN_PASSWORD |
 | username | string | The admin username to use when initializing |  | INITIALIZE_ADMIN_USERNAME |
 
-## Web
-
-| Name | Type | Description | Default | Env |
-|------|------|-------------|---------|-----|
-| host | string | What host to bind on, such as: "", "localhost" or "0.0.0.0" |  | WEB_HOST |
-| port | uint16 | The port to server web traffic to | 8080 | WEB_PORT |
-| static | object | see: [static](#static) |  |  |
-
-### Static
-
-| Name | Type | Description | Default | Env |
-|------|------|-------------|---------|-----|
-| folder | string | The default files to serve | /web | WEB_STATIC_FOLDER |
-
 ## Log
 
 | Name | Type | Description | Default | Env |
@@ -79,3 +65,17 @@
 | hostname | string | The host name to broadcast on | mechanus | MDNS_HOSTNAME |
 | ipv6 | bool | Whenever or not to support ipv6 as well | false | MDNS_IPV6 |
 | servicetype | string | The MDNS type to broadcast as | _http._tcp.local | MDNS_SERVICETYPE |
+
+## Web
+
+| Name | Type | Description | Default | Env |
+|------|------|-------------|---------|-----|
+| host | string | What host to bind on, such as: "", "localhost" or "0.0.0.0" |  | WEB_HOST |
+| port | uint16 | The port to server web traffic to | 8080 | WEB_PORT |
+| static | object | see: [static](#static) |  |  |
+
+### Static
+
+| Name | Type | Description | Default | Env |
+|------|------|-------------|---------|-----|
+| folder | string | The default files to serve | /web | WEB_STATIC_FOLDER |

@@ -12,8 +12,8 @@ type mockRoleContainer struct {
 }
 
 // SetRoles implements roles.RoleContainer.
-func (m *mockRoleContainer) SetRoles(roles ...string) {
-	m.roles = roles
+func (m *mockRoleContainer) SetRoles(newroles ...string) {
+	m.roles = newroles
 }
 
 func (m *mockRoleContainer) GetRoles() []string {
