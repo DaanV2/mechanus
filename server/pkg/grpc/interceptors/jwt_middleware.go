@@ -66,8 +66,8 @@ func (j *JWTMiddleware) validateAndInject(ctx context.Context, headers http.Head
 
 	claims, ok := authenication.GetClaims(token.Claims)
 	if ok {
-		logger := logging.From(ctx).With("user.valid", err != nil, "user.id", claims.User.ID, "user.name", claims.User.Name)
-		ctx = authenication.ContextWithJWT(ctx, claims, err != nil)
+		logger := logging.From(ctx).With("user.valid", err == nil, "user.id", claims.User.ID, "user.name", claims.User.Name)
+		ctx = authenication.ContextWithJWT(ctx, claims, err == nil)
 		ctx = logging.Context(ctx, logger)
 	} else {
 		j.logger.Error("somehow the claims are not expect as it should", "token", jwtStr)
