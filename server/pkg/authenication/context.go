@@ -19,7 +19,7 @@ func (j *JWTContext) IsAuthenicated() bool {
 
 // IsAuthenicatedWithRole checks if the user is authenticated and has the given role. Or a role that inherits it.
 func (j *JWTContext) IsAuthenicatedWithRole(role roles.Role) bool {
-	return j.IsAuthenicated() && j.Claims != nil && roles.GrantsHasRole(j.Claims, roles.Viewer)
+	return j.IsAuthenicated() && roles.GrantsHasRole(j.Claims, role)
 }
 
 var (

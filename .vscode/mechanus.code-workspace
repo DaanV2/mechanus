@@ -1,20 +1,20 @@
 {
   "folders": [
     {
-      "path": "..",
-      "name": "mechanus"
+      "name": "mechanus",
+      "path": ".."
     },
     {
-      "path": "../server",
-      "name": "server"
+      "name": "server",
+      "path": "../server"
     },
     {
-      "path": "../client",
-      "name": "client"
+      "name": "client",
+      "path": "../client"
     },
     {
-      "path": "../tests",
-      "name": "tests"
+      "name": "tests",
+      "path": "../tests"
     }
   ],
   "settings": {
