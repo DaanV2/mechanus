@@ -54,7 +54,11 @@ updates:
           - "*"
 
   - package-ecosystem: docker-compose
-    directory: /
+    directories:
+      - "/"
+      - "/client"
+      - "/server"
+      - "/tests"
     labels:
       - dependencies
     schedule:
