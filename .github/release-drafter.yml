@@ -14,6 +14,18 @@ categories:
     labels:
       - "chore"
       - "dependencies"
+  - title: "📱 Client"
+    labels:
+      - "client"
+  - title: "🖥️ Server"
+    labels:
+      - "server"
+  - title: "🔬 integration tests"
+    labels:
+      - integration-tests
+  - title: "🏗️ CI/CD"
+    labels:
+      - "CI/CD"
   - title: "📚 Documentation"
     labels:
       - "documentation"
