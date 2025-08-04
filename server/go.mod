@@ -23,7 +23,7 @@ require (
 	github.com/daanv2/go-kit v1.0.6
 	github.com/daanv2/go-locks v1.3.0
 	github.com/glebarez/sqlite v1.11.0
-	github.com/golang-jwt/jwt/v5 v5.2.3
+	github.com/golang-jwt/jwt/v5 v5.3.0
 	github.com/google/uuid v1.6.0
 	github.com/google/wire v0.6.0
 	github.com/onsi/ginkgo/v2 v2.23.4
