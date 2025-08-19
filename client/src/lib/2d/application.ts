@@ -29,4 +29,8 @@ export class Application {
     document.body.removeChild(this._app.canvas);
     this._app.destroy();
   }
+
+  get stage() {
+    return this._app.stage
+  }
 }
