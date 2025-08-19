@@ -6,5 +6,6 @@
 
   onMount(async () => {
     await app.init();
+    // TODO add your pixi test code here, but don't commit :)
   });
 </script>
