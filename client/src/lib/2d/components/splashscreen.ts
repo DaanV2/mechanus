@@ -1,63 +1,48 @@
-import { Container, Graphics, Text, TextStyle, type Application } from 'pixi.js';
+import { Container, Graphics, Rectangle, Text, TextStyle } from 'pixi.js';
 
-interface SplashScreenOptions {
-  title: string;
-  subtitle: string;
-  background: string;
-  textColor: string;
-}
+export class SplashScreen extends Container {
+  public readonly background: Graphics;
+  public readonly title: Text;
+  public readonly titleStyle: TextStyle;
+  public readonly subtitleStyle: TextStyle;
+  public readonly subtitle: Text;
 
-const defOpts = {
-  title: 'Mechanus',
-  subtitle: 'Virtual table top software',
-  textColor: '#ffffff',
-  background: '#000000'
-};
+  constructor() {
+    super();
 
-export function createSplashScreen(
-  app: Application,
-  opts?: Partial<SplashScreenOptions>
-): Container {
-  opts = {
-    ...defOpts,
-    ...opts
-  };
+    this.background = new Graphics().rect(0, 0, 800, 400).fill('#000000');
 
-  const container = new Container();
+    this.titleStyle = new TextStyle({
+      fontSize: 96,
+      fill: '#FFFFFF',
+      fontWeight: 'bold'
+    });
+    this.subtitleStyle = new TextStyle({
+      fontSize: 32,
+      fill: '#FFFFFF',
+      fontWeight: 'bold'
+    });
+    this.title = new Text({
+      text: 'Machnus',
+      style: this.titleStyle
+    });
+    this.subtitle = new Text({
+      text: '',
+      style: this.subtitleStyle
+    });
 
-  if ('background' in opts) {
-    container.addChild(
-      new Graphics().rect(0, 0, app.screen.width, app.screen.height).fill(opts['background'])
-    );
+    this.addChild(this.background, this.title, this.subtitle);
   }
 
-  if ('title' in opts) {
-    container.addChild(
-      new Text({
-        text: opts['title'],
-        position: { x: app.screen.width / 2, y: app.screen.height / 2 - 50 },
-        style: new TextStyle({
-          fontSize: 96,
-          fill: opts['textColor'],
-          fontWeight: 'bold'
-        })
-      })
-    );
-  }
+  public handleResize(screen: Pick<Rectangle, 'width' | 'height'>) {
+    const x = screen.width / 2;
+    const y = screen.height / 2;
 
-  if ('subtitle' in opts) {
-    container.addChild(
-      new Text({
-        text: opts['subtitle'],
-        position: { x: app.screen.width / 2, y: app.screen.height / 2 + 50 },
-        style: new TextStyle({
-          fontSize: 32,
-          fill: opts['textColor'],
-          fontWeight: 'bold'
-        })
-      })
-    );
+    this.background.setSize(screen.width, screen.height);
+    this.title.position = { x: x, y: y - (this.title.height + 2) };
+    this.subtitle.position = {
+      x: x,
+      y: y + (this.subtitle.height + 2)
+    };
   }
-
-  return container;
 }

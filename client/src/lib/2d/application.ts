@@ -1,11 +1,14 @@
 import * as pixi from 'pixi.js';
+import { LayerManager } from './layer-manager';
 
 export class Application {
   // Create a new application
-  private _app: pixi.Application;
+  public readonly _app: pixi.Application;
+  public readonly layers: LayerManager;
 
   constructor() {
     this._app = new pixi.Application();
+    this.layers = new LayerManager();
   }
 
   /**
@@ -23,6 +26,11 @@ export class Application {
       throw new Error('app canvas not initialized');
     }
     document.body.appendChild(this._app.canvas);
+
+    this._app.renderer.on('resize', () => this.layers.handleResize(this._app.renderer));
+
+    // STEP: activate splashscreen first before anything
+    this.layers.activate('splashScreen', this._app.stage);
   }
 
   destroy() {
@@ -31,6 +39,6 @@ export class Application {
   }
 
   get stage() {
-    return this._app.stage
+    return this._app.stage;
   }
 }
