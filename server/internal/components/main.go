@@ -15,13 +15,13 @@ import (
 	"github.com/DaanV2/mechanus/server/pkg/storage"
 )
 
-// BuildServer setup all the nessecary components for an api server
-func BuildServer(ctx context.Context) (*Server, error) {
+// BuildServer setup all the necessary components for an api server
+func BuildServer(setupCtx context.Context) (*Server, error) {
 	v, err := GetDatabaseOptions()
 	if err != nil {
 		return nil, err
 	}
-	db, err := SetupDatabase(v...)
+	db, err := SetupDatabase(setupCtx, v...)
 	if err != nil {
 		return nil, err
 	}
@@ -50,7 +50,7 @@ func BuildServer(ctx context.Context) (*Server, error) {
 	webServices := web.WEBServices{
 		Components: componentManager,
 	}
-	serversManager, err := createServerManager(ctx, rpcs, webServices)
+	serversManager, err := createServerManager(setupCtx, rpcs, webServices)
 	if err != nil {
 		return nil, err
 	}
@@ -60,5 +60,6 @@ func BuildServer(ctx context.Context) (*Server, error) {
 		DB:         db,
 		Components: componentManager,
 	}
+
 	return server, nil
 }

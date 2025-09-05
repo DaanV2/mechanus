@@ -16,15 +16,15 @@ var _ = Describe("Campaign Service", func() {
 		service *campaign_service.Service
 	)
 
-	BeforeEach(func() {
-		db = util_test.CreateDatabase()
+	BeforeEach(func(setupCtx SpecContext) {
+		db = util_test.CreateDatabase(setupCtx)
 		service = campaign_service.NewService(db)
 	})
 
 	Context("Get", func() {
 		It("can get a campaign by id", func(ctx SpecContext) {
 			campaign := &models.Campaign{
-				Name:        "Fellowship",
+				Name: "Fellowship",
 			}
 
 			By("creating a new campaign")

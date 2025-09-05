@@ -20,10 +20,10 @@ var _ = Describe("JwtService", func() {
 		service    *authenication.JWTService
 	)
 
-	BeforeEach(func() {
+	BeforeEach(func(setupCtx SpecContext) {
 		var err error
 
-		db = util_test.CreateDatabase()
+		db = util_test.CreateDatabase(setupCtx)
 		jtiService = authenication.NewJTIService(db)
 		dbstore := storage.DBStorage[*authenication.KeyData](db)
 		keyManager, err = authenication.NewKeyManager(dbstore)
