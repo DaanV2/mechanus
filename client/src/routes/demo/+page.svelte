@@ -6,7 +6,10 @@
   import Fluid from '../../lib/components/collections/fluid.svelte';
 
   // Define an array of subpage objects
-  const subpages = [{ name: 'Size check', path: '/demo/size' }];
+  const subpages = [
+    { name: 'Size check', path: '/demo/size' },
+    { name: 'Playground', path: '/demo/playground' },
+  ];
 </script>
 
 <svelte:head>

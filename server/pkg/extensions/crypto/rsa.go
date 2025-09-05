@@ -8,6 +8,7 @@ import (
 	xrand "github.com/DaanV2/mechanus/server/pkg/extensions/rand"
 )
 
+
 type RSAKey struct {
 	id  string
 	key *rsa.PrivateKey
