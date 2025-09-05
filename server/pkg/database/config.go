@@ -62,6 +62,8 @@ func validateDatabaseFlags(conf *config.Config) error {
 	return err
 }
 
+// GetOptions builds a list of options from flags/envs variable via viper.
+// See [DatabaseConfig] for available values
 func GetOptions() ([]Option, error) {
 	opts := []Option{
 		WithMaxIdleConns(DatabaseConfig.GetInt("database.maxIdleConns")),
