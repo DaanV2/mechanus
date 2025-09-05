@@ -18,8 +18,8 @@ var _ = Describe("User Service", func() {
 		service *user_service.Service
 	)
 
-	BeforeEach(func() {
-		db = util_test.CreateDatabase()
+	BeforeEach(func(setupCtx SpecContext) {
+		db = util_test.CreateDatabase(setupCtx)
 		service = user_service.NewService(db)
 	})
 
@@ -114,7 +114,6 @@ var _ = Describe("User Service", func() {
 			By("creating a new user")
 			Expect(service.Create(ctx, user)).To(Succeed())
 			Expect(user.ID).ToNot(BeEmpty())
-
 
 			// Wait a bit so the UpdateAt timestamp can be increased
 			time.Sleep(100 * time.Millisecond)

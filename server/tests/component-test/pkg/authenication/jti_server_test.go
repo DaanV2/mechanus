@@ -14,8 +14,8 @@ var _ = Describe("JtiServer", func() {
 		service *authenication.JTIService
 	)
 
-	BeforeEach(func() {
-		db = util_test.CreateDatabase()
+	BeforeEach(func(setupCtx SpecContext) {
+		db = util_test.CreateDatabase(setupCtx)
 		service = authenication.NewJTIService(db)
 	})
 

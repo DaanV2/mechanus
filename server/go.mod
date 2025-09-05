@@ -1,13 +1,12 @@
 module github.com/DaanV2/mechanus/server
 
-go 1.24.4
+go 1.25.1
 
 tool (
 	connectrpc.com/connect/cmd/protoc-gen-connect-go
 	github.com/bufbuild/buf/cmd/buf
 	github.com/fullstorydev/grpcurl/cmd/grpcurl
 	github.com/golangci/golangci-lint/v2/cmd/golangci-lint
-	github.com/google/wire/cmd/wire
 	github.com/onsi/ginkgo/v2/ginkgo
 	github.com/spf13/cobra-cli
 	google.golang.org/protobuf/cmd/protoc-gen-go
@@ -25,7 +24,6 @@ require (
 	github.com/glebarez/sqlite v1.11.0
 	github.com/golang-jwt/jwt/v5 v5.3.0
 	github.com/google/uuid v1.6.0
-	github.com/google/wire v0.7.0
 	github.com/onsi/ginkgo/v2 v2.25.1
 	github.com/onsi/gomega v1.38.1
 	github.com/spf13/cobra v1.9.1
@@ -183,7 +181,6 @@ require (
 	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/google/go-containerregistry v0.20.2 // indirect
 	github.com/google/pprof v0.0.0-20250820193118-f64d9cf942d6 // indirect
-	github.com/google/subcommands v1.2.0 // indirect
 	github.com/gordonklaus/ineffassign v0.1.0 // indirect
 	github.com/gostaticanalysis/analysisutil v0.7.1 // indirect
 	github.com/gostaticanalysis/comment v1.5.0 // indirect

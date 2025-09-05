@@ -11,10 +11,10 @@ import (
 	"gorm.io/gorm/logger"
 )
 
-func CreateDatabase() *database.DB {
+func CreateDatabase(setupCtx context.Context) *database.DB {
 	ginkgo.GinkgoHelper()
 
-	db, err := components.SetupTestDatabase(database.WithDBLogger(&GinkgoDBLogger{}))
+	db, err := components.SetupTestDatabase(setupCtx, database.WithDBLogger(&GinkgoDBLogger{}))
 	gomega.Expect(err).ToNot(gomega.HaveOccurred(), "database setup")
 	ginkgo.DeferCleanup(func() {
 		gomega.Expect(db.Close()).To(gomega.Succeed(), "database close")
