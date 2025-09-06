@@ -27,6 +27,13 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: 🏷️ Building tags
+        id: repo
+        run: |
+          echo "owner=$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+          echo "repo=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+
+
       - name: 🛠️ Build and Push
         id: docker-build
         uses: docker/build-push-action@v6
@@ -36,16 +43,16 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           tags: |
-            ghcr.io/${{ github.repository_owner }}/mechanus:latest
-            ghcr.io/${{ github.repository_owner }}/mechanus:${{ github.event.release.tag_name }}
+            ghcr.io/${{ steps.repo.outputs.repo }}:latest
+            ghcr.io/${{ steps.repo.outputs.repo }}:${{ github.sha }}
+            ghcr.io/${{ steps.repo.outputs.repo }}:${{ github.ref_name }}
 
       - name: 📌 Update Release Notes with Docker Image
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ github.event.release.tag_name }}
+          append_body: true
           body: |
-            ${{ github.event.release.body }}
-
             ---
             🐳 **Docker images for this release:**
             - `ghcr.io/${{ github.repository_owner }}/mechanus:latest`
