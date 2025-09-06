@@ -1,4 +1,4 @@
-# Developement
+# Development
 
 ## Getting started
 
@@ -9,4 +9,4 @@ Install tools:
 - [Nodejs](https://nodejs.org/en)
 
 if you working on frontend check [client/docs/development](../client/docs/development.md).  
-if you working on backend check [server/docs/development](../server/docs/development.md).  
+if you working on backend check [server/docs/development](../server/docs/development.md).
