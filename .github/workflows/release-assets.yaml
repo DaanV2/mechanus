@@ -55,5 +55,5 @@ jobs:
           body: |
             ---
             🐳 **Docker images for this release:**
-            - `ghcr.io/${{ github.repository_owner }}/mechanus:latest`
-            - `ghcr.io/${{ github.repository_owner }}/mechanus:${{ github.event.release.tag_name }}`
+            - `ghcr.io/${{ steps.repo.outputs.repo }}/mechanus:latest`
+            - `ghcr.io/${{ steps.repo.outputs.repo }}/mechanus:${{ github.event.release.tag_name }}`
