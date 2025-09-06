@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="381px" height="636px" viewBox="-0.5 -0.5 381 636">
+    <defs />
+    <g>
+        <g data-cell-id="0">
+            <g data-cell-id="1">
+                <g data-cell-id="zwhOWAjqpLJHutThEbvT-1">
+                    <g>
+                        <path d="M 0 635 L 50 205 L 330 205 L 380 635 Z" fill="#a0522d" stroke="#6d1f00"
+                            stroke-miterlimit="10" pointer-events="all"
+                            style="fill: light-dark(rgb(160, 82, 45), rgb(210, 143, 112)); stroke: light-dark(rgb(109, 31, 0), rgb(252, 185, 158));" />
+                    </g>
+                </g>
+                <g data-cell-id="zwhOWAjqpLJHutThEbvT-2">
+                    <g
+                        style="filter: drop-shadow(light-dark(rgba(0, 0, 0, 0.25), rgba(237, 237, 237, 0.25)) 2px 3px 2px);">
+                        <path
+                            d="M 190 595 L 50 595 Q 40 595 41.29 585.08 L 68.71 374.92 Q 70 365 80 365 L 300 365 Q 310 365 311.29 374.92 L 338.71 585.08 Q 340 595 330 595 Z"
+                            fill="#1c86bf" stroke="#000000" stroke-width="3" stroke-miterlimit="10" pointer-events="all"
+                            style="fill: light-dark(rgb(28, 134, 191), rgb(27, 125, 181)); stroke: rgb(0, 0, 0);" />
+                    </g>
+                </g>
+                <g data-cell-id="zwhOWAjqpLJHutThEbvT-3">
+                    <g>
+                        <rect x="130" y="225" width="120" height="80" fill="#e51400" stroke="#b20000"
+                            pointer-events="all"
+                            style="fill: light-dark(rgb(229, 20, 0), rgb(255, 86, 86)); stroke: light-dark(rgb(178, 0, 0), rgb(255, 172, 172));" />
+                    </g>
+                </g>
+                <g data-cell-id="zwhOWAjqpLJHutThEbvT-4">
+                    <g>
+                        <path d="M 239.68 292.5 L 259.68 216.16 L 350.16 216.16 L 330.16 292.5 Z" fill="#e51400"
+                            stroke="#b20000" stroke-miterlimit="10" transform="rotate(-15,294.92,254.33)"
+                            pointer-events="all"
+                            style="fill: light-dark(rgb(229, 20, 0), rgb(255, 86, 86)); stroke: light-dark(rgb(178, 0, 0), rgb(255, 172, 172));" />
+                    </g>
+                </g>
+                <g data-cell-id="zwhOWAjqpLJHutThEbvT-6">
+                    <g>
+                        <path d="M 30.15 292.52 L 50.15 215.02 L 140.63 215.02 L 120.63 292.52 Z" fill="#e51400"
+                            stroke="#b20000" stroke-miterlimit="10"
+                            transform="translate(85.39,0)scale(-1,1)translate(-85.39,0)rotate(-15,85.39,253.77)"
+                            pointer-events="all"
+                            style="fill: light-dark(rgb(229, 20, 0), rgb(255, 86, 86)); stroke: light-dark(rgb(178, 0, 0), rgb(255, 172, 172));" />
+                    </g>
+                </g>
+                <g data-cell-id="zwhOWAjqpLJHutThEbvT-8">
+                    <g
+                        style="filter: drop-shadow(light-dark(rgba(0, 0, 0, 0.25), rgba(237, 237, 237, 0.25)) 2px 3px 2px);">
+                        <rect x="105" y="5" width="170" height="120" rx="18" ry="18" fill="#1c86bf" stroke="#000000"
+                            stroke-width="3" pointer-events="all"
+                            style="fill: light-dark(rgb(28, 134, 191), rgb(27, 125, 181)); stroke: rgb(0, 0, 0);" />
+                    </g>
+                </g>
+                <g data-cell-id="zwhOWAjqpLJHutThEbvT-9">
+                    <g
+                        style="filter: drop-shadow(light-dark(rgba(0, 0, 0, 0.25), rgba(237, 237, 237, 0.25)) 2px 3px 2px);">
+                        <rect x="142.5" y="235.31" width="95" height="59.38" rx="8.91" ry="8.91" fill="#1c86bf"
+                            stroke="#000000" stroke-width="3" pointer-events="all"
+                            style="fill: light-dark(rgb(28, 134, 191), rgb(27, 125, 181)); stroke: rgb(0, 0, 0);" />
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>
