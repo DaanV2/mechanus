@@ -16,3 +16,7 @@ npm run dev
 cd ../server
 make start-server
 ```
+
+## Testing
+
+Local tests, are done without a server in `./tests` and uses the playwright testing suite.
