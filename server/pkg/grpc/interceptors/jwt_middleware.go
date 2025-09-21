@@ -7,20 +7,20 @@ import (
 
 	"connectrpc.com/connect"
 	"github.com/DaanV2/mechanus/server/internal/logging"
-	"github.com/DaanV2/mechanus/server/pkg/authenication"
+	"github.com/DaanV2/mechanus/server/pkg/authentication"
 	"github.com/charmbracelet/log"
 )
 
 var _ connect.Interceptor = &JWTMiddleware{}
 
 // JWTMiddleware checks incoming requests and validates the jwt if present
-// The result is stored on the context and can be retrieved with [authenication.JWTFromContext]
+// The result is stored on the context and can be retrieved with [authentication.JWTFromContext]
 type JWTMiddleware struct {
-	jwtService *authenication.JWTService
+	jwtService *authentication.JWTService
 	logger     *log.Logger
 }
 
-func NewJWTMiddleware(jwtService *authenication.JWTService) *JWTMiddleware {
+func NewJWTMiddleware(jwtService *authentication.JWTService) *JWTMiddleware {
 	return &JWTMiddleware{
 		jwtService: jwtService,
 		logger:     log.Default().WithPrefix("jwt middleware"),
@@ -54,7 +54,7 @@ func (j *JWTMiddleware) WrapUnary(next connect.UnaryFunc) connect.UnaryFunc {
 }
 
 // validateAndInject retrieves the bearer jwt from the request, validates it and stores the result on the context
-// Which can be retrieved with [authenication.JWTFromContext]
+// Which can be retrieved with [authentication.JWTFromContext]
 func (j *JWTMiddleware) validateAndInject(ctx context.Context, headers http.Header) context.Context {
 	jwtStr := getJwtValue(headers)
 	if jwtStr == "" {
@@ -64,10 +64,10 @@ func (j *JWTMiddleware) validateAndInject(ctx context.Context, headers http.Head
 	jwtStr = strings.TrimPrefix(jwtStr, "Bearer ")
 	token, err := j.jwtService.Validate(ctx, jwtStr)
 
-	claims, ok := authenication.GetClaims(token.Claims)
+	claims, ok := authentication.GetClaims(token.Claims)
 	if ok {
 		logger := logging.From(ctx).With("user.valid", err == nil, "user.id", claims.User.ID, "user.name", claims.User.Name)
-		ctx = authenication.ContextWithJWT(ctx, claims, err == nil)
+		ctx = authentication.ContextWithJWT(ctx, claims, err == nil)
 		ctx = logging.Context(ctx, logger)
 	} else {
 		j.logger.Error("somehow the claims are not expect as it should", "token", jwtStr)

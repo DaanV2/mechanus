@@ -1,10 +1,10 @@
-package authenication
+package authentication
 
 import (
 	"context"
 	"errors"
 
-	"github.com/DaanV2/mechanus/server/pkg/authenication/roles"
+	"github.com/DaanV2/mechanus/server/pkg/authentication/roles"
 	"github.com/daanv2/go-kit/generics"
 )
 

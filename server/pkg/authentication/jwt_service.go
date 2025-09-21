@@ -1,4 +1,4 @@
-package authenication
+package authentication
 
 import (
 	"context"

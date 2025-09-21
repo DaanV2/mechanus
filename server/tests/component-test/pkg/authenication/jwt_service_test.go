@@ -1,10 +1,10 @@
-package authenication_test
+package authentication_test
 
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"github.com/DaanV2/mechanus/server/pkg/authenication"
+	"github.com/DaanV2/mechanus/server/pkg/authentication"
 	"github.com/DaanV2/mechanus/server/pkg/database"
 	"github.com/DaanV2/mechanus/server/pkg/storage"
 	util_test "github.com/DaanV2/mechanus/server/tests/component-test/util"
@@ -15,21 +15,21 @@ var _ = Describe("JwtService", func() {
 
 	var (
 		db         *database.DB
-		jtiService *authenication.JTIService
-		keyManager *authenication.KeyManager
-		service    *authenication.JWTService
+		jtiService *authentication.JTIService
+		keyManager *authentication.KeyManager
+		service    *authentication.JWTService
 	)
 
 	BeforeEach(func(setupCtx SpecContext) {
 		var err error
 
 		db = util_test.CreateDatabase(setupCtx)
-		jtiService = authenication.NewJTIService(db)
-		dbstore := storage.DBStorage[*authenication.KeyData](db)
-		keyManager, err = authenication.NewKeyManager(dbstore)
+		jtiService = authentication.NewJTIService(db)
+		dbstore := storage.DBStorage[*authentication.KeyData](db)
+		keyManager, err = authentication.NewKeyManager(dbstore)
 		Expect(err).ShouldNot(HaveOccurred())
 
-		service = authenication.NewJWTService(jtiService, keyManager)
+		service = authentication.NewJWTService(jtiService, keyManager)
 	})
 
 	Describe("Create", func() {
@@ -49,12 +49,12 @@ var _ = Describe("JwtService", func() {
 			// Parse both tokens and check JTI
 			t1, err := service.Validate(ctx, token1)
 			Expect(err).ShouldNot(HaveOccurred())
-			claims1, ok := authenication.GetClaims(t1.Claims)
+			claims1, ok := authentication.GetClaims(t1.Claims)
 			Expect(ok).To(BeTrue())
 
 			t2, err := service.Validate(ctx, token2)
 			Expect(err).ShouldNot(HaveOccurred())
-			claims2, ok := authenication.GetClaims(t2.Claims)
+			claims2, ok := authentication.GetClaims(t2.Claims)
 			Expect(ok).To(BeTrue())
 
 			Expect(claims1.ID).To(Equal(claims2.ID))
@@ -68,7 +68,7 @@ var _ = Describe("JwtService", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 			t1, err := service.Validate(ctx, token1)
 			Expect(err).ShouldNot(HaveOccurred())
-			claims1, ok := authenication.GetClaims(t1.Claims)
+			claims1, ok := authentication.GetClaims(t1.Claims)
 			Expect(ok).To(BeTrue())
 
 			// Revoke the JTI
@@ -80,7 +80,7 @@ var _ = Describe("JwtService", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 			t2, err := service.Validate(ctx, token2)
 			Expect(err).ShouldNot(HaveOccurred())
-			claims2, ok := authenication.GetClaims(t2.Claims)
+			claims2, ok := authentication.GetClaims(t2.Claims)
 			Expect(ok).To(BeTrue())
 
 			Expect(claims2.ID).ToNot(Equal(claims1.ID))
@@ -95,7 +95,7 @@ var _ = Describe("JwtService", func() {
 
 			t, err := service.Validate(ctx, token)
 			Expect(err).ShouldNot(HaveOccurred())
-			claims, ok := authenication.GetClaims(t.Claims)
+			claims, ok := authentication.GetClaims(t.Claims)
 			Expect(ok).To(BeTrue())
 			Expect(claims.User.ID).To(Equal(user.ID))
 			Expect(claims.Scope).To(Equal(scope))
@@ -108,7 +108,7 @@ var _ = Describe("JwtService", func() {
 
 			t, err := service.Validate(ctx, token)
 			Expect(err).ShouldNot(HaveOccurred())
-			claims, ok := authenication.GetClaims(t.Claims)
+			claims, ok := authentication.GetClaims(t.Claims)
 			Expect(ok).To(BeTrue())
 
 			_, err = jtiService.Revoke(ctx, claims.ID)

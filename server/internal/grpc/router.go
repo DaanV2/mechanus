@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"connectrpc.com/connect"
-	"github.com/DaanV2/mechanus/server/pkg/authenication"
+	"github.com/DaanV2/mechanus/server/pkg/authentication"
 	"github.com/DaanV2/mechanus/server/pkg/grpc/gen/screens/v1/screensv1connect"
 	"github.com/DaanV2/mechanus/server/pkg/grpc/gen/users/v1/usersv1connect"
 	grpc_handlers "github.com/DaanV2/mechanus/server/pkg/grpc/handlers"
@@ -18,7 +18,7 @@ type RPCS struct {
 	Login  usersv1connect.LoginServiceHandler
 	User   usersv1connect.UserServiceHandler
 	Screen screensv1connect.ScreensServiceHandler
-	JWT    *authenication.JWTService
+	JWT    *authentication.JWTService
 	CORS   *grpc_handlers.CORSHandler
 }
 

@@ -1,4 +1,4 @@
-package authenication_test
+package authentication_test
 
 import (
 	"context"
@@ -7,18 +7,18 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"github.com/DaanV2/mechanus/server/pkg/authenication"
-	"github.com/DaanV2/mechanus/server/pkg/authenication/roles"
+	"github.com/DaanV2/mechanus/server/pkg/authentication"
+	"github.com/DaanV2/mechanus/server/pkg/authentication/roles"
 )
 
 var _ = Describe("Context", func() {
 	ctx := context.Background()
-	ctx = authenication.ContextWithJWT(ctx, &authenication.JWTClaims{
+	ctx = authentication.ContextWithJWT(ctx, &authentication.JWTClaims{
 		RegisteredClaims: jwt.RegisteredClaims{
 			Issuer:  "test-issuer",
 			Subject: "test-subject",
 		},
-		User: authenication.JWTUser{
+		User: authentication.JWTUser{
 			ID:        "test-user-id",
 			Name:      "Test User",
 			Roles:     []string{"user"},
@@ -28,7 +28,7 @@ var _ = Describe("Context", func() {
 
 	DescribeTable("IsAuthenicated",
 		func(role roles.Role, expected bool) {
-			Expect(authenication.IsAuthenicatedWithRole(ctx, role)).To(Equal(expected))
+			Expect(authentication.IsAuthenicatedWithRole(ctx, role)).To(Equal(expected))
 		},
 		Entry("should have viewer", roles.Viewer, true),
 		Entry("should have user", roles.User, true),

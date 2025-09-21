@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	"connectrpc.com/connect"
-	"github.com/DaanV2/mechanus/server/pkg/authenication"
+	"github.com/DaanV2/mechanus/server/pkg/authentication"
 	xcrypto "github.com/DaanV2/mechanus/server/pkg/extensions/crypto"
 	usersv1 "github.com/DaanV2/mechanus/server/pkg/grpc/gen/users/v1"
 	"github.com/DaanV2/mechanus/server/pkg/grpc/gen/users/v1/usersv1connect"
@@ -21,10 +21,10 @@ var (
 
 type LoginService struct {
 	users *user_service.Service
-	jwts  *authenication.JWTService
+	jwts  *authentication.JWTService
 }
 
-func NewLoginService(users *user_service.Service, jwts *authenication.JWTService) *LoginService {
+func NewLoginService(users *user_service.Service, jwts *authentication.JWTService) *LoginService {
 	return &LoginService{
 		users,
 		jwts,
@@ -73,7 +73,7 @@ func (l *LoginService) Refresh(ctx context.Context, req *connect.Request[usersv1
 	}
 
 	// Get the user to update the info in th token
-	claims, ok := authenication.GetClaims(t.Claims)
+	claims, ok := authentication.GetClaims(t.Claims)
 	if !ok {
 		return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("token not provided by mechanus"))
 	}

@@ -1,7 +1,7 @@
-package authenication_test
+package authentication_test
 
 import (
-	"github.com/DaanV2/mechanus/server/pkg/authenication"
+	"github.com/DaanV2/mechanus/server/pkg/authentication"
 	"github.com/DaanV2/mechanus/server/pkg/database"
 	util_test "github.com/DaanV2/mechanus/server/tests/component-test/util"
 	. "github.com/onsi/ginkgo/v2"
@@ -11,12 +11,12 @@ import (
 var _ = Describe("JtiServer", func() {
 	var (
 		db      *database.DB
-		service *authenication.JTIService
+		service *authentication.JTIService
 	)
 
 	BeforeEach(func(setupCtx SpecContext) {
 		db = util_test.CreateDatabase(setupCtx)
-		service = authenication.NewJTIService(db)
+		service = authentication.NewJTIService(db)
 	})
 
 	Context("GetActiveOrCreate", func() {

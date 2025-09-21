@@ -6,8 +6,8 @@ import (
 
 	"connectrpc.com/connect"
 	"github.com/DaanV2/mechanus/server/internal/logging"
-	"github.com/DaanV2/mechanus/server/pkg/authenication"
-	"github.com/DaanV2/mechanus/server/pkg/authenication/roles"
+	"github.com/DaanV2/mechanus/server/pkg/authentication"
+	"github.com/DaanV2/mechanus/server/pkg/authentication/roles"
 	"github.com/DaanV2/mechanus/server/pkg/database/models"
 	xerrors "github.com/DaanV2/mechanus/server/pkg/extensions/errors"
 	usersv1 "github.com/DaanV2/mechanus/server/pkg/grpc/gen/users/v1"
@@ -70,7 +70,7 @@ func (u *UserService) Get(ctx context.Context, req *connect.Request[usersv1.GetU
 	id := req.Msg.GetId()
 	logger := u.logger.With("userId", id)
 
-	jwt, err := authenication.JWTFromContext(ctx)
+	jwt, err := authentication.JWTFromContext(ctx)
 	if err != nil {
 		logger.From(ctx).Error("error during reading jwt", "error", err)
 

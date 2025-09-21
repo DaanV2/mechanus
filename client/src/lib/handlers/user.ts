@@ -1,5 +1,5 @@
 import type { LoginResponse } from '../../proto/users/v1/login_pb';
-import { parseJwt, type JWTClaims } from '../authenication/jwt/parse';
+import { parseJwt, type JWTClaims } from '../authentication/jwt/parse';
 import { Cookie } from '../storage';
 import { createLoginClient, createUserClient } from '../stores/clients';
 
