@@ -1,3 +1,4 @@
+import { createScreenClient } from '$lib/stores/clients';
 import * as pixi from 'pixi.js';
 
 export class Application {
@@ -38,4 +39,12 @@ export class Application {
   get stage() {
     return this._app.stage;
   }
+
+  start() {
+    const client = createScreenClient();
+
+    const requests: AsyncIterable<PartialMessage<ClientMessages>>;
+    const handler = client.duplexUpdates()
+  }
+
 }

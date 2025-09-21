@@ -33,20 +33,20 @@ const (
 // reflection-formatted method names, remove the leading slash and convert the remaining slash to a
 // period.
 const (
-	// ScreensServiceListenUpdateProcedure is the fully-qualified name of the ScreensService's
-	// ListenUpdate RPC.
-	ScreensServiceListenUpdateProcedure = "/screens.v1.ScreensService/ListenUpdate"
+	// ScreensServiceDuplexUpdatesProcedure is the fully-qualified name of the ScreensService's
+	// DuplexUpdates RPC.
+	ScreensServiceDuplexUpdatesProcedure = "/screens.v1.ScreensService/DuplexUpdates"
 )
 
 // These variables are the protoreflect.Descriptor objects for the RPCs defined in this package.
 var (
-	screensServiceServiceDescriptor            = v1.File_screens_v1_screens_proto.Services().ByName("ScreensService")
-	screensServiceListenUpdateMethodDescriptor = screensServiceServiceDescriptor.Methods().ByName("ListenUpdate")
+	screensServiceServiceDescriptor             = v1.File_screens_v1_screens_proto.Services().ByName("ScreensService")
+	screensServiceDuplexUpdatesMethodDescriptor = screensServiceServiceDescriptor.Methods().ByName("DuplexUpdates")
 )
 
 // ScreensServiceClient is a client for the screens.v1.ScreensService service.
 type ScreensServiceClient interface {
-	ListenUpdate(context.Context, *connect.Request[v1.ScreenListenRequest]) (*connect.ServerStreamForClient[v1.ScreenUpdate], error)
+	DuplexUpdates(context.Context) *connect.BidiStreamForClient[v1.ClientMessages, v1.ServerMessages]
 }
 
 // NewScreensServiceClient constructs a client for the screens.v1.ScreensService service. By
@@ -59,10 +59,10 @@ type ScreensServiceClient interface {
 func NewScreensServiceClient(httpClient connect.HTTPClient, baseURL string, opts ...connect.ClientOption) ScreensServiceClient {
 	baseURL = strings.TrimRight(baseURL, "/")
 	return &screensServiceClient{
-		listenUpdate: connect.NewClient[v1.ScreenListenRequest, v1.ScreenUpdate](
+		duplexUpdates: connect.NewClient[v1.ClientMessages, v1.ServerMessages](
 			httpClient,
-			baseURL+ScreensServiceListenUpdateProcedure,
-			connect.WithSchema(screensServiceListenUpdateMethodDescriptor),
+			baseURL+ScreensServiceDuplexUpdatesProcedure,
+			connect.WithSchema(screensServiceDuplexUpdatesMethodDescriptor),
 			connect.WithClientOptions(opts...),
 		),
 	}
@@ -70,17 +70,17 @@ func NewScreensServiceClient(httpClient connect.HTTPClient, baseURL string, opts
 
 // screensServiceClient implements ScreensServiceClient.
 type screensServiceClient struct {
-	listenUpdate *connect.Client[v1.ScreenListenRequest, v1.ScreenUpdate]
+	duplexUpdates *connect.Client[v1.ClientMessages, v1.ServerMessages]
 }
 
-// ListenUpdate calls screens.v1.ScreensService.ListenUpdate.
-func (c *screensServiceClient) ListenUpdate(ctx context.Context, req *connect.Request[v1.ScreenListenRequest]) (*connect.ServerStreamForClient[v1.ScreenUpdate], error) {
-	return c.listenUpdate.CallServerStream(ctx, req)
+// DuplexUpdates calls screens.v1.ScreensService.DuplexUpdates.
+func (c *screensServiceClient) DuplexUpdates(ctx context.Context) *connect.BidiStreamForClient[v1.ClientMessages, v1.ServerMessages] {
+	return c.duplexUpdates.CallBidiStream(ctx)
 }
 
 // ScreensServiceHandler is an implementation of the screens.v1.ScreensService service.
 type ScreensServiceHandler interface {
-	ListenUpdate(context.Context, *connect.Request[v1.ScreenListenRequest], *connect.ServerStream[v1.ScreenUpdate]) error
+	DuplexUpdates(context.Context, *connect.BidiStream[v1.ClientMessages, v1.ServerMessages]) error
 }
 
 // NewScreensServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -89,16 +89,16 @@ type ScreensServiceHandler interface {
 // By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
 // and JSON codecs. They also support gzip compression.
 func NewScreensServiceHandler(svc ScreensServiceHandler, opts ...connect.HandlerOption) (string, http.Handler) {
-	screensServiceListenUpdateHandler := connect.NewServerStreamHandler(
-		ScreensServiceListenUpdateProcedure,
-		svc.ListenUpdate,
-		connect.WithSchema(screensServiceListenUpdateMethodDescriptor),
+	screensServiceDuplexUpdatesHandler := connect.NewBidiStreamHandler(
+		ScreensServiceDuplexUpdatesProcedure,
+		svc.DuplexUpdates,
+		connect.WithSchema(screensServiceDuplexUpdatesMethodDescriptor),
 		connect.WithHandlerOptions(opts...),
 	)
 	return "/screens.v1.ScreensService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
-		case ScreensServiceListenUpdateProcedure:
-			screensServiceListenUpdateHandler.ServeHTTP(w, r)
+		case ScreensServiceDuplexUpdatesProcedure:
+			screensServiceDuplexUpdatesHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -108,6 +108,6 @@ func NewScreensServiceHandler(svc ScreensServiceHandler, opts ...connect.Handler
 // UnimplementedScreensServiceHandler returns CodeUnimplemented from all methods.
 type UnimplementedScreensServiceHandler struct{}
 
-func (UnimplementedScreensServiceHandler) ListenUpdate(context.Context, *connect.Request[v1.ScreenListenRequest], *connect.ServerStream[v1.ScreenUpdate]) error {
-	return connect.NewError(connect.CodeUnimplemented, errors.New("screens.v1.ScreensService.ListenUpdate is not implemented"))
+func (UnimplementedScreensServiceHandler) DuplexUpdates(context.Context, *connect.BidiStream[v1.ClientMessages, v1.ServerMessages]) error {
+	return connect.NewError(connect.CodeUnimplemented, errors.New("screens.v1.ScreensService.DuplexUpdates is not implemented"))
 }

@@ -1,0 +1,22 @@
+syntax = "proto3";
+package screens.v1;
+
+import "screens/v1/general.proto";
+
+option go_package = "github.com/DaanV2/mechanus/server/pkg/grpc/gen/screens/v1;screensv1";
+
+message ClientMessages {
+    repeated ClientMessage action = 1;
+}
+
+message ClientMessage {
+    optional string id = 1; // Unique identifier for the message, in case request <-> response matching is needed.
+    oneof action {
+        InitialSetupRequest initial_setup_request = 2;
+        Ping ping = 3;
+    }
+}
+
+message InitialSetupRequest {
+
+}

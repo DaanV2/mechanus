@@ -3,7 +3,8 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { ScreenListenRequest, ScreenUpdate } from "./screens_pb.js";
+import { ClientMessages } from "./client_pb.js";
+import { ServerMessages } from "./server_pb.js";
 import { MethodKind } from "@bufbuild/protobuf";
 
 /**
@@ -13,13 +14,13 @@ export const ScreensService = {
   typeName: "screens.v1.ScreensService",
   methods: {
     /**
-     * @generated from rpc screens.v1.ScreensService.ListenUpdate
+     * @generated from rpc screens.v1.ScreensService.DuplexUpdates
      */
-    listenUpdate: {
-      name: "ListenUpdate",
-      I: ScreenListenRequest,
-      O: ScreenUpdate,
-      kind: MethodKind.ServerStreaming,
+    duplexUpdates: {
+      name: "DuplexUpdates",
+      I: ClientMessages,
+      O: ServerMessages,
+      kind: MethodKind.BiDiStreaming,
     },
   }
 } as const;

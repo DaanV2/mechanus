@@ -1,0 +1,11 @@
+syntax = "proto3";
+package screens.v1;
+
+option go_package = "github.com/DaanV2/mechanus/server/pkg/grpc/gen/screens/v1;screensv1";
+
+
+message Ping {
+    float x = 1; // Coordinates
+    float y = 2; // Coordinates
+    string initiator_id = 3; // The player/device that initiated the ping
+}

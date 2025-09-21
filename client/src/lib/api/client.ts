@@ -1,8 +1,7 @@
 import { type Interceptor, type Transport } from '@connectrpc/connect';
 import { createConnectTransport } from '@connectrpc/connect-web';
 import { Cookie } from '../storage';
-
-export const GRPC_PORT = 8666;
+import { server_grpc_url } from '$lib/config';
 
 // Interceptor to inject access-token as Authorization header
 const tokenInjector: Interceptor = (next) => (req) => {
@@ -16,7 +15,7 @@ const tokenInjector: Interceptor = (next) => (req) => {
 
 export function createClient(): Transport {
   return createConnectTransport({
-    baseUrl: `${window.location.protocol}//${window.location.hostname}:${GRPC_PORT}`,
+    baseUrl: server_grpc_url(),
     credentials: 'same-origin',
     defaultTimeoutMs: 5000,
     interceptors: [tokenInjector]

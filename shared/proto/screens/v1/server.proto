@@ -1,0 +1,22 @@
+syntax = "proto3";
+package screens.v1;
+
+option go_package = "github.com/DaanV2/mechanus/server/pkg/grpc/gen/screens/v1;screensv1";
+
+import "screens/v1/scene_actions.proto";
+import "screens/v1/splash_screen.proto";
+
+
+message ServerMessages {
+  repeated ServerMessage action = 1;
+}
+
+message ServerMessage {
+  optional string id = 1; // Unique identifier for the message, in case request <-> response matching is needed.
+
+  oneof action {
+    SplashScreen splash_screen_update = 2;
+    SceneChange scene_change = 3;
+    SceneChangeCompleted scene_change_completed = 4;
+  }
+}
