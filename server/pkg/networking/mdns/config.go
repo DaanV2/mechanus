@@ -33,8 +33,6 @@ func validateServerConfig(c *config.Config) error {
 		err = errors.Join(err, errors.New("service type for mdns needs to be something"))
 	}
 
-	
-
 	return err
 }
 

@@ -43,6 +43,7 @@ func (m *Map[K, V]) Store(key K, value V) {
 // Swap swaps the value for a key and returns true if there was a previous value.
 func (m *Map[K, V]) Swap(key K, value V) (V, bool) {
 	v, loaded := m.data.Swap(key, value)
+
 	return v.(V), loaded
 }
 
@@ -79,6 +80,7 @@ func (m *Map[K, V]) Range(f func(key K, value V) bool) {
 		if kok && vok {
 			return f(k, v)
 		}
+
 		return true
 	})
 }

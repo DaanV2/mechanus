@@ -26,7 +26,7 @@ func NewScreenState() *ScreenState {
 			XRatio:  1,
 			YRatio:  1,
 		},
-		Layers: []*Layer{},
+		Layers:       []*Layer{},
 		SplashScreen: nil,
 	}
 }

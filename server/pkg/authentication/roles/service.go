@@ -17,7 +17,7 @@ type RoleService struct {
 func ParseRole(role string) (Role, error) {
 	v := Role(strings.ToLower(role))
 	switch v {
-	case Admin, Operator, User, Viewer:
+	case Admin, Operator, User, Viewer, Device:
 		return v, nil
 	default:
 		return Viewer, errors.New("unknown role: " + role)

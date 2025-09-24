@@ -2,10 +2,10 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 	"sort"
 
 	"github.com/DaanV2/mechanus/server/mechanus/paths"
+	"github.com/charmbracelet/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"gopkg.in/yaml.v3"
@@ -36,7 +36,7 @@ func PrintInfo(cmd *cobra.Command, args []string) error {
 		printInfoFn("user data dir", paths.GetUserDataDir),
 	}
 	// TODO use bubbles
-	log.Println("printing info")
+	fmt.Println("printing info")
 
 	fmt.Println("\n==== Info ====")
 	sort.Strings(values)

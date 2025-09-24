@@ -20,9 +20,13 @@ generate:
 lint:
 	go tool golangci-lint run -v --fix
 
+format:
+	go fmt ./...
+
 checks:
 	$(MAKE) build
 	$(MAKE) test
+	$(MAKE) format
 	$(MAKE) lint
 	$(MAKE) documentation
 

@@ -71,6 +71,7 @@ type connectionHandler struct {
 func NewWebsocketRouter(handler *WebsocketHandler) *http.ServeMux {
 	router := http.NewServeMux()
 	router.Handle("/api/v1/screen/{screenid}/{id}", handler) // Placeholder, will be handled by websocket handler.
+
 	return router
 }
 
@@ -93,16 +94,17 @@ func (handler *WebsocketHandler) ServeHTTP(w http.ResponseWriter, r *http.Reques
 	screenid := r.PathValue("screenid")
 	if id == "" || screenid == "" {
 		http.Error(w, "Missing id or type in path", http.StatusBadRequest)
+
 		return
 	}
 	screenHandler, ok := handler.screenManager.Get(screenid)
 	if !ok {
 		http.Error(w, "Screen not found", http.StatusNotFound)
+
 		return
 	}
 	//TODO: check that screenHandler is allowed to be access by this requester
-
-	connCtx, cancel := context.WithCancel(context.Background())
+	connCtx, cancel := context.WithCancel(r.Context())
 	defer cancel()
 	logger, connCtx := handler.logger.
 		With("id", id, "screen", screenid).
@@ -112,12 +114,14 @@ func (handler *WebsocketHandler) ServeHTTP(w http.ResponseWriter, r *http.Reques
 	auth, err := handler.authenticate(r)
 	if err != nil {
 		http.Error(w, "Could not authenticate: "+err.Error(), http.StatusUnauthorized)
+
 		return
 	}
 
 	conn, err := websocket.Accept(w, r, handler.acceptOptions())
 	if err != nil {
 		logger.Error("Could not open websocket", "error", err)
+
 		return
 	}
 
@@ -144,11 +148,13 @@ func (handler *WebsocketHandler) authenticate(r *http.Request) (*ConnectionInfo,
 		t, err := handler.jwt_authenticator.Validate(r.Context(), token)
 		if err != nil {
 			handler.logger.From(r.Context()).Error("Could not validate JWT", "error", err)
+
 			return nil, err
 		}
 		c, ok := authentication.GetClaims(t.Claims)
 		if !ok {
 			handler.logger.From(r.Context()).Error("Could not get claims from JWT")
+
 			return nil, errors.New("could not get claims from JWT")
 		}
 
@@ -199,11 +205,13 @@ func (connh *connectionHandler) setupConnection(w http.ResponseWriter) {
 	if err != nil {
 		connh.logger.Error("Could not open websocket reader", "error", err)
 		http.Error(w, "Could not open websocket reader: "+err.Error(), http.StatusInternalServerError)
+
 		return
 	}
 	if readerType != websocket.MessageBinary {
 		connh.logger.Error("Unsupported websocket message type", "type", readerType)
 		http.Error(w, "Unsupported websocket message type", http.StatusBadRequest)
+
 		return
 	}
 
@@ -217,6 +225,7 @@ func (connh *connectionHandler) readLoop(reader io.Reader) {
 		if err != nil {
 			if errors.Is(err, net.ErrClosed) {
 				connh.logger.Info("Websocket connection closed")
+
 				return
 			}
 			var ws websocket.CloseError
@@ -224,14 +233,17 @@ func (connh *connectionHandler) readLoop(reader io.Reader) {
 				if ws.Code == websocket.StatusNormalClosure || ws.Code == websocket.StatusGoingAway {
 					connh.logger.Info("Websocket connection closed normally", "code", ws.Code, "reason", ws.Reason)
 					connh.close(nil)
+
 					return
 				}
 
 				connh.logger.Info("Websocket connection closed by client", "code", ws.Code, "reason", ws.Reason)
 				connh.close(ws)
+
 				return
 			}
 			connh.logger.Error("Could not read websocket message", "error", err)
+
 			return
 		}
 		// Parse
@@ -240,6 +252,7 @@ func (connh *connectionHandler) readLoop(reader io.Reader) {
 		if err != nil {
 			connh.logger.Error("Could not parse websocket message", "error", err)
 			connh.close(err)
+
 			return
 		}
 
@@ -248,6 +261,7 @@ func (connh *connectionHandler) readLoop(reader io.Reader) {
 		if err != nil {
 			connh.logger.Error("Could not handle websocket message", "error", err)
 			connh.close(err)
+
 			return
 		}
 	}
@@ -259,11 +273,16 @@ func (connh *connectionHandler) close(err error) {
 	// Close the connection with the appropriate status code or normal closure.
 	if err != nil {
 		connh.logger.Error("Closing connection due to error", "error", err)
-		connh.conn.Close(websocket.StatusInternalError, "connection closed by server due to error: "+err.Error())
+		connh.closeWith(websocket.StatusInternalError, "connection closed by server due to error: "+err.Error())
+
 		return
 	}
 
-	crr := connh.conn.Close(websocket.StatusNormalClosure, "connection closed by server")
+	connh.closeWith(websocket.StatusNormalClosure, "connection closed by server")
+}
+
+func (connh *connectionHandler) closeWith(code websocket.StatusCode, reason string) {
+	crr := connh.conn.Close(code, reason)
 	if errors.Is(crr, net.ErrClosed) { // Already closed, ignore.
 		return
 	}

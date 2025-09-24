@@ -74,9 +74,9 @@ func (s *ScreenHandler) HandleMessage(ctx context.Context, msg *screensv1.Client
 }
 
 func (s *ScreenHandler) HandlePingRequest(ctx context.Context, msg *screensv1.ClientMessage_Ping) ([]*screensv1.ServerMessage, error) {
-	return nil, nil // TODO
+	return nil, nil // TODO implement handler later
 }
 
 func (s *ScreenHandler) HandleInitialSetupRequest(ctx context.Context, msg *screensv1.ClientMessage_InitialSetupRequest) ([]*screensv1.ServerMessage, error) {
-	return nil, nil // TODO
+	return nil, nil // TODO implement handler later
 }

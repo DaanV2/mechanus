@@ -2,6 +2,7 @@ package logging
 
 import (
 	"io"
+	// nolint:depguard // this is needed for libraries that implement slog
 	"log/slog"
 
 	"github.com/charmbracelet/log"

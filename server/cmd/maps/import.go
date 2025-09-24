@@ -6,11 +6,11 @@ import (
 
 // config/importCmd represents the config/save command
 var importCmd = &cobra.Command{
-	Use:   "import [filepath]",
-	Short: "Imports the given universal vtt map",
+	Use:     "import [filepath]",
+	Short:   "Imports the given universal vtt map",
 	Example: "mechanus maps import ./dungeon.dd2vtt",
-	RunE:  importCmdWorkload,
-	Args: cobra.ExactArgs(1),
+	RunE:    importCmdWorkload,
+	Args:    cobra.ExactArgs(1),
 }
 
 func init() {

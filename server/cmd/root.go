@@ -36,7 +36,7 @@ var rootCmd = &cobra.Command{
 
 func init() {
 	pflags := rootCmd.PersistentFlags()
-	setup.LoggerConfig.AddToSet( pflags)
+	setup.LoggerConfig.AddToSet(pflags)
 
 	cmd_config.AddCommand(rootCmd)
 	cmd_mdns.AddCommand(rootCmd)

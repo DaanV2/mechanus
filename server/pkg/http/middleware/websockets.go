@@ -19,6 +19,7 @@ func NewWebsocketSplitter(websocket, other http.Handler) *WebsocketSplitter {
 func (w *WebsocketSplitter) ServeHTTP(writer http.ResponseWriter, req *http.Request) {
 	if req.URL.Scheme == "ws" || req.URL.Scheme == "wss" {
 		w.websocket.ServeHTTP(writer, req)
+
 		return
 	}
 

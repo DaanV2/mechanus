@@ -8,8 +8,7 @@ linters:
       package-average: 10
     depguard:
       rules:
-        main:
-          list-mode: strict
+        blacklisted:
           deny:
             - pkg: github.com/gorilla/websocket
               desc: "Use github.com/coder/websocket"
