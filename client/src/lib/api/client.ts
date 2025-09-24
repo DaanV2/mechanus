@@ -1,7 +1,7 @@
+import { server_grpc_url } from '$lib/config';
 import { type Interceptor, type Transport } from '@connectrpc/connect';
 import { createConnectTransport } from '@connectrpc/connect-web';
 import { Cookie } from '../storage';
-import { server_grpc_url } from '$lib/config';
 
 // Interceptor to inject access-token as Authorization header
 const tokenInjector: Interceptor = (next) => (req) => {

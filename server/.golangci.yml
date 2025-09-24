@@ -12,11 +12,11 @@ linters:
           list-mode: strict
           deny:
             - pkg: github.com/gorilla/websocket
-              message: "Use github.com/coder/websocket"
+              desc: "Use github.com/coder/websocket"
             - pkg: "github.com/pkg/errors"
-              message: "Use the standard library errors package instead of github.com/pkg/errors"
+              desc: "Use the standard library errors package instead of github.com/pkg/errors"
             - pkg: "log"
-              message: "Use github.com/charmbracelet/log for structured logging"
+              desc: "Use github.com/charmbracelet/log for structured logging"
     nolintlint:
       require-explanation: true
       require-specific: true
