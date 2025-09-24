@@ -1,7 +1,0 @@
-syntax = "proto3";
-package screens.v1;
-
-import "screens/v1/client.proto";
-import "screens/v1/server.proto";
-
-option go_package = "github.com/DaanV2/mechanus/server/pkg/grpc/gen/screens/v1;screensv1";
