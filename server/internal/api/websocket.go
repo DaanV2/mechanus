@@ -12,7 +12,6 @@ import (
 	"github.com/DaanV2/mechanus/server/mechanus/screens"
 	"github.com/DaanV2/mechanus/server/pkg/authentication"
 	"github.com/DaanV2/mechanus/server/pkg/authentication/roles"
-	xstrings "github.com/DaanV2/mechanus/server/pkg/extensions/strings"
 	screensv1 "github.com/DaanV2/mechanus/server/pkg/grpc/gen/screens/v1"
 	"github.com/charmbracelet/log"
 	"github.com/coder/websocket"
@@ -101,6 +100,7 @@ func (handler *WebsocketHandler) ServeHTTP(w http.ResponseWriter, r *http.Reques
 		http.Error(w, "Screen not found", http.StatusNotFound)
 		return
 	}
+	//TODO: check that screenHandler is allowed to be access by this requester
 
 	connCtx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -160,15 +160,9 @@ func (handler *WebsocketHandler) authenticate(r *http.Request) (*ConnectionInfo,
 		}, nil
 	}
 
-	id := xstrings.FirstNotEmpty(
-		r.URL.Query().Get("deviceid"),
-		r.Header.Get("X-Device-ID"),
-		strings.TrimPrefix(r.URL.Path, "/api/v1/screen/"),
-	)
-
 	return &ConnectionInfo{
 		Token: token, // TODO: check token for device and device id.
-		ID:    id,
+		ID:    r.PathValue("id"),
 		Roles: []string{roles.Device.String()},
 		Type:  DeviceTypeDevice,
 	}, nil

@@ -4,14 +4,15 @@ yada yada (TODo)
 
 ## Paths
 
-The path is `ws://<domain>:[port]/api/v1/screen` or `wss://<domain>:[port]/api/v1/screen` and for devices you can provide an id either via header, query parameter or path id:
+The path is `<ws | wss>://<domain>:[port]/api/v1/screen/{screenid}/{id}`
 
-device examples
-```
-ws://<domain>:[port]/api/v1/screen/[deviceid]
-ws://<domain>:[port]/api/v1/screen?deviceid=<deviceid>
-ws://<domain>:[port]/api/v1/screen with: `X-Device-ID`: `<deviceid>`
-```
+## Screen ID
+
+A screen ID can be a UUID used for specific screen identifiers or one of the following `player`, `admin` or `viewer`
+
+## ID
+
+The user id or device id
 
 ## Authentication
 
