@@ -8,6 +8,12 @@ proto-format:
 proto-lint:
 	buf lint
 
+checks:
+	$(MAKE) proto
+	$(MAKE) proto-format
+	$(MAKE) proto-lint
+	$(MAKE) image
+
 image:
 	docker build . -t mechanus
 
