@@ -5,7 +5,6 @@ import (
 
 	"connectrpc.com/connect"
 	"github.com/DaanV2/mechanus/server/pkg/authentication"
-	"github.com/DaanV2/mechanus/server/pkg/grpc/gen/screens/v1/screensv1connect"
 	"github.com/DaanV2/mechanus/server/pkg/grpc/gen/users/v1/usersv1connect"
 	grpc_handlers "github.com/DaanV2/mechanus/server/pkg/grpc/handlers"
 	grpc_interceptors "github.com/DaanV2/mechanus/server/pkg/grpc/interceptors"
@@ -15,11 +14,10 @@ import (
 )
 
 type RPCS struct {
-	Login  usersv1connect.LoginServiceHandler
-	User   usersv1connect.UserServiceHandler
-	Screen screensv1connect.ScreensServiceHandler
-	JWT    *authentication.JWTService
-	CORS   *grpc_handlers.CORSHandler
+	Login usersv1connect.LoginServiceHandler
+	User  usersv1connect.UserServiceHandler
+	JWT   *authentication.JWTService
+	CORS  *grpc_handlers.CORSHandler
 }
 
 func NewRouter(services RPCS) http.Handler {
@@ -34,7 +32,6 @@ func NewRouter(services RPCS) http.Handler {
 
 	RegisterService(router, usersv1connect.NewLoginServiceHandler, services.Login, opts...)
 	RegisterService(router, usersv1connect.NewUserServiceHandler, services.User, opts...)
-	RegisterService(router, screensv1connect.NewScreensServiceHandler, services.Screen, opts...)
 
 	// Wrap the router with CORS middleware before h2c
 	return h2c.NewHandler(grpc_handlers.Wrap(services.CORS, router), &http2.Server{})
