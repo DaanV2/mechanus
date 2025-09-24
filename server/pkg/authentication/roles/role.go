@@ -5,6 +5,7 @@ const (
 	Operator Role = "operator"
 	User     Role = "user"
 	Viewer   Role = "viewer"
+	Device   Role = "device"
 )
 
 type Role string
@@ -25,7 +26,7 @@ func (r Role) value() int {
 		return 2
 	case User:
 		return 1
-	case Viewer:
+	case Viewer, Device:
 		return 0
 	}
 

@@ -6,6 +6,17 @@ linters:
     cyclop:
       max-complexity: 20
       package-average: 10
+    depguard:
+      rules:
+        main:
+          list-mode: strict
+          deny:
+            - pkg: github.com/gorilla/websocket
+              message: "Use github.com/coder/websocket"
+            - pkg: "github.com/pkg/errors"
+              message: "Use the standard library errors package instead of github.com/pkg/errors"
+            - pkg: "log"
+              message: "Use github.com/charmbracelet/log for structured logging"
     nolintlint:
       require-explanation: true
       require-specific: true
@@ -92,6 +103,7 @@ linters:
     - cyclop
     - dupl
     - durationcheck
+    - depguard
     - errcheck
     - errchkjson
     - errorlint

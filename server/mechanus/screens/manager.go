@@ -1,19 +1,17 @@
 package screens
 
-import "github.com/DaanV2/mechanus/server/mechanus/paths"
+import xsync "github.com/DaanV2/mechanus/server/pkg/extensions/sync"
 
-type Manager struct {
-	folder string
-	
+type ScreenManager struct {
+	screens xsync.Map[string, *ScreenHandler]
 }
 
-func NewManager() (*Manager, error) {
-	f, err := paths.GetAppConfigDir()
-	if err != nil {
-		return nil, err
+func NewScreenManager() *ScreenManager {
+	return &ScreenManager{
+		screens: xsync.Map[string, *ScreenHandler]{},
 	}
+}
 
-	return &Manager{
-		folder: f,
-	}, nil
+func (sm *ScreenManager) Get(id string) (*ScreenHandler, bool) {
+	return sm.screens.Load(id)
 }

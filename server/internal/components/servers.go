@@ -3,10 +3,12 @@ package components
 import (
 	"context"
 
+	"github.com/DaanV2/mechanus/server/internal/api"
 	"github.com/DaanV2/mechanus/server/internal/grpc"
 	"github.com/DaanV2/mechanus/server/internal/web"
 	"github.com/DaanV2/mechanus/server/pkg/application"
 	"github.com/DaanV2/mechanus/server/pkg/database"
+	http_middleware "github.com/DaanV2/mechanus/server/pkg/http/middleware"
 	"github.com/DaanV2/mechanus/server/pkg/networking/mdns"
 	"github.com/DaanV2/mechanus/server/pkg/servers"
 	user_service "github.com/DaanV2/mechanus/server/pkg/services/users"
@@ -19,7 +21,7 @@ type Server struct {
 	Components *application.ComponentManager
 }
 
-func createServerManager(ctx context.Context, rpcs grpc.RPCS, serv web.WEBServices) (*servers.Manager, error) {
+func createServerManager(ctx context.Context, rpcs grpc.RPCS, websocketHandler *api.WebsocketHandler, serv web.WEBServices) (*servers.Manager, error) {
 	wconf := web.GetConfig()
 	gconf := grpc.GetConfig()
 	mconf := mdns.GetServerConfig(wconf.Port)
@@ -29,7 +31,7 @@ func createServerManager(ctx context.Context, rpcs grpc.RPCS, serv web.WEBServic
 	}
 
 	return ServerManager(
-		APIServer(gconf, rpcs),
+		APIServer(gconf, websocketHandler, rpcs),
 		WebServer(wconf, serv),
 		s,
 	), nil
@@ -48,10 +50,12 @@ func WebServer(conf web.ServerConfig, serv web.WEBServices) servers.Server {
 	return web.NewServer(conf.Config, router)
 }
 
-func APIServer(conf grpc.Config, rpcs grpc.RPCS) servers.Server {
-	router := grpc.NewRouter(rpcs)
+func APIServer(grpcConf grpc.Config, websocketHandler *api.WebsocketHandler, rpcs grpc.RPCS) servers.Server {
+	grpcrouter := grpc.NewRouter(rpcs)
+	webrouter := api.NewWebsocketRouter(websocketHandler)
+	router := http_middleware.NewWebsocketSplitter(webrouter, grpcrouter)
 
-	return grpc.NewServer(router, conf)
+	return grpc.NewServer(router, grpcConf)
 }
 
 func MDNSServer(ctx context.Context, conf mdns.ServerConfig) (*mdns.Server, error) {

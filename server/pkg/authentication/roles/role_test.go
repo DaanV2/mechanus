@@ -22,6 +22,7 @@ var _ = Describe("Role", func() {
 		Entry("User should have viewer", roles.User, roles.Viewer),
 		Entry("User should have user", roles.User, roles.User),
 		Entry("Viewer should have viewer", roles.Viewer, roles.Viewer),
+		Entry("Viewer should have viewer", roles.Viewer, roles.Device),
 	)
 
 	DescribeTable("given roles should not have or inherit the role",

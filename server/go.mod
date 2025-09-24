@@ -19,6 +19,7 @@ require (
 	github.com/charmbracelet/fang v0.4.2
 	github.com/charmbracelet/lipgloss v1.1.0
 	github.com/charmbracelet/log v0.4.2
+	github.com/coder/websocket v1.8.14
 	github.com/daanv2/go-kit v1.0.6
 	github.com/daanv2/go-locks v1.3.0
 	github.com/glebarez/sqlite v1.11.0

@@ -11,7 +11,9 @@ type (
 	JWTClaims struct {
 		jwt.RegisteredClaims `json:",inline"`
 		User                 JWTUser `json:"user"`
-		Scope                string  `json:"scope"`
+		// The scope under which the token was issued.
+		// eg: "password", "refresh"
+		Scope string `json:"scope"`
 	}
 
 	JWTUser struct {

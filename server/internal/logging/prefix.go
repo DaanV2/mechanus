@@ -35,3 +35,8 @@ func (p Enriched) From(ctx context.Context) *log.Logger {
 
 	return l
 }
+
+func (p Enriched) FromUpdate(ctx context.Context) (*log.Logger, context.Context) {
+	l := p.From(ctx)
+	return l, Context(ctx, l)
+}

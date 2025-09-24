@@ -3,13 +3,13 @@ package components
 import (
 	"context"
 
+	"github.com/DaanV2/mechanus/server/internal/api"
 	"github.com/DaanV2/mechanus/server/internal/grpc"
 	"github.com/DaanV2/mechanus/server/internal/web"
-	"github.com/DaanV2/mechanus/server/mechanus/scenes"
+	"github.com/DaanV2/mechanus/server/mechanus/screens"
 	"github.com/DaanV2/mechanus/server/pkg/application"
 	"github.com/DaanV2/mechanus/server/pkg/authentication"
 	grpc_handlers "github.com/DaanV2/mechanus/server/pkg/grpc/handlers"
-	"github.com/DaanV2/mechanus/server/pkg/grpc/rpcs/rpcs_screens"
 	"github.com/DaanV2/mechanus/server/pkg/grpc/rpcs/rpcs_users"
 	user_service "github.com/DaanV2/mechanus/server/pkg/services/users"
 	"github.com/DaanV2/mechanus/server/pkg/storage"
@@ -36,21 +36,22 @@ func BuildServer(setupCtx context.Context) (*Server, error) {
 	jwtService := authentication.NewJWTService(jtiService, keyManager)
 	loginService := rpcs_users.NewLoginService(service, jwtService)
 	userService := rpcs_users.NewUserService(service)
-	manager := scenes.NewManager()
-	screenService := rpcs_screens.NewScreenService(manager)
 	corsConfig := grpc_handlers.GetCORSConfig()
 	corsHandler := grpc_handlers.NewCORSHandler(corsConfig)
 	rpcs := grpc.RPCS{
-		Login:  loginService,
-		User:   userService,
-		Screen: screenService,
-		JWT:    jwtService,
-		CORS:   corsHandler,
+		Login: loginService,
+		User:  userService,
+		JWT:   jwtService,
+		CORS:  corsHandler,
 	}
 	webServices := web.WEBServices{
 		Components: componentManager,
 	}
-	serversManager, err := createServerManager(setupCtx, rpcs, webServices)
+	screenManager := screens.NewScreenManager()
+	websocketConfig := api.GetWebsocketConfig()
+	websocketService := api.NewWebsocketHandler(screenManager, jwtService, websocketConfig)
+
+	serversManager, err := createServerManager(setupCtx, rpcs, websocketService, webServices)
 	if err != nil {
 		return nil, err
 	}
