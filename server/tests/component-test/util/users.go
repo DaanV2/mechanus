@@ -20,7 +20,7 @@ func CreateUser() *models.User {
 			CreatedAt: time.Now(),
 			UpdatedAt: time.Now(),
 		},
-		Username:         "username_" + id,
+		Username:     "username_" + id,
 		Roles:        []string{"user"},
 		Campaigns:    []*models.Campaign{},
 		Characters:   []*models.Character{},

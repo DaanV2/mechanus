@@ -42,7 +42,7 @@ func (repo *UserRepository) FindByUsername(ctx context.Context, username string)
 
 	var user models.User
 
-	tx := repo.db.WithContext(ctx).First(&user, "name = ?", username)
+	tx := repo.db.WithContext(ctx).First(&user, "username = ?", username)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
@@ -66,7 +66,7 @@ func (repo *UserRepository) Update(ctx context.Context, user *models.User) error
 	logger.Debug("updating user")
 
 	tx := repo.db.WithContext(ctx).
-		Omit("name", "password_hash", "id").
+		Omit("username", "password_hash", "id").
 		Updates(user)
 
 	return tx.Error

@@ -43,7 +43,7 @@ func (u *UserService) Create(ctx context.Context, req *connect.Request[usersv1.C
 	}
 
 	user := models.User{
-		Username:         username,
+		Username:     username,
 		PasswordHash: []byte(password),
 		Roles:        []string{roles.User.String()},
 		Campaigns:    []*models.Campaign{},

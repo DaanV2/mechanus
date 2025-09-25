@@ -29,7 +29,7 @@ var _ = Describe("User Service", func() {
 	Context("create", func() {
 		It("can create a new user", func(ctx SpecContext) {
 			user := &models.User{
-				Username:         "gandalf",
+				Username:     "gandalf",
 				Roles:        []string{"wizard"},
 				PasswordHash: []byte("the-one-ring"),
 			}
@@ -72,7 +72,7 @@ var _ = Describe("User Service", func() {
 	Context("Update", func() {
 		It("can update the user, but will skip the password and name", func(ctx SpecContext) {
 			user := &models.User{
-				Username:         "first",
+				Username:     "first",
 				Roles:        []string{"first"},
 				PasswordHash: []byte("first"),
 			}
@@ -83,7 +83,7 @@ var _ = Describe("User Service", func() {
 
 			updateduser := &models.User{
 				Model:        user.Model,
-				Username:         "second",
+				Username:     "second",
 				Roles:        []string{"second"},
 				PasswordHash: []byte("second"),
 			}
@@ -109,7 +109,7 @@ var _ = Describe("User Service", func() {
 
 		It("can update the user's password but nothing else", func(ctx SpecContext) {
 			user := &models.User{
-				Username:         "first",
+				Username:     "first",
 				Roles:        []string{"first"},
 				PasswordHash: []byte("first"),
 			}

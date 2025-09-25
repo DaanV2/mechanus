@@ -31,7 +31,7 @@ func InitializeServer(ctx context.Context, server *components.Server) {
 	if len(users) == 0 {
 		password := xstrings.FirstNotEmpty(AdminPassword.Value(), uuid.NewString())
 		admin := models.User{
-			Username:         xstrings.FirstNotEmpty(AdminUser.Value(), "admin"),
+			Username:     xstrings.FirstNotEmpty(AdminUser.Value(), "admin"),
 			PasswordHash: []byte(password),
 			Roles:        pq.StringArray{"admin"},
 		}
