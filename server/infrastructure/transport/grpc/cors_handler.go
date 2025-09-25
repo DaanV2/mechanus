@@ -5,8 +5,8 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/DaanV2/mechanus/server/pkg/config"
-	xurl "github.com/DaanV2/mechanus/server/pkg/extensions/url"
+	"github.com/DaanV2/mechanus/server/infrastructure/config"
+	"github.com/DaanV2/mechanus/server/pkg/extensions/xurl"
 	"github.com/charmbracelet/log"
 )
 

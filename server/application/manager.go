@@ -5,6 +5,8 @@ import (
 	"errors"
 	"slices"
 	"time"
+
+	"github.com/DaanV2/mechanus/server/infrastructure/health"
 )
 
 type (
@@ -19,22 +21,14 @@ type (
 	BeforeShutdown interface {
 		BeforeShutdown(ctx context.Context) error
 	}
-
-	HealthCheck interface {
-		HealthCheck(ctx context.Context) error
-	}
-
-	ReadyCheck interface {
-		ReadyCheck(ctx context.Context) error
-	}
 )
 
 type ComponentManager struct {
 	afterInitialize []AfterInitialize
 	aftershutdown   []AfterShutDown
 	beforeshutdown  []BeforeShutdown
-	healthcheck     []HealthCheck
-	readycheck      []ReadyCheck
+	healthcheck     []health.HealthCheck
+	readycheck      []health.ReadyCheck
 }
 
 func NewComponentManager() *ComponentManager {
@@ -116,11 +110,11 @@ func (m *ComponentManager) add(component any) {
 		m.beforeshutdown = append(m.beforeshutdown, v)
 	}
 
-	if v, ok := component.(HealthCheck); ok {
+	if v, ok := component.(health.HealthCheck); ok {
 		m.healthcheck = append(m.healthcheck, v)
 	}
 
-	if v, ok := component.(ReadyCheck); ok {
+	if v, ok := component.(health.ReadyCheck); ok {
 		m.readycheck = append(m.readycheck, v)
 	}
 
@@ -148,14 +142,14 @@ func (m *ComponentManager) remove(component any) {
 		})
 	}
 
-	if v, ok := component.(HealthCheck); ok {
-		m.healthcheck = slices.DeleteFunc(m.healthcheck, func(item HealthCheck) bool {
+	if v, ok := component.(health.HealthCheck); ok {
+		m.healthcheck = slices.DeleteFunc(m.healthcheck, func(item health.HealthCheck) bool {
 			return item == v
 		})
 	}
 
-	if v, ok := component.(ReadyCheck); ok {
-		m.readycheck = slices.DeleteFunc(m.readycheck, func(item ReadyCheck) bool {
+	if v, ok := component.(health.ReadyCheck); ok {
+		m.readycheck = slices.DeleteFunc(m.readycheck, func(item health.ReadyCheck) bool {
 			return item == v
 		})
 	}

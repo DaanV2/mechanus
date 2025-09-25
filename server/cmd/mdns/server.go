@@ -1,7 +1,7 @@
 package cmd_mdns
 
 import (
-	"github.com/DaanV2/mechanus/server/pkg/networking/mdns"
+	"github.com/DaanV2/mechanus/server/infrastructure/transport/mdns"
 	"github.com/spf13/cobra"
 )
 
@@ -25,7 +25,6 @@ func init() {
 }
 
 func serverCmdWorkload(cmd *cobra.Command, args []string) error {
-
 	conf := mdns.GetServerConfig(8080)
 	serv, err := mdns.NewServer(cmd.Context(), conf)
 	if err != nil {

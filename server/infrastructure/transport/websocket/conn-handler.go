@@ -7,7 +7,7 @@ import (
 	"net"
 	"net/http"
 
-	"github.com/DaanV2/mechanus/server/mechanus/screens"
+	"github.com/DaanV2/mechanus/server/engine/screens"
 	screensv1 "github.com/DaanV2/mechanus/server/pkg/gen/proto/screens/v1"
 	"github.com/charmbracelet/log"
 	"github.com/coder/websocket"

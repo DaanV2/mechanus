@@ -10,9 +10,9 @@ import (
 	"strings"
 
 	"github.com/DaanV2/mechanus/server/cmd"
-	"github.com/DaanV2/mechanus/server/internal/setup"
-	"github.com/DaanV2/mechanus/server/pkg/config"
-	xos "github.com/DaanV2/mechanus/server/pkg/extensions/os"
+	"github.com/DaanV2/mechanus/server/infrastructure/config"
+	"github.com/DaanV2/mechanus/server/infrastructure/logging"
+	"github.com/DaanV2/mechanus/server/pkg/extensions/xos"
 	"github.com/charmbracelet/log"
 	"github.com/spf13/viper"
 	"golang.org/x/text/cases"
@@ -45,8 +45,8 @@ func (b *markdownBuilder) render() ([]byte, error) {
 }
 
 func main() {
-	setup.Viper()
-	setup.Logger()
+	config.SetupViper()
+	logging.SetupLogger()
 
 	_ = cmd.RootCommand()
 

@@ -5,26 +5,26 @@ import (
 	"errors"
 
 	"connectrpc.com/connect"
+	"github.com/DaanV2/mechanus/server/application"
+	"github.com/DaanV2/mechanus/server/engine/authz/roles"
+	"github.com/DaanV2/mechanus/server/infrastructure/authentication"
 	"github.com/DaanV2/mechanus/server/infrastructure/logging"
-	"github.com/DaanV2/mechanus/server/pkg/authentication"
-	"github.com/DaanV2/mechanus/server/pkg/authentication/roles"
-	"github.com/DaanV2/mechanus/server/pkg/database/models"
-	xerrors "github.com/DaanV2/mechanus/server/pkg/extensions/errors"
+	"github.com/DaanV2/mechanus/server/infrastructure/persistence/models"
+	"github.com/DaanV2/mechanus/server/pkg/extensions/xerrors"
 	usersv1 "github.com/DaanV2/mechanus/server/pkg/gen/proto/users/v1"
 	"github.com/DaanV2/mechanus/server/pkg/gen/proto/users/v1/usersv1connect"
-	user_service "github.com/DaanV2/mechanus/server/pkg/services/users"
 )
 
 var _ usersv1connect.UserServiceHandler = &UserService{}
 
 type UserService struct {
-	users  *user_service.Service
+	users  *application.UserService
 	logger logging.Enriched
 
 	roleService *roles.RoleService
 }
 
-func NewUserService(users *user_service.Service) *UserService {
+func NewUserService(users *application.UserService) *UserService {
 	logger := logging.Enriched{}.WithPrefix("grpc-users")
 	roleService := &roles.RoleService{}
 
@@ -51,7 +51,7 @@ func (u *UserService) Create(ctx context.Context, req *connect.Request[usersv1.C
 
 	err := u.users.Create(ctx, &user)
 	if err != nil {
-		if errors.Is(err, user_service.ErrUserAlreadyExists) {
+		if errors.Is(err, application.ErrUserAlreadyExists) {
 			return nil, connect.NewError(connect.CodeAlreadyExists, err)
 		}
 

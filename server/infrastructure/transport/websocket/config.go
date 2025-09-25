@@ -1,6 +1,6 @@
 package websocket
 
-import "github.com/DaanV2/mechanus/server/pkg/config"
+import "github.com/DaanV2/mechanus/server/infrastructure/config"
 
 var (
 	WebsocketConfigSet = config.New("api.websocket")

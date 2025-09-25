@@ -6,12 +6,12 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/DaanV2/mechanus/server/application/checks"
+	"github.com/DaanV2/mechanus/server/components"
+	"github.com/DaanV2/mechanus/server/infrastructure/persistence"
 	"github.com/DaanV2/mechanus/server/infrastructure/transport/grpc"
 	web "github.com/DaanV2/mechanus/server/infrastructure/transport/http"
-	"github.com/DaanV2/mechanus/server/internal/checks"
-	"github.com/DaanV2/mechanus/server/internal/components"
-	"github.com/DaanV2/mechanus/server/pkg/database"
-	"github.com/DaanV2/mechanus/server/pkg/networking/mdns"
+	"github.com/DaanV2/mechanus/server/infrastructure/transport/mdns"
 	"github.com/charmbracelet/log"
 	"github.com/spf13/cobra"
 )
@@ -44,7 +44,7 @@ func init() {
 	// flags := serverCmd.Flags()
 	web.WebConfig.AddToSet(serverCmd.Flags())
 	grpc.APIServerConfigSet.AddToSet(serverCmd.Flags())
-	database.DatabaseConfig.AddToSet(serverCmd.Flags())
+	persistence.DatabaseConfig.AddToSet(serverCmd.Flags())
 	checks.InitializeConfig.AddToSet(serverCmd.Flags())
 	mdns.MDNSConfig.AddToSet(serverCmd.Flags())
 }

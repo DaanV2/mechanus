@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/DaanV2/mechanus/server/mechanus/paths"
+	"github.com/DaanV2/mechanus/server/pkg/paths"
 	"github.com/charmbracelet/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"

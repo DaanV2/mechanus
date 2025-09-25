@@ -6,10 +6,10 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/DaanV2/mechanus/server/engine/authz/roles"
+	"github.com/DaanV2/mechanus/server/engine/screens"
+	"github.com/DaanV2/mechanus/server/infrastructure/authentication"
 	"github.com/DaanV2/mechanus/server/infrastructure/logging"
-	"github.com/DaanV2/mechanus/server/mechanus/screens"
-	"github.com/DaanV2/mechanus/server/pkg/authentication"
-	"github.com/DaanV2/mechanus/server/pkg/authentication/roles"
 	cwebsocket "github.com/coder/websocket"
 )
 

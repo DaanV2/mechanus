@@ -5,7 +5,7 @@ import (
 
 	"connectrpc.com/connect"
 	"github.com/DaanV2/mechanus/server/infrastructure/logging"
-	"github.com/DaanV2/mechanus/server/mechanus/constants"
+	"github.com/DaanV2/mechanus/server/mechanus"
 )
 
 var _ connect.Interceptor = &LoggingInterceptor{}
@@ -49,7 +49,7 @@ func (m *LoggingInterceptor) WrapUnary(next connect.UnaryFunc) connect.UnaryFunc
 			return resp, err
 		}
 		if resp != nil && resp.Header() != nil {
-			resp.Header().Set("Server", constants.SERVICE_NAME)
+			resp.Header().Set("Server", mechanus.SERVICE_NAME)
 		}
 
 		return resp, err

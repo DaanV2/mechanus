@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"connectrpc.com/connect"
-	"github.com/DaanV2/mechanus/server/pkg/authentication"
+	"github.com/DaanV2/mechanus/server/infrastructure/authentication"
 	"github.com/DaanV2/mechanus/server/pkg/gen/proto/users/v1/usersv1connect"
 	"github.com/charmbracelet/log"
 	"golang.org/x/net/http2"

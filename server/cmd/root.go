@@ -9,7 +9,7 @@ import (
 	cmd_config "github.com/DaanV2/mechanus/server/cmd/config"
 	cmd_maps "github.com/DaanV2/mechanus/server/cmd/maps"
 	cmd_mdns "github.com/DaanV2/mechanus/server/cmd/mdns"
-	"github.com/DaanV2/mechanus/server/internal/setup"
+	"github.com/DaanV2/mechanus/server/infrastructure/logging"
 	"github.com/charmbracelet/fang"
 	"github.com/charmbracelet/log"
 	"github.com/spf13/cobra"
@@ -24,19 +24,19 @@ var rootCmd = &cobra.Command{
 	// has an action associated with it:
 	// Run: func(cmd *cobra.Command, args []string) { },
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-		setup.UpdateLogger(
-			setup.ReportCallerFlag.Value(),
-			setup.LevelFlag.Value(),
-			setup.FormatFlag.Value(),
+		logging.UpdateLogger(
+			logging.ReportCallerFlag.Value(),
+			logging.LevelFlag.Value(),
+			logging.FormatFlag.Value(),
 		)
 
-		return setup.LoggerConfig.Validate()
+		return logging.LoggerConfigSet.Validate()
 	},
 }
 
 func init() {
 	pflags := rootCmd.PersistentFlags()
-	setup.LoggerConfig.AddToSet(pflags)
+	logging.LoggerConfigSet.AddToSet(pflags)
 
 	cmd_config.AddCommand(rootCmd)
 	cmd_mdns.AddCommand(rootCmd)

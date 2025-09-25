@@ -6,11 +6,11 @@ import (
 	"fmt"
 
 	"connectrpc.com/connect"
-	"github.com/DaanV2/mechanus/server/pkg/authentication"
-	xcrypto "github.com/DaanV2/mechanus/server/pkg/extensions/crypto"
+	"github.com/DaanV2/mechanus/server/application"
+	"github.com/DaanV2/mechanus/server/infrastructure/authentication"
+	"github.com/DaanV2/mechanus/server/pkg/extensions/xcrypto"
 	usersv1 "github.com/DaanV2/mechanus/server/pkg/gen/proto/users/v1"
 	"github.com/DaanV2/mechanus/server/pkg/gen/proto/users/v1/usersv1connect"
-	user_service "github.com/DaanV2/mechanus/server/pkg/services/users"
 )
 
 var _ usersv1connect.LoginServiceHandler = &LoginService{}
@@ -20,11 +20,11 @@ var (
 )
 
 type LoginService struct {
-	users *user_service.Service
+	users *application.UserService
 	jwts  *authentication.JWTService
 }
 
-func NewLoginService(users *user_service.Service, jwts *authentication.JWTService) *LoginService {
+func NewLoginService(users *application.UserService, jwts *authentication.JWTService) *LoginService {
 	return &LoginService{
 		users,
 		jwts,
