@@ -1,7 +1,7 @@
 syntax = "proto3";
 package users.v1;
 
-option go_package = "github.com/DaanV2/mechanus/server/pkg/grpc/gen/users/v1;usersv1";
+option go_package = "github.com/DaanV2/mechanus/server/pkg/gen/proto/users/v1;usersv1";
 
 // A service for logging in a user, or creating their account
 service LoginService {

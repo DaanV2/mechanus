@@ -3,8 +3,8 @@ package util_test
 import (
 	"time"
 
-	"github.com/DaanV2/mechanus/server/pkg/database/models"
-	xrand "github.com/DaanV2/mechanus/server/pkg/extensions/rand"
+	"github.com/DaanV2/mechanus/server/infrastructure/persistence/models"
+	"github.com/DaanV2/mechanus/server/pkg/extensions/xrand"
 )
 
 func CreateUserID() string {

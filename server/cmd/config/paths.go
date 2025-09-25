@@ -3,7 +3,7 @@ package cmd_config
 import (
 	"fmt"
 
-	"github.com/DaanV2/mechanus/server/pkg/config"
+	"github.com/DaanV2/mechanus/server/infrastructure/config"
 	"github.com/charmbracelet/log"
 	"github.com/spf13/cobra"
 )

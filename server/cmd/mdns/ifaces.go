@@ -3,7 +3,7 @@ package cmd_mdns
 import (
 	"net"
 
-	"github.com/DaanV2/mechanus/server/pkg/terminal"
+	"github.com/DaanV2/mechanus/server/pkg/tui"
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/spf13/cobra"
@@ -35,7 +35,7 @@ func ifacesCmdWorkload(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	t := terminal.NewTable[net.Interface](ifaceRow)
+	t := tui.NewTable[net.Interface](ifaceRow)
 
 	t.SetColumns(table.Column{Title: "name"}, table.Column{Title: "address"})
 	t.AddItems(ifaces)

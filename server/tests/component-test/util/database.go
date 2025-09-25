@@ -4,17 +4,17 @@ import (
 	"context"
 	"time"
 
-	"github.com/DaanV2/mechanus/server/internal/components"
-	"github.com/DaanV2/mechanus/server/pkg/database"
+	"github.com/DaanV2/mechanus/server/components"
+	"github.com/DaanV2/mechanus/server/infrastructure/persistence"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
 	"gorm.io/gorm/logger"
 )
 
-func CreateDatabase(setupCtx context.Context) *database.DB {
+func CreateDatabase(setupCtx context.Context) *persistence.DB {
 	ginkgo.GinkgoHelper()
 
-	db, err := components.SetupTestDatabase(setupCtx, database.WithDBLogger(&GinkgoDBLogger{}))
+	db, err := components.SetupTestDatabase(setupCtx, persistence.WithDBLogger(&GinkgoDBLogger{}))
 	gomega.Expect(err).ToNot(gomega.HaveOccurred(), "database setup")
 	ginkgo.DeferCleanup(func() {
 		gomega.Expect(db.Close()).To(gomega.Succeed(), "database close")

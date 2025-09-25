@@ -4,17 +4,19 @@ import (
 	"errors"
 
 	"github.com/DaanV2/mechanus/server/cmd"
-	"github.com/DaanV2/mechanus/server/internal/setup"
+	"github.com/DaanV2/mechanus/server/infrastructure/config"
+	"github.com/DaanV2/mechanus/server/infrastructure/logging"
+	"github.com/DaanV2/mechanus/server/infrastructure/storage"
 	"github.com/charmbracelet/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
 func main() {
-	setup.Viper()
-	setup.Logger()
-	setup.Folders()
-	setup.Config()
+	config.SetupViper()
+	logging.SetupLogger()
+	storage.SetupFolders()
+	config.SetupConfig()
 
 	cobra.OnFinalize(func() {
 		err := viper.SafeWriteConfig()
