@@ -3,9 +3,9 @@ package components
 import (
 	"context"
 
+	"github.com/DaanV2/mechanus/server/infrastructure/transport/grpc"
 	web "github.com/DaanV2/mechanus/server/infrastructure/transport/http"
 	"github.com/DaanV2/mechanus/server/infrastructure/transport/websocket"
-	"github.com/DaanV2/mechanus/server/internal/grpc"
 	"github.com/DaanV2/mechanus/server/pkg/application"
 	"github.com/DaanV2/mechanus/server/pkg/database"
 	http_middleware "github.com/DaanV2/mechanus/server/pkg/http/middleware"

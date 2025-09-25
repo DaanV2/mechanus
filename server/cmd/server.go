@@ -6,10 +6,10 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/DaanV2/mechanus/server/infrastructure/transport/grpc"
 	web "github.com/DaanV2/mechanus/server/infrastructure/transport/http"
 	"github.com/DaanV2/mechanus/server/internal/checks"
 	"github.com/DaanV2/mechanus/server/internal/components"
-	"github.com/DaanV2/mechanus/server/internal/grpc"
 	"github.com/DaanV2/mechanus/server/pkg/database"
 	"github.com/DaanV2/mechanus/server/pkg/networking/mdns"
 	"github.com/charmbracelet/log"
