@@ -4,7 +4,7 @@ import "github.com/lib/pq"
 
 type User struct {
 	Model
-	Name         string
+	Username     string
 	Roles        pq.StringArray `gorm:"type:text[]"`
 	Campaigns    []*Campaign    `gorm:"many2many:user_campaigns"`
 	Characters   []*Character   `gorm:"many2many:user_characters"`

@@ -31,7 +31,7 @@ func InitializeServer(ctx context.Context, server *components.Server) {
 	if len(users) == 0 {
 		password := xstrings.FirstNotEmpty(AdminPassword.Value(), uuid.NewString())
 		admin := models.User{
-			Name:         xstrings.FirstNotEmpty(AdminUser.Value(), "admin"),
+			Username:         xstrings.FirstNotEmpty(AdminUser.Value(), "admin"),
 			PasswordHash: []byte(password),
 			Roles:        pq.StringArray{"admin"},
 		}
@@ -39,6 +39,6 @@ func InitializeServer(ctx context.Context, server *components.Server) {
 			log.Fatal("couldn't create admin account", "error", err)
 		}
 
-		log.Warnf("!!!! Create admin account, will only output this once !!!!\nusername: %s\npassword: %s", admin.Name, password)
+		log.Warnf("!!!! Create admin account, will only output this once !!!!\nusername: %s\npassword: %s", admin.Username, password)
 	}
 }

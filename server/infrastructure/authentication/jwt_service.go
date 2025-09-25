@@ -56,7 +56,7 @@ func (s *JWTService) Create(ctx context.Context, user *models.User, scope string
 	claims := &JWTClaims{
 		User: JWTUser{
 			ID:        user.ID,
-			Name:      user.Name,
+			Name:      user.Username,
 			Roles:     user.Roles,
 			Campaigns: xslices.CollectIDs(user.Campaigns),
 		},

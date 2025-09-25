@@ -29,7 +29,7 @@ var _ = Describe("User Service", func() {
 	Context("create", func() {
 		It("can create a new user", func(ctx SpecContext) {
 			user := &models.User{
-				Name:         "gandalf",
+				Username:         "gandalf",
 				Roles:        []string{"wizard"},
 				PasswordHash: []byte("the-one-ring"),
 			}
@@ -43,7 +43,7 @@ var _ = Describe("User Service", func() {
 			Expect(err).ToNot(HaveOccurred())
 
 			Expect(user.ID).To(Equal(u.ID))
-			Expect(user.Name).To(Equal(u.Name))
+			Expect(user.Username).To(Equal(u.Username))
 			Expect(user.PasswordHash).To(Equal(u.PasswordHash))
 			Expect(u.PasswordHash).ToNot(Equal([]byte("the-one-ring")))
 			Expect(u.Roles).To(BeEquivalentTo([]string{"wizard"}))
@@ -53,7 +53,7 @@ var _ = Describe("User Service", func() {
 	Context("Get", func() {
 		It("can get a user by name", func(ctx SpecContext) {
 			user := &models.User{
-				Name: "gandalf",
+				Username: "gandalf",
 			}
 
 			By("creating a new user")
@@ -65,14 +65,14 @@ var _ = Describe("User Service", func() {
 			Expect(err).ToNot(HaveOccurred())
 
 			Expect(user.ID).To(Equal(u.ID))
-			Expect(user.Name).To(Equal(u.Name))
+			Expect(user.Username).To(Equal(u.Username))
 		})
 	})
 
 	Context("Update", func() {
 		It("can update the user, but will skip the password and name", func(ctx SpecContext) {
 			user := &models.User{
-				Name:         "first",
+				Username:         "first",
 				Roles:        []string{"first"},
 				PasswordHash: []byte("first"),
 			}
@@ -83,7 +83,7 @@ var _ = Describe("User Service", func() {
 
 			updateduser := &models.User{
 				Model:        user.Model,
-				Name:         "second",
+				Username:         "second",
 				Roles:        []string{"second"},
 				PasswordHash: []byte("second"),
 			}
@@ -104,12 +104,12 @@ var _ = Describe("User Service", func() {
 
 			By("expecting the password and name to not be changed")
 			Expect(check.PasswordHash).To(Equal(user.PasswordHash))
-			Expect(check.Name).To(Equal(user.Name))
+			Expect(check.Username).To(Equal(user.Username))
 		})
 
 		It("can update the user's password but nothing else", func(ctx SpecContext) {
 			user := &models.User{
-				Name:         "first",
+				Username:         "first",
 				Roles:        []string{"first"},
 				PasswordHash: []byte("first"),
 			}
@@ -130,7 +130,7 @@ var _ = Describe("User Service", func() {
 
 			Expect(check.ID).To(Equal(user.ID))
 			Expect(check.UpdatedAt).To(BeTemporally(">", user.UpdatedAt))
-			Expect(check.Name).To(Equal(user.Name))
+			Expect(check.Username).To(Equal(user.Username))
 			Expect(check.Roles).To(Equal(user.Roles))
 
 			By("expecting the password to not be changed")

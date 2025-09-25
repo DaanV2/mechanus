@@ -43,7 +43,7 @@ func (u *UserService) Create(ctx context.Context, req *connect.Request[usersv1.C
 	}
 
 	user := models.User{
-		Name:         username,
+		Username:         username,
 		PasswordHash: []byte(password),
 		Roles:        []string{roles.User.String()},
 		Campaigns:    []*models.Campaign{},
@@ -111,7 +111,7 @@ func (u *UserService) getFullInfo(ctx context.Context, id string) (*usersv1.User
 
 	return &usersv1.User{
 		Id:   user.ID,
-		Name: user.Name,
+		Name: user.Username,
 	}, nil
 }
 
@@ -123,7 +123,7 @@ func (u *UserService) getReducedInfo(ctx context.Context, id string) (*usersv1.U
 
 	return &usersv1.User{
 		Id:   user.ID,
-		Name: user.Name,
+		Name: user.Username,
 	}, nil
 
 }

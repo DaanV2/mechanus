@@ -53,7 +53,7 @@ func (repo *UserRepository) FindByUsername(ctx context.Context, username string)
 // Create makes a new entry in the database, assumes the password is set in the PasswordHash field as plain bytes, will hash that field first
 // It updates the user with the new password hash and sets the ID to a new UUID
 func (repo *UserRepository) Create(ctx context.Context, user *models.User) error {
-	logger := repo.logger.With("username", user.Name).From(ctx)
+	logger := repo.logger.With("username", user.Username).From(ctx)
 	logger.Debug("Creating user")
 
 	tx := repo.db.WithContext(ctx).Create(user)

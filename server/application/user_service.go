@@ -39,7 +39,7 @@ func (s *UserService) Create(ctx context.Context, user *models.User) error {
 		return err
 	}
 
-	_, err = s.repo.FindByUsername(ctx, user.Name)
+	_, err = s.repo.FindByUsername(ctx, user.Username)
 	if !persistence.IsNotExist(err) {
 		return ErrUserAlreadyExists
 	}
