@@ -33,7 +33,7 @@ func (db *DB) WithContext(ctx context.Context) *gorm.DB {
 // NewDB creates a new database connection with the given options
 func NewDB(opts ...Option) (*DB, error) {
 	// Default configuration
-	config := &Config{
+	config := &DatabaseConfig{
 		Type:            SQLite,
 		DSN:             "db.sqlite",
 		MaxIdleConns:    2,

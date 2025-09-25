@@ -44,7 +44,7 @@ func init() {
 	// flags := serverCmd.Flags()
 	web.WebConfig.AddToSet(serverCmd.Flags())
 	grpc.APIServerConfigSet.AddToSet(serverCmd.Flags())
-	persistence.DatabaseConfig.AddToSet(serverCmd.Flags())
+	persistence.DatabaseConfigSet.AddToSet(serverCmd.Flags())
 	checks.InitializeConfig.AddToSet(serverCmd.Flags())
 	mdns.MDNSConfig.AddToSet(serverCmd.Flags())
 }

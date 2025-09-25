@@ -30,7 +30,7 @@ const (
 )
 
 // Config holds the database configuration
-type Config struct {
+type DatabaseConfig struct {
 	Type            DBType
 	DSN             string
 	MaxIdleConns    int
@@ -41,18 +41,18 @@ type Config struct {
 }
 
 var (
-	DatabaseConfig      = config.New("database").WithValidate(validateDatabaseFlags)
-	TypeFlag            = DatabaseConfig.String("persistence.type", SQLite.String(), "The type of database to connect/use: supported values: sqlite, postgres, mysql. (For testing purposes there is also inmemory)")
-	DSNFlag             = DatabaseConfig.String("persistence.dsn", "db.sqlite", "A datasource name, depends on type of database, but usually referes to file name or the connection string")
-	MaxIdleConnsFlag    = DatabaseConfig.Int("persistence.maxIdleConns", 2, "Sets the maximum number of connections in the idle connection pool. If n <= 0, no idle connections are retained.")
-	MaxOpenConnsFlag    = DatabaseConfig.Int("persistence.maxOpenConns", 0, "Sets the maximum number of open connections to the persistence. If n <= 0, then there is no limit on the number of open connections.")
-	ConnMaxLifetimeFlag = DatabaseConfig.Duration("persistence.connMaxLifetime", 1*time.Hour, "Sets the maximum amount of time a connection may be reused. If d <= 0, connections are not closed due to a connection's age.")
+	DatabaseConfigSet   = config.New("database").WithValidate(validateDatabaseFlags)
+	TypeFlag            = DatabaseConfigSet.String("database.type", SQLite.String(), "The type of database to connect/use: supported values: sqlite, postgres, mysql. (For testing purposes there is also inmemory)")
+	DSNFlag             = DatabaseConfigSet.String("database.dsn", "db.sqlite", "A datasource name, depends on type of database, but usually referes to file name or the connection string")
+	MaxIdleConnsFlag    = DatabaseConfigSet.Int("database.maxIdleConns", 2, "Sets the maximum number of connections in the idle connection pool. If n <= 0, no idle connections are retained.")
+	MaxOpenConnsFlag    = DatabaseConfigSet.Int("database.maxOpenConns", 0, "Sets the maximum number of open connections to the database. If n <= 0, then there is no limit on the number of open connections.")
+	ConnMaxLifetimeFlag = DatabaseConfigSet.Duration("database.connMaxLifetime", 1*time.Hour, "Sets the maximum amount of time a connection may be reused. If d <= 0, connections are not closed due to a connection's age.")
 )
 
 func validateDatabaseFlags(conf *config.Config) error {
 	var err error
 
-	dbt := conf.GetString("persistence.type")
+	dbt := conf.GetString("database.type")
 	switch DBType(dbt) {
 	case MySQL, SQLite, InMemory, PostgreSQL:
 	default:
@@ -66,13 +66,13 @@ func validateDatabaseFlags(conf *config.Config) error {
 // See [DatabaseConfig] for available values
 func GetOptions() ([]Option, error) {
 	opts := []Option{
-		WithMaxIdleConns(DatabaseConfig.GetInt("persistence.maxIdleConns")),
-		WithMaxOpenConns(DatabaseConfig.GetInt("persistence.maxOpenConns")),
-		WithConnMaxLifetime(DatabaseConfig.GetDuration("persistence.connMaxLifetime")),
+		WithMaxIdleConns(DatabaseConfigSet.GetInt("database.maxIdleConns")),
+		WithMaxOpenConns(DatabaseConfigSet.GetInt("database.maxOpenConns")),
+		WithConnMaxLifetime(DatabaseConfigSet.GetDuration("database.connMaxLifetime")),
 	}
 
-	dt := DBType(DatabaseConfig.GetString("persistence.type"))
-	dsn := DatabaseConfig.GetString("persistence.dsn")
+	dt := DBType(DatabaseConfigSet.GetString("database.type"))
+	dsn := DatabaseConfigSet.GetString("database.dsn")
 
 	// If SQLITE and dsn is empty or default, we will sanitize to the state directory
 	if dt == SQLite && (dsn == "" || dsn == "db.sqlite") {

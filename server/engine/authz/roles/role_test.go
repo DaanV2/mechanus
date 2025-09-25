@@ -4,7 +4,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"github.com/DaanV2/mechanus/server/engine/users/roles"
+	"github.com/DaanV2/mechanus/server/engine/authz/roles"
 )
 
 var _ = Describe("Role", func() {
