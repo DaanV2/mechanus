@@ -18,6 +18,8 @@
     }
   ],
   "settings": {
+    "editor.formatOnSave": true,
+
     "terminal.integrated.env.windows": {
       "LOG_LEVEL": "debug"
     },
@@ -25,7 +27,6 @@
       "editor.defaultFormatter": "zxh404.vscode-proto3"
     },
     "protoc": {},
-    "editor.formatOnSave": true,
 
     "go.lintTool": "golangci-lint",
     "go.formatTool": "gofmt",
@@ -45,3 +46,4 @@
     }
   }
 }
+
