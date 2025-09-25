@@ -4,7 +4,7 @@ package screens.v1;
 import "screens/v1/scene_actions.proto";
 import "screens/v1/splash_screen.proto";
 
-option go_package = "github.com/DaanV2/mechanus/server/pkg/grpc/gen/screens/v1;screensv1";
+option go_package = "github.com/DaanV2/mechanus/server/pkg/gen/proto/screens/v1;screensv1";
 
 message ServerMessages {
   repeated ServerMessage action = 1;

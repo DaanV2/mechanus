@@ -43,7 +43,7 @@ func init() {
 	// serverCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	// flags := serverCmd.Flags()
 	web.WebConfig.AddToSet(serverCmd.Flags())
-	grpc.APIConfig.AddToSet(serverCmd.Flags())
+	grpc.APIServerConfigSet.AddToSet(serverCmd.Flags())
 	database.DatabaseConfig.AddToSet(serverCmd.Flags())
 	checks.InitializeConfig.AddToSet(serverCmd.Flags())
 	mdns.MDNSConfig.AddToSet(serverCmd.Flags())

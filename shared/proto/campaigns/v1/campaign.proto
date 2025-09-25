@@ -1,6 +1,6 @@
 syntax = "proto3";
 package campaigns.v1;
 
-option go_package = "github.com/DaanV2/mechanus/server/pkg/grpc/gen/campaigns/v1;campaignsv1";
+option go_package = "github.com/DaanV2/mechanus/server/pkg/gen/proto/campaigns/v1;campaignsv1";
 
 service CampaignService {}

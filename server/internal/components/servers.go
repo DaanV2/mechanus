@@ -23,7 +23,7 @@ type Server struct {
 
 func createServerManager(ctx context.Context, rpcs grpc.RPCS, websocketHandler *websocket.WebsocketHandler, serv web.WEBServices) (*servers.Manager, error) {
 	wconf := web.GetConfig()
-	gconf := grpc.GetConfig()
+	apiconf := grpc.GetAPIServerConfig()
 	mconf := mdns.GetServerConfig(wconf.Port)
 	s, err := MDNSServer(ctx, mconf)
 	if err != nil {
@@ -31,7 +31,7 @@ func createServerManager(ctx context.Context, rpcs grpc.RPCS, websocketHandler *
 	}
 
 	return ServerManager(
-		APIServer(gconf, websocketHandler, rpcs),
+		APIServer(apiconf, websocketHandler, rpcs),
 		WebServer(wconf, serv),
 		s,
 	), nil
@@ -50,12 +50,12 @@ func WebServer(conf web.ServerConfig, serv web.WEBServices) servers.Server {
 	return web.NewServer(conf.Config, router)
 }
 
-func APIServer(grpcConf grpc.Config, websocketHandler *websocket.WebsocketHandler, rpcs grpc.RPCS) servers.Server {
+func APIServer(apiConfig grpc.APIServerConfig, websocketHandler *websocket.WebsocketHandler, rpcs grpc.RPCS) servers.Server {
 	grpcrouter := grpc.NewRouter(rpcs)
 	webrouter := websocket.NewWebsocketRouter(websocketHandler)
 	router := http_middleware.NewWebsocketSplitter(webrouter, grpcrouter)
 
-	return grpc.NewServer(router, grpcConf)
+	return grpc.NewServer(router, apiConfig)
 }
 
 func MDNSServer(ctx context.Context, conf mdns.ServerConfig) (*mdns.Server, error) {

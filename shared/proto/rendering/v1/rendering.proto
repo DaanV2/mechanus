@@ -1,6 +1,0 @@
-syntax = "proto3";
-package rendering.v1;
-
-option go_package = "github.com/DaanV2/mechanus/server/pkg/grpc/gen/rendering/v1;renderingv1";
-
-service RenderingService {}

@@ -5,7 +5,7 @@ import (
 	"errors"
 
 	xsync "github.com/DaanV2/mechanus/server/pkg/extensions/sync"
-	screensv1 "github.com/DaanV2/mechanus/server/pkg/grpc/gen/screens/v1"
+	screensv1 "github.com/DaanV2/mechanus/server/pkg/gen/proto/screens/v1"
 )
 
 type ListenerManager interface {

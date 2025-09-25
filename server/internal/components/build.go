@@ -9,8 +9,6 @@ import (
 	"github.com/DaanV2/mechanus/server/mechanus/screens"
 	"github.com/DaanV2/mechanus/server/pkg/application"
 	"github.com/DaanV2/mechanus/server/pkg/authentication"
-	grpc_handlers "github.com/DaanV2/mechanus/server/pkg/grpc/handlers"
-	"github.com/DaanV2/mechanus/server/pkg/grpc/rpcs/rpcs_users"
 	user_service "github.com/DaanV2/mechanus/server/pkg/services/users"
 	"github.com/DaanV2/mechanus/server/pkg/storage"
 )
@@ -34,10 +32,10 @@ func BuildServer(setupCtx context.Context) (*Server, error) {
 		return nil, err
 	}
 	jwtService := authentication.NewJWTService(jtiService, keyManager)
-	loginService := rpcs_users.NewLoginService(service, jwtService)
-	userService := rpcs_users.NewUserService(service)
-	corsConfig := grpc_handlers.GetCORSConfig()
-	corsHandler := grpc_handlers.NewCORSHandler(corsConfig)
+	loginService := grpc.NewLoginService(service, jwtService)
+	userService := grpc.NewUserService(service)
+	corsConfig := grpc.GetCORSConfig()
+	corsHandler := grpc.NewCORSHandler(corsConfig)
 	rpcs := grpc.RPCS{
 		Login: loginService,
 		User:  userService,

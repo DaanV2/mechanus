@@ -2,11 +2,11 @@ version: v2
 plugins:
   # Server
   - local: protoc-gen-go
-    out: server/pkg/grpc/gen
+    out: server/pkg/gen/proto
     opt:
       - paths=source_relative
   - local: protoc-gen-connect-go
-    out: server/pkg/grpc/gen
+    out: server/pkg/gen/proto
     opt:
       - paths=source_relative
   # Client
@@ -16,3 +16,4 @@ plugins:
   - remote: buf.build/bufbuild/connect-es
     out: client/src/proto
     opt: target=ts
+
