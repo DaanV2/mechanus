@@ -39,7 +39,7 @@ func (l *LoginService) Login(ctx context.Context, req *connect.Request[usersv1.L
 		return nil, connect.NewError(connect.CodeUnauthenticated, ErrInvalidUserPassword)
 	}
 
-	u, err := l.users.GetByUsername(ctx, username)
+	u, err := l.users.FindByUsername(ctx, username)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeUnauthenticated, ErrInvalidUserPassword)
 	}

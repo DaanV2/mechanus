@@ -6,6 +6,7 @@ import (
 	"github.com/DaanV2/mechanus/server/application"
 	"github.com/DaanV2/mechanus/server/infrastructure/persistence"
 	"github.com/DaanV2/mechanus/server/infrastructure/persistence/models"
+	"github.com/DaanV2/mechanus/server/infrastructure/persistence/repositories"
 	util_test "github.com/DaanV2/mechanus/server/tests/component-test/util"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -16,11 +17,13 @@ var _ = Describe("User Service", func() {
 	var (
 		db      *persistence.DB
 		service *application.UserService
+		repo    *repositories.UserRepository
 	)
 
 	BeforeEach(func(setupCtx SpecContext) {
 		db = util_test.CreateDatabase(setupCtx)
-		service = application.NewUserService(db)
+		repo = repositories.NewUserRepository(db)
+		service = application.NewUserService(repo)
 	})
 
 	Context("create", func() {
@@ -58,7 +61,7 @@ var _ = Describe("User Service", func() {
 			Expect(user.ID).ToNot(BeEmpty())
 
 			By("trying to retrieve the user")
-			u, err := service.GetByUsername(ctx, "gandalf")
+			u, err := service.FindByUsername(ctx, "gandalf")
 			Expect(err).ToNot(HaveOccurred())
 
 			Expect(user.ID).To(Equal(u.ID))
@@ -67,7 +70,7 @@ var _ = Describe("User Service", func() {
 	})
 
 	Context("Update", func() {
-		It("can update the user, but will skip the password", func(ctx SpecContext) {
+		It("can update the user, but will skip the password and name", func(ctx SpecContext) {
 			user := &models.User{
 				Name:         "first",
 				Roles:        []string{"first"},
@@ -97,11 +100,11 @@ var _ = Describe("User Service", func() {
 
 			Expect(check.ID).To(Equal(user.ID))
 			Expect(check.UpdatedAt).To(BeTemporally(">", user.UpdatedAt))
-			Expect(check.Name).To(Equal(updateduser.Name))
 			Expect(check.Roles).To(Equal(updateduser.Roles))
 
-			By("expecting the password to not be changed")
+			By("expecting the password and name to not be changed")
 			Expect(check.PasswordHash).To(Equal(user.PasswordHash))
+			Expect(check.Name).To(Equal(user.Name))
 		})
 
 		It("can update the user's password but nothing else", func(ctx SpecContext) {

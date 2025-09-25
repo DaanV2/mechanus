@@ -6,6 +6,7 @@ import (
 	"github.com/DaanV2/mechanus/server/application"
 	"github.com/DaanV2/mechanus/server/engine/screens"
 	"github.com/DaanV2/mechanus/server/infrastructure/authentication"
+	"github.com/DaanV2/mechanus/server/infrastructure/persistence/repositories"
 	"github.com/DaanV2/mechanus/server/infrastructure/storage"
 	"github.com/DaanV2/mechanus/server/infrastructure/transport/grpc"
 	"github.com/DaanV2/mechanus/server/infrastructure/transport/http"
@@ -22,7 +23,8 @@ func BuildServer(setupCtx context.Context) (*Server, error) {
 	if err != nil {
 		return nil, err
 	}
-	service := application.NewUserService(db)
+	user_repo := repositories.NewUserRepository(db)
+	service := application.NewUserService(user_repo)
 	jtiService := authentication.NewJTIService(db)
 	componentManager := application.NewComponentManager()
 	storageProvider := storage.DBStorage[*authentication.KeyData](db)

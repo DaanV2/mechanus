@@ -5,9 +5,9 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/DaanV2/mechanus/server/infrastructure/logging"
 	"github.com/DaanV2/mechanus/server/infrastructure/persistence"
 	"github.com/DaanV2/mechanus/server/infrastructure/persistence/models"
+	"github.com/DaanV2/mechanus/server/infrastructure/persistence/repositories"
 	"github.com/DaanV2/mechanus/server/pkg/extensions/xcrypto"
 )
 
@@ -16,103 +16,59 @@ var (
 )
 
 type UserService struct {
-	db     *persistence.DB
-	logger logging.Enriched
+	repo *repositories.UserRepository
 }
 
-func NewUserService(db *persistence.DB) *UserService {
-	return &UserService{
-		db:     db,
-		logger: logging.Enriched{}.WithPrefix("users"),
-	}
+func NewUserService(repo *repositories.UserRepository) *UserService {
+	return &UserService{repo}
 }
 
-// Gets looks up the user by the given id, will return a [xerrors.ErrNotExist] if nothing matched
 func (s *UserService) Get(ctx context.Context, userId string) (*models.User, error) {
-	logger := s.logger.With("userId", userId).From(ctx)
-	logger.Debug("Getting user by id")
-
-	var user models.User
-
-	tx := s.db.WithContext(ctx).First(&user, "id = ?", userId)
-	if tx.Error != nil {
-		return nil, tx.Error
-	}
-
-	return &user, nil
+	return s.repo.Get(ctx, userId)
 }
 
-// GetByUsername retrieve the given user by its name, instead of id.
-// returns a [xerrors.ErrNotExist] if nothing matched
-func (s *UserService) GetByUsername(ctx context.Context, username string) (*models.User, error) {
-	logger := s.logger.With("username", username).From(ctx)
-	logger.Debug("Getting user by username")
-
-	var user models.User
-
-	tx := s.db.WithContext(ctx).First(&user, "name = ?", username)
-	if tx.Error != nil {
-		return nil, tx.Error
-	}
-
-	return &user, nil
+func (s *UserService) FindByUsername(ctx context.Context, username string) (*models.User, error) {
+	return s.repo.FindByUsername(ctx, username)
 }
 
 // Create makes a new entry in the database, assumes the password is set in the PasswordHash field as plain bytes, will hash that field first
 // It updates the user with the new password hash and sets the ID to a new UUID
 func (s *UserService) Create(ctx context.Context, user *models.User) error {
-	logger := s.logger.With("username", user.Name).From(ctx)
-	logger.Debug("Creating user")
-
 	err := updatePassword(user)
 	if err != nil {
 		return err
 	}
 
-	_, err = s.GetByUsername(ctx, user.Name)
+	_, err = s.repo.FindByUsername(ctx, user.Name)
 	if !persistence.IsNotExist(err) {
 		return ErrUserAlreadyExists
 	}
 
-	tx := s.db.WithContext(ctx).Create(user)
-
-	return tx.Error
+	return s.repo.Create(ctx, user)
 }
 
 // Update will take the new information in the user and update the database entry. Note, this does not update the password or the ID
 func (s *UserService) Update(ctx context.Context, user *models.User) error {
-	logger := s.logger.With("userId", user.ID).From(ctx)
-	logger.Debug("updating user")
-
-	// TODO ensure that the name cannot be updated, or stays unique
-	tx := s.db.WithContext(ctx).Omit("password_hash", "id").Updates(user)
-
-	return tx.Error
+	return s.repo.Update(ctx, user)
 }
 
 // UpdatePassword will update the password field with the new password in the database
 func (s *UserService) UpdatePassword(ctx context.Context, id string, newPassword []byte) error {
-	logger := s.logger.With("userId", id).From(ctx)
-	logger.Debug("updating password")
-
-	user := &models.User{Model: models.Model{ID: id}}
+	user := &models.User{
+		Model:        models.Model{ID: id},
+		PasswordHash: newPassword,
+	}
 
 	err := updatePassword(user)
 	if err != nil {
 		return err
 	}
 
-	tx := s.db.WithContext(ctx).Select("password_hash").Updates(user)
-
-	return tx.Error
+	return s.repo.UpdatePassword(ctx, user)
 }
 
 func (s *UserService) Find(ctx context.Context, queries *models.User) ([]*models.User, error) {
-	var users []*models.User
-
-	tx := s.db.WithContext(ctx).Model(queries).Find(&users)
-
-	return users, tx.Error
+	return s.repo.Find(ctx, queries)
 }
 
 func updatePassword(user *models.User) error {

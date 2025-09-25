@@ -33,6 +33,9 @@
     "go.delveConfig": {
       "showRegisters": true
     },
+    "go.enableCodeLens": {
+      "runtest": true
+    },
     "go.testOnSave": true,
     "go.coverOnSave": true,
     "go.coverageDecorator": {

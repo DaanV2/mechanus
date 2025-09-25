@@ -34,21 +34,11 @@
 
 ---
 
-### ✅ Coverage & Tests
-
-- [ ] Remove `coverage/` directories scattered inside `engine/` and `pkg/` (e.g. `engine/screens/coverage`, `pkg/extensions/xslices/coverage`).
-- [ ] Consolidate **all coverage and measurement tests under `tests/coverage/`**.
-- [ ] Keep `tests/component-test/` for integration tests grouped by layer (application, infrastructure).
-
----
-
 ### ✅ Documentation & Reports
 
-- [ ] Document authN/authZ split under `docs/authentication`.
 - [ ] Add a short guideline to `docs/` (e.g. `docs/CONTRIBUTING.md`) explaining:
   - What belongs in `engine/`, `application/`, `infrastructure/`.
   - How repos and models should be separated.
-- [ ] Move any auto‑generated coverage reports under `reports/` (not in prod directories).
 
 ---
 
@@ -57,5 +47,4 @@
 - [ ] Consider renaming **`application/checks` → `application/health/`**, and expose them both as:
   - CLI check (`your-project doctor`).
   - HTTP health endpoint (`/health`, `/ready`).
-- [ ] Consider placing **TUI/UI helpers** into `pkg/ui/` (instead of deep in `pkg/tui/`) for clarity.
-- [ ] Ensure **proto source files** live under `infrastructure/proto/`, with **generated code** in `pkg/gen/proto/` (already good, just confirm usage).
+
