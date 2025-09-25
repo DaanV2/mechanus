@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/DaanV2/mechanus/server/internal/logging"
+	"github.com/DaanV2/mechanus/server/infrastructure/logging"
 	"github.com/DaanV2/mechanus/server/mechanus/constants"
 	"github.com/DaanV2/mechanus/server/pkg/database/models"
 	xslices "github.com/DaanV2/mechanus/server/pkg/extensions/slices"

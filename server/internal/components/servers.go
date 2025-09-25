@@ -3,7 +3,7 @@ package components
 import (
 	"context"
 
-	"github.com/DaanV2/mechanus/server/internal/api"
+	"github.com/DaanV2/mechanus/server/infrastructure/transport/websocket"
 	"github.com/DaanV2/mechanus/server/internal/grpc"
 	"github.com/DaanV2/mechanus/server/internal/web"
 	"github.com/DaanV2/mechanus/server/pkg/application"
@@ -21,7 +21,7 @@ type Server struct {
 	Components *application.ComponentManager
 }
 
-func createServerManager(ctx context.Context, rpcs grpc.RPCS, websocketHandler *api.WebsocketHandler, serv web.WEBServices) (*servers.Manager, error) {
+func createServerManager(ctx context.Context, rpcs grpc.RPCS, websocketHandler *websocket.WebsocketHandler, serv web.WEBServices) (*servers.Manager, error) {
 	wconf := web.GetConfig()
 	gconf := grpc.GetConfig()
 	mconf := mdns.GetServerConfig(wconf.Port)
@@ -50,9 +50,9 @@ func WebServer(conf web.ServerConfig, serv web.WEBServices) servers.Server {
 	return web.NewServer(conf.Config, router)
 }
 
-func APIServer(grpcConf grpc.Config, websocketHandler *api.WebsocketHandler, rpcs grpc.RPCS) servers.Server {
+func APIServer(grpcConf grpc.Config, websocketHandler *websocket.WebsocketHandler, rpcs grpc.RPCS) servers.Server {
 	grpcrouter := grpc.NewRouter(rpcs)
-	webrouter := api.NewWebsocketRouter(websocketHandler)
+	webrouter := websocket.NewWebsocketRouter(websocketHandler)
 	router := http_middleware.NewWebsocketSplitter(webrouter, grpcrouter)
 
 	return grpc.NewServer(router, grpcConf)

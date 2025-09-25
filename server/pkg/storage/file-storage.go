@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/DaanV2/mechanus/server/internal/logging"
+	"github.com/DaanV2/mechanus/server/infrastructure/logging"
 	"github.com/DaanV2/mechanus/server/mechanus/paths"
 	xencoding "github.com/DaanV2/mechanus/server/pkg/extensions/encoding"
 	xio "github.com/DaanV2/mechanus/server/pkg/extensions/io"

@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"connectrpc.com/connect"
-	"github.com/DaanV2/mechanus/server/internal/logging"
+	"github.com/DaanV2/mechanus/server/infrastructure/logging"
 	"github.com/DaanV2/mechanus/server/pkg/authentication"
 	"github.com/charmbracelet/log"
 )

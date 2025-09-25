@@ -1,4 +1,4 @@
-package api
+package websocket
 
 import "github.com/DaanV2/mechanus/server/pkg/config"
 

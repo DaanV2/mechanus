@@ -3,7 +3,7 @@ package http_middleware
 import (
 	"net/http"
 
-	"github.com/DaanV2/mechanus/server/internal/logging"
+	"github.com/DaanV2/mechanus/server/infrastructure/logging"
 	"github.com/charmbracelet/log"
 )
 

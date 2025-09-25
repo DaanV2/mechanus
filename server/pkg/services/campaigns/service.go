@@ -3,7 +3,7 @@ package campaign_service
 import (
 	"context"
 
-	"github.com/DaanV2/mechanus/server/internal/logging"
+	"github.com/DaanV2/mechanus/server/infrastructure/logging"
 	"github.com/DaanV2/mechanus/server/pkg/database"
 	"github.com/DaanV2/mechanus/server/pkg/database/models"
 	xslices "github.com/DaanV2/mechanus/server/pkg/extensions/slices"

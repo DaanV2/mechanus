@@ -5,7 +5,7 @@ import (
 
 	"time"
 
-	"github.com/DaanV2/mechanus/server/internal/logging"
+	"github.com/DaanV2/mechanus/server/infrastructure/logging"
 	"github.com/charmbracelet/log"
 	"gorm.io/gorm/logger"
 )

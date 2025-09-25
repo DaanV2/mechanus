@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/DaanV2/mechanus/server/internal/logging"
+	"github.com/DaanV2/mechanus/server/infrastructure/logging"
 	"github.com/DaanV2/mechanus/server/pkg/application"
 	xcrypto "github.com/DaanV2/mechanus/server/pkg/extensions/crypto"
 	xsync "github.com/DaanV2/mechanus/server/pkg/extensions/sync"

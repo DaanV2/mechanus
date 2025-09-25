@@ -3,7 +3,7 @@ package setup
 import (
 	"errors"
 
-	"github.com/DaanV2/mechanus/server/internal/logging"
+	"github.com/DaanV2/mechanus/server/infrastructure/logging"
 	"github.com/DaanV2/mechanus/server/pkg/config"
 	"github.com/charmbracelet/log"
 	"github.com/spf13/viper"

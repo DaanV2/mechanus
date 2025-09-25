@@ -3,7 +3,7 @@ package components
 import (
 	"context"
 
-	"github.com/DaanV2/mechanus/server/internal/api"
+	"github.com/DaanV2/mechanus/server/infrastructure/transport/websocket"
 	"github.com/DaanV2/mechanus/server/internal/grpc"
 	"github.com/DaanV2/mechanus/server/internal/web"
 	"github.com/DaanV2/mechanus/server/mechanus/screens"
@@ -48,8 +48,8 @@ func BuildServer(setupCtx context.Context) (*Server, error) {
 		Components: componentManager,
 	}
 	screenManager := screens.NewScreenManager()
-	websocketConfig := api.GetWebsocketConfig()
-	websocketService := api.NewWebsocketHandler(screenManager, jwtService, websocketConfig)
+	websocketConfig := websocket.GetWebsocketConfig()
+	websocketService := websocket.NewWebsocketHandler(screenManager, jwtService, websocketConfig)
 
 	serversManager, err := createServerManager(setupCtx, rpcs, websocketService, webServices)
 	if err != nil {

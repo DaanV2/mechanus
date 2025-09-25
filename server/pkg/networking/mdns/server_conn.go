@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/DaanV2/mechanus/server/internal/logging"
+	"github.com/DaanV2/mechanus/server/infrastructure/logging"
 	"github.com/DaanV2/mechanus/server/mechanus/constants"
 	"golang.org/x/net/dns/dnsmessage"
 )

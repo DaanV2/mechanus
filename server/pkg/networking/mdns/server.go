@@ -7,7 +7,7 @@ import (
 	"net"
 	"sync"
 
-	"github.com/DaanV2/mechanus/server/internal/logging"
+	"github.com/DaanV2/mechanus/server/infrastructure/logging"
 )
 
 // Server handles service discovery via mdns, it starts the
