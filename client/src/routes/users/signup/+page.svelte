@@ -105,14 +105,15 @@
       </ButtonGroup>
     </Label>
     <Label class="space-y-2">
-      <Label for="password" class="font-bold {password_wrong ? 'text-red-800' : 'text-white'}"
-        >Confirm password</Label
+      <Label
+        for="confirm-password"
+        class="font-bold {password_wrong ? 'text-red-800' : 'text-white'}">Confirm password</Label
       >
       <ButtonGroup class="w-full">
         <Input
-          id="password"
+          id="confirm-password"
           type={showConfirmPassword ? 'text' : 'password'}
-          placeholder="Your password here"
+          placeholder="Confirm your password here"
           color={password_wrong ? 'red' : confirm_password.length > 0 ? 'green' : 'default'}
           required
           bind:value={confirm_password}

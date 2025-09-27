@@ -21,7 +21,7 @@ test.describe("when logged in", { tag: ["@users"] }, () => {
         .getByRole("textbox", { name: "Your password" })
         .fill(user.password);
       await page
-        .getByRole("textbox", { name: "Confirm password eye slash" })
+        .getByRole("textbox", { name: "Confirm password" })
         .fill(user.password);
       await page.getByRole("button", { name: "Signup" }).click();
     });
