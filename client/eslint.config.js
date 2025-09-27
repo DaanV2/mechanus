@@ -22,7 +22,8 @@ export default tseslint.config(
     },
     rules: {
       'no-undef': 'off',
-      '@typescript-eslint/no-namespace': 'off'
+      '@typescript-eslint/no-namespace': 'off',
+      'svelte/no-navigation-without-resolve': 'off'
     }
   },
   {

@@ -1,6 +1,5 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
-  import { resolve } from '$app/paths';
   import Footer from '$lib/components/footer.svelte';
   import NavBar from '$lib/components/nav-bar.svelte';
   import { userHandler } from '$lib/handlers/user';
@@ -16,7 +15,7 @@
     if (!userHandler.current.loggedin) {
       console.error('not logged in');
       // redirect to login
-      return goto(resolve('/users/login', {}));
+      return goto('/users/login');
     }
 
     const data = await userHandler.serverData();
