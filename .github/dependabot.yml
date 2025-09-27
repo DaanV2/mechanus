@@ -16,6 +16,24 @@ updates:
         patterns:
           - "@connect*"
           - "@bufbuild*"
+      eslint:
+        patterns:
+          - "eslint*"
+          - "@eslint*"
+          - "*eslint*"
+      flowbite:
+        patterns:
+          - "flowbite*"
+      prettier:
+        patterns:
+          - "prettier*"
+      tailwindcss:
+        patterns:
+          - "tailwindcss*"
+          - "@tailwindcss*"
+      sveltejs:
+        patterns:
+          - "@sveltejs*"
       all:
         patterns:
           - "*"
