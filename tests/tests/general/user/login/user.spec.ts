@@ -9,7 +9,7 @@ test.describe("when logged in", { tag: ["@users"] }, () => {
 
     await test.step("by signing up", async () => {
       await page.goto("/");
-      await page.getByRole("button", { name: "Login" }).click();
+      await page.getByRole("link", { name: "Login" }).click();
       await page.waitForURL(/\/users\/login\//);
       await page.getByRole("link", { name: "Sign up" }).click();
       await page.waitForURL(/\/users\/signup\//);
