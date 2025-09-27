@@ -11,5 +11,19 @@ test.describe("homepage", () => {
     await expect(
       page.getByRole("link", { name: "Devices Manage the devices" })
     ).toBeEnabled();
+
+    await expect(
+      page.getByRole("heading", { name: "Choose your adventure" })
+    ).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: "Campaigns see your campaigns" })
+    ).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: "Profile Manage your user" })
+    ).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: "Devices Manage the devices" })
+    ).toBeVisible();
   });
 });
+

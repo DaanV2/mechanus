@@ -18,7 +18,7 @@ test.describe("when logged in", { tag: ["@users"] }, () => {
         .getByRole("textbox", { name: "Your username" })
         .fill(user.name);
       await page
-        .getByRole("textbox", { name: "Your password eye slash" })
+        .getByRole("textbox", { name: "Your password" })
         .fill(user.password);
       await page
         .getByRole("textbox", { name: "Confirm password eye slash" })
@@ -41,3 +41,4 @@ test.describe("not logged in", () => {
     await page.waitForURL(/\/users\/login\//);
   });
 });
+

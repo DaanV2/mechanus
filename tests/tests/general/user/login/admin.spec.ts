@@ -13,7 +13,7 @@ test.describe("admin account", { tag: ["@users", "@admin"] }, () => {
         .getByRole("textbox", { name: "Your username" })
         .fill(user.name);
       await page
-        .getByRole("textbox", { name: "Your password eye slash" })
+        .getByRole("textbox", { name: "Your password" })
         .fill(user.password);
       await page.locator("button").filter({ hasText: "Login" }).click();
     });

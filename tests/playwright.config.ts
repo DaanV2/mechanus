@@ -24,6 +24,8 @@ const config = defineConfig({
     // to access services running on the host machine
     baseURL: "http://localhost:8080",
     // headless: false,
+
+    ...devices["Pixel 5"],
   },
 
   /* Configure projects for major browsers */
@@ -79,3 +81,4 @@ if (CI) {
 }
 
 export default config;
+
