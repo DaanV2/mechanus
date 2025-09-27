@@ -39,7 +39,5 @@ export class Application {
     return this._app.stage;
   }
 
-  start() {
-  }
-
+  start() {}
 }

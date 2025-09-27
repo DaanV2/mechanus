@@ -1,13 +1,13 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
   import ErrorMessage from '$lib/components/error-message.svelte';
+  import type { MechanusError } from '$lib/components/errors';
+  import Footer from '$lib/components/footer.svelte';
+  import NavBar from '$lib/components/nav-bar.svelte';
   import { Code, ConnectError } from '@connectrpc/connect';
   import { Button, ButtonGroup, Input, InputAddon, Label } from 'flowbite-svelte';
   import { EyeOutline, EyeSlashOutline } from 'flowbite-svelte-icons';
   import { onMount } from 'svelte';
-  import Footer from '$lib/components/footer.svelte';
-  import NavBar from '$lib/components/nav-bar.svelte';
-  import type { MechanusError } from '$lib/components/errors';
   import { userHandler } from '../../../lib/handlers/user';
   import { sleep } from '../../../lib/timings/sleep';
   let username = $state('');
@@ -41,7 +41,7 @@
 
     await userHandler.login(username, password);
     await sleep(100);
-    goto('/users/profile', {});
+    goto('/users/profile');
   }
 
   onMount(() => {

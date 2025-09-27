@@ -9,7 +9,7 @@ test.describe("when logged in", { tag: ["@users"] }, () => {
 
     await test.step("by signing up", async () => {
       await page.goto("/");
-      await page.getByRole("button", { name: "Login" }).click();
+      await page.getByRole("link", { name: "Login" }).click();
       await page.waitForURL(/\/users\/login\//);
       await page.getByRole("link", { name: "Sign up" }).click();
       await page.waitForURL(/\/users\/signup\//);
@@ -18,10 +18,10 @@ test.describe("when logged in", { tag: ["@users"] }, () => {
         .getByRole("textbox", { name: "Your username" })
         .fill(user.name);
       await page
-        .getByRole("textbox", { name: "Your password eye slash" })
+        .getByRole("textbox", { name: "Your password" })
         .fill(user.password);
       await page
-        .getByRole("textbox", { name: "Confirm password eye slash" })
+        .getByRole("textbox", { name: "Confirm password" })
         .fill(user.password);
       await page.getByRole("button", { name: "Signup" }).click();
     });
@@ -41,3 +41,4 @@ test.describe("not logged in", () => {
     await page.waitForURL(/\/users\/login\//);
   });
 });
+

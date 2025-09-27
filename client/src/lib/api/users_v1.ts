@@ -1,6 +1,6 @@
 import { createClient, type Client, type Transport } from '@connectrpc/connect';
-import { UserService } from '../../proto/users/v1/users_connect';
-import { LoginService } from '../../proto/users/v1/login_connect';
+import { UserService } from '../../proto/users/v1/users_pb';
+import { LoginService } from '../../proto/users/v1/login_pb';
 
 export function createUserClient(transport: Transport): Client<typeof UserService> {
   return createClient(UserService, transport);

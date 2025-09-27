@@ -13,13 +13,14 @@
   - [Troubleshooting](#troubleshooting)
   - [Configuration](#configuration)
 
-
 ## Overview
+
 This directory contains integration tests for the application using Playwright. These tests verify that the application works correctly from an end-user perspective by automating browser interactions.
 
 ## Setup
 
 ### Quick Start
+
 For a complete setup that prepares everything for development or testing:
 
 ```bash
@@ -31,6 +32,7 @@ make test-setup
 ```
 
 ### Manual Setup
+
 If you prefer to set up components individually:
 
 ```bash
@@ -47,7 +49,9 @@ make server
 ## Testing
 
 ### Running Tests
+
 To run all tests:
+
 ```bash
 # Ensure you have executed something like: make test-setup
 
@@ -55,7 +59,9 @@ make test
 ```
 
 ### Cleaning Up
+
 To clean up Docker containers and test artifacts:
+
 ```bash
 # Full cleanup (removes dependencies, browser installations, and test results)
 make clean
@@ -64,6 +70,7 @@ make clean
 ## Development Workflow
 
 **initial setup**
+
 ```bash
 # From project root
 make image
@@ -73,6 +80,7 @@ make dev-setup
 ```
 
 **start local server**:
+
 ```bash
 # Use Docker container (recommended for consistency with CI)
 make server
@@ -84,6 +92,7 @@ make local-server
 **write and run tests**
 
 Create or modify tests in the `tests` directory
+
 ```bash
 # Run specific tests with:
 npx playwright test <test-file-path>
@@ -96,7 +105,9 @@ npx playwright show-report
 ```
 
 ## CI Integration
+
 The tests are configured to run in GitHub Actions using the Playwright Docker image. The workflow:
+
 1. Builds the application Docker image
 2. Sets up the test environment
 3. Runs all tests
@@ -112,6 +123,7 @@ The tests are configured to run in GitHub Actions using the Playwright Docker im
 ## Configuration
 
 The Playwright configuration is in `playwright.config.ts`. Key settings:
+
 - Tests run against http://127.0.0.1:8080 by default (or host.docker.internal in Docker)
 - Tests are configured to run in Chromium, Firefox, WebKit, and mobile emulation
 - Traces are captured on test retry for debugging
@@ -119,3 +131,4 @@ The Playwright configuration is in `playwright.config.ts`. Key settings:
 ---
 
 For more information on Playwright, visit the [official documentation](https://playwright.dev/docs/intro).
+

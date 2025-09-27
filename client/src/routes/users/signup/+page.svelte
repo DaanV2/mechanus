@@ -1,15 +1,15 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
   import ErrorMessage from '$lib/components/error-message.svelte';
+  import type { MechanusError } from '$lib/components/errors';
+  import Footer from '$lib/components/footer.svelte';
+  import NavBar from '$lib/components/nav-bar.svelte';
   import { Code, ConnectError } from '@connectrpc/connect';
   import { Button, ButtonGroup, Input, InputAddon, Label } from 'flowbite-svelte';
   import { EyeOutline, EyeSlashOutline } from 'flowbite-svelte-icons';
-  import Footer from '$lib/components/footer.svelte';
-  import NavBar from '$lib/components/nav-bar.svelte';
+  import { onMount } from 'svelte';
   import { userHandler } from '../../../lib/handlers/user';
   import { sleep } from '../../../lib/timings/sleep';
-  import { onMount } from 'svelte';
-  import type { MechanusError } from '$lib/components/errors';
 
   let username = $state('');
   let password = $state('');
@@ -105,14 +105,15 @@
       </ButtonGroup>
     </Label>
     <Label class="space-y-2">
-      <Label for="password" class="font-bold {password_wrong ? 'text-red-800' : 'text-white'}"
-        >Confirm password</Label
+      <Label
+        for="confirm-password"
+        class="font-bold {password_wrong ? 'text-red-800' : 'text-white'}">Confirm password</Label
       >
       <ButtonGroup class="w-full">
         <Input
-          id="password"
+          id="confirm-password"
           type={showConfirmPassword ? 'text' : 'password'}
-          placeholder="Your password here"
+          placeholder="Confirm your password here"
           color={password_wrong ? 'red' : confirm_password.length > 0 ? 'green' : 'default'}
           required
           bind:value={confirm_password}

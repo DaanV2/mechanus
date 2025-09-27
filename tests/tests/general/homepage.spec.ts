@@ -6,10 +6,24 @@ test.describe("homepage", () => {
 
     // Expect a title "to contain" a substring.
     await expect(page).toHaveTitle(/Mechanus/);
-    await expect(page.getByRole("button", { name: "Login" })).toBeEnabled();
+    await expect(page.getByRole("link", { name: "Login" })).toBeEnabled();
     await expect(page.getByRole("button", { name: "Dark mode" })).toBeEnabled();
     await expect(
       page.getByRole("link", { name: "Devices Manage the devices" })
     ).toBeEnabled();
+
+    await expect(
+      page.getByRole("heading", { name: "Choose your adventure" })
+    ).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: "Campaigns see your campaigns" })
+    ).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: "Profile Manage your user" })
+    ).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: "Devices Manage the devices" })
+    ).toBeVisible();
   });
 });
+
