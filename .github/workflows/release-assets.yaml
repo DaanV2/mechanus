@@ -15,7 +15,7 @@ jobs:
 
     steps:
       - name: 📦 Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: ⚒️ Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -48,7 +48,7 @@ jobs:
             ghcr.io/${{ steps.repo.outputs.repo }}:${{ github.ref_name }}
 
       - name: 📌 Update Release Notes with Docker Image
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.event.release.tag_name }}
           append_body: true
