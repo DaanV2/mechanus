@@ -13,7 +13,7 @@ tool (
 )
 
 require (
-	connectrpc.com/connect v1.18.1
+	connectrpc.com/connect v1.19.0
 	github.com/charmbracelet/bubbles v0.21.0
 	github.com/charmbracelet/bubbletea v1.3.10
 	github.com/charmbracelet/fang v0.4.2
@@ -38,12 +38,6 @@ require (
 	gorm.io/driver/mysql v1.6.0
 	gorm.io/driver/postgres v1.6.0
 	gorm.io/gorm v1.31.0
-)
-
-require (
-	github.com/charmbracelet/ultraviolet v0.0.0-20250915111650-81d4262876ef // indirect
-	github.com/charmbracelet/x/termios v0.1.1 // indirect
-	github.com/charmbracelet/x/windows v0.2.2 // indirect
 )
 
 require (
@@ -102,10 +96,13 @@ require (
 	github.com/charithe/durationcheck v0.0.10 // indirect
 	github.com/charmbracelet/colorprofile v0.3.2 // indirect
 	github.com/charmbracelet/lipgloss/v2 v2.0.0-beta.3.0.20250917201909-41ff0bf215ea // indirect
+	github.com/charmbracelet/ultraviolet v0.0.0-20250915111650-81d4262876ef // indirect
 	github.com/charmbracelet/x/ansi v0.10.1 // indirect
 	github.com/charmbracelet/x/cellbuf v0.0.13 // indirect
 	github.com/charmbracelet/x/exp/charmtone v0.0.0-20250603201427-c31516f43444 // indirect
 	github.com/charmbracelet/x/term v0.2.1 // indirect
+	github.com/charmbracelet/x/termios v0.1.1 // indirect
+	github.com/charmbracelet/x/windows v0.2.2 // indirect
 	github.com/chavacava/garif v0.1.0 // indirect
 	github.com/ckaznocha/intrange v0.3.1 // indirect
 	github.com/cncf/xds/go v0.0.0-20241223141626-cff3c89139a3 // indirect
