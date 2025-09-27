@@ -6,7 +6,9 @@
 version: 2
 updates:
   - package-ecosystem: "npm" # See documentation for possible values
-    directory: /client # Location of package manifests
+    directories:
+      - /client # Location of package manifests
+      - /tests
     labels:
       - dependencies
     schedule:
@@ -39,6 +41,7 @@ updates:
           - "*"
           - "!@connect*"
           - "!@bufbuild*"
+
   - package-ecosystem: "github-actions" # See documentation for possible values
     directory: "/" # Location of package manifests
     labels:
@@ -85,3 +88,4 @@ updates:
       all:
         patterns:
           - "*"
+
