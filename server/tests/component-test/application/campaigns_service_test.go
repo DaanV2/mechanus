@@ -4,6 +4,7 @@ import (
 	"github.com/DaanV2/mechanus/server/application"
 	"github.com/DaanV2/mechanus/server/infrastructure/persistence"
 	"github.com/DaanV2/mechanus/server/infrastructure/persistence/models"
+	"github.com/DaanV2/mechanus/server/infrastructure/persistence/repositories"
 	util_test "github.com/DaanV2/mechanus/server/tests/component-test/util"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -14,11 +15,13 @@ var _ = Describe("Campaign Service", func() {
 	var (
 		db      *persistence.DB
 		service *application.CampaignService
+		repo    *repositories.CampaignRepository
 	)
 
 	BeforeEach(func(setupCtx SpecContext) {
 		db = util_test.CreateDatabase(setupCtx)
-		service = application.NewCampaignService(db)
+		repo = repositories.NewCampaignRepository(db)
+		service = application.NewCampaignService(repo)
 	})
 
 	Context("Get", func() {
