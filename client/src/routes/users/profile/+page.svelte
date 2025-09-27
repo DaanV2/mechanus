@@ -1,10 +1,11 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
-  import { userHandler } from '$lib/handlers/user';
-  import { onMount } from 'svelte';
+  import { resolve } from '$app/paths';
   import Footer from '$lib/components/footer.svelte';
   import NavBar from '$lib/components/nav-bar.svelte';
-  import { User } from '../../../proto/users/v1/users_pb';
+  import { userHandler } from '$lib/handlers/user';
+  import { onMount } from 'svelte';
+  import type { User } from '../../../proto/users/v1/users_pb';
 
   let user = $state<User | undefined>(undefined);
 
@@ -15,7 +16,7 @@
     if (!userHandler.current.loggedin) {
       console.error('not logged in');
       // redirect to login
-      return goto('/users/login');
+      return goto(resolve('/users/login', {}));
     }
 
     const data = await userHandler.serverData();

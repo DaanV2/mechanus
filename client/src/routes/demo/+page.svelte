@@ -8,7 +8,7 @@
   // Define an array of subpage objects
   const subpages = [
     { name: 'Size check', path: '/demo/size' },
-    { name: 'Playground', path: '/demo/playground' },
+    { name: 'Playground', path: '/demo/playground' }
   ];
 </script>
 

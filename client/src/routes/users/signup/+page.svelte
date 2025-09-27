@@ -10,6 +10,7 @@
   import { sleep } from '../../../lib/timings/sleep';
   import { onMount } from 'svelte';
   import type { MechanusError } from '$lib/components/errors';
+  import { resolve } from '$app/paths';
 
   let username = $state('');
   let password = $state('');
@@ -52,13 +53,13 @@
     await userHandler.create(username, 'password');
 
     await sleep(100);
-    goto('/users/profile');
+    goto(resolve('/users/profile', {}));
   }
 
   onMount(() => {
     if (userHandler.current.loggedin) {
       console.error('already logged in for sign up');
-      goto('/users/profile');
+      goto(resolve('/users/profile', {}));
     }
   });
 </script>
@@ -131,7 +132,7 @@
     <Button type="submit" class="w-full1" disabled={!isFormValid}>Signup</Button>
     <p class="text-sm font-light text-white dark:text-white">
       Already have an account? <a
-        href="/users/login"
+        href={resolve('/users/login', {})}
         class="text-primary-600 dark:text-primary-500 font-medium hover:underline">Login</a
       >
     </p>

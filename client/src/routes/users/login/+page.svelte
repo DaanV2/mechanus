@@ -10,6 +10,7 @@
   import type { MechanusError } from '$lib/components/errors';
   import { userHandler } from '../../../lib/handlers/user';
   import { sleep } from '../../../lib/timings/sleep';
+  import { resolve } from '$app/paths';
   let username = $state('');
   let password = $state('');
   let errorObj = $state<MechanusError>(null);
@@ -41,13 +42,13 @@
 
     await userHandler.login(username, password);
     await sleep(100);
-    goto('/users/profile', {});
+    goto(resolve('/users/profile', {}));
   }
 
   onMount(() => {
     if (userHandler.current.loggedin) {
       console.error('already logged in');
-      goto('/users/profile');
+      goto(resolve('/users/profile', {}));
     }
   });
 </script>
@@ -96,7 +97,7 @@
     <Button type="submit" class="w-full1" disabled={!isFormValid}>Login</Button>
     <p class="text-sm font-light text-white dark:text-white">
       Don't have an account yet? <a
-        href="/users/signup"
+        href={resolve('/users/signup', {})}
         class="text-primary-600 dark:text-primary-500 font-medium hover:underline">Sign up</a
       >
     </p>
