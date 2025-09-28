@@ -19,7 +19,6 @@
   ],
   "settings": {
     "editor.formatOnSave": true,
-
     "terminal.integrated.env.windows": {
       "LOG_LEVEL": "debug"
     },
@@ -27,7 +26,6 @@
       "editor.defaultFormatter": "zxh404.vscode-proto3"
     },
     "protoc": {},
-
     "go.lintTool": "golangci-lint",
     "go.formatTool": "gofmt",
     "go.delveConfig": {
@@ -46,7 +44,13 @@
       "uncoveredBorderColor": "rgba(128,64,64,0.25)",
       "coveredGutterStyle": "blockblue",
       "uncoveredGutterStyle": "slashyellow"
+    },
+    "[markdown]": {
+      "editor.unicodeHighlight.ambiguousCharacters": true,
+      "editor.unicodeHighlight.invisibleCharacters": true,
+      "diffEditor.ignoreTrimWhitespace": false,
+      "editor.wordWrap": "off",
+      "editor.dragAndDrop": true,
     }
   }
 }
-
