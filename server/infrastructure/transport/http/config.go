@@ -2,7 +2,7 @@ package http
 
 import (
 	"github.com/DaanV2/mechanus/server/infrastructure/config"
-	"github.com/DaanV2/mechanus/server/pkg/servers"
+	"github.com/DaanV2/mechanus/server/infrastructure/servers"
 )
 
 var (

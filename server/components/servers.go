@@ -5,11 +5,11 @@ import (
 
 	"github.com/DaanV2/mechanus/server/application"
 	"github.com/DaanV2/mechanus/server/infrastructure/persistence"
+	"github.com/DaanV2/mechanus/server/infrastructure/servers"
 	"github.com/DaanV2/mechanus/server/infrastructure/transport/grpc"
 	"github.com/DaanV2/mechanus/server/infrastructure/transport/http"
 	"github.com/DaanV2/mechanus/server/infrastructure/transport/mdns"
 	"github.com/DaanV2/mechanus/server/infrastructure/transport/websocket"
-	"github.com/DaanV2/mechanus/server/pkg/servers"
 )
 
 type Server struct {

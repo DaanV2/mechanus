@@ -3,7 +3,7 @@ package grpc
 import (
 	"net/http"
 
-	"github.com/DaanV2/mechanus/server/pkg/servers"
+	"github.com/DaanV2/mechanus/server/infrastructure/servers"
 )
 
 func NewServer(router http.Handler, c APIServerConfig) servers.Server {
