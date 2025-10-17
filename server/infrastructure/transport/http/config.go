@@ -17,7 +17,7 @@ type ServerConfig struct {
 	StaticFolder string
 }
 
-func GetConfig() ServerConfig {
+func GetWebConfig() ServerConfig {
 	return ServerConfig{
 		Config: servers.Config{
 			Port: PortFlag.Value(),

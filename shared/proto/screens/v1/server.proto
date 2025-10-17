@@ -1,6 +1,7 @@
 syntax = "proto3";
 package screens.v1;
 
+import "screens/v1/general.proto";
 import "screens/v1/scene_actions.proto";
 import "screens/v1/splash_screen.proto";
 
@@ -17,5 +18,6 @@ message ServerMessage {
     SplashScreen splash_screen_update = 2;
     SceneChange scene_change = 3;
     SceneChangeCompleted scene_change_completed = 4;
+    Ping ping = 5;
   }
 }

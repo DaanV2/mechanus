@@ -84,8 +84,12 @@ func ServerWorkload(cmd *cobra.Command, args []string) error {
 
 	aerr := server.Components.AfterShutDown(shutCtx)
 	if aerr != nil {
-		log.Error("errors while performing post shutdown calls", "error", berr)
+		log.Error("errors while performing post shutdown calls", "error", aerr)
+	}
+	serr := server.Components.ShutdownCleanup(shutCtx)
+	if serr != nil {
+		log.Error("errors while performing shutdown cleanup calls", "error", serr)
 	}
 
-	return errors.Join(berr, aerr)
+	return errors.Join(berr, aerr, serr)
 }

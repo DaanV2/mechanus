@@ -1,7 +1,7 @@
 package roles_test
 
 import (
-	"github.com/DaanV2/mechanus/server/engine/authz/roles"
+	"github.com/DaanV2/mechanus/server/engine/authentication/roles"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )

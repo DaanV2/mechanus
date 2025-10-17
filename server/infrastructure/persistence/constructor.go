@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/DaanV2/mechanus/server/infrastructure/lifecycle"
+	"github.com/DaanV2/mechanus/server/infrastructure/logging"
 	"github.com/DaanV2/mechanus/server/pkg/extensions/xgorm"
 	"github.com/charmbracelet/log"
 	"github.com/glebarez/sqlite"
@@ -13,17 +15,25 @@ import (
 	"gorm.io/gorm"
 )
 
+var _ lifecycle.ShutdownCleanup = &DB{}
+
 type DB struct {
 	gormDB *gorm.DB
 }
 
-func (db *DB) Close() error {
+func (db *DB) Close(ctx context.Context) error {
+	logging.Debug(ctx, "closing database")
 	sqlDB, err := db.gormDB.DB()
 	if err != nil {
 		return fmt.Errorf("failed to get database: %w", err)
 	}
 
 	return sqlDB.Close()
+}
+
+// ShutdownCleanup implements lifecycle.ShutdownCleanup.
+func (db *DB) ShutdownCleanup(ctx context.Context) error {
+	return db.Close(ctx)
 }
 
 func (db *DB) WithContext(ctx context.Context) *gorm.DB {

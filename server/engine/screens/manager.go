@@ -1,6 +1,8 @@
 package screens
 
-import "github.com/DaanV2/mechanus/server/pkg/extensions/xsync"
+import (
+	"github.com/DaanV2/mechanus/server/pkg/extensions/xsync"
+)
 
 type ScreenManager struct {
 	screens xsync.Map[string, *ScreenHandler]

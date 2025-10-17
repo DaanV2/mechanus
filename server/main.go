@@ -1,3 +1,4 @@
+// The main entry point of any mechanus program, setups config, logging and folders then goes to ./cmd
 package main
 
 import (
