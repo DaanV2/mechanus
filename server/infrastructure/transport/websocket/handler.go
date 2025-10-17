@@ -57,6 +57,7 @@ func (handler *WebsocketHandler) ServeHTTP(w http.ResponseWriter, r *http.Reques
 	screenHandler, ok := handler.screenManager.Get(screenid)
 	if !ok {
 		http.Error(w, "Screen not found", http.StatusNotFound)
+
 		return
 	}
 
@@ -84,7 +85,7 @@ func (handler *WebsocketHandler) ServeHTTP(w http.ResponseWriter, r *http.Reques
 	screenHandler.AddListener(connCtx, h)
 
 	// Wait until closed
-	_ = <- h.Context().Done()
+	<-h.Context().Done()
 }
 
 func (handler *WebsocketHandler) authenticate(r *http.Request) (*screens.ConnectionInfo, error) {

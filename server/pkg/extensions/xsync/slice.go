@@ -69,7 +69,7 @@ func (s *Slice[T]) RangeErrorCollect(callfn func(item T) error) error {
 
 	for _, d := range s.items {
 		err = errors.Join(callfn(d))
-		
+
 	}
 
 	return err

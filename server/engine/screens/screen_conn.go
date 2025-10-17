@@ -6,12 +6,10 @@ import (
 	"io"
 	"net"
 
-	"github.com/coder/websocket"
-	cwebsocket "github.com/coder/websocket"
-
 	"github.com/DaanV2/mechanus/server/engine/devices"
 	"github.com/DaanV2/mechanus/server/infrastructure/logging"
 	screensv1 "github.com/DaanV2/mechanus/server/pkg/gen/proto/screens/v1"
+	"github.com/coder/websocket"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -20,12 +18,12 @@ type ScreenConn struct {
 	screenid string // screen id
 	connctx  context.Context
 	cancelfn func()
-	conn     *cwebsocket.Conn
+	conn     *websocket.Conn
 	logger   logging.Enriched
 	info     *ConnectionInfo
 }
 
-func NewScreenConn(id, screenid string, connctx context.Context, conn *cwebsocket.Conn, info *ConnectionInfo) *ScreenConn {
+func NewScreenConn(id, screenid string, connctx context.Context, conn *websocket.Conn, info *ConnectionInfo) *ScreenConn {
 	wctx, cancelfn := context.WithCancel(connctx)
 
 	return &ScreenConn{
@@ -57,7 +55,7 @@ func (sconn *ScreenConn) Send(ctx context.Context, msg *screensv1.ServerMessages
 		return err
 	}
 
-	return sconn.conn.Write(ctx, cwebsocket.MessageBinary, data)
+	return sconn.conn.Write(ctx, websocket.MessageBinary, data)
 }
 
 // Close handles the shutdown and message around closing connection,
@@ -75,6 +73,7 @@ func (connh *ScreenConn) Close(err error) {
 
 		connh.logger.Error(connh.connctx, "Closing connection due to error", "error", err)
 		connh.CloseWith(code, "connection closed by server due to error: "+err.Error())
+
 		return
 	}
 
@@ -87,6 +86,7 @@ func (connh *ScreenConn) startReadLoop(handleMessage func(ctx context.Context, c
 	if err != nil {
 		logger.Error("Could not open websocket reader", "error", err)
 		connh.Close(err)
+
 		return
 	}
 	if readerType != websocket.MessageBinary {
@@ -101,7 +101,7 @@ func (connh *ScreenConn) startReadLoop(handleMessage func(ctx context.Context, c
 		message, err := io.ReadAll(reader)
 		if err != nil {
 			logger = logger.With("error", err)
-			if errors.Is(err, net.ErrClosed) || err == context.Canceled {
+			if errors.Is(err, net.ErrClosed) || errors.Is(err, context.Canceled) {
 				logger.Info("Websocket connection closed")
 
 				return
@@ -119,6 +119,7 @@ func (connh *ScreenConn) startReadLoop(handleMessage func(ctx context.Context, c
 
 			logger.Error("Could not read websocket message", "error", err)
 			connh.Close(err)
+
 			return
 		}
 

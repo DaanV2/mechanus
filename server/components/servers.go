@@ -21,7 +21,6 @@ type Server struct {
 	Components *lifecycle.Manager
 }
 
-
 func CreateWebServer(conf http.ServerConfig, healthChecker health.HealthCheck, readyChecker health.ReadyCheck) servers.Server {
 	router := http.WebRouter(conf, healthChecker, readyChecker)
 

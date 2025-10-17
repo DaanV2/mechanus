@@ -21,8 +21,8 @@ type DB struct {
 	gormDB *gorm.DB
 }
 
-func (db *DB) Close() error {
-	logging.Debug(context.Background(), "closing database")
+func (db *DB) Close(ctx context.Context) error {
+	logging.Debug(ctx, "closing database")
 	sqlDB, err := db.gormDB.DB()
 	if err != nil {
 		return fmt.Errorf("failed to get database: %w", err)
@@ -33,7 +33,7 @@ func (db *DB) Close() error {
 
 // ShutdownCleanup implements lifecycle.ShutdownCleanup.
 func (db *DB) ShutdownCleanup(ctx context.Context) error {
-	return db.Close()
+	return db.Close(ctx)
 }
 
 func (db *DB) WithContext(ctx context.Context) *gorm.DB {

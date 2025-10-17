@@ -17,7 +17,7 @@ func CreateDatabase(setupCtx context.Context) *persistence.DB {
 	db, err := components.SetupTestDatabase(setupCtx, persistence.WithDBLogger(&GinkgoDBLogger{}))
 	gomega.Expect(err).ToNot(gomega.HaveOccurred(), "database setup")
 	ginkgo.DeferCleanup(func() {
-		gomega.Expect(db.Close()).To(gomega.Succeed(), "database close")
+		gomega.Expect(db.Close(setupCtx)).To(gomega.Succeed(), "database close")
 	})
 
 	return db

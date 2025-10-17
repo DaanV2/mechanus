@@ -14,8 +14,8 @@ func (d DeviceType) String() string {
 		return "user"
 	case DeviceTypeDevice:
 		return "device"
-	default:
 	case DeviceTypeUnknown:
+	default:
 	}
 
 	return "unknown"
