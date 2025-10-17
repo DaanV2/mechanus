@@ -11,8 +11,8 @@ import (
 	"github.com/DaanV2/mechanus/server/infrastructure/logging"
 	"github.com/DaanV2/mechanus/server/infrastructure/persistence/models"
 	"github.com/DaanV2/mechanus/server/pkg/extensions/xerrors"
-	usersv1 "github.com/DaanV2/mechanus/server/pkg/gen/proto/users/v1"
-	"github.com/DaanV2/mechanus/server/pkg/gen/proto/users/v1/usersv1connect"
+	usersv1 "github.com/DaanV2/mechanus/server/proto/users/v1"
+	"github.com/DaanV2/mechanus/server/proto/users/v1/usersv1connect"
 )
 
 var _ usersv1connect.UserServiceHandler = &UserServiceHandler{}

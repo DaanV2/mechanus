@@ -9,8 +9,8 @@ import (
 	"github.com/DaanV2/mechanus/server/application"
 	"github.com/DaanV2/mechanus/server/infrastructure/authentication"
 	"github.com/DaanV2/mechanus/server/pkg/extensions/xcrypto"
-	usersv1 "github.com/DaanV2/mechanus/server/pkg/gen/proto/users/v1"
-	"github.com/DaanV2/mechanus/server/pkg/gen/proto/users/v1/usersv1connect"
+	usersv1 "github.com/DaanV2/mechanus/server/proto/users/v1"
+	"github.com/DaanV2/mechanus/server/proto/users/v1/usersv1connect"
 )
 
 var _ usersv1connect.LoginServiceHandler = &LoginServiceHandler{}

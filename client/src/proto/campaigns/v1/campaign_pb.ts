@@ -9,7 +9,7 @@ import { fileDesc, serviceDesc } from "@bufbuild/protobuf/codegenv1";
  * Describes the file campaigns/v1/campaign.proto.
  */
 export const file_campaigns_v1_campaign: GenFile = /*@__PURE__*/
-  fileDesc("ChtjYW1wYWlnbnMvdjEvY2FtcGFpZ24ucHJvdG8SDGNhbXBhaWducy52MTIRCg9DYW1wYWlnblNlcnZpY2VCSlpIZ2l0aHViLmNvbS9EYWFuVjIvbWVjaGFudXMvc2VydmVyL3BrZy9nZW4vcHJvdG8vY2FtcGFpZ25zL3YxO2NhbXBhaWduc3YxYgZwcm90bzM");
+  fileDesc("ChtjYW1wYWlnbnMvdjEvY2FtcGFpZ24ucHJvdG8SDGNhbXBhaWducy52MTIRCg9DYW1wYWlnblNlcnZpY2VCQlpAZ2l0aHViLmNvbS9EYWFuVjIvbWVjaGFudXMvc2VydmVyL3Byb3RvL2NhbXBhaWducy92MTtjYW1wYWlnbnN2MWIGcHJvdG8z");
 
 /**
  * @generated from service campaigns.v1.CampaignService
