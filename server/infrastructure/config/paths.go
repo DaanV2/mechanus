@@ -11,10 +11,10 @@ func ConfigPaths() []string {
 	userStr, _ := paths.GetUserDataDir()
 
 	return []string{
-		appConfStr,
-		userStr,
+		".config",
 		filepath.Join(appConfStr, ".config"),
 		filepath.Join(userStr, ".config"),
-		".config",
+		appConfStr,
+		userStr,
 	}
 }
