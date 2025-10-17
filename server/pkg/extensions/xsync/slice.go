@@ -1,6 +1,7 @@
 package xsync
 
 import (
+	"errors"
 	"slices"
 	"sync"
 )
@@ -36,7 +37,7 @@ func (s *Slice[T]) Remove(predicate func(other T) bool) bool {
 	return len(s.items) != old
 }
 
-func (s *Slice[T]) Items() (items []T, unlock func()) {
+func (s *Slice[T]) BorrowItems() (items []T, unlock func()) {
 	s.lock.Lock()
 	i := s.items
 	un := func() {
@@ -46,7 +47,7 @@ func (s *Slice[T]) Items() (items []T, unlock func()) {
 	return i, un
 }
 
-func (s *Slice[T]) WalkE(callfn func(item T) error) error {
+func (s *Slice[T]) RangeE(callfn func(item T) error) error {
 	s.lock.Lock()
 	defer s.lock.Unlock()
 
@@ -60,8 +61,22 @@ func (s *Slice[T]) WalkE(callfn func(item T) error) error {
 	return nil
 }
 
-func (s *Slice[T]) Walk(callfn func(item T)) {
-	_ = s.WalkE(func(item T) error {
+// RangeErrorCollect loops over all the items and collect all the errors with [errors.Join]
+func (s *Slice[T]) RangeErrorCollect(callfn func(item T) error) error {
+	s.lock.Lock()
+	defer s.lock.Unlock()
+	var err error
+
+	for _, d := range s.items {
+		err = errors.Join(callfn(d))
+		
+	}
+
+	return err
+}
+
+func (s *Slice[T]) Range(callfn func(item T)) {
+	_ = s.RangeE(func(item T) error {
 		callfn(item)
 
 		return nil

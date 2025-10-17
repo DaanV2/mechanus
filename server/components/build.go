@@ -6,60 +6,77 @@ import (
 	"github.com/DaanV2/mechanus/server/application"
 	"github.com/DaanV2/mechanus/server/engine/screens"
 	"github.com/DaanV2/mechanus/server/infrastructure/authentication"
+	"github.com/DaanV2/mechanus/server/infrastructure/lifecycle"
 	"github.com/DaanV2/mechanus/server/infrastructure/persistence/repositories"
+	"github.com/DaanV2/mechanus/server/infrastructure/servers"
 	"github.com/DaanV2/mechanus/server/infrastructure/storage"
 	"github.com/DaanV2/mechanus/server/infrastructure/transport/grpc"
 	"github.com/DaanV2/mechanus/server/infrastructure/transport/http"
+	"github.com/DaanV2/mechanus/server/infrastructure/transport/mdns"
 	"github.com/DaanV2/mechanus/server/infrastructure/transport/websocket"
 )
 
 // BuildServer setup all the necessary components for an api server
 func BuildServer(setupCtx context.Context) (*Server, error) {
+	lfManager := lifecycle.NewManager()
+
+	// Configs
+	corsConf := grpc.GetCORSConfig()
+	apiConf := grpc.GetAPIServerConfig()
+	webConf := http.GetWebConfig()
+	mdnsConf := mdns.GetServerConfig(webConf.Port)
+	websocketConf := websocket.GetWebsocketConfig()
+
+	// Storage
 	v, err := GetDatabaseOptions()
 	if err != nil {
 		return nil, err
 	}
+
 	db, err := SetupDatabase(setupCtx, v...)
 	if err != nil {
 		return nil, err
 	}
-	user_repo := repositories.NewUserRepository(db)
-	service := application.NewUserService(user_repo)
+
+	userRepo := repositories.NewUserRepository(db)
 	jtiService := authentication.NewJTIService(db)
-	componentManager := application.NewComponentManager()
 	storageProvider := storage.DBStorage[*authentication.KeyData](db)
-	keyManager, err := NewKeyManager(componentManager, storageProvider)
+
+	// Service and Managers
+	keyManager, err := authentication.NewKeyManager(storageProvider)
 	if err != nil {
 		return nil, err
 	}
 	jwtService := authentication.NewJWTService(jtiService, keyManager)
-	loginService := grpc.NewLoginService(service, jwtService)
-	userService := grpc.NewUserService(service)
-	corsConfig := grpc.GetCORSConfig()
-	corsHandler := grpc.NewCORSHandler(corsConfig)
+	userService := application.NewUserService(userRepo)
 	rpcs := grpc.RPCS{
-		Login: loginService,
-		User:  userService,
+		Login: grpc.NewLoginServiceHandler(userService, jwtService),
+		User:  grpc.NewUserServiceHandler(userService),
 		JWT:   jwtService,
-		CORS:  corsHandler,
-	}
-	webServices := http.WEBServices{
-		Components: componentManager,
+		CORS:  grpc.NewCORSHandler(corsConf),
 	}
 	screenManager := screens.NewScreenManager()
-	websocketConfig := websocket.GetWebsocketConfig()
-	websocketService := websocket.NewWebsocketHandler(screenManager, jwtService, websocketConfig)
 
-	serversManager, err := createServerManager(setupCtx, rpcs, websocketService, webServices)
+	// Servers
+	websocketHandler := websocket.NewWebsocketHandler(screenManager, jwtService, websocketConf)
+	mdnsServer, err := CreateMDNSServer(setupCtx, mdnsConf)
 	if err != nil {
 		return nil, err
 	}
+
+	serverManager := &servers.Manager{}
+	serverManager.Register(
+		CreateAPIServer(apiConf, websocketHandler, rpcs),
+		CreateWebServer(webConf, lfManager, lfManager),
+		mdnsServer,
+	)
 	server := &Server{
-		Manager:    serversManager,
-		Users:      service,
+		Manager:    serverManager,
+		Users:      userService,
 		DB:         db,
-		Components: componentManager,
+		Components: lfManager,
 	}
+	lfManager.Add(screenManager, keyManager, db)
 
 	return server, nil
 }

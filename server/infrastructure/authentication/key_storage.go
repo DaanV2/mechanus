@@ -4,14 +4,14 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/DaanV2/mechanus/server/application"
+	"github.com/DaanV2/mechanus/server/infrastructure/lifecycle"
 	"github.com/DaanV2/mechanus/server/infrastructure/logging"
 	"github.com/DaanV2/mechanus/server/infrastructure/storage"
 	"github.com/DaanV2/mechanus/server/pkg/extensions/xcrypto"
 	"github.com/DaanV2/mechanus/server/pkg/extensions/xsync"
 )
 
-var _ application.AfterInitialize = &KeyManager{}
+var _ lifecycle.AfterInitialize = &KeyManager{}
 
 type KeyManager struct {
 	storage storage.Storage[*KeyData]

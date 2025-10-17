@@ -13,26 +13,26 @@ import (
 	"github.com/DaanV2/mechanus/server/pkg/gen/proto/users/v1/usersv1connect"
 )
 
-var _ usersv1connect.LoginServiceHandler = &LoginService{}
+var _ usersv1connect.LoginServiceHandler = &LoginServiceHandler{}
 
 var (
 	ErrInvalidUserPassword = errors.New("username/password is invalid")
 )
 
-type LoginService struct {
+type LoginServiceHandler struct {
 	users *application.UserService
 	jwts  *authentication.JWTService
 }
 
-func NewLoginService(users *application.UserService, jwts *authentication.JWTService) *LoginService {
-	return &LoginService{
+func NewLoginServiceHandler(users *application.UserService, jwts *authentication.JWTService) *LoginServiceHandler {
+	return &LoginServiceHandler{
 		users,
 		jwts,
 	}
 }
 
 // Login implements usersv1connect.LoginServiceHandler.
-func (l *LoginService) Login(ctx context.Context, req *connect.Request[usersv1.LoginRequest]) (*connect.Response[usersv1.LoginResponse], error) {
+func (l *LoginServiceHandler) Login(ctx context.Context, req *connect.Request[usersv1.LoginRequest]) (*connect.Response[usersv1.LoginResponse], error) {
 	// Check user
 	username, password := req.Msg.GetUsername(), req.Msg.GetPassword()
 	if username == "" || password == "" {
@@ -61,7 +61,7 @@ func (l *LoginService) Login(ctx context.Context, req *connect.Request[usersv1.L
 }
 
 // Refresh implements usersv1connect.LoginServiceHandler.
-func (l *LoginService) Refresh(ctx context.Context, req *connect.Request[usersv1.RefreshTokenRequest]) (*connect.Response[usersv1.RefreshTokenResponse], error) {
+func (l *LoginServiceHandler) Refresh(ctx context.Context, req *connect.Request[usersv1.RefreshTokenRequest]) (*connect.Response[usersv1.RefreshTokenResponse], error) {
 	token := req.Msg.GetToken()
 	if token == "" {
 		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("missing token"))

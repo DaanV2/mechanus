@@ -15,20 +15,20 @@ import (
 	"github.com/DaanV2/mechanus/server/pkg/gen/proto/users/v1/usersv1connect"
 )
 
-var _ usersv1connect.UserServiceHandler = &UserService{}
+var _ usersv1connect.UserServiceHandler = &UserServiceHandler{}
 
-type UserService struct {
+type UserServiceHandler struct {
 	users  *application.UserService
 	logger logging.Enriched
 
 	roleService *roles.RoleService
 }
 
-func NewUserService(users *application.UserService) *UserService {
+func NewUserServiceHandler(users *application.UserService) *UserServiceHandler {
 	logger := logging.Enriched{}.WithPrefix("grpc-users")
 	roleService := &roles.RoleService{}
 
-	return &UserService{
+	return &UserServiceHandler{
 		users,
 		logger,
 		roleService,
@@ -36,7 +36,7 @@ func NewUserService(users *application.UserService) *UserService {
 }
 
 // Create implements usersv1connect.UserServiceClient.
-func (u *UserService) Create(ctx context.Context, req *connect.Request[usersv1.CreateAccountRequest]) (*connect.Response[usersv1.CreateAccountResponse], error) {
+func (u *UserServiceHandler) Create(ctx context.Context, req *connect.Request[usersv1.CreateAccountRequest]) (*connect.Response[usersv1.CreateAccountResponse], error) {
 	username, password := req.Msg.GetUsername(), req.Msg.GetPassword()
 	if username == "" || password == "" {
 		return nil, connect.NewError(connect.CodeUnauthenticated, ErrInvalidUserPassword)
@@ -62,7 +62,7 @@ func (u *UserService) Create(ctx context.Context, req *connect.Request[usersv1.C
 }
 
 // Get implements usersv1connect.UserServiceClient.
-func (u *UserService) Get(ctx context.Context, req *connect.Request[usersv1.GetUserRequest]) (*connect.Response[usersv1.GetUserResponse], error) {
+func (u *UserServiceHandler) Get(ctx context.Context, req *connect.Request[usersv1.GetUserRequest]) (*connect.Response[usersv1.GetUserResponse], error) {
 	if req.Msg.GetId() == "" {
 		return nil, connect.NewError(connect.CodeInvalidArgument, xerrors.ErrNotExist)
 	}
@@ -103,7 +103,7 @@ func (u *UserService) Get(ctx context.Context, req *connect.Request[usersv1.GetU
 	return connect.NewResponse(&usersv1.GetUserResponse{User: user}), nil
 }
 
-func (u *UserService) getFullInfo(ctx context.Context, id string) (*usersv1.User, error) {
+func (u *UserServiceHandler) getFullInfo(ctx context.Context, id string) (*usersv1.User, error) {
 	user, err := u.users.Get(ctx, id)
 	if err != nil {
 		return nil, err
@@ -115,7 +115,7 @@ func (u *UserService) getFullInfo(ctx context.Context, id string) (*usersv1.User
 	}, nil
 }
 
-func (u *UserService) getReducedInfo(ctx context.Context, id string) (*usersv1.User, error) {
+func (u *UserServiceHandler) getReducedInfo(ctx context.Context, id string) (*usersv1.User, error) {
 	user, err := u.users.Get(ctx, id)
 	if err != nil {
 		return nil, err
