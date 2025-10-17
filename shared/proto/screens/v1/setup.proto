@@ -5,5 +5,4 @@ option go_package = "github.com/DaanV2/mechanus/server/proto/screens/v1;screensv
 
 message InitialSetupRequest {}
 
-message InitialSetupResponse {
-}
+message InitialSetupResponse {}

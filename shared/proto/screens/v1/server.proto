@@ -3,8 +3,8 @@ package screens.v1;
 
 import "screens/v1/general.proto";
 import "screens/v1/scene_actions.proto";
-import "screens/v1/splash_screen.proto";
 import "screens/v1/setup.proto";
+import "screens/v1/splash_screen.proto";
 
 option go_package = "github.com/DaanV2/mechanus/server/proto/screens/v1;screensv1";
 

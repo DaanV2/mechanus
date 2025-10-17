@@ -17,4 +17,3 @@ message ClientMessage {
     Ping ping = 3;
   }
 }
-
