@@ -72,6 +72,7 @@ func (m *Map[K, V]) Clear() {
 	m.data.Clear()
 }
 
+// Range calls f sequentially for each key and value present in the map.
 func (m *Map[K, V]) Range(f func(key K, value V) bool) {
 	m.data.Range(func(key, value any) bool {
 		k, kok := key.(K)
