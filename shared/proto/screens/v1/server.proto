@@ -1,9 +1,9 @@
 syntax = "proto3";
 package screens.v1;
 
+import "screens/v1/general.proto";
 import "screens/v1/scene_actions.proto";
 import "screens/v1/splash_screen.proto";
-import "screens/v1/general.proto";
 
 option go_package = "github.com/DaanV2/mechanus/server/pkg/gen/proto/screens/v1;screensv1";
 
