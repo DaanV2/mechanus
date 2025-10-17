@@ -10,7 +10,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file screens/v1/scene_actions.proto.
  */
 export const file_screens_v1_scene_actions: GenFile = /*@__PURE__*/
-  fileDesc("Ch5zY3JlZW5zL3YxL3NjZW5lX2FjdGlvbnMucHJvdG8SCnNjcmVlbnMudjEiGQoLU2NlbmVDaGFuZ2USCgoCaWQYASABKAkiFgoUU2NlbmVDaGFuZ2VDb21wbGV0ZWRCRlpEZ2l0aHViLmNvbS9EYWFuVjIvbWVjaGFudXMvc2VydmVyL3BrZy9nZW4vcHJvdG8vc2NyZWVucy92MTtzY3JlZW5zdjFiBnByb3RvMw");
+  fileDesc("Ch5zY3JlZW5zL3YxL3NjZW5lX2FjdGlvbnMucHJvdG8SCnNjcmVlbnMudjEiGQoLU2NlbmVDaGFuZ2USCgoCaWQYASABKAkiFgoUU2NlbmVDaGFuZ2VDb21wbGV0ZWRCPlo8Z2l0aHViLmNvbS9EYWFuVjIvbWVjaGFudXMvc2VydmVyL3Byb3RvL3NjcmVlbnMvdjE7c2NyZWVuc3YxYgZwcm90bzM");
 
 /**
  * @generated from message screens.v1.SceneChange

@@ -10,7 +10,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file screens/v1/setup.proto.
  */
 export const file_screens_v1_setup: GenFile = /*@__PURE__*/
-  fileDesc("ChZzY3JlZW5zL3YxL3NldHVwLnByb3RvEgpzY3JlZW5zLnYxIhUKE0luaXRpYWxTZXR1cFJlcXVlc3QiFgoUSW5pdGlhbFNldHVwUmVzcG9uc2VCRlpEZ2l0aHViLmNvbS9EYWFuVjIvbWVjaGFudXMvc2VydmVyL3BrZy9nZW4vcHJvdG8vc2NyZWVucy92MTtzY3JlZW5zdjFiBnByb3RvMw");
+  fileDesc("ChZzY3JlZW5zL3YxL3NldHVwLnByb3RvEgpzY3JlZW5zLnYxIhUKE0luaXRpYWxTZXR1cFJlcXVlc3QiFgoUSW5pdGlhbFNldHVwUmVzcG9uc2VCPlo8Z2l0aHViLmNvbS9EYWFuVjIvbWVjaGFudXMvc2VydmVyL3Byb3RvL3NjcmVlbnMvdjE7c2NyZWVuc3YxYgZwcm90bzM");
 
 /**
  * @generated from message screens.v1.InitialSetupRequest

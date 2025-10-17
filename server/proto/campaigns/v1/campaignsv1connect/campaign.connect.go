@@ -5,10 +5,9 @@
 package campaignsv1connect
 
 import (
-	http "net/http"
-
 	connect "connectrpc.com/connect"
 	v1 "github.com/DaanV2/mechanus/server/proto/campaigns/v1"
+	http "net/http"
 )
 
 // This is a compile-time assertion to ensure that this generated file and the connect package are
