@@ -3,11 +3,11 @@ clean: true
 plugins:
   # Server
   - local: protoc-gen-go
-    out: server/pkg/gen/proto
+    out: server/proto
     opt:
       - paths=source_relative
   - local: protoc-gen-connect-go
-    out: server/pkg/gen/proto
+    out: server/proto
     opt:
       - paths=source_relative
   # Client

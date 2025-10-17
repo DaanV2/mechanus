@@ -3,7 +3,7 @@ package screens
 import (
 	"context"
 
-	screensv1 "github.com/DaanV2/mechanus/server/pkg/gen/proto/screens/v1"
+	screensv1 "github.com/DaanV2/mechanus/server/proto/screens/v1"
 )
 
 func (s *ScreenHandler) HandlePingRequest(ctx context.Context, msg *screensv1.ClientMessage_Ping) ([]*screensv1.ServerMessage, error) {
