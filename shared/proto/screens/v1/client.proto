@@ -4,7 +4,7 @@ package screens.v1;
 import "screens/v1/general.proto";
 import "screens/v1/setup.proto";
 
-option go_package = "github.com/DaanV2/mechanus/server/pkg/gen/proto/screens/v1;screensv1";
+option go_package = "github.com/DaanV2/mechanus/server/proto/screens/v1;screensv1";
 
 message ClientMessages {
   repeated ClientMessage action = 1;
