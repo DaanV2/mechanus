@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 
-	"github.com/DaanV2/mechanus/server/engine/authz/roles"
+	"github.com/DaanV2/mechanus/server/engine/authentication/roles"
 	"github.com/daanv2/go-kit/generics"
 )
 

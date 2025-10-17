@@ -6,7 +6,7 @@ import (
 
 	"connectrpc.com/connect"
 	"github.com/DaanV2/mechanus/server/application"
-	"github.com/DaanV2/mechanus/server/engine/authz/roles"
+	"github.com/DaanV2/mechanus/server/engine/authentication/roles"
 	"github.com/DaanV2/mechanus/server/infrastructure/authentication"
 	"github.com/DaanV2/mechanus/server/infrastructure/logging"
 	"github.com/DaanV2/mechanus/server/infrastructure/persistence/models"

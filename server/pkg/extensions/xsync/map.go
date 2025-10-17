@@ -41,7 +41,7 @@ func (m *Map[K, V]) Store(key K, value V) {
 }
 
 // Swap swaps the value for a key and returns true if there was a previous value.
-func (m *Map[K, V]) Swap(key K, value V) (V, bool) {
+func (m *Map[K, V]) Swap(key K, value V) (previous V, loaded bool) {
 	v, loaded := m.data.Swap(key, value)
 
 	return v.(V), loaded

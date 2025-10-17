@@ -1,29 +1,22 @@
 package websocket
 
 import (
-	"context"
 	"errors"
 	"net/http"
 	"strings"
 
-	"github.com/DaanV2/mechanus/server/engine/authz/roles"
+	cwebsocket "github.com/coder/websocket"
+
+	"github.com/DaanV2/mechanus/server/engine/authentication/roles"
+	"github.com/DaanV2/mechanus/server/engine/devices"
 	"github.com/DaanV2/mechanus/server/engine/screens"
 	"github.com/DaanV2/mechanus/server/infrastructure/authentication"
 	"github.com/DaanV2/mechanus/server/infrastructure/logging"
-	cwebsocket "github.com/coder/websocket"
 )
 
 var (
 	// ErrWebsocketNotFound is returned when a websocket connection could not be found.
 	ErrWebsocketNotFound = errors.New("websocket: connection not found")
-)
-
-type DeviceType int
-
-const (
-	DeviceTypeUnknown DeviceType = iota
-	DeviceTypeUser
-	DeviceTypeDevice
 )
 
 var (
@@ -36,13 +29,6 @@ type WebsocketHandler struct {
 
 	screenManager     *screens.ScreenManager
 	jwt_authenticator *authentication.JWTService
-}
-
-type ConnectionInfo struct {
-	Token string
-	ID    string
-	Roles []string
-	Type  DeviceType
 }
 
 func NewWebsocketHandler(handler *screens.ScreenManager, jwt_authenticator *authentication.JWTService, config WebsocketConfig) *WebsocketHandler {
@@ -67,18 +53,17 @@ func (handler *WebsocketHandler) ServeHTTP(w http.ResponseWriter, r *http.Reques
 
 		return
 	}
+
 	screenHandler, ok := handler.screenManager.Get(screenid)
 	if !ok {
 		http.Error(w, "Screen not found", http.StatusNotFound)
-
 		return
 	}
+
 	//TODO: check that screenHandler is allowed to be access by this requester
-	connCtx, cancel := context.WithCancel(r.Context())
-	defer cancel()
 	logger, connCtx := handler.logger.
 		With("id", id, "screen", screenid).
-		FromUpdate(connCtx)
+		FromUpdate(r.Context())
 	r = r.WithContext(connCtx)
 
 	auth, err := handler.authenticate(r)
@@ -95,21 +80,14 @@ func (handler *WebsocketHandler) ServeHTTP(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	h := connectionHandler{
-		id:       id,
-		screenid: screenid,
-		ctx:      connCtx,
-		closeFn:  cancel,
-		conn:     conn,
-		logger:   logger,
-		info:     auth,
-		handler:  screenHandler,
-	}
+	h := screens.NewScreenConn(id, screenid, connCtx, conn, auth)
+	screenHandler.AddListener(connCtx, h)
 
-	h.setupConnection(w)
+	// Wait until closed
+	_ = <- h.Context().Done()
 }
 
-func (handler *WebsocketHandler) authenticate(r *http.Request) (*ConnectionInfo, error) {
+func (handler *WebsocketHandler) authenticate(r *http.Request) (*screens.ConnectionInfo, error) {
 	token := r.Header.Get("Authorization")
 
 	// Bearer token are only supported for users for now.
@@ -128,18 +106,18 @@ func (handler *WebsocketHandler) authenticate(r *http.Request) (*ConnectionInfo,
 			return nil, errors.New("could not get claims from JWT")
 		}
 
-		return &ConnectionInfo{
+		return &screens.ConnectionInfo{
 			Token: token,
 			ID:    c.User.ID,
 			Roles: c.User.Roles,
-			Type:  DeviceTypeUser,
+			Type:  devices.DeviceTypeUser,
 		}, nil
 	}
 
-	return &ConnectionInfo{
+	return &screens.ConnectionInfo{
 		Token: token, // TODO: check token for device and device id.
 		ID:    r.PathValue("id"),
 		Roles: []string{roles.Device.String()},
-		Type:  DeviceTypeDevice,
+		Type:  devices.DeviceTypeDevice,
 	}, nil
 }
