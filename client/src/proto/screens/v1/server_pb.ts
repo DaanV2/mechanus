@@ -4,19 +4,21 @@
 
 import type { GenFile, GenMessage } from "@bufbuild/protobuf/codegenv1";
 import { fileDesc, messageDesc } from "@bufbuild/protobuf/codegenv1";
+import type { Ping } from "./general_pb";
+import { file_screens_v1_general } from "./general_pb";
 import type { SceneChange, SceneChangeCompleted } from "./scene_actions_pb";
 import { file_screens_v1_scene_actions } from "./scene_actions_pb";
 import type { SplashScreen } from "./splash_screen_pb";
 import { file_screens_v1_splash_screen } from "./splash_screen_pb";
-import type { Ping } from "./general_pb";
-import { file_screens_v1_general } from "./general_pb";
+import type { InitialSetupResponse } from "./setup_pb";
+import { file_screens_v1_setup } from "./setup_pb";
 import type { Message } from "@bufbuild/protobuf";
 
 /**
  * Describes the file screens/v1/server.proto.
  */
 export const file_screens_v1_server: GenFile = /*@__PURE__*/
-  fileDesc("ChdzY3JlZW5zL3YxL3NlcnZlci5wcm90bxIKc2NyZWVucy52MSI7Cg5TZXJ2ZXJNZXNzYWdlcxIpCgZhY3Rpb24YASADKAsyGS5zY3JlZW5zLnYxLlNlcnZlck1lc3NhZ2UiggIKDVNlcnZlck1lc3NhZ2USDwoCaWQYASABKAlIAYgBARI4ChRzcGxhc2hfc2NyZWVuX3VwZGF0ZRgCIAEoCzIYLnNjcmVlbnMudjEuU3BsYXNoU2NyZWVuSAASLwoMc2NlbmVfY2hhbmdlGAMgASgLMhcuc2NyZWVucy52MS5TY2VuZUNoYW5nZUgAEkIKFnNjZW5lX2NoYW5nZV9jb21wbGV0ZWQYBCABKAsyIC5zY3JlZW5zLnYxLlNjZW5lQ2hhbmdlQ29tcGxldGVkSAASIAoEcGluZxgFIAEoCzIQLnNjcmVlbnMudjEuUGluZ0gAQggKBmFjdGlvbkIFCgNfaWRCRlpEZ2l0aHViLmNvbS9EYWFuVjIvbWVjaGFudXMvc2VydmVyL3BrZy9nZW4vcHJvdG8vc2NyZWVucy92MTtzY3JlZW5zdjFiBnByb3RvMw", [file_screens_v1_scene_actions, file_screens_v1_splash_screen, file_screens_v1_general]);
+  fileDesc("ChdzY3JlZW5zL3YxL3NlcnZlci5wcm90bxIKc2NyZWVucy52MSI7Cg5TZXJ2ZXJNZXNzYWdlcxIpCgZhY3Rpb24YASADKAsyGS5zY3JlZW5zLnYxLlNlcnZlck1lc3NhZ2UivQIKDVNlcnZlck1lc3NhZ2USDwoCaWQYASABKAlIAYgBARI5Cg1pbml0aWFsX3NldHVwGAIgASgLMiAuc2NyZWVucy52MS5Jbml0aWFsU2V0dXBSZXNwb25zZUgAEjgKFHNwbGFzaF9zY3JlZW5fdXBkYXRlGAMgASgLMhguc2NyZWVucy52MS5TcGxhc2hTY3JlZW5IABIvCgxzY2VuZV9jaGFuZ2UYBCABKAsyFy5zY3JlZW5zLnYxLlNjZW5lQ2hhbmdlSAASQgoWc2NlbmVfY2hhbmdlX2NvbXBsZXRlZBgFIAEoCzIgLnNjcmVlbnMudjEuU2NlbmVDaGFuZ2VDb21wbGV0ZWRIABIgCgRwaW5nGAYgASgLMhAuc2NyZWVucy52MS5QaW5nSABCCAoGYWN0aW9uQgUKA19pZEJGWkRnaXRodWIuY29tL0RhYW5WMi9tZWNoYW51cy9zZXJ2ZXIvcGtnL2dlbi9wcm90by9zY3JlZW5zL3YxO3NjcmVlbnN2MWIGcHJvdG8z", [file_screens_v1_general, file_screens_v1_scene_actions, file_screens_v1_splash_screen, file_screens_v1_setup]);
 
 /**
  * @generated from message screens.v1.ServerMessages
@@ -51,25 +53,31 @@ export type ServerMessage = Message<"screens.v1.ServerMessage"> & {
    */
   action: {
     /**
-     * @generated from field: screens.v1.SplashScreen splash_screen_update = 2;
+     * @generated from field: screens.v1.InitialSetupResponse initial_setup = 2;
+     */
+    value: InitialSetupResponse;
+    case: "initialSetup";
+  } | {
+    /**
+     * @generated from field: screens.v1.SplashScreen splash_screen_update = 3;
      */
     value: SplashScreen;
     case: "splashScreenUpdate";
   } | {
     /**
-     * @generated from field: screens.v1.SceneChange scene_change = 3;
+     * @generated from field: screens.v1.SceneChange scene_change = 4;
      */
     value: SceneChange;
     case: "sceneChange";
   } | {
     /**
-     * @generated from field: screens.v1.SceneChangeCompleted scene_change_completed = 4;
+     * @generated from field: screens.v1.SceneChangeCompleted scene_change_completed = 5;
      */
     value: SceneChangeCompleted;
     case: "sceneChangeCompleted";
   } | {
     /**
-     * @generated from field: screens.v1.Ping ping = 5;
+     * @generated from field: screens.v1.Ping ping = 6;
      */
     value: Ping;
     case: "ping";

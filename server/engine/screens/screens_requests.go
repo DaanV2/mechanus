@@ -17,5 +17,11 @@ func (s *ScreenHandler) HandlePingRequest(ctx context.Context, msg *screensv1.Cl
 }
 
 func (s *ScreenHandler) HandleInitialSetupRequest(ctx context.Context, msg *screensv1.ClientMessage_InitialSetupRequest) ([]*screensv1.ServerMessage, error) {
-	return nil, nil // TODO implement handler later
+	resp := []*screensv1.ServerMessage{
+		&screensv1.ServerMessage{
+			Action: screensv1.ServerMessage
+		}
+	}
+
+	return resp, nil // TODO implement handler later
 }
