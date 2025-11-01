@@ -35,6 +35,7 @@ const settings_section_template = `{{ $header := repeat "#" .Depth }}
 {{range .Fields}}| {{.Name}} | {{.Type}} | {{.Description}} | {{.Default}} | {{.Env}} |
 {{end}}{{end}}`
 
+// TODO replace
 func repeat(s string, count int) string {
 	return strings.Repeat(s, count)
 }
