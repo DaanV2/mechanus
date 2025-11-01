@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"strings"
 	"text/template"
 )
 
@@ -34,13 +35,9 @@ const settings_section_template = `{{ $header := repeat "#" .Depth }}
 {{range .Fields}}| {{.Name}} | {{.Type}} | {{.Description}} | {{.Default}} | {{.Env}} |
 {{end}}{{end}}`
 
+// TODO replace
 func repeat(s string, count int) string {
-	result := ""
-	for range count {
-		result += s
-	}
-
-	return result
+	return strings.Repeat(s, count)
 }
 
 func (s *Settings) render() ([]byte, error) {
