@@ -3,9 +3,10 @@ package screens.v1;
 
 import "screens/v1/general.proto";
 import "screens/v1/scene_actions.proto";
+import "screens/v1/setup.proto";
 import "screens/v1/splash_screen.proto";
 
-option go_package = "github.com/DaanV2/mechanus/server/pkg/gen/proto/screens/v1;screensv1";
+option go_package = "github.com/DaanV2/mechanus/server/proto/screens/v1;screensv1";
 
 message ServerMessages {
   repeated ServerMessage action = 1;
@@ -15,9 +16,10 @@ message ServerMessage {
   optional string id = 1; // Unique identifier for the message, in case request <-> response matching is needed.
 
   oneof action {
-    SplashScreen splash_screen_update = 2;
-    SceneChange scene_change = 3;
-    SceneChangeCompleted scene_change_completed = 4;
-    Ping ping = 5;
+    InitialSetupResponse initial_setup = 2;
+    SplashScreen splash_screen_update = 3;
+    SceneChange scene_change = 4;
+    SceneChangeCompleted scene_change_completed = 5;
+    Ping ping = 6;
   }
 }
