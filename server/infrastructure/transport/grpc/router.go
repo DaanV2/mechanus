@@ -4,7 +4,9 @@ import (
 	"net/http"
 
 	"connectrpc.com/connect"
+	"connectrpc.com/otelconnect"
 	"github.com/DaanV2/mechanus/server/infrastructure/authentication"
+	"github.com/DaanV2/mechanus/server/infrastructure/tracing"
 	"github.com/DaanV2/mechanus/server/pkg/gen/proto/users/v1/usersv1connect"
 	"github.com/charmbracelet/log"
 	"golang.org/x/net/http2"
@@ -18,7 +20,7 @@ type RPCS struct {
 	CORS  *CORSHandler
 }
 
-func NewRouter(services RPCS) http.Handler {
+func NewRouter(services RPCS, tracingConf tracing.Config) http.Handler {
 	router := http.NewServeMux()
 
 	opts := []connect.HandlerOption{
@@ -26,6 +28,16 @@ func NewRouter(services RPCS) http.Handler {
 			&LoggingInterceptor{},
 			NewAuthenticator(services.JWT),
 		),
+	}
+
+	// Add OpenTelemetry interceptor if tracing is enabled
+	if tracingConf.Enabled {
+		otelInterceptor, err := otelconnect.NewInterceptor()
+		if err == nil {
+			opts = append(opts, connect.WithInterceptors(otelInterceptor))
+		} else {
+			log.Warn("Failed to create OpenTelemetry interceptor", "error", err)
+		}
 	}
 
 	RegisterService(router, usersv1connect.NewLoginServiceHandler, services.Login, opts...)
