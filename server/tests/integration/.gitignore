@@ -1,0 +1,10 @@
+# Logs
+logs/
+*.log
+
+# Test results
+reports/
+coverage.out
+
+# Docker volumes (managed by docker-compose)
+*-data/

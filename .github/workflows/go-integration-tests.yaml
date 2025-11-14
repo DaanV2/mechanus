@@ -1,0 +1,157 @@
+name: 🧪 Go Integration Tests with OpenTelemetry
+
+on:
+  workflow_call:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'server/**'
+      - '.github/workflows/go-integration-tests.yaml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'server/**'
+      - '.github/workflows/go-integration-tests.yaml'
+
+env:
+  FORCE_COLOR: true
+  # OpenTelemetry configuration
+  OTEL_EXPORTER_OTLP_ENDPOINT: http://localhost:4317
+  OTEL_EXPORTER_OTLP_PROTOCOL: grpc
+  OTEL_SERVICE_NAME: mechanus-server
+  # Grafana Stack endpoints
+  TEMPO_ENDPOINT: http://localhost:3200
+  LOKI_ENDPOINT: http://localhost:3100
+  PROMETHEUS_ENDPOINT: http://localhost:9090
+  GRAFANA_ENDPOINT: http://localhost:3000
+
+jobs:
+  integration-tests:
+    name: 🧪 Integration Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: 📦 Checkout Repository
+        uses: actions/checkout@v5
+
+      - name: ⚒️ Setup Golang
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: ./server/go.mod
+          cache-dependency-path: ./server/go.sum
+
+      - name: 🐋 Start Grafana Observability Stack
+        working-directory: server/tests/integration
+        run: |
+          echo "Starting Grafana stack services..."
+          docker compose up -d
+          echo "Waiting for services to be ready..."
+          sleep 15
+
+      - name: 🔍 Verify Services Health
+        run: |
+          echo "Checking service health..."
+          max_retries=30
+          retry_interval=2
+          
+          check_service() {
+            local url=$1
+            local name=$2
+            local retries=0
+            
+            echo "Checking $name at $url..."
+            while [ $retries -lt $max_retries ]; do
+              if curl -sf "$url" > /dev/null 2>&1; then
+                echo "✓ $name is healthy"
+                return 0
+              fi
+              retries=$((retries + 1))
+              echo "  Waiting for $name... (attempt $retries/$max_retries)"
+              sleep $retry_interval
+            done
+            
+            echo "✗ $name failed to become healthy"
+            return 1
+          }
+          
+          check_service "http://localhost:3200/ready" "Tempo"
+          check_service "http://localhost:3100/ready" "Loki"
+          check_service "http://localhost:9090/-/ready" "Prometheus"
+          check_service "http://localhost:3000/api/health" "Grafana"
+          check_service "http://localhost:8888/metrics" "OTEL Collector"
+
+      - name: 🧪 Run Integration Tests
+        working-directory: server/tests/integration
+        run: |
+          echo "Running integration tests..."
+          go test -v -timeout 10m ./...
+
+      - name: 📊 Generate Test Summary
+        if: always()
+        run: |
+          echo "## 🧪 Integration Test Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Services Status" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          services=("tempo:3200/ready" "loki:3100/ready" "prometheus:9090/-/ready" "grafana:3000/api/health")
+          for service in "${services[@]}"; do
+            name=$(echo $service | cut -d: -f1)
+            endpoint=$(echo $service | cut -d: -f2-)
+            if curl -sf "http://localhost:$endpoint" > /dev/null 2>&1; then
+              echo "- ✅ **${name^}**: Running" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "- ❌ **${name^}**: Not responding" >> $GITHUB_STEP_SUMMARY
+            fi
+          done
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📊 Grafana Dashboard Links" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Grafana UI**: http://localhost:3000 (admin/admin)" >> $GITHUB_STEP_SUMMARY
+          echo "- **Tempo (Traces)**: http://localhost:3200" >> $GITHUB_STEP_SUMMARY
+          echo "- **Loki (Logs)**: http://localhost:3100" >> $GITHUB_STEP_SUMMARY
+          echo "- **Prometheus (Metrics)**: http://localhost:9090" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🔧 OpenTelemetry Configuration" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **OTLP Endpoint**: http://localhost:4317 (gRPC)" >> $GITHUB_STEP_SUMMARY
+          echo "- **OTLP Endpoint**: http://localhost:4318 (HTTP)" >> $GITHUB_STEP_SUMMARY
+          echo "- **Service Name**: mechanus-server" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📝 Notes" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "These tests assume OpenTelemetry instrumentation is enabled in the Go server." >> $GITHUB_STEP_SUMMARY
+          echo "Telemetry data (traces, logs, metrics) will be exported to the Grafana stack during test execution." >> $GITHUB_STEP_SUMMARY
+
+      - name: 📋 Export Service Logs
+        if: failure()
+        working-directory: server/tests/integration
+        run: |
+          echo "Exporting service logs..."
+          mkdir -p logs
+          docker compose logs tempo > logs/tempo.log
+          docker compose logs loki > logs/loki.log
+          docker compose logs prometheus > logs/prometheus.log
+          docker compose logs grafana > logs/grafana.log
+          docker compose logs otel-collector > logs/otel-collector.log
+
+      - name: 📤 Upload Service Logs
+        if: failure()
+        uses: actions/upload-artifact@v5
+        with:
+          name: integration-test-logs
+          path: server/tests/integration/logs/
+          retention-days: 5
+
+      - name: 🧹 Cleanup
+        if: always()
+        working-directory: server/tests/integration
+        run: |
+          echo "Stopping services..."
+          docker compose down -v
+          echo "Cleanup complete"
