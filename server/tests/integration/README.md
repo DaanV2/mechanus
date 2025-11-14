@@ -111,6 +111,10 @@ The integration tests verify:
 2. **Data Source Connectivity**: Grafana can connect to Tempo, Loki, and Prometheus
 3. **OTLP Endpoints**: OpenTelemetry Collector is ready to receive data
 4. **API Accessibility**: All service APIs are accessible and responding correctly
+5. **Server Integration**: The Go server runs with OpenTelemetry enabled and exports traces to Tempo
+6. **Trace Generation**: HTTP requests generate traces that appear in Tempo
+7. **Trace Context**: The server correctly handles W3C trace context headers
+8. **Configuration**: OpenTelemetry can be disabled without errors
 
 ## Viewing Telemetry Data
 
