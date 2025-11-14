@@ -9,8 +9,8 @@ import (
 
 func NewServer(conf servers.Config, router http.Handler, tracingConf tracing.Config) servers.Server {
 	// Apply middleware in order: OTel -> Logging
-	handler := OtelMiddleware(tracingConf)(router)
+	handler := OtelMiddleware(tracingConf, router)
 	handler = Logging(handler)
-	
+
 	return servers.NewHttpServer("web", handler, conf)
 }

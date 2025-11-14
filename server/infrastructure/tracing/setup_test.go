@@ -1,18 +1,14 @@
 package tracing_test
 
 import (
-	"context"
-
 	"github.com/DaanV2/mechanus/server/infrastructure/tracing"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
 
 var _ = Describe("Setup", func() {
-	ctx := context.Background()
-
 	Describe("SetupTracing", func() {
-		It("should return a no-op provider when tracing is disabled", func() {
+		It("should return a no-op provider when tracing is disabled", func(ctx SpecContext) {
 			cfg := tracing.Config{
 				Enabled:     false,
 				Endpoint:    "localhost:4318",
@@ -29,7 +25,7 @@ var _ = Describe("Setup", func() {
 			Expect(err).ToNot(HaveOccurred())
 		})
 
-		It("should return an error when endpoint is invalid and tracing is enabled", func() {
+		It("should return an error when endpoint is invalid and tracing is enabled", func(ctx SpecContext) {
 			cfg := tracing.Config{
 				Enabled:     true,
 				Endpoint:    "invalid://endpoint:99999",
@@ -49,7 +45,7 @@ var _ = Describe("Setup", func() {
 	})
 
 	Describe("Shutdown", func() {
-		It("should handle nil provider gracefully", func() {
+		It("should handle nil provider gracefully", func(ctx SpecContext) {
 			err := tracing.Shutdown(ctx, nil)
 			Expect(err).ToNot(HaveOccurred())
 		})

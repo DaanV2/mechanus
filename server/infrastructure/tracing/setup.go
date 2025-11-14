@@ -16,7 +16,10 @@ import (
 func SetupTracing(ctx context.Context, cfg Config) (*sdktrace.TracerProvider, error) {
 	if !cfg.Enabled {
 		// Return a no-op tracer provider when tracing is disabled
-		return sdktrace.NewTracerProvider(), nil
+		// Disable default sampler, IDGenerator, and other defaults for no-op behavior
+		return sdktrace.NewTracerProvider(
+			sdktrace.WithSampler(sdktrace.NeverSample()),
+		), nil
 	}
 
 	// Create resource with service information
@@ -66,5 +69,6 @@ func Shutdown(ctx context.Context, tp *sdktrace.TracerProvider) error {
 	if tp == nil {
 		return nil
 	}
+
 	return tp.Shutdown(ctx)
 }
