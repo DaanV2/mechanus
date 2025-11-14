@@ -30,6 +30,8 @@ require (
 	github.com/spf13/cobra v1.10.1
 	github.com/spf13/pflag v1.0.10
 	github.com/spf13/viper v1.21.0
+	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp v1.34.0
+	go.opentelemetry.io/otel/sdk v1.34.0
 	golang.org/x/crypto v0.43.0
 	golang.org/x/net v0.46.0
 	golang.org/x/text v0.30.0
@@ -46,8 +48,6 @@ require (
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.25.1 // indirect
 	github.com/opencontainers/selinux v1.11.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.34.0 // indirect
-	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp v1.34.0 // indirect
-	go.opentelemetry.io/otel/sdk v1.34.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.5.0 // indirect
 )
 
@@ -64,7 +64,7 @@ require (
 	buf.build/go/spdx v0.2.0 // indirect
 	cel.dev/expr v0.19.1 // indirect
 	cloud.google.com/go/compute/metadata v0.6.0 // indirect
-	connectrpc.com/otelconnect v0.7.1 // indirect
+	connectrpc.com/otelconnect v0.7.1
 	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/4meepo/tagalign v1.4.2 // indirect
 	github.com/Abirdcfly/dupword v0.1.3 // indirect
@@ -330,8 +330,8 @@ require (
 	go.lsp.dev/protocol v0.12.0 // indirect
 	go.lsp.dev/uri v0.3.0 // indirect
 	go.opentelemetry.io/auto/sdk v1.1.0 // indirect
-	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.59.0 // indirect
-	go.opentelemetry.io/otel v1.38.0 // indirect
+	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.59.0
+	go.opentelemetry.io/otel v1.38.0
 	go.opentelemetry.io/otel/metric v1.38.0 // indirect
 	go.opentelemetry.io/otel/trace v1.38.0 // indirect
 	go.uber.org/automaxprocs v1.6.0 // indirect
