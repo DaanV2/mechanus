@@ -24,6 +24,7 @@ func (m *Manager) AfterInitialize(ctx context.Context) error {
 	if m.provider != nil {
 		log.Debug("OpenTelemetry tracing initialized")
 	}
+
 	return nil
 }
 
@@ -38,9 +39,11 @@ func (m *Manager) AfterShutDown(ctx context.Context) error {
 		log.Debug("Shutting down OpenTelemetry tracer provider")
 		if err := Shutdown(ctx, m.provider); err != nil {
 			log.Error("Failed to shutdown tracer provider", "error", err)
+
 			return err
 		}
 	}
+
 	return nil
 }
 
