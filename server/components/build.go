@@ -10,6 +10,7 @@ import (
 	"github.com/DaanV2/mechanus/server/infrastructure/persistence/repositories"
 	"github.com/DaanV2/mechanus/server/infrastructure/servers"
 	"github.com/DaanV2/mechanus/server/infrastructure/storage"
+	"github.com/DaanV2/mechanus/server/infrastructure/tracing"
 	"github.com/DaanV2/mechanus/server/infrastructure/transport/grpc"
 	"github.com/DaanV2/mechanus/server/infrastructure/transport/http"
 	"github.com/DaanV2/mechanus/server/infrastructure/transport/mdns"
@@ -26,16 +27,24 @@ func BuildServer(setupCtx context.Context) (*Server, error) {
 	webConf := http.GetWebConfig()
 	mdnsConf := mdns.GetServerConfig(webConf.Port)
 	websocketConf := websocket.GetWebsocketConfig()
+	tracingConf := tracing.GetConfig()
 
-	// Storage
-	v, err := GetDatabaseOptions()
+	// Setup OpenTelemetry tracing
+	tracerProvider, err := tracing.SetupTracing(setupCtx, tracingConf)
 	if err != nil {
 		return nil, err
 	}
+	tracingManager := tracing.NewManager(tracerProvider)
 
-	db, err := SetupDatabase(setupCtx, v...)
-	if err != nil {
-		return nil, err
+	// Storage
+	v, dbErr := GetDatabaseOptions()
+	if dbErr != nil {
+		return nil, dbErr
+	}
+
+	db, dbErr := SetupDatabase(setupCtx, v...)
+	if dbErr != nil {
+		return nil, dbErr
 	}
 
 	userRepo := repositories.NewUserRepository(db)
@@ -43,9 +52,9 @@ func BuildServer(setupCtx context.Context) (*Server, error) {
 	storageProvider := storage.DBStorage[*authentication.KeyData](db)
 
 	// Service and Managers
-	keyManager, err := authentication.NewKeyManager(storageProvider)
-	if err != nil {
-		return nil, err
+	keyManager, keyErr := authentication.NewKeyManager(storageProvider)
+	if keyErr != nil {
+		return nil, keyErr
 	}
 	jwtService := authentication.NewJWTService(jtiService, keyManager)
 	userService := application.NewUserService(userRepo)
@@ -59,15 +68,15 @@ func BuildServer(setupCtx context.Context) (*Server, error) {
 
 	// Servers
 	websocketHandler := websocket.NewWebsocketHandler(screenManager, jwtService, websocketConf)
-	mdnsServer, err := CreateMDNSServer(setupCtx, mdnsConf)
-	if err != nil {
-		return nil, err
+	mdnsServer, mdnsErr := CreateMDNSServer(setupCtx, mdnsConf)
+	if mdnsErr != nil {
+		return nil, mdnsErr
 	}
 
 	serverManager := &servers.Manager{}
 	serverManager.Register(
-		CreateAPIServer(apiConf, websocketHandler, rpcs),
-		CreateWebServer(webConf, lfManager, lfManager),
+		CreateAPIServer(apiConf, websocketHandler, rpcs, tracingConf),
+		CreateWebServer(webConf, lfManager, lfManager, tracingConf),
 		mdnsServer,
 	)
 	server := &Server{
@@ -76,7 +85,7 @@ func BuildServer(setupCtx context.Context) (*Server, error) {
 		DB:         db,
 		Components: lfManager,
 	}
-	lfManager.Add(screenManager, keyManager, db)
+	lfManager.Add(screenManager, keyManager, db, tracingManager)
 
 	return server, nil
 }

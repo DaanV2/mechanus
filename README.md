@@ -53,6 +53,7 @@ This allows the server and thus GM to control a TV screen on the table as battle
 | [Viper](https://github.com/spf13/viper)                                             | The library / framework that used to build the configuration handling of the server      |
 | [Gorm](gorm.io/gorm)                                                                | The library or ORM (object relation manager) used to connect golang object to SQL tables |
 | [Golang Jwt](https://github.com/golang-jwt/jwt)                                     | The library used to make user authentication tokens                                      |
+| [OpenTelemetry](https://opentelemetry.io/)                                          | Observability framework for distributed tracing and monitoring                           |
 
 ## TODO Features
 

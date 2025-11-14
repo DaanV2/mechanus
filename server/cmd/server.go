@@ -9,6 +9,7 @@ import (
 	"github.com/DaanV2/mechanus/server/application/checks"
 	"github.com/DaanV2/mechanus/server/components"
 	"github.com/DaanV2/mechanus/server/infrastructure/persistence"
+	"github.com/DaanV2/mechanus/server/infrastructure/tracing"
 	"github.com/DaanV2/mechanus/server/infrastructure/transport/grpc"
 	web "github.com/DaanV2/mechanus/server/infrastructure/transport/http"
 	"github.com/DaanV2/mechanus/server/infrastructure/transport/mdns"
@@ -47,6 +48,7 @@ func init() {
 	persistence.DatabaseConfigSet.AddToSet(serverCmd.Flags())
 	checks.InitializeConfig.AddToSet(serverCmd.Flags())
 	mdns.MDNSConfig.AddToSet(serverCmd.Flags())
+	tracing.TracingConfigSet.AddToSet(serverCmd.Flags())
 }
 
 func ServerWorkload(cmd *cobra.Command, args []string) error {
