@@ -41,6 +41,7 @@ jobs:
 
   integration-tests:
     needs:
+      - docker-checks
       - proto-checks
     name: 🎭 Integration tests
     uses: ./.github/workflows/integration-tests.yaml
