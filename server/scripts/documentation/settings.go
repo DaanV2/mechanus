@@ -35,13 +35,9 @@ const settings_section_template = `{{ $header := repeat "#" .Depth }}
 {{range .Fields}}| {{.Name}} | {{.Type}} | {{.Description}} | {{.Default}} | {{.Env}} |
 {{end}}{{end}}`
 
-// TODO replace
-func repeat(s string, count int) string {
-	return strings.Repeat(s, count)
-}
 
 func (s *Settings) render() ([]byte, error) {
-	v := template.New("settings").Funcs(template.FuncMap{"repeat": repeat})
+	v := template.New("settings").Funcs(template.FuncMap{"repeat": strings.Repeat})
 
 	templ, err := v.Parse(settings_section_template)
 	if err != nil {
