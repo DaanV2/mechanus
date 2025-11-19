@@ -1,23 +1,23 @@
 # OpenTelemetry Configuration
 
-Mechanus server supports OpenTelemetry for distributed tracing. This allows you to observe and monitor the behavior of your server across different components and services.
+Mechanus server supports OpenTelemetry for distributed tracing and logging. This allows you to observe and monitor the behavior of your server across different components and services, with full correlation between traces and logs.
 
 ## Configuration
 
-OpenTelemetry tracing is **disabled by default** and must be explicitly enabled through command-line flags or environment variables.
+OpenTelemetry tracing and logging are **disabled by default** and must be explicitly enabled through command-line flags or environment variables. When enabled, both traces and logs will be exported to the configured OpenTelemetry collector endpoint.
 
 ### Available Options
 
 | Flag | Environment Variable | Default | Description |
 |------|---------------------|---------|-------------|
-| `--otel.enabled` | `OTEL_ENABLED` | `false` | Enable OpenTelemetry tracing |
+| `--otel.enabled` | `OTEL_ENABLED` | `false` | Enable OpenTelemetry tracing and logging |
 | `--otel.endpoint` | `OTEL_ENDPOINT` | `localhost:4318` | OpenTelemetry collector endpoint (OTLP HTTP) |
-| `--otel.service-name` | `OTEL_SERVICE_NAME` | `mechanus-server` | Service name for traces |
+| `--otel.service-name` | `OTEL_SERVICE_NAME` | `mechanus-server` | Service name for traces and logs |
 | `--otel.insecure` | `OTEL_INSECURE` | `true` | Use insecure connection to OTLP collector |
 
 ## Usage
 
-### Starting the server with tracing enabled
+### Starting the server with OpenTelemetry enabled
 
 ```bash
 ./mechanus server --otel.enabled=true --otel.endpoint=localhost:4318
@@ -30,6 +30,8 @@ export OTEL_ENABLED=true
 export OTEL_ENDPOINT=localhost:4318
 ./mechanus server
 ```
+
+This will enable both tracing and logging export to OpenTelemetry.
 
 ### Using with OpenTelemetry Collector
 
@@ -80,6 +82,10 @@ service:
       receivers: [otlp]
       processors: [batch]
       exporters: [jaeger, logging]
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [logging]
 ```
 
 ### Viewing Traces
@@ -93,13 +99,35 @@ After starting the server with tracing enabled and an OpenTelemetry Collector + 
 5. Select "mechanus-server" from the service dropdown
 6. Click "Find Traces" to view traces
 
-## What is Traced?
+## What is Exported?
 
-The OpenTelemetry integration automatically traces:
+The OpenTelemetry integration automatically exports:
 
+### Traces
 - **HTTP requests** to both the web and API servers
 - **gRPC/Connect RPC calls** including login, user management, and other services
 - **Request context propagation** across service boundaries
+
+### Logs
+- **All application logs** generated through the Charm logger
+- **Structured logging** with key-value attributes preserved
+- **Log levels** (Debug, Info, Warn, Error) mapped to OpenTelemetry severity levels
+- **Correlation** with traces when within a traced request context
+
+## Architecture
+
+The OpenTelemetry integration in Mechanus uses a bridge pattern to connect the Charm logger with OpenTelemetry:
+
+1. **Charm Logger**: The primary logging interface using `charmbracelet/log`, which implements the `slog.Handler` interface
+2. **OTEL Bridge**: A custom `slog.Handler` wrapper that forwards log records to both Charm logger and OpenTelemetry
+3. **OTEL Log Provider**: Configured with batch processing for efficient export to the collector
+4. **OTEL Trace Provider**: Handles distributed tracing with context propagation
+
+This architecture ensures:
+- Zero performance impact when OpenTelemetry is disabled
+- Minimal overhead when enabled (batch processing)
+- Seamless integration with existing logging infrastructure
+- Automatic correlation between logs and traces
 
 ## Production Considerations
 
@@ -112,12 +140,13 @@ For production deployments:
 
 ## Troubleshooting
 
-### Traces not appearing
+### Traces or logs not appearing
 
 1. Verify the collector endpoint is correct and reachable
 2. Check the collector logs for errors
 3. Ensure `--otel.enabled=true` is set
 4. Check Mechanus server logs for OpenTelemetry initialization messages
+5. Verify your collector configuration has both `traces` and `logs` pipelines configured
 
 ### High overhead
 
