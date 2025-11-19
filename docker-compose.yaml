@@ -1,0 +1,77 @@
+services:
+  mechanus:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      tags:
+        - mechanus:latest
+    container_name: mechanus
+    ports:
+      - "8080:8080"
+      - "8443:8443"
+      - "8666:8666"
+    environment:
+      # Default environment variables (can be overridden by creating a .env file)
+      # See .env.example for reference
+      WEB_HOST: ""
+      WEB_PORT: "8080"
+      WEB_STATIC_FOLDER: "/web"
+      LOG_FORMAT: "text"
+      LOG_LEVEL: "debug"
+    restart: unless-stopped
+    networks:
+      - mechanus-dev
+    develop:
+      watch:
+        # Watch server Go files - rebuild on changes
+        - action: rebuild
+          path: ./server
+          target: /app
+          ignore:
+            - server/.env
+            - server/.local
+            - server/.user
+            - server/reports
+            - server/mechanus
+            - server/**/*.test
+        
+        # Watch client source files - rebuild on changes
+        - action: rebuild
+          path: ./client/src
+          target: /app
+        
+        # Watch client package files - rebuild on changes
+        - action: rebuild
+          path: ./client/package.json
+          target: /app/package.json
+        
+        - action: rebuild
+          path: ./client/package-lock.json
+          target: /app/package-lock.json
+        
+        # Watch client config files - rebuild on changes
+        - action: rebuild
+          path: ./client/vite.config.ts
+          target: /app/vite.config.ts
+        
+        - action: rebuild
+          path: ./client/svelte.config.js
+          target: /app/svelte.config.js
+        
+        - action: rebuild
+          path: ./client/tailwind.config.js
+          target: /app/tailwind.config.js
+        
+        - action: rebuild
+          path: ./client/tsconfig.json
+          target: /app/tsconfig.json
+        
+        # Watch shared proto files - rebuild on changes
+        - action: rebuild
+          path: ./shared
+          target: /app
+
+networks:
+  mechanus-dev:
+    driver: bridge
+    attachable: true

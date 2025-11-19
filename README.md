@@ -10,6 +10,16 @@ This allows the server and thus GM to control a TV screen on the table as battle
 
 ![overview](./docs/assets/overview.svg)
 
+## Quick Start
+
+For local development with Docker:
+
+```bash
+docker compose watch
+```
+
+This will build and start the application with automatic rebuilds on code changes. See [Local development](./docs/development.md) for more details.
+
 ## Contents
 
 - [Documentation](./docs/README.md)
