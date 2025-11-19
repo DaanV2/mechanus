@@ -8,11 +8,13 @@ import (
 	"github.com/DaanV2/mechanus/server/infrastructure/persistence/models"
 )
 
+// CampaignRepository provides database operations for campaigns.
 type CampaignRepository struct {
 	db     *persistence.DB
 	logger logging.Enriched
 }
 
+// NewCampaignRepository creates a new campaign repository with the provided database.
 func NewCampaignRepository(db *persistence.DB) *CampaignRepository {
 	return &CampaignRepository{
 		db:     db,
@@ -20,7 +22,7 @@ func NewCampaignRepository(db *persistence.DB) *CampaignRepository {
 	}
 }
 
-// Gets looks up the campaign by the given id, will return a [xerrors.ErrNotExist] if nothing matched
+// Get looks up the campaign by the given id, will return a [xerrors.ErrNotExist] if nothing matched.
 func (repo *CampaignRepository) Get(ctx context.Context, campaignId string) (*models.Campaign, error) {
 	logger := repo.logger.With("campaignId", campaignId).From(ctx)
 	logger.Debug("Getting campaign by id")
@@ -55,6 +57,7 @@ func (repo *CampaignRepository) Update(ctx context.Context, campaign *models.Cam
 	return tx.Error
 }
 
+// LinkUser associates a user with a campaign.
 func (repo *CampaignRepository) LinkUser(ctx context.Context, campaign *models.Campaign, user *models.User) error {
 	logger := repo.logger.With("campaignId", campaign.ID, "userId", user.ID).From(ctx)
 	logger.Debug("add user to campaign")
@@ -62,6 +65,7 @@ func (repo *CampaignRepository) LinkUser(ctx context.Context, campaign *models.C
 	return repo.db.WithContext(ctx).Model(campaign).Association("Users").Append(user)
 }
 
+// UnlinkUser removes a user's association with a campaign.
 func (repo *CampaignRepository) UnlinkUser(ctx context.Context, campaign *models.Campaign, user *models.User) error {
 	logger := repo.logger.With("campaignId", campaign.ID, "userId", user.ID).From(ctx)
 	logger.Debug("removing user to campaign")

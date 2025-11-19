@@ -1,5 +1,6 @@
 package models
 
+// Campaign represents a game campaign in the database.
 type Campaign struct {
 	Model
 	Name  string
