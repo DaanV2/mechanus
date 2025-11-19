@@ -38,7 +38,7 @@ docker-server: server
 # Start server using Docker Compose
 default-compose-file := docker-compose.yaml
 compose-up:
-	docker compose -f $(default-compose-file) up -d mechanus-server --build
+	docker compose -f $(default-compose-file) up -d mechanus-server
 
 compose-down:
 	docker compose -f $(default-compose-file) down
@@ -46,7 +46,7 @@ compose-down:
 # Start server in Docker Compose (replaces old server target)
 server:
 	docker compose -f $(default-compose-file) rm -sf mechanus-server || true
-	docker compose -f $(default-compose-file) up -d mechanus-server --build
+	docker compose -f $(default-compose-file) up -d mechanus-server
 
 server-logs:
 	-mkdir ./playwright-report/server
