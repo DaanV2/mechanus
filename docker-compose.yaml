@@ -32,7 +32,6 @@ services:
             - server/.local
             - server/.user
             - server/reports
-            - server/mechanus
             - server/**/*.test
         
         # Watch client source files - rebuild on changes
@@ -65,11 +64,6 @@ services:
         - action: rebuild
           path: ./client/tsconfig.json
           target: /app/tsconfig.json
-        
-        # Watch shared proto files - rebuild on changes
-        - action: rebuild
-          path: ./shared
-          target: /app
 
 networks:
   mechanus-dev:
