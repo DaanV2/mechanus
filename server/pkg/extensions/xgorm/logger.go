@@ -12,11 +12,13 @@ import (
 
 var _ logger.Interface = &GormLogger{}
 
+// GormLogger is a GORM logger implementation that uses the logging.Enriched logger.
 type GormLogger struct {
 	level  log.Level
 	logger logging.Enriched
 }
 
+// NewGormlogger creates a new GormLogger with the "db" prefix.
 func NewGormlogger() *GormLogger {
 	result := &GormLogger{
 		logger: logging.Enriched{}.WithPrefix("db"),

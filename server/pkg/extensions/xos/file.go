@@ -11,6 +11,7 @@ const (
 	DEFAULT_FILE_PERMISSIONS = xio.DEFAULT_FILE_PERMISSIONS
 )
 
+// WriteFile writes data to the named file with default file permissions.
 func WriteFile(name string, data []byte) error {
 	return os.WriteFile(name, data, xio.DEFAULT_FILE_PERMISSIONS)
 }

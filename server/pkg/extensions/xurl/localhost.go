@@ -2,6 +2,7 @@ package xurl
 
 import "strings"
 
+// IsLocalHostOrigin checks if the given origin URL is a localhost URL (http or https).
 func IsLocalHostOrigin(origin string) bool {
 	switch {
 	case origin == "":

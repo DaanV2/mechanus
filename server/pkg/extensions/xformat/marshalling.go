@@ -19,6 +19,8 @@ func Unmarshal(data []byte, result any) error {
 	return json.Unmarshal(data, result)
 }
 
+// Marshal tries to marshal the item using the following marshallers in order:
+// [encoding.TextMarshaler] -> [encoding.BinaryMarshaler] -> [json.Marshal]
 func Marshal(item any) ([]byte, error) {
 	if v, ok := item.(encoding.TextMarshaler); ok {
 		return v.MarshalText()
