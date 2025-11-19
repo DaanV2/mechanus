@@ -13,14 +13,17 @@ import (
 )
 
 var (
+	// ErrScreenNotFound is returned when a screen is not found in storage.
 	ErrScreenNotFound = errors.New("screen not found")
 )
 
+// ScreenStorage manages persistent storage of screen data.
 type ScreenStorage struct {
 	// Each screen has its own storage subfolder.
 	folder string
 }
 
+// NewScreenStorage creates a new screen storage instance.
 func NewScreenStorage() *ScreenStorage {
 	return &ScreenStorage{folder: paths.StorageFolder("screens")}
 }

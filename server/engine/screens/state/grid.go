@@ -1,5 +1,6 @@
 package state
 
+// GridSettings defines the grid layout and positioning for a screen.
 type GridSettings struct {
 	XOffset int `json:"x_offset"` // Horizontal offset in pixels
 	YOffset int `json:"y_offset"` // Vertical offset in pixels

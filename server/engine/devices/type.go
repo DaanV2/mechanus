@@ -1,8 +1,10 @@
 package devices
 
+// DeviceType represents the type of device.
 type DeviceType int
 
 const (
+	// DeviceTypeUnknown represents an unknown device type.
 	DeviceTypeUnknown DeviceType = iota
 	DeviceTypeUser
 	DeviceTypeDevice

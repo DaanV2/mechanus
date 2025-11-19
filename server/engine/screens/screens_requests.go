@@ -7,6 +7,7 @@ import (
 	screensv1 "github.com/DaanV2/mechanus/server/proto/screens/v1"
 )
 
+// HandlePingRequest processes a ping request from a client.
 func (s *ScreenHandler) HandlePingRequest(ctx context.Context, msg *screensv1.ClientMessage_Ping) ([]*screensv1.ServerMessage, error) {
 	s.Broadcast(ctx, &screensv1.ServerMessage{
 		Action: &screensv1.ServerMessage_Ping{
@@ -17,6 +18,7 @@ func (s *ScreenHandler) HandlePingRequest(ctx context.Context, msg *screensv1.Cl
 	return nil, nil // TODO implement handler later
 }
 
+// HandleInitialSetupRequest processes an initial setup request from a client.
 func (s *ScreenHandler) HandleInitialSetupRequest(ctx context.Context, msg *screensv1.ClientMessage_InitialSetupRequest) ([]*screensv1.ServerMessage, error) {
 	return []*screensv1.ServerMessage{
 		{

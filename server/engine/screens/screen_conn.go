@@ -13,6 +13,7 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
+// ScreenConn represents a WebSocket connection to a screen.
 type ScreenConn struct {
 	id       string // user / device id
 	screenid string // screen id
@@ -23,6 +24,7 @@ type ScreenConn struct {
 	info     *ConnectionInfo
 }
 
+// NewScreenConn creates a new screen connection with the provided parameters.
 func NewScreenConn(id, screenid string, connctx context.Context, conn *websocket.Conn, info *ConnectionInfo) *ScreenConn {
 	wctx, cancelfn := context.WithCancel(connctx)
 
@@ -38,6 +40,7 @@ func NewScreenConn(id, screenid string, connctx context.Context, conn *websocket
 	}
 }
 
+// ConnectionInfo contains authentication and identification information for a connection.
 type ConnectionInfo struct {
 	Token string
 	ID    string
@@ -45,10 +48,12 @@ type ConnectionInfo struct {
 	Type  devices.DeviceType
 }
 
+// Context returns the connection's context.
 func (sconn *ScreenConn) Context() context.Context {
 	return sconn.connctx
 }
 
+// Send sends a server message to the client over the WebSocket connection.
 func (sconn *ScreenConn) Send(ctx context.Context, msg *screensv1.ServerMessages) error {
 	data, err := proto.Marshal(msg)
 	if err != nil {
@@ -144,6 +149,7 @@ func (connh *ScreenConn) startReadLoop(handleMessage func(ctx context.Context, c
 	}
 }
 
+// CloseWith closes the WebSocket connection with the specified status code and reason.
 func (connh *ScreenConn) CloseWith(code websocket.StatusCode, reason string) {
 	defer connh.cancelfn()
 

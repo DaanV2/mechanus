@@ -6,6 +6,7 @@ import (
 	"github.com/DaanV2/mechanus/server/pkg/must"
 )
 
+// ScreenState represents the complete state of a screen.
 type ScreenState struct {
 	Environment  *Environment  `json:"environment"`             // Environment state
 	Grid         *GridSettings `json:"grid"`                    // Grid settings
@@ -13,6 +14,7 @@ type ScreenState struct {
 	SplashScreen *SplashScreen `json:"splash_screen,omitempty"` // Optional splash screen, if nil assumed to be not shown
 }
 
+// NewScreenState creates a new screen state with default values.
 func NewScreenState() *ScreenState {
 	return &ScreenState{
 		Environment: &Environment{
