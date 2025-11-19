@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"connectrpc.com/grpchealth"
+	"github.com/DaanV2/mechanus/server/infrastructure/logging"
 )
 
 var (
@@ -41,6 +42,8 @@ func (h *HealthService) Check(ctx context.Context, req *grpchealth.CheckRequest)
 
 	err := h.checks.HealthCheck(ctx)
 	if err != nil {
+		logging.From(ctx).Warnf("health check failed: %s", err)
+
 		return &grpchealth.CheckResponse{
 			Status: grpchealth.StatusServing,
 		}, nil
