@@ -32,7 +32,20 @@ func BuildServer(setupCtx context.Context) (*ServerComponents, error) {
 	if err != nil {
 		return nil, err
 	}
-	tracingManager := tracing.NewManager(tracerProvider)
+
+	// Setup OpenTelemetry logging
+	logProvider, err := tracing.SetupLogging(setupCtx, tracingCfg)
+	if err != nil {
+		return nil, err
+	}
+
+	tracingManager := tracing.NewManager(tracerProvider, logProvider)
+
+	// Connect charm logger with OTEL log exporter
+	// This must be done after OTEL log provider is set up
+	if tracingCfg.Enabled {
+		tracing.SetupLoggerBridge()
+	}
 
 	// Storage
 	v, dbErr := GetDatabaseOptions()

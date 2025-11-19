@@ -33,7 +33,7 @@ require (
 	github.com/spf13/pflag v1.0.10
 	github.com/spf13/viper v1.21.0
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp v1.34.0
-	go.opentelemetry.io/otel/sdk v1.34.0
+	go.opentelemetry.io/otel/sdk v1.38.0
 	golang.org/x/crypto v0.43.0
 	golang.org/x/net v0.46.0
 	golang.org/x/text v0.30.0
@@ -47,10 +47,14 @@ require (
 require (
 	github.com/AdaLogics/go-fuzz-headers v0.0.0-20230811130428-ced1acdcaa24 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
-	github.com/grpc-ecosystem/grpc-gateway/v2 v2.25.1 // indirect
+	github.com/cenkalti/backoff/v5 v5.0.3 // indirect
+	github.com/grpc-ecosystem/grpc-gateway/v2 v2.27.2 // indirect
 	github.com/opencontainers/selinux v1.11.0 // indirect
+	go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploghttp v0.14.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.34.0 // indirect
-	go.opentelemetry.io/proto/otlp v1.5.0 // indirect
+	go.opentelemetry.io/otel/log v0.14.0 // indirect
+	go.opentelemetry.io/otel/sdk/log v0.14.0 // indirect
+	go.opentelemetry.io/proto/otlp v1.7.1 // indirect
 )
 
 require (
@@ -64,8 +68,8 @@ require (
 	buf.build/go/bufplugin v0.6.0 // indirect
 	buf.build/go/protoyaml v0.3.1 // indirect
 	buf.build/go/spdx v0.2.0 // indirect
-	cel.dev/expr v0.19.1 // indirect
-	cloud.google.com/go/compute/metadata v0.6.0 // indirect
+	cel.dev/expr v0.24.0 // indirect
+	cloud.google.com/go/compute/metadata v0.7.0 // indirect
 	connectrpc.com/otelconnect v0.7.1
 	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/4meepo/tagalign v1.4.2 // indirect
@@ -117,7 +121,7 @@ require (
 	github.com/charmbracelet/x/windows v0.2.2 // indirect
 	github.com/chavacava/garif v0.1.0 // indirect
 	github.com/ckaznocha/intrange v0.3.1 // indirect
-	github.com/cncf/xds/go v0.0.0-20241223141626-cff3c89139a3 // indirect
+	github.com/cncf/xds/go v0.0.0-20250501225837-2ac532fd4443 // indirect
 	github.com/containerd/log v0.1.0 // indirect
 	github.com/containerd/stargz-snapshotter/estargz v0.16.3 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.6 // indirect
@@ -345,16 +349,16 @@ require (
 	golang.org/x/exp v0.0.0-20250305212735-054e65f0b394 // indirect
 	golang.org/x/exp/typeparams v0.0.0-20250210185358-939b2ce775ac // indirect
 	golang.org/x/mod v0.28.0 // indirect
-	golang.org/x/oauth2 v0.28.0 // indirect
+	golang.org/x/oauth2 v0.30.0 // indirect
 	golang.org/x/sync v0.17.0 // indirect
 	golang.org/x/sys v0.37.0 // indirect
 	golang.org/x/term v0.36.0 // indirect
 	golang.org/x/tools v0.37.0 // indirect
 	golang.org/x/tools/go/expect v0.1.1-deprecated // indirect
 	golang.org/x/tools/go/packages/packagestest v0.1.1-deprecated // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20250115164207-1a7da9e5054f // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20250313205543-e70fdf4c4cb4 // indirect
-	google.golang.org/grpc v1.71.0 // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20250825161204-c5933d9347a5 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20250825161204-c5933d9347a5 // indirect
+	google.golang.org/grpc v1.75.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	honnef.co/go/tools v0.6.1 // indirect
 	modernc.org/libc v1.22.5 // indirect

@@ -4,18 +4,21 @@ import (
 	"context"
 
 	"github.com/charmbracelet/log"
+	sdklog "go.opentelemetry.io/otel/sdk/log"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 )
 
-// Manager handles the lifecycle of the OpenTelemetry tracer provider
+// Manager handles the lifecycle of the OpenTelemetry tracer and logger providers
 type Manager struct {
-	provider *sdktrace.TracerProvider
+	provider    *sdktrace.TracerProvider
+	logProvider *sdklog.LoggerProvider
 }
 
 // NewManager creates a new tracing manager
-func NewManager(provider *sdktrace.TracerProvider) *Manager {
+func NewManager(provider *sdktrace.TracerProvider, logProvider *sdklog.LoggerProvider) *Manager {
 	return &Manager{
-		provider: provider,
+		provider:    provider,
+		logProvider: logProvider,
 	}
 }
 
@@ -23,6 +26,10 @@ func NewManager(provider *sdktrace.TracerProvider) *Manager {
 func (m *Manager) AfterInitialize(ctx context.Context) error {
 	if m.provider != nil {
 		log.Debug("OpenTelemetry tracing initialized")
+	}
+
+	if m.logProvider != nil {
+		log.Debug("OpenTelemetry logging initialized")
 	}
 
 	return nil
@@ -35,16 +42,27 @@ func (m *Manager) BeforeShutdown(ctx context.Context) error {
 
 // AfterShutDown is called after shutdown completes
 func (m *Manager) AfterShutDown(ctx context.Context) error {
+	var err error
+
 	if m.provider != nil {
 		log.Debug("Shutting down OpenTelemetry tracer provider")
-		if err := Shutdown(ctx, m.provider); err != nil {
-			log.Error("Failed to shutdown tracer provider", "error", err)
-
-			return err
+		if shutdownErr := Shutdown(ctx, m.provider); shutdownErr != nil {
+			log.Error("Failed to shutdown tracer provider", "error", shutdownErr)
+			err = shutdownErr
 		}
 	}
 
-	return nil
+	if m.logProvider != nil {
+		log.Debug("Shutting down OpenTelemetry logger provider")
+		if shutdownErr := ShutdownLogging(ctx, m.logProvider); shutdownErr != nil {
+			log.Error("Failed to shutdown logger provider", "error", shutdownErr)
+			if err == nil {
+				err = shutdownErr
+			}
+		}
+	}
+
+	return err
 }
 
 // ShutdownCleanup performs final cleanup
