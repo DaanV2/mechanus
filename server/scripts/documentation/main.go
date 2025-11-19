@@ -80,7 +80,7 @@ func markdownStruct(builder *markdownBuilder, key, configKey string, value map[s
 
 	for _, k := range keys {
 		v := value[k]
-		if v == nil {
+		if v == nil || k == "log_level" {
 			continue
 		}
 

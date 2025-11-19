@@ -1,20 +1,13 @@
-api:
-  cors:
-    allow-localhost: true
-    allowed-origins:
-      - "*"
-  host: ""
-  port: 8666
 database:
-  connmaxlifetime: 1h0m0s
+  conn-max-lifetime: 1h0m0s
   dsn: db.sqlite
-  maxidleconns: 2
-  maxopenconns: 0
+  max-idle-conss: 2
+  max-open-conns: 0
   type: sqlite
 initialize:
   admin:
-    password: admin
-    username: admin
+    password: ""
+    username: ""
 log:
   format: text
   level: debug
@@ -23,7 +16,16 @@ mdns:
   hostname: mechanus
   ipv6: false
   servicetype: _http._tcp.local
-web:
+otel:
+  enabled: false
+  endpoint: localhost:4318
+  insecure: true
+  service-name: mechanus-server
+server:
+  cors:
+    allow-localhost: true
+    allowed-origins:
+      - "*"
   host: ""
   port: 8080
   static:

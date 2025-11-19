@@ -3,7 +3,6 @@
 
 | Name | Type | Description | Default | Env |
 |------|------|-------------|---------|-----|
-| log_level | string |  | debug |  |
 | database | object | see: [database](#database) |  |  |
 | initialize | object | see: [initialize](#initialize) |  |  |
 | log | object | see: [log](#log) |  |  |
