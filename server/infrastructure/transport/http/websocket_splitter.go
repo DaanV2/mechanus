@@ -17,7 +17,7 @@ func NewWebsocketSplitter(websocket, other http.Handler) *WebsocketSplitter {
 
 // ServeHTTP implements http.Handler.
 func (w *WebsocketSplitter) ServeHTTP(writer http.ResponseWriter, req *http.Request) {
-	if req.URL.Scheme == "ws" || req.URL.Scheme == "wss" {
+	if req.Header.Get("Upgrade") == "websocket" {
 		w.websocket.ServeHTTP(writer, req)
 
 		return
