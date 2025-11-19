@@ -23,7 +23,6 @@ func main() {
 		err := viper.SafeWriteConfig()
 
 		var verr viper.ConfigFileAlreadyExistsError
-
 		if err == nil || errors.As(err, &verr) {
 			return
 		}

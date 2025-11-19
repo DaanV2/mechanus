@@ -3,6 +3,7 @@ package config
 import (
 	"errors"
 
+	"github.com/DaanV2/mechanus/server/pkg/extensions/xio"
 	"github.com/charmbracelet/log"
 	"github.com/spf13/viper"
 )
@@ -27,7 +28,10 @@ func SetupViper() {
 	viper.SetEnvKeyReplacer(EnvironmentNamer())
 	viper.SetConfigType("yaml")
 
-	for _, v := range ConfigPaths() {
+	cfgs := ConfigPaths()
+	xio.MakeDirAll(cfgs[0])
+
+	for _, v := range cfgs {
 		viper.AddConfigPath(v)
 	}
 }
