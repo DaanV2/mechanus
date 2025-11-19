@@ -3,6 +3,7 @@ package components
 import (
 	"context"
 
+	"connectrpc.com/connect"
 	"github.com/DaanV2/mechanus/server/application"
 	"github.com/DaanV2/mechanus/server/engine/screens"
 	"github.com/DaanV2/mechanus/server/infrastructure/authentication"
@@ -11,26 +12,23 @@ import (
 	"github.com/DaanV2/mechanus/server/infrastructure/servers"
 	"github.com/DaanV2/mechanus/server/infrastructure/storage"
 	"github.com/DaanV2/mechanus/server/infrastructure/tracing"
+	"github.com/DaanV2/mechanus/server/infrastructure/transport/cors"
 	"github.com/DaanV2/mechanus/server/infrastructure/transport/grpc"
-	"github.com/DaanV2/mechanus/server/infrastructure/transport/http"
-	"github.com/DaanV2/mechanus/server/infrastructure/transport/mdns"
 	"github.com/DaanV2/mechanus/server/infrastructure/transport/websocket"
 )
 
 // BuildServer setup all the necessary components for an api server
-func BuildServer(setupCtx context.Context) (*Server, error) {
+func BuildServer(setupCtx context.Context) (*ServerComponents, error) {
 	lfManager := lifecycle.NewManager()
 
 	// Configs
-	corsConf := grpc.GetCORSConfig()
-	apiConf := grpc.GetAPIServerConfig()
-	webConf := http.GetWebConfig()
-	mdnsConf := mdns.GetServerConfig(webConf.Port)
-	websocketConf := websocket.GetWebsocketConfig()
-	tracingConf := tracing.GetConfig()
+	corsCfg := cors.GetCORSConfig()
+	serverCfg := servers.GetServerConfig()
+	websocketCfg := websocket.GetWebsocketConfig()
+	tracingCfg := tracing.GetConfig()
 
 	// Setup OpenTelemetry tracing
-	tracerProvider, err := tracing.SetupTracing(setupCtx, tracingConf)
+	tracerProvider, err := tracing.SetupTracing(setupCtx, tracingCfg)
 	if err != nil {
 		return nil, err
 	}
@@ -58,34 +56,40 @@ func BuildServer(setupCtx context.Context) (*Server, error) {
 	}
 	jwtService := authentication.NewJWTService(jtiService, keyManager)
 	userService := application.NewUserService(userRepo)
-	rpcs := grpc.RPCS{
-		Login: grpc.NewLoginServiceHandler(userService, jwtService),
-		User:  grpc.NewUserServiceHandler(userService),
-		JWT:   jwtService,
-		CORS:  grpc.NewCORSHandler(corsConf),
-	}
 	screenManager := screens.NewScreenManager()
 
 	// Servers
-	websocketHandler := websocket.NewWebsocketHandler(screenManager, jwtService, websocketConf)
-	mdnsServer, mdnsErr := CreateMDNSServer(setupCtx, mdnsConf)
-	if mdnsErr != nil {
-		return nil, mdnsErr
+	websocketHandler := websocket.NewWebsocketHandler(screenManager, jwtService, websocketCfg)
+
+	router, err := CreateRouter(RouterSetup{
+		WebsocketHandler: websocketHandler,
+		HealthChecker:    lfManager,
+		ReadyChecker:     lfManager,
+		Interceptors: []connect.Interceptor{
+			tracing.TraceGRPCMiddleware(tracingCfg),
+			&grpc.LoggingInterceptor{},
+			grpc.NewAuthenticator(jwtService),
+		},
+	}, RouterRPCS{
+		Login: grpc.NewLoginServiceHandler(userService, jwtService),
+		User:  grpc.NewUserServiceHandler(userService),
+	},
+		RouterConfig{
+			CORS:    corsCfg,
+			Server:  serverCfg,
+			Tracing: tracingCfg,
+		})
+	if err != nil {
+		return nil, err
 	}
 
-	serverManager := &servers.Manager{}
-	serverManager.Register(
-		CreateAPIServer(apiConf, websocketHandler, rpcs, tracingConf),
-		CreateWebServer(webConf, lfManager, lfManager, tracingConf),
-		mdnsServer,
-	)
-	server := &Server{
-		Manager:    serverManager,
+	server := &ServerComponents{
+		Server:     CreateServer(router, serverCfg.Config),
 		Users:      userService,
 		DB:         db,
 		Components: lfManager,
 	}
-	lfManager.Add(screenManager, keyManager, db, tracingManager)
+	lfManager.Add(screenManager, keyManager, db, tracingManager, server.Server)
 
 	return server, nil
 }

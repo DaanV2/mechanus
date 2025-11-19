@@ -9,10 +9,8 @@ import (
 	"github.com/DaanV2/mechanus/server/application/checks"
 	"github.com/DaanV2/mechanus/server/components"
 	"github.com/DaanV2/mechanus/server/infrastructure/persistence"
+	"github.com/DaanV2/mechanus/server/infrastructure/servers"
 	"github.com/DaanV2/mechanus/server/infrastructure/tracing"
-	"github.com/DaanV2/mechanus/server/infrastructure/transport/grpc"
-	web "github.com/DaanV2/mechanus/server/infrastructure/transport/http"
-	"github.com/DaanV2/mechanus/server/infrastructure/transport/mdns"
 	"github.com/charmbracelet/log"
 	"github.com/spf13/cobra"
 )
@@ -43,31 +41,29 @@ func init() {
 	// is called directly, e.g.:
 	// serverCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	// flags := serverCmd.Flags()
-	web.WebConfig.AddToSet(serverCmd.Flags())
-	grpc.APIServerConfigSet.AddToSet(serverCmd.Flags())
+	servers.ServerConfigSet.AddToSet(serverCmd.Flags())
 	persistence.DatabaseConfigSet.AddToSet(serverCmd.Flags())
 	checks.InitializeConfig.AddToSet(serverCmd.Flags())
-	mdns.MDNSConfig.AddToSet(serverCmd.Flags())
 	tracing.TracingConfigSet.AddToSet(serverCmd.Flags())
 }
 
 func ServerWorkload(cmd *cobra.Command, args []string) error {
 	// Setup
-	server, err := components.BuildServer(cmd.Context())
+	cmpts, err := components.BuildServer(cmd.Context())
 	if err != nil {
 		return fmt.Errorf("couldn't setup the server: %w", err)
 	}
 	// Start initial components
-	err = server.Components.AfterInitialize(cmd.Context())
+	err = cmpts.Components.AfterInitialize(cmd.Context())
 	if err != nil {
 		log.Fatal("errors while performing initialization calls", "error", err)
 	}
 
-	checks.InitializeServer(cmd.Context(), server)
-	manager := server.Manager
+	checks.InitializeServer(cmd.Context(), cmpts)
+	server := cmpts.Server
 
 	// Execute
-	manager.Start()
+	go server.Listen()
 
 	// Await termination signal
 	<-cmd.Context().Done()
@@ -77,18 +73,18 @@ func ServerWorkload(cmd *cobra.Command, args []string) error {
 	defer cancel()
 
 	// Shutdown
-	berr := server.Components.BeforeShutdown(shutCtx)
+	berr := cmpts.Components.BeforeShutdown(shutCtx)
 	if berr != nil {
 		log.Error("errors while performing pre shutdown calls", "error", berr)
 	}
 
-	manager.Stop(shutCtx)
+	server.Shutdown(shutCtx)
 
-	aerr := server.Components.AfterShutDown(shutCtx)
+	aerr := cmpts.Components.AfterShutDown(shutCtx)
 	if aerr != nil {
 		log.Error("errors while performing post shutdown calls", "error", aerr)
 	}
-	serr := server.Components.ShutdownCleanup(shutCtx)
+	serr := cmpts.Components.ShutdownCleanup(shutCtx)
 	if serr != nil {
 		log.Error("errors while performing shutdown cleanup calls", "error", serr)
 	}

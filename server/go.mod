@@ -14,6 +14,8 @@ tool (
 
 require (
 	connectrpc.com/connect v1.19.1
+	connectrpc.com/grpchealth v1.4.0
+	connectrpc.com/grpcreflect v1.3.0
 	github.com/charmbracelet/bubbles v0.21.0
 	github.com/charmbracelet/bubbletea v1.3.10
 	github.com/charmbracelet/fang v0.4.3

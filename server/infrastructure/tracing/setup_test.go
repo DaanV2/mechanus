@@ -9,7 +9,7 @@ import (
 var _ = Describe("Setup", func() {
 	Describe("SetupTracing", func() {
 		It("should return a no-op provider when tracing is disabled", func(ctx SpecContext) {
-			cfg := tracing.Config{
+			cfg := &tracing.Config{
 				Enabled:     false,
 				Endpoint:    "localhost:4318",
 				ServiceName: "test-service",
@@ -26,7 +26,7 @@ var _ = Describe("Setup", func() {
 		})
 
 		It("should return an error when endpoint is invalid and tracing is enabled", func(ctx SpecContext) {
-			cfg := tracing.Config{
+			cfg := &tracing.Config{
 				Enabled:     true,
 				Endpoint:    "invalid://endpoint:99999",
 				ServiceName: "test-service",

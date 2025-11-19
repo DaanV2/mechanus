@@ -18,8 +18,8 @@ var (
 )
 
 // GetConfig returns the current tracing configuration
-func GetConfig() Config {
-	return Config{
+func GetConfig() *Config {
+	return &Config{
 		Enabled:     EnabledFlag.Value(),
 		Endpoint:    EndpointFlag.Value(),
 		ServiceName: ServiceNameFlag.Value(),
