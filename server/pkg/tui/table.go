@@ -11,11 +11,13 @@ var baseStyle = lipgloss.NewStyle().
 	BorderStyle(lipgloss.NormalBorder()).
 	BorderForeground(lipgloss.Color("240"))
 
+// Table is a generic table widget that displays items of type T as rows.
 type Table[T any] struct {
 	table table.Model
 	conv  func(item T) []string
 }
 
+// NewTable creates a new table with the provided converter function for items.
 func NewTable[T any](conv func(item T) []string) *Table[T] {
 	s := table.DefaultStyles()
 	s.Header = s.Header.

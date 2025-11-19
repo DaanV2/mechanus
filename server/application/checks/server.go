@@ -14,12 +14,15 @@ import (
 )
 
 var (
+	// InitializeConfig is the configuration object for server initialization settings.
 	InitializeConfig = config.New("initialize")
-	AdminUser        = InitializeConfig.String("initialize.admin.username", "", "The admin username to use when initializing")
-	AdminPassword    = InitializeConfig.String("initialize.admin.password", "", "The admin password to use when initializing")
+	// AdminUser is the configuration key for the admin username.
+	AdminUser = InitializeConfig.String("initialize.admin.username", "", "The admin username to use when initializing")
+	// AdminPassword is the configuration key for the admin password.
+	AdminPassword = InitializeConfig.String("initialize.admin.password", "", "The admin password to use when initializing")
 )
 
-// Runs the necessary checks to check if the server has been properly initialized
+// InitializeServer runs the necessary checks to verify if the server has been properly initialized.
 func InitializeServer(ctx context.Context, server *components.ServerComponents) {
 	ctx = xgorm.WithPrefix(ctx, "checks")
 

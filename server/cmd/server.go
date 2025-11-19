@@ -51,6 +51,7 @@ func init() {
 	websocket.WebsocketConfigSet.AddToSet(serverCmd.Flags())
 }
 
+// ServerWorkload starts and manages the server lifecycle.
 func ServerWorkload(cmd *cobra.Command, args []string) error {
 	// Setup
 	cmpts, err := components.BuildServer(cmd.Context())

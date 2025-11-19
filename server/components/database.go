@@ -8,7 +8,7 @@ import (
 	"github.com/charmbracelet/log"
 )
 
-// GetOptions builds a list of options from flags/envs variable via viper.
+// GetDatabaseOptions builds a list of options from flags/envs variable via viper.
 // See [persistence.GetOptions] for available values
 func GetDatabaseOptions() ([]persistence.Option, error) {
 	return persistence.GetOptions()
