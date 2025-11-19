@@ -14,15 +14,18 @@ import (
 )
 
 const (
-	JWT_ISSUER   = mechanus.SERVICE_NAME
+	// JWT_ISSUER is the issuer name for JWT tokens.
+	JWT_ISSUER = mechanus.SERVICE_NAME
 	JWT_AUDIENCE = mechanus.SERVICE_NAME
 )
 
 type (
+	// JWTOptions contains configuration options for JWT tokens.
 	JWTOptions struct {
 		TokenDuration time.Duration
 	}
 
+	// JWTService manages JWT token creation and validation.
 	JWTService struct {
 		options    *JWTOptions
 		validator  *jwt.Validator
@@ -31,6 +34,7 @@ type (
 	}
 )
 
+// NewJWTService creates a new JWT service with the provided JTI service and key manager.
 func NewJWTService(jtiService *JTIService, keys *KeyManager) *JWTService {
 	service := &JWTService{
 		options: &JWTOptions{
@@ -50,6 +54,7 @@ func NewJWTService(jtiService *JTIService, keys *KeyManager) *JWTService {
 
 // TODO Refresh
 
+// Create creates a new JWT token for the given user with the specified scope.
 func (s *JWTService) Create(ctx context.Context, user *models.User, scope string) (string, error) {
 	logging.Info(ctx, "creating jwt")
 
@@ -71,10 +76,12 @@ func (s *JWTService) Create(ctx context.Context, user *models.User, scope string
 	return s.sign(ctx, jti.ID, claims)
 }
 
+// Options returns the JWT service configuration options.
 func (s *JWTService) Options() *JWTOptions {
 	return s.options
 }
 
+// Validate validates a JWT token and returns the parsed token.
 func (s *JWTService) Validate(ctx context.Context, token string) (*jwt.Token, error) {
 	jToken, err := s.validate(ctx, token, jwt.WithExpirationRequired(), jwt.WithIssuer(JWT_ISSUER))
 
@@ -182,6 +189,7 @@ func (s *JWTService) findPublicKey(ctx context.Context, token *jwt.Token) (any, 
 	return nil, errors.New("couldn't find the jwt signing key: " + kid)
 }
 
+// GetClaims extracts JWTClaims from generic jwt.Claims.
 func GetClaims(claims jwt.Claims) (*JWTClaims, bool) {
 	if claims != nil {
 		c, ok := claims.(*JWTClaims)

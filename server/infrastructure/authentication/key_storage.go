@@ -13,12 +13,14 @@ import (
 
 var _ lifecycle.AfterInitialize = &KeyManager{}
 
+// KeyManager manages cryptographic keys for JWT signing and verification.
 type KeyManager struct {
 	storage storage.Storage[*KeyData]
 	keys    *xsync.Map[string, *KeyData]
 	logger  logging.Enriched
 }
 
+// NewKeyManager creates a new key manager with the provided storage provider.
 func NewKeyManager(sp storage.StorageProvider[*KeyData]) (*KeyManager, error) {
 	s, err := sp.AppStorage()
 	if err != nil {
@@ -46,6 +48,7 @@ func (manager *KeyManager) AfterInitialize(ctx context.Context) error {
 	return nil
 }
 
+// Get retrieves a key by its ID, loading from storage if necessary.
 func (manager *KeyManager) Get(ctx context.Context, id string) (*KeyData, error) {
 	manager.logger.From(ctx).Debug("getting key: " + id)
 	item, ok := manager.keys.Load(id)
@@ -56,6 +59,7 @@ func (manager *KeyManager) Get(ctx context.Context, id string) (*KeyData, error)
 	return manager.load(ctx, id)
 }
 
+// New creates and saves a new cryptographic key.
 func (manager *KeyManager) New(ctx context.Context) (*KeyData, error) {
 	manager.logger.From(ctx).Debug("creating new key")
 	item, err := xcrypto.GenerateRSAKeys()
@@ -71,7 +75,7 @@ func (manager *KeyManager) New(ctx context.Context) (*KeyData, error) {
 	return key, manager.save(ctx, key)
 }
 
-// GetSigningKey
+// GetSigningKey retrieves or creates a signing key for JWT tokens.
 func (manager *KeyManager) GetSigningKey(ctx context.Context) (*KeyData, error) {
 	var (
 		key *KeyData
