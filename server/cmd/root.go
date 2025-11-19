@@ -51,10 +51,6 @@ func RootCommand() *cobra.Command {
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
-	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM, syscall.SIGKILL, syscall.SIGQUIT)
-	defer cancel()
-	rootCmd.SetContext(ctx)
-
 	go func() {
 		<-ctx.Done()
 		log.Info("Shutdown received")
@@ -66,7 +62,9 @@ func Execute() {
 		}
 	}()
 
-	err := fang.Execute(ctx, rootCmd)
+	err := fang.Execute(ctx, rootCmd,
+		fang.WithNotifySignal(syscall.SIGINT, syscall.SIGTERM, syscall.SIGKILL, syscall.SIGQUIT)
+	)
 	if err != nil {
 		// nolint:gocritic // exitAfterDefer fine in this case, we already report the error
 		log.Fatal("error during executing command", "error", err)
