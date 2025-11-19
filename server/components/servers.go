@@ -20,7 +20,7 @@ import (
 	"github.com/DaanV2/mechanus/server/infrastructure/transport/routers"
 	"github.com/DaanV2/mechanus/server/infrastructure/transport/websocket"
 	"github.com/DaanV2/mechanus/server/mechanus"
-	"github.com/DaanV2/mechanus/server/pkg/gen/proto/users/v1/usersv1connect"
+	"github.com/DaanV2/mechanus/server/proto/users/v1/usersv1connect"
 )
 
 type ServerComponents struct {

@@ -44,9 +44,9 @@ var (
 	DatabaseConfigSet   = config.New("database").WithValidate(validateDatabaseFlags)
 	TypeFlag            = DatabaseConfigSet.String("database.type", SQLite.String(), "The type of database to connect/use: supported values: sqlite, postgres, mysql. (For testing purposes there is also inmemory)")
 	DSNFlag             = DatabaseConfigSet.String("database.dsn", "db.sqlite", "A datasource name, depends on type of database, but usually referes to file name or the connection string")
-	MaxIdleConnsFlag    = DatabaseConfigSet.Int("database.maxIdleConns", 2, "Sets the maximum number of connections in the idle connection pool. If n <= 0, no idle connections are retained.")
-	MaxOpenConnsFlag    = DatabaseConfigSet.Int("database.maxOpenConns", 0, "Sets the maximum number of open connections to the database. If n <= 0, then there is no limit on the number of open connections.")
-	ConnMaxLifetimeFlag = DatabaseConfigSet.Duration("database.connMaxLifetime", 1*time.Hour, "Sets the maximum amount of time a connection may be reused. If d <= 0, connections are not closed due to a connection's age.")
+	MaxIdleConnsFlag    = DatabaseConfigSet.Int("database.max-idle-conss", 2, "Sets the maximum number of connections in the idle connection pool. If n <= 0, no idle connections are retained.")
+	MaxOpenConnsFlag    = DatabaseConfigSet.Int("database.max-open-conns", 0, "Sets the maximum number of open connections to the database. If n <= 0, then there is no limit on the number of open connections.")
+	ConnMaxLifetimeFlag = DatabaseConfigSet.Duration("database.conn-max-lifetime", 1*time.Hour, "Sets the maximum amount of time a connection may be reused. If d <= 0, connections are not closed due to a connection's age.")
 )
 
 func validateDatabaseFlags(conf *config.Config) error {

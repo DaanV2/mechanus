@@ -11,6 +11,8 @@ import (
 	"github.com/DaanV2/mechanus/server/infrastructure/persistence"
 	"github.com/DaanV2/mechanus/server/infrastructure/servers"
 	"github.com/DaanV2/mechanus/server/infrastructure/tracing"
+	"github.com/DaanV2/mechanus/server/infrastructure/transport/cors"
+	"github.com/DaanV2/mechanus/server/infrastructure/transport/websocket"
 	"github.com/charmbracelet/log"
 	"github.com/spf13/cobra"
 )
@@ -44,7 +46,9 @@ func init() {
 	servers.ServerConfigSet.AddToSet(serverCmd.Flags())
 	persistence.DatabaseConfigSet.AddToSet(serverCmd.Flags())
 	checks.InitializeConfig.AddToSet(serverCmd.Flags())
-	tracing.TracingConfigSet.AddToSet(serverCmd.Flags())
+	tracing.OtelConfigSet.AddToSet(serverCmd.Flags())
+	cors.CorsConfig.AddToSet(serverCmd.Flags())
+	websocket.WebsocketConfigSet.AddToSet(serverCmd.Flags())
 }
 
 func ServerWorkload(cmd *cobra.Command, args []string) error {
