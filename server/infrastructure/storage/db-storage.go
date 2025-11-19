@@ -15,6 +15,7 @@ import (
 	"gorm.io/gorm/clause"
 )
 
+// DBStorage creates a database-based storage provider for the given type.
 func DBStorage[T Identifiable](db *persistence.DB) StorageProvider[T] {
 	return &dbProvider[T]{db}
 }

@@ -14,6 +14,7 @@ import (
 	"github.com/daanv2/go-locks"
 )
 
+// FileStorage creates a file-based storage provider for the given type.
 func FileStorage[T Identifiable]() StorageProvider[T] {
 	return &fileStorage[T]{
 		locks: *locks.NewRWPool(),

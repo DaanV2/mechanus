@@ -8,11 +8,13 @@ import (
 	"github.com/daanv2/go-kit/generics"
 )
 
+// JWTContext holds JWT authentication information in a context.
 type JWTContext struct {
 	Valid  bool
 	Claims *JWTClaims
 }
 
+// IsAuthenicated checks if the JWT context represents an authenticated user.
 func (j *JWTContext) IsAuthenicated() bool {
 	return j.Valid && j.Claims != nil
 }
@@ -23,11 +25,13 @@ func (j *JWTContext) IsAuthenicatedWithRole(role roles.Role) bool {
 }
 
 var (
+	// ErrNoToken is returned when no JWT token is found in the context.
 	ErrNoToken = errors.New("no token")
 )
 
 type jwt_context_key struct{}
 
+// ContextWithJWT adds JWT claims to a context.
 func ContextWithJWT(ctx context.Context, jwt *JWTClaims, valid bool) context.Context {
 	c := JWTContext{
 		Valid:  valid,
@@ -52,6 +56,7 @@ func JWTFromContext(ctx context.Context) (JWTContext, error) {
 	return c, nil
 }
 
+// IsAuthenicated checks if the context contains an authenticated JWT.
 func IsAuthenicated(ctx context.Context) bool {
 	c, err := JWTFromContext(ctx)
 	if err != nil {

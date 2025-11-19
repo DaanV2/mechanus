@@ -9,11 +9,13 @@ import (
 	"github.com/DaanV2/mechanus/server/infrastructure/persistence/models"
 )
 
+// JTIService manages JWT IDs (JTI) in the system.
 type JTIService struct {
 	db     *persistence.DB
 	logger logging.Enriched
 }
 
+// NewJTIService creates a new JTI service with the provided database.
 func NewJTIService(db *persistence.DB) *JTIService {
 	return &JTIService{
 		db:     db,
@@ -21,6 +23,7 @@ func NewJTIService(db *persistence.DB) *JTIService {
 	}
 }
 
+// GetByUser retrieves all JTIs for a given user.
 func (s *JTIService) GetByUser(ctx context.Context, userId string) ([]models.JTI, error) {
 	if userId == "" {
 		return nil, errors.New("string is empty: userId")
@@ -39,6 +42,7 @@ func (s *JTIService) GetByUser(ctx context.Context, userId string) ([]models.JTI
 	return result, nil
 }
 
+// GetActive retrieves all active (non-revoked) JTIs for a given user.
 func (s *JTIService) GetActive(ctx context.Context, userId string) ([]models.JTI, error) {
 	if userId == "" {
 		return nil, errors.New("string is empty: userId")
@@ -58,6 +62,7 @@ func (s *JTIService) GetActive(ctx context.Context, userId string) ([]models.JTI
 	return result, nil
 }
 
+// Get retrieves a JTI by its ID.
 func (s *JTIService) Get(ctx context.Context, jti string) (*models.JTI, error) {
 	if jti == "" {
 		return nil, errors.New("string is empty: jti")
@@ -76,6 +81,7 @@ func (s *JTIService) Get(ctx context.Context, jti string) (*models.JTI, error) {
 	return &result, nil
 }
 
+// Create creates a new JTI for the given user.
 func (s *JTIService) Create(ctx context.Context, userId string) (*models.JTI, error) {
 	if userId == "" {
 		return nil, errors.New("string is empty: userId")
@@ -98,7 +104,7 @@ func (s *JTIService) Create(ctx context.Context, userId string) (*models.JTI, er
 	return &result, nil
 }
 
-// GetOrCreate is optimistic, and epics that all gets will almost always succeed
+// GetActiveOrCreate retrieves an active JTI for the user or creates one if none exist.
 func (s *JTIService) GetActiveOrCreate(ctx context.Context, userId string) (*models.JTI, error) {
 	v, err := s.GetActive(ctx, userId)
 	if err == nil && len(v) > 0 {
@@ -108,6 +114,7 @@ func (s *JTIService) GetActiveOrCreate(ctx context.Context, userId string) (*mod
 	return s.Create(ctx, userId)
 }
 
+// Revoke marks a JTI as revoked.
 func (s *JTIService) Revoke(ctx context.Context, jti string) (bool, error) {
 	if jti == "" {
 		return false, errors.New("string is empty: jti")
