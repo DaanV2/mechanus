@@ -13,7 +13,9 @@ import (
 )
 
 // SetupTracing initializes OpenTelemetry tracing with the given configuration
-func SetupTracing(ctx context.Context, cfg Config) (*sdktrace.TracerProvider, error) {
+func SetupTracing(ctx context.Context, cfg *Config) (*sdktrace.TracerProvider, error) {
+	otel.SetErrorHandler(&otelErrorHandler{})
+
 	if !cfg.Enabled {
 		// Return a no-op tracer provider when tracing is disabled
 		// Disable default sampler, IDGenerator, and other defaults for no-op behavior
@@ -36,7 +38,7 @@ func SetupTracing(ctx context.Context, cfg Config) (*sdktrace.TracerProvider, er
 	opts := []otlptracehttp.Option{
 		otlptracehttp.WithEndpoint(cfg.Endpoint),
 	}
-	
+
 	if cfg.Insecure {
 		opts = append(opts, otlptracehttp.WithInsecure())
 	}

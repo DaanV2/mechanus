@@ -9,7 +9,6 @@ services:
     ports:
       - "8080:8080"
       - "8443:8443"
-      - "8666:8666"
     environment:
       # Default environment variables (can be overridden by creating a .env file)
       # See .env.example for reference

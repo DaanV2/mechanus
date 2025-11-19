@@ -36,12 +36,11 @@ COPY --from=server /app/mechanus-result /app/mechanus
 
 EXPOSE 8080
 EXPOSE 8443
-EXPOSE 8666
 
 # Default config
-ENV WEB_HOST=
-ENV WEB_PORT=8080
-ENV WEB_STATIC_FOLDER=/web
+ENV SERVER_HOST=
+ENV SERVER_PORT=8080
+ENV SERVER_STATIC_FOLDER=/web
 ENV LOG_FORMAT=json
 
 CMD ["/app/mechanus", "server"]

@@ -20,7 +20,7 @@ var (
 )
 
 // Runs the necessary checks to check if the server has been properly initialized
-func InitializeServer(ctx context.Context, server *components.Server) {
+func InitializeServer(ctx context.Context, server *components.ServerComponents) {
 	ctx = xgorm.WithPrefix(ctx, "checks")
 
 	// Is there an admin account?

@@ -12,7 +12,6 @@ services:
     ports:
       - "8080:8080"
       - "8443:8443"
-      - "8666:8666"
     restart: unless-stopped
     networks:
       - mechanus-public
