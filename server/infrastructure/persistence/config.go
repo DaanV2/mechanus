@@ -66,13 +66,13 @@ func validateDatabaseFlags(conf *config.Config) error {
 // See [DatabaseConfig] for available values
 func GetOptions() ([]Option, error) {
 	opts := []Option{
-		WithMaxIdleConns(DatabaseConfigSet.GetInt("database.maxIdleConns")),
-		WithMaxOpenConns(DatabaseConfigSet.GetInt("database.maxOpenConns")),
-		WithConnMaxLifetime(DatabaseConfigSet.GetDuration("database.connMaxLifetime")),
+		WithMaxIdleConns(MaxIdleConnsFlag.Value()),
+		WithMaxOpenConns(MaxOpenConnsFlag.Value()),
+		WithConnMaxLifetime(ConnMaxLifetimeFlag.Value()),
 	}
 
-	dt := DBType(DatabaseConfigSet.GetString("database.type"))
-	dsn := DatabaseConfigSet.GetString("database.dsn")
+	dt := DBType(TypeFlag.Value())
+	dsn := DSNFlag.Value()
 
 	// If SQLITE and dsn is empty or default, we will sanitize to the state directory
 	if dt == SQLite && (dsn == "" || dsn == "db.sqlite") {
