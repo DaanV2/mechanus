@@ -21,6 +21,7 @@ func MakeDirAll(folder string) {
 	}
 }
 
+// DirExists checks if a directory exists at the given path.
 func DirExists(folder string) bool {
 	_, err := os.Stat(folder)
 

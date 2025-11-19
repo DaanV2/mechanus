@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 )
 
+// MustID generates a random hex ID of the specified length and panics if an error occurs.
 func MustID(length int) string {
 	id, err := ID(length)
 	if err != nil {
@@ -14,6 +15,7 @@ func MustID(length int) string {
 	return id
 }
 
+// ID generates a random hex ID of the specified length.
 func ID(length int) (string, error) {
 	l := length / 2
 	if length&1 == 1 {
