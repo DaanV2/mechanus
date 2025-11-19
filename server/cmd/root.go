@@ -3,7 +3,6 @@ package cmd
 import (
 	"context"
 	"os"
-	"os/signal"
 	"syscall"
 
 	cmd_config "github.com/DaanV2/mechanus/server/cmd/config"
@@ -51,19 +50,16 @@ func RootCommand() *cobra.Command {
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
-	go func() {
-		<-ctx.Done()
-		log.Info("Shutdown received")
-	}()
-
 	defer func() {
 		if e := recover(); e != nil {
 			log.Fatal("uncaught error", "error", e)
 		}
 	}()
 
-	err := fang.Execute(ctx, rootCmd,
-		fang.WithNotifySignal(syscall.SIGINT, syscall.SIGTERM, syscall.SIGKILL, syscall.SIGQUIT)
+	err := fang.Execute(
+		context.Background(),
+		rootCmd,
+		fang.WithNotifySignal(syscall.SIGINT, syscall.SIGTERM, syscall.SIGKILL, syscall.SIGQUIT),
 	)
 	if err != nil {
 		// nolint:gocritic // exitAfterDefer fine in this case, we already report the error
