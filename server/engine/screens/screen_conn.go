@@ -8,7 +8,7 @@ import (
 
 	"github.com/DaanV2/mechanus/server/engine/devices"
 	"github.com/DaanV2/mechanus/server/infrastructure/logging"
-	screensv1 "github.com/DaanV2/mechanus/server/pkg/gen/proto/screens/v1"
+	screensv1 "github.com/DaanV2/mechanus/server/proto/screens/v1"
 	"github.com/coder/websocket"
 	"google.golang.org/protobuf/proto"
 )

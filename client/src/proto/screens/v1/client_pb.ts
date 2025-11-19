@@ -6,13 +6,15 @@ import type { GenFile, GenMessage } from "@bufbuild/protobuf/codegenv1";
 import { fileDesc, messageDesc } from "@bufbuild/protobuf/codegenv1";
 import type { Ping } from "./general_pb";
 import { file_screens_v1_general } from "./general_pb";
+import type { InitialSetupRequest } from "./setup_pb";
+import { file_screens_v1_setup } from "./setup_pb";
 import type { Message } from "@bufbuild/protobuf";
 
 /**
  * Describes the file screens/v1/client.proto.
  */
 export const file_screens_v1_client: GenFile = /*@__PURE__*/
-  fileDesc("ChdzY3JlZW5zL3YxL2NsaWVudC5wcm90bxIKc2NyZWVucy52MSI7Cg5DbGllbnRNZXNzYWdlcxIpCgZhY3Rpb24YASADKAsyGS5zY3JlZW5zLnYxLkNsaWVudE1lc3NhZ2UilQEKDUNsaWVudE1lc3NhZ2USDwoCaWQYASABKAlIAYgBARJAChVpbml0aWFsX3NldHVwX3JlcXVlc3QYAiABKAsyHy5zY3JlZW5zLnYxLkluaXRpYWxTZXR1cFJlcXVlc3RIABIgCgRwaW5nGAMgASgLMhAuc2NyZWVucy52MS5QaW5nSABCCAoGYWN0aW9uQgUKA19pZCIVChNJbml0aWFsU2V0dXBSZXF1ZXN0QkZaRGdpdGh1Yi5jb20vRGFhblYyL21lY2hhbnVzL3NlcnZlci9wa2cvZ2VuL3Byb3RvL3NjcmVlbnMvdjE7c2NyZWVuc3YxYgZwcm90bzM", [file_screens_v1_general]);
+  fileDesc("ChdzY3JlZW5zL3YxL2NsaWVudC5wcm90bxIKc2NyZWVucy52MSI7Cg5DbGllbnRNZXNzYWdlcxIpCgZhY3Rpb24YASADKAsyGS5zY3JlZW5zLnYxLkNsaWVudE1lc3NhZ2UilQEKDUNsaWVudE1lc3NhZ2USDwoCaWQYASABKAlIAYgBARJAChVpbml0aWFsX3NldHVwX3JlcXVlc3QYAiABKAsyHy5zY3JlZW5zLnYxLkluaXRpYWxTZXR1cFJlcXVlc3RIABIgCgRwaW5nGAMgASgLMhAuc2NyZWVucy52MS5QaW5nSABCCAoGYWN0aW9uQgUKA19pZEI+WjxnaXRodWIuY29tL0RhYW5WMi9tZWNoYW51cy9zZXJ2ZXIvcHJvdG8vc2NyZWVucy92MTtzY3JlZW5zdjFiBnByb3RvMw", [file_screens_v1_general, file_screens_v1_setup]);
 
 /**
  * @generated from message screens.v1.ClientMessages
@@ -66,17 +68,4 @@ export type ClientMessage = Message<"screens.v1.ClientMessage"> & {
  */
 export const ClientMessageSchema: GenMessage<ClientMessage> = /*@__PURE__*/
   messageDesc(file_screens_v1_client, 1);
-
-/**
- * @generated from message screens.v1.InitialSetupRequest
- */
-export type InitialSetupRequest = Message<"screens.v1.InitialSetupRequest"> & {
-};
-
-/**
- * Describes the message screens.v1.InitialSetupRequest.
- * Use `create(InitialSetupRequestSchema)` to create a new message.
- */
-export const InitialSetupRequestSchema: GenMessage<InitialSetupRequest> = /*@__PURE__*/
-  messageDesc(file_screens_v1_client, 2);
 

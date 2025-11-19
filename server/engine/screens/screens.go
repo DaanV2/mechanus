@@ -8,7 +8,7 @@ import (
 
 	"github.com/DaanV2/mechanus/server/infrastructure/logging"
 	"github.com/DaanV2/mechanus/server/pkg/extensions/xsync"
-	screensv1 "github.com/DaanV2/mechanus/server/pkg/gen/proto/screens/v1"
+	screensv1 "github.com/DaanV2/mechanus/server/proto/screens/v1"
 	"github.com/coder/websocket"
 )
 

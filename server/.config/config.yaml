@@ -27,4 +27,5 @@ web:
   host: ""
   port: 8080
   static:
-    folder: /web
+    folder: ../client/build
+

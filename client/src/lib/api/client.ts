@@ -16,7 +16,6 @@ const tokenInjector: Interceptor = (next) => (req) => {
 export function createClient(): Transport {
   return createConnectTransport({
     baseUrl: server_grpc_url(),
-    credentials: 'same-origin',
     defaultTimeoutMs: 5000,
     interceptors: [tokenInjector]
   });
