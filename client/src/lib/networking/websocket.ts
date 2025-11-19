@@ -1,6 +1,6 @@
 import { server_websocket_url } from '$lib/config';
 import { Cookie } from '$lib/storage';
-import { create, fromBinary, toBinary, type MessageInitShape } from '@bufbuild/protobuf';
+import { create, fromBinary, toBinary } from '@bufbuild/protobuf';
 import {
   ClientMessageSchema,
   ClientMessagesSchema,
@@ -33,13 +33,16 @@ export class WebsocketHandler {
 
   addEventListener<K extends keyof WebSocketEventMap>(
     type: K,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     listener: (this: WebsocketHandler, ev: WebSocketEventMap[K]) => any,
     options?: boolean | AddEventListenerOptions
   ): void {
     this.socket.addEventListener(type, (ev) => listener.call(this, ev), options);
   }
+
   removeEventListener<K extends keyof WebSocketEventMap>(
     type: K,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     listener: (this: WebsocketHandler, ev: WebSocketEventMap[K]) => any,
     options?: boolean | EventListenerOptions
   ): void {
@@ -56,6 +59,7 @@ export class WebsocketHandler {
     this.socket.send(data);
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private _received(ev: MessageEvent<any>) {
     console.log('received', ev);
 

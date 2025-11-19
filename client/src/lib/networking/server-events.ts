@@ -1,4 +1,3 @@
-import type { Action } from '@sveltejs/kit';
 import type { ServerMessage } from '../../proto/screens/v1/server_pb';
 
 type ActionCases = UnionToMap<
@@ -11,17 +10,8 @@ type ActionCases = UnionToMap<
   >,
   false
 >;
-type EventMapping = UnionToMap<
-  Exclude<
-    ServerMessage['action'],
-    {
-      case: undefined;
-      value?: undefined;
-    }
-  >,
-  true
->;
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type UnionToMap<U extends { case: string; value: any }, WrapValue extends boolean = false> = {
   [K in U as K['case']]: WrapValue extends true ? Array<ActionHandler<K['value']>> : K['value'];
 };
@@ -32,6 +22,7 @@ type Handler<T> = (id: string | undefined, msg: T) => void;
 type ActionHandler<K extends ActionCase> = Handler<ActionCases[K]>;
 
 export class ServerEventHandler {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   readonly events: Partial<Record<ActionCase, Array<ActionType<any>>>>;
 
   constructor() {
