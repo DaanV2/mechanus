@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/charmbracelet/log"
+	"go.opentelemetry.io/otel/trace"
 )
 
 // With returns a logger with the given key-value pairs attached,
@@ -16,6 +17,28 @@ func With(ctx context.Context, keyvals ...interface{}) *log.Logger {
 // based on the logger extracted from the provided context.
 func WithPrefix(ctx context.Context, prefix string) *log.Logger {
 	return From(ctx).WithPrefix(prefix)
+}
+
+// WithTrace returns a logger with trace information (trace ID and span ID) attached,
+// based on the logger extracted from the provided context and the current span from the context.
+// If no valid span is present in the context, returns the logger without trace information.
+func WithTrace(ctx context.Context) *log.Logger {
+	logger := From(ctx)
+	
+	span := trace.SpanFromContext(ctx)
+	if span == nil {
+		return logger
+	}
+	
+	spanContext := span.SpanContext()
+	if !spanContext.IsValid() {
+		return logger
+	}
+	
+	return logger.With(
+		"trace_id", spanContext.TraceID().String(),
+		"span_id", spanContext.SpanID().String(),
+	)
 }
 
 // Debug logs a message at the debug level using the logger from the context.
