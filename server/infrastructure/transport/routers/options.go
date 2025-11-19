@@ -9,7 +9,6 @@ import (
 
 type Option func(*http.ServeMux)
 
-
 func WithGrpcRoute[T any](create func(data T, opts ...connect.HandlerOption) (string, http.Handler), input T, opts []connect.HandlerOption) Option {
 	return func(router *http.ServeMux) {
 		path, handler := create(input, opts...)

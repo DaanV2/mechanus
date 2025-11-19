@@ -1,4 +1,4 @@
-export const GRPC_PORT = 8666;
+export const GRPC_PORT = 8080;
 
 export function server_grpc_url(): `${string}//${string}:${number}` {
   return `${window.location.protocol}//${window.location.hostname}:${GRPC_PORT}`;
