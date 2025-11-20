@@ -13,6 +13,7 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/plugin/opentelemetry/tracing"
 )
 
 var _ lifecycle.ShutdownCleanup = &DB{}
@@ -67,6 +68,7 @@ func NewDB(opts ...Option) (*DB, error) {
 	if config.Logger != nil {
 		gormConfig.Logger = config.Logger
 	}
+	
 
 	// Connect to the database based on the type
 	log.WithPrefix("db").Debug("opening database", "type", config.Type, "dsn", config.DSN)
@@ -87,6 +89,10 @@ func NewDB(opts ...Option) (*DB, error) {
 	db, err := gorm.Open(dailer, gormConfig)
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to database: %w", err)
+	}
+	err = db.Use(tracing.NewPlugin())
+	if err != nil {
+		return nil, fmt.Errorf("failed to enable tracing plugin: %w", err)
 	}
 
 	// Configure connection pool
