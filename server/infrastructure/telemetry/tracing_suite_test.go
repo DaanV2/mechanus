@@ -1,4 +1,4 @@
-package tracing_test
+package telemetry_test
 
 import (
 	"testing"

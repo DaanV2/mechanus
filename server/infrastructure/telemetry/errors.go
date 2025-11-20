@@ -1,4 +1,4 @@
-package tracing
+package telemetry
 
 import "github.com/charmbracelet/log"
 

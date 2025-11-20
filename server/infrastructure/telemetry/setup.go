@@ -1,10 +1,11 @@
-package tracing
+package telemetry
 
 import (
 	"context"
 	"fmt"
 
 	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/resource"
@@ -12,16 +13,13 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.21.0"
 )
 
-// SetupTracing initializes OpenTelemetry tracing with the given configuration
-func SetupTracing(ctx context.Context, cfg *Config) (*sdktrace.TracerProvider, error) {
+// Setup initializes OpenTelemetry telemetry with the given configuration
+func Setup(ctx context.Context, cfg *Config) (*Manager, error) {
 	otel.SetErrorHandler(&otelErrorHandler{})
+	manager := NewManager()
 
 	if !cfg.Enabled {
-		// Return a no-op tracer provider when tracing is disabled
-		// Disable default sampler, IDGenerator, and other defaults for no-op behavior
-		return sdktrace.NewTracerProvider(
-			sdktrace.WithSampler(sdktrace.NeverSample()),
-		), nil
+		return manager, nil
 	}
 
 	// Create resource with service information
@@ -38,7 +36,6 @@ func SetupTracing(ctx context.Context, cfg *Config) (*sdktrace.TracerProvider, e
 	opts := []otlptracehttp.Option{
 		otlptracehttp.WithEndpoint(cfg.Endpoint),
 	}
-
 	if cfg.Insecure {
 		opts = append(opts, otlptracehttp.WithInsecure())
 	}
@@ -48,6 +45,13 @@ func SetupTracing(ctx context.Context, cfg *Config) (*sdktrace.TracerProvider, e
 		return nil, fmt.Errorf("failed to create OTLP exporter: %w", err)
 	}
 
+	manager.SetTraceProvider(SetupTracing(exporter, res))
+	manager.SetExporter(exporter)
+
+	return manager, nil
+}
+
+func SetupTracing(exporter *otlptrace.Exporter, res *resource.Resource) *sdktrace.TracerProvider {
 	// Create tracer provider with batch span processor
 	tp := sdktrace.NewTracerProvider(
 		sdktrace.WithBatcher(exporter),
@@ -57,20 +61,11 @@ func SetupTracing(ctx context.Context, cfg *Config) (*sdktrace.TracerProvider, e
 	// Set global tracer provider
 	otel.SetTracerProvider(tp)
 
-	// Set global propagator for distributed tracing
+	// Set global propagator for distributed telemetry
 	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(
 		propagation.TraceContext{},
 		propagation.Baggage{},
 	))
 
-	return tp, nil
-}
-
-// Shutdown gracefully shuts down the tracer provider
-func Shutdown(ctx context.Context, tp *sdktrace.TracerProvider) error {
-	if tp == nil {
-		return nil
-	}
-
-	return tp.Shutdown(ctx)
+	return tp
 }

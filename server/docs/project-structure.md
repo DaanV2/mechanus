@@ -27,7 +27,7 @@ flowchart TD
         AUTHN["authn/ (jwt, rsa keys)"]
         T["transport/(grpc,http,ws,mdns)"]
         LG["logging/"]
-        TR["tracing/"]
+        TR["telemetry/"]
         CFG["config/"]
     end
 
@@ -56,3 +56,4 @@ flowchart TD
     Interfaces --> Infrastructure
     Infrastructure --> Pkg
 ```
+

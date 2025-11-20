@@ -1,4 +1,4 @@
-package tracing
+package telemetry
 
 import (
 	"net/http"
@@ -13,10 +13,10 @@ import (
 // TraceHttpMiddleware wraps an HTTP handler with OpenTelemetry instrumentation
 func TraceHttpMiddleware(cfg *Config, next http.Handler) http.Handler {
 	if !cfg.Enabled {
-		// Return the handler as-is if tracing is disabled
+		// Return the handler as-is if telemetry is disabled
 		return next
 	}
-	log.Debug("tracing is enabled for http server")
+	log.Debug("telemetry is enabled for http server")
 
 	// Wrap with otelhttp instrumentation
 	return otelhttp.NewHandler(
@@ -26,7 +26,7 @@ func TraceHttpMiddleware(cfg *Config, next http.Handler) http.Handler {
 	)
 }
 
-// TraceGRPCMiddleware returns a Connect interceptor that adds OpenTelemetry tracing to gRPC requests
+// TraceGRPCMiddleware returns a Connect interceptor that adds OpenTelemetry telemetry to gRPC requests
 func TraceGRPCMiddleware(cfg *Config) connect.Interceptor {
 	if !cfg.Enabled {
 		return nil

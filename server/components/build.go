@@ -11,7 +11,7 @@ import (
 	"github.com/DaanV2/mechanus/server/infrastructure/persistence/repositories"
 	"github.com/DaanV2/mechanus/server/infrastructure/servers"
 	"github.com/DaanV2/mechanus/server/infrastructure/storage"
-	"github.com/DaanV2/mechanus/server/infrastructure/tracing"
+	"github.com/DaanV2/mechanus/server/infrastructure/telemetry"
 	"github.com/DaanV2/mechanus/server/infrastructure/transport/cors"
 	"github.com/DaanV2/mechanus/server/infrastructure/transport/grpc"
 	"github.com/DaanV2/mechanus/server/infrastructure/transport/websocket"
@@ -25,14 +25,13 @@ func BuildServer(setupCtx context.Context) (*ServerComponents, error) {
 	corsCfg := cors.GetCORSConfig()
 	serverCfg := servers.GetServerConfig()
 	websocketCfg := websocket.GetWebsocketConfig()
-	tracingCfg := tracing.GetConfig()
+	tracingCfg := telemetry.GetConfig()
 
-	// Setup OpenTelemetry tracing
-	tracerProvider, err := tracing.SetupTracing(setupCtx, tracingCfg)
+	// Setup OpenTelemetry telemetry
+	otelmanager, err := telemetry.Setup(setupCtx, tracingCfg)
 	if err != nil {
 		return nil, err
 	}
-	tracingManager := tracing.NewManager(tracerProvider)
 
 	// Storage
 	v, dbErr := GetDatabaseOptions()
@@ -66,7 +65,7 @@ func BuildServer(setupCtx context.Context) (*ServerComponents, error) {
 		HealthChecker:    lfManager,
 		ReadyChecker:     lfManager,
 		Interceptors: []connect.Interceptor{
-			tracing.TraceGRPCMiddleware(tracingCfg),
+			telemetry.TraceGRPCMiddleware(tracingCfg),
 			&grpc.LoggingInterceptor{},
 			grpc.NewAuthenticator(jwtService),
 		},
@@ -89,7 +88,7 @@ func BuildServer(setupCtx context.Context) (*ServerComponents, error) {
 		DB:         db,
 		Components: lfManager,
 	}
-	lfManager.Add(screenManager, keyManager, db, tracingManager, server.Server)
+	lfManager.Add(screenManager, keyManager, db, otelmanager, server.Server)
 
 	return server, nil
 }

@@ -1,7 +1,7 @@
-package tracing_test
+package telemetry_test
 
 import (
-	"github.com/DaanV2/mechanus/server/infrastructure/tracing"
+	"github.com/DaanV2/mechanus/server/infrastructure/telemetry"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
@@ -9,7 +9,7 @@ import (
 var _ = Describe("Config", func() {
 	Describe("GetConfig", func() {
 		It("should return default configuration", func() {
-			cfg := tracing.GetConfig()
+			cfg := telemetry.GetConfig()
 			Expect(cfg.Enabled).To(BeFalse())
 			Expect(cfg.Endpoint).To(Equal("localhost:4318"))
 			Expect(cfg.ServiceName).To(Equal("mechanus-server"))

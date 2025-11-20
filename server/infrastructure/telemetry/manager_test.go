@@ -1,7 +1,7 @@
-package tracing_test
+package telemetry_test
 
 import (
-	"github.com/DaanV2/mechanus/server/infrastructure/tracing"
+	"github.com/DaanV2/mechanus/server/infrastructure/telemetry"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
@@ -11,7 +11,8 @@ var _ = Describe("Manager", func() {
 	Describe("Lifecycle", func() {
 		It("should handle lifecycle with no-op provider", func(ctx SpecContext) {
 			provider := sdktrace.NewTracerProvider()
-			manager := tracing.NewManager(provider)
+			manager := telemetry.NewManager()
+			manager.SetTraceProvider(provider)
 
 			err := manager.AfterInitialize(ctx)
 			Expect(err).ToNot(HaveOccurred())
@@ -27,7 +28,7 @@ var _ = Describe("Manager", func() {
 		})
 
 		It("should handle lifecycle with nil provider", func(ctx SpecContext) {
-			manager := tracing.NewManager(nil)
+			manager := telemetry.NewManager()
 
 			err := manager.AfterInitialize(ctx)
 			Expect(err).ToNot(HaveOccurred())

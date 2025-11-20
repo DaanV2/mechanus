@@ -13,7 +13,7 @@ import (
 	"github.com/DaanV2/mechanus/server/infrastructure/logging"
 	"github.com/DaanV2/mechanus/server/infrastructure/persistence"
 	"github.com/DaanV2/mechanus/server/infrastructure/servers"
-	"github.com/DaanV2/mechanus/server/infrastructure/tracing"
+	"github.com/DaanV2/mechanus/server/infrastructure/telemetry"
 	"github.com/DaanV2/mechanus/server/infrastructure/transport/cors"
 	"github.com/DaanV2/mechanus/server/infrastructure/transport/http"
 	"github.com/DaanV2/mechanus/server/infrastructure/transport/mdns"
@@ -54,7 +54,7 @@ type RouterRPCS struct {
 type RouterConfig struct {
 	CORS    *cors.CORSConfig
 	Server  *servers.ServerConfig
-	Tracing *tracing.Config
+	Tracing *telemetry.Config
 }
 
 // CreateRouter creates an HTTP handler with all routes, middleware, and services configured.
@@ -94,7 +94,7 @@ func CreateRouter(setup RouterSetup, rpcs RouterRPCS, cfgs RouterConfig) (gohttp
 	hrouter := gohttp.Handler(router)
 	hrouter = cors.NewCORSHandler(cfgs.CORS, hrouter)
 	hrouter = http.NewWebsocketSplitter(wrouter, hrouter)
-	hrouter = tracing.TraceHttpMiddleware(cfgs.Tracing, hrouter)
+	hrouter = telemetry.TraceHttpMiddleware(cfgs.Tracing, hrouter)
 	hrouter = logging.HttpMiddleware(hrouter)
 
 	return hrouter, nil
