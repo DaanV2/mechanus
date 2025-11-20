@@ -1,5 +1,6 @@
 services:
   mechanus-server:
+    image: mechanus:latest
     build:
       context: ..
       tags:
