@@ -10,8 +10,10 @@ import (
 )
 
 var (
+	// ErrHomeNotFound is returned when the user home directory cannot be determined.
 	ErrHomeNotFound = errors.New("unable to determine user home directory")
-	ErrCreateDir    = errors.New("failed to create directory")
+	// ErrCreateDir is returned when a directory cannot be created.
+	ErrCreateDir = errors.New("failed to create directory")
 )
 
 // GetUserDataDir returns the directory for storing user data

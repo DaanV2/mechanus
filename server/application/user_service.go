@@ -12,21 +12,26 @@ import (
 )
 
 var (
+	// ErrUserAlreadyExists is returned when attempting to create a user that already exists.
 	ErrUserAlreadyExists = errors.New("user already exists")
 )
 
+// UserService provides operations for managing users in the application.
 type UserService struct {
 	repo *repositories.UserRepository
 }
 
+// NewUserService creates a new UserService with the provided repository.
 func NewUserService(repo *repositories.UserRepository) *UserService {
 	return &UserService{repo}
 }
 
+// Get retrieves a user by their ID.
 func (s *UserService) Get(ctx context.Context, userId string) (*models.User, error) {
 	return s.repo.Get(ctx, userId)
 }
 
+// FindByUsername retrieves a user by their username.
 func (s *UserService) FindByUsername(ctx context.Context, username string) (*models.User, error) {
 	return s.repo.FindByUsername(ctx, username)
 }
@@ -67,6 +72,7 @@ func (s *UserService) UpdatePassword(ctx context.Context, id string, newPassword
 	return s.repo.UpdatePassword(ctx, user)
 }
 
+// Find retrieves users matching the provided query criteria.
 func (s *UserService) Find(ctx context.Context, queries *models.User) ([]*models.User, error) {
 	return s.repo.Find(ctx, queries)
 }

@@ -8,6 +8,7 @@ import (
 )
 
 const (
+	// DEFAULT_FILE_PERMISSIONS is the default file permission mode used when creating files.
 	DEFAULT_FILE_PERMISSIONS = xio.DEFAULT_FILE_PERMISSIONS
 )
 

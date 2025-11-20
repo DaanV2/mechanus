@@ -10,6 +10,7 @@ var rootCmd = &cobra.Command{
 	Short: "manage maps",
 }
 
+// AddCommand adds the maps command to the parent command.
 func AddCommand(parent *cobra.Command) {
 	parent.AddCommand(rootCmd)
 }

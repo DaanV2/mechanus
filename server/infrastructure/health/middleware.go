@@ -14,20 +14,24 @@ var (
 	_ http.Handler       = &ReadyService{}
 )
 
+// HealthService provides health check functionality for the application.
 type HealthService struct {
 	checks HealthCheck
 }
 
+// ReadyService provides readiness check functionality for the application.
 type ReadyService struct {
 	checks ReadyCheck
 }
 
+// NewHealthService creates a new health service with the provided health check.
 func NewHealthService(checks HealthCheck) *HealthService {
 	return &HealthService{
 		checks: checks,
 	}
 }
 
+// NewReadyService creates a new readiness service with the provided readiness check.
 func NewReadyService(checks ReadyCheck) *ReadyService {
 	return &ReadyService{
 		checks: checks,

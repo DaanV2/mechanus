@@ -2,6 +2,7 @@ package models
 
 import "github.com/lib/pq"
 
+// User represents a user in the database.
 type User struct {
 	Model
 	Username     string
@@ -11,10 +12,12 @@ type User struct {
 	PasswordHash []byte
 }
 
+// GetRoles returns the user's roles.
 func (u *User) GetRoles() []string {
 	return u.Roles
 }
 
+// SetRoles sets the user's roles.
 func (u *User) SetRoles(roles ...string) {
 	u.Roles = roles
 }

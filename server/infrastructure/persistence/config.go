@@ -29,7 +29,7 @@ const (
 	MySQL DBType = "mysql"
 )
 
-// Config holds the database configuration
+// DatabaseConfig holds the database configuration.
 type DatabaseConfig struct {
 	Type            DBType
 	DSN             string
@@ -41,7 +41,8 @@ type DatabaseConfig struct {
 }
 
 var (
-	DatabaseConfigSet   = config.New("database").WithValidate(validateDatabaseFlags)
+	// DatabaseConfigSet is the configuration set for database settings.
+	DatabaseConfigSet = config.New("database").WithValidate(validateDatabaseFlags)
 	TypeFlag            = DatabaseConfigSet.String("database.type", SQLite.String(), "The type of database to connect/use: supported values: sqlite, postgres, mysql. (For testing purposes there is also inmemory)")
 	DSNFlag             = DatabaseConfigSet.String("database.dsn", "db.sqlite", "A datasource name, depends on type of database, but usually referes to file name or the connection string")
 	MaxIdleConnsFlag    = DatabaseConfigSet.Int("database.max-idle-conss", 2, "Sets the maximum number of connections in the idle connection pool. If n <= 0, no idle connections are retained.")

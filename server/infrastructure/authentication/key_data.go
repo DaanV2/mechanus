@@ -12,6 +12,7 @@ var _ encoding.TextMarshaler = &KeyData{}
 var _ encoding.TextUnmarshaler = &KeyData{}
 
 type (
+	// KeyData holds a cryptographic key with an identifier.
 	KeyData struct {
 		id  string
 		key crypto.PrivateKey
@@ -22,14 +23,17 @@ type (
 	}
 )
 
+// GetID returns the key's identifier.
 func (k *KeyData) GetID() string {
 	return k.id
 }
 
+// Private returns the private key.
 func (k *KeyData) Private() crypto.PrivateKey {
 	return k.key
 }
 
+// Public returns the public key corresponding to the private key.
 func (k *KeyData) Public() crypto.PublicKey {
 	if p, ok := k.key.(publicCarrier); ok {
 		return p.Public()

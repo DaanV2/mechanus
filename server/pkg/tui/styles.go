@@ -5,6 +5,7 @@ import (
 	"github.com/charmbracelet/log"
 )
 
+// LogStyle returns a customized log style with standardized level names and error colors.
 func LogStyle() *log.Styles {
 	styles := log.DefaultStyles()
 

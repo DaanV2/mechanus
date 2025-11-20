@@ -1,5 +1,6 @@
 package state
 
+// SplashScreen represents a splash screen displayed to users.
 type SplashScreen struct {
 	Show            bool   `json:"show"`             // Whether the splash screen is shown
 	Title           string `json:"title"`            // Title of the splash screen

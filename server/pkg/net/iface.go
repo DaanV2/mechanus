@@ -6,6 +6,7 @@ import (
 	"strings"
 )
 
+// FirstIFace returns the first available network interface.
 func FirstIFace() (net.Interface, error) {
 	ifaces, err := net.Interfaces()
 	if err != nil {
@@ -19,6 +20,7 @@ func FirstIFace() (net.Interface, error) {
 	return ifaces[0], nil
 }
 
+// FindIFace searches for a network interface by name (case-insensitive substring match).
 func FindIFace(name string) (net.Interface, error) {
 	ifaces, err := net.Interfaces()
 	if err != nil {

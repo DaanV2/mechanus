@@ -10,6 +10,7 @@ var rootCmd = &cobra.Command{
 	Short: "multi-cast dns commands",
 }
 
+// AddCommand adds the mdns command to the parent command.
 func AddCommand(parent *cobra.Command) {
 	parent.AddCommand(rootCmd)
 

@@ -29,6 +29,7 @@ func init() {
 	// infoCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
+// PrintInfo prints information about application directories and paths.
 func PrintInfo(cmd *cobra.Command, args []string) error {
 	values := []string{
 		printInfoFn("app config dir", paths.GetAppConfigDir),

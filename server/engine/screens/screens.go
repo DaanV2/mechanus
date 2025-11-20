@@ -12,12 +12,14 @@ import (
 	"github.com/coder/websocket"
 )
 
+// ScreenHandler manages connections and messages for a single screen.
 type ScreenHandler struct {
 	id        string
 	listeners *xsync.Map[string, *ScreenConn]
 	logger    logging.Enriched
 }
 
+// NewScreenHandler creates a new screen handler with the given ID.
 func NewScreenHandler(id string) *ScreenHandler {
 	return &ScreenHandler{
 		id:        id,
@@ -26,11 +28,12 @@ func NewScreenHandler(id string) *ScreenHandler {
 	}
 }
 
+// GetID returns the screen's unique identifier.
 func (s *ScreenHandler) GetID() string {
 	return s.id
 }
 
-// Sends a message to all listeners
+// Broadcast sends a message to all listeners of this screen.
 func (s *ScreenHandler) Broadcast(ctx context.Context, msg ...*screensv1.ServerMessage) {
 	msgs := &screensv1.ServerMessages{
 		Action: msg,
@@ -48,10 +51,12 @@ func (s *ScreenHandler) broadcast(ctx context.Context, msg *screensv1.ServerMess
 	}
 }
 
+// RemoveListener removes a listener by ID from this screen.
 func (s *ScreenHandler) RemoveListener(id string) {
 	s.listeners.Delete(id)
 }
 
+// AddListener adds a new listener connection to this screen.
 func (s *ScreenHandler) AddListener(ctx context.Context, listener *ScreenConn) {
 	old, loaded := s.listeners.Swap(listener.id, listener)
 	if loaded && old != nil {
@@ -68,6 +73,7 @@ func (s *ScreenHandler) setupListener(listener *ScreenConn) {
 	go listener.startReadLoop(s.HandleMessages)
 }
 
+// HandleMessages processes a batch of client messages from a listener.
 func (s *ScreenHandler) HandleMessages(ctx context.Context, listener *ScreenConn, msg *screensv1.ClientMessages) error {
 	var response []*screensv1.ServerMessage
 	var err error
@@ -93,6 +99,7 @@ func (s *ScreenHandler) HandleMessages(ctx context.Context, listener *ScreenConn
 	return err
 }
 
+// HandleMessage processes a single client message and returns server responses.
 func (s *ScreenHandler) HandleMessage(ctx context.Context, msg *screensv1.ClientMessage) ([]*screensv1.ServerMessage, error) {
 	// Non block read to see if we need to stop
 	select {
@@ -126,6 +133,7 @@ func (s *ScreenHandler) HandleMessage(ctx context.Context, msg *screensv1.Client
 	return response, err
 }
 
+// Close closes all listener connections for this screen.
 func (s *ScreenHandler) Close() {
 	wg := sync.WaitGroup{}
 

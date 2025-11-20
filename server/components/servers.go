@@ -23,6 +23,7 @@ import (
 	"github.com/DaanV2/mechanus/server/proto/users/v1/usersv1connect"
 )
 
+// ServerComponents holds the main server and its core components.
 type ServerComponents struct {
 	Server     *servers.Server
 	Users      *application.UserService
@@ -30,10 +31,12 @@ type ServerComponents struct {
 	Components *lifecycle.Manager
 }
 
+// CreateMDNSServer creates a new mDNS server with the provided configuration.
 func CreateMDNSServer(ctx context.Context, conf mdns.ServerConfig) (*mdns.Server, error) {
 	return mdns.NewServer(ctx, conf)
 }
 
+// RouterSetup contains the setup dependencies for creating a router.
 type RouterSetup struct {
 	HealthChecker    health.HealthCheck
 	Interceptors     []connect.Interceptor
@@ -41,17 +44,20 @@ type RouterSetup struct {
 	WebsocketHandler *websocket.WebsocketHandler
 }
 
+// RouterRPCS contains the gRPC service handlers for the router.
 type RouterRPCS struct {
 	Login usersv1connect.LoginServiceHandler
 	User  usersv1connect.UserServiceHandler
 }
 
+// RouterConfig contains the configuration for creating a router.
 type RouterConfig struct {
 	CORS    *cors.CORSConfig
 	Server  *servers.ServerConfig
 	Tracing *tracing.Config
 }
 
+// CreateRouter creates an HTTP handler with all routes, middleware, and services configured.
 func CreateRouter(setup RouterSetup, rpcs RouterRPCS, cfgs RouterConfig) (gohttp.Handler, error) {
 	healthServ := health.NewHealthService(setup.HealthChecker)
 	readyServ := health.NewReadyService(setup.ReadyChecker)
@@ -94,6 +100,7 @@ func CreateRouter(setup RouterSetup, rpcs RouterRPCS, cfgs RouterConfig) (gohttp
 	return hrouter, nil
 }
 
+// CreateServer creates a new HTTP server with the provided handler and configuration.
 func CreateServer(router gohttp.Handler, conf servers.Config) *servers.Server {
 	p := new(gohttp.Protocols)
 	p.SetHTTP1(true)

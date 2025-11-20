@@ -17,10 +17,12 @@ import (
 
 var _ lifecycle.ShutdownCleanup = &DB{}
 
+// DB wraps a GORM database connection.
 type DB struct {
 	gormDB *gorm.DB
 }
 
+// Close closes the database connection.
 func (db *DB) Close(ctx context.Context) error {
 	logging.Debug(ctx, "closing database")
 	sqlDB, err := db.gormDB.DB()
@@ -36,6 +38,7 @@ func (db *DB) ShutdownCleanup(ctx context.Context) error {
 	return db.Close(ctx)
 }
 
+// WithContext returns a GORM DB instance with the provided context.
 func (db *DB) WithContext(ctx context.Context) *gorm.DB {
 	return db.gormDB.WithContext(ctx)
 }

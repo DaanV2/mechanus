@@ -8,11 +8,13 @@ import (
 	"github.com/DaanV2/mechanus/server/infrastructure/persistence/models"
 )
 
+// UserRepository provides database operations for users.
 type UserRepository struct {
 	db     *persistence.DB
 	logger logging.Enriched
 }
 
+// NewUserRepository creates a new user repository with the provided database.
 func NewUserRepository(db *persistence.DB) *UserRepository {
 	return &UserRepository{
 		db:     db,
@@ -61,6 +63,7 @@ func (repo *UserRepository) Create(ctx context.Context, user *models.User) error
 	return tx.Error
 }
 
+// Update updates a user in the database, omitting username, password hash, and ID.
 func (repo *UserRepository) Update(ctx context.Context, user *models.User) error {
 	logger := repo.logger.With("userId", user.ID).From(ctx)
 	logger.Debug("updating user")
@@ -84,6 +87,7 @@ func (repo *UserRepository) UpdatePassword(ctx context.Context, user *models.Use
 	return tx.Error
 }
 
+// Find searches for users matching the provided query criteria.
 func (repo *UserRepository) Find(ctx context.Context, queries *models.User) ([]*models.User, error) {
 	logger := repo.logger.From(ctx)
 	logger.Debug("querying users")

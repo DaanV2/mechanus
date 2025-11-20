@@ -1,5 +1,6 @@
 package models
 
+// Character represents a game character in the database.
 type Character struct {
 	Model
 	Name  string

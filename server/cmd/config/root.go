@@ -10,6 +10,7 @@ var rootCmd = &cobra.Command{
 	Short: "manage config settings",
 }
 
+// AddCommand adds the config command to the parent command.
 func AddCommand(parent *cobra.Command) {
 	parent.AddCommand(rootCmd)
 }
