@@ -24,20 +24,26 @@ func WithPrefix(ctx context.Context, prefix string) *log.Logger {
 // If no valid span is present in the context, returns the logger without trace information.
 func WithTrace(ctx context.Context) *log.Logger {
 	logger := From(ctx)
-	
+
 	span := trace.SpanFromContext(ctx)
 	if span == nil {
 		return logger
 	}
-	
-	spanContext := span.SpanContext()
-	if !spanContext.IsValid() {
+
+	if !span.SpanContext().IsValid() || !span.IsRecording() {
 		return logger
 	}
-	
+
+	return InjectTrace(logger, span)
+}
+
+// InjectTrace returns a logger with trace information (trace ID and span ID) attached.
+func InjectTrace(logger *log.Logger, span trace.Span) *log.Logger {
+	ctx := span.SpanContext()
+
 	return logger.With(
-		"trace_id", spanContext.TraceID().String(),
-		"span_id", spanContext.SpanID().String(),
+		"trace_id", ctx.TraceID().String(),
+		"span_id", ctx.SpanID().String(),
 	)
 }
 

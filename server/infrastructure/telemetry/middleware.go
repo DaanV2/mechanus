@@ -16,7 +16,6 @@ func TraceHttpMiddleware(cfg *Config, next http.Handler) http.Handler {
 		// Return the handler as-is if telemetry is disabled
 		return next
 	}
-	log.Debug("telemetry is enabled for http server")
 
 	// Wrap with otelhttp instrumentation
 	return otelhttp.NewHandler(
