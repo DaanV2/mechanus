@@ -18,7 +18,7 @@ jobs:
 
     steps:
       - name: 📦 Checkout Repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: ⚒️  Setup Golang
         uses: actions/setup-go@v6
@@ -37,7 +37,7 @@ jobs:
           go tool ginkgo run --output-dir reports --cover --covermode atomic -coverprofile=coverage.out ./...
 
       - name: 🔍 Run linting
-        uses: golangci/golangci-lint-action@v8
+        uses: golangci/golangci-lint-action@v9
         with:
           version: latest
           working-directory: server
