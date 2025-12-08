@@ -37,7 +37,7 @@
     "@types/eslint": "^9.6.0",
     "eslint": "^9.39.1",
     "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-svelte": "^3.13.0",
+    "eslint-plugin-svelte": "^3.13.1",
     "flowbite": "^4.0.1",
     "flowbite-svelte": "^1.30.0",
     "flowbite-svelte-icons": "^3.0.1",
@@ -50,7 +50,7 @@
     "svelte-check": "^4.3.4",
     "tailwindcss": "^4.1.13",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.48.0",
+    "typescript-eslint": "^8.48.1",
     "vite": "^7.2.7"
   }
 }
