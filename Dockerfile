@@ -13,7 +13,7 @@ COPY ./client .
 RUN npm run build
 
 # build server
-FROM golang:1.25.4 AS server
+FROM golang:1.25.5 AS server
 WORKDIR /app
 
 COPY ./server/go.mod .
