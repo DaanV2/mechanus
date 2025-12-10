@@ -160,7 +160,7 @@ Each backend has a dedicated Docker Compose file in the `tests/` directory:
 
 ### CI/CD Matrix Testing
 
-In CI, the integration tests automatically run in parallel for all three database backends using GitHub Actions matrix strategy. This ensures compatibility across all supported database types.
+In CI, the integration tests automatically run in parallel for all three database backends using GitHub Actions matrix strategy. This ensures compatibility across all tested database backends.
 
 The workflow configuration can be found in `.github/workflows/integration-tests.yaml`.
 
