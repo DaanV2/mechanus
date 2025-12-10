@@ -62,8 +62,8 @@ server:
 	docker compose -f $(default-compose-file) up -d mechanus-server
 
 server-logs:
-	-mkdir ./playwright-report/server
-	docker-compose logs > ./playwright-report/server/logs.txt
+	mkdir -p ./playwright-report/server
+	docker compose -f $(default-compose-file) logs > ./playwright-report/server/logs.txt
 
 
 # Start local server for development
