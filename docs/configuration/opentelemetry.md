@@ -80,6 +80,10 @@ service:
       receivers: [otlp]
       processors: [batch]
       exporters: [jaeger, logging]
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [logging]
 ```
 
 ### Viewing Traces
@@ -93,13 +97,20 @@ After starting the server with telemetry enabled and an OpenTelemetry Collector 
 5. Select "mechanus-server" from the service dropdown
 6. Click "Find Traces" to view traces
 
-## What is Traced?
+## What is Traced and Logged?
 
-The OpenTelemetry integration automatically traces:
+The OpenTelemetry integration automatically captures:
 
+### Traces
 - **HTTP requests** to both the web and API servers
 - **gRPC/Connect RPC calls** including login, user management, and other services
 - **Request context propagation** across service boundaries
+
+### Logs
+- **Application logs** from the charm.sh logger are automatically forwarded to OpenTelemetry
+- Logs include all structured attributes (key-value pairs) from the charm.sh logger
+- Log severity levels are mapped to OpenTelemetry severity levels
+- Logs and traces can be correlated using trace and span IDs
 
 ## Production Considerations
 
