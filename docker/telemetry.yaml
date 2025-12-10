@@ -7,8 +7,6 @@ services:
       - "4317:4317" # OpenTelemetry GRPC endpoint
       - "4318:4318" # OpenTelemetry HTTP endpoint
       - "9090:9090" # Prometheus endpoint
-    expose:
-      - "3000"
     volumes:
       - ./data:/data
     networks:
