@@ -36,7 +36,11 @@ start-services: setup
 docker-server: server
 
 # Start server using Docker Compose
-default-compose-file := docker-compose.yaml
+# Can be overridden to test different database backends
+# Usage: make server DB_BACKEND=postgres
+DB_BACKEND ?= inmemory
+default-compose-file := docker-compose.$(DB_BACKEND).yaml
+
 compose-up:
 	docker compose -f $(default-compose-file) up -d mechanus-server
 
@@ -60,8 +64,8 @@ local-server:
 # Stop services
 stop-services:
 	@echo "Stopping services..."
-	docker compose -f $(default-compose-file) stop mechanus-server || true
-	docker compose -f $(default-compose-file) rm -sf mechanus-server || true
+	docker compose -f $(default-compose-file) stop || true
+	docker compose -f $(default-compose-file) rm -sf || true
 
 # Run tests
 test:

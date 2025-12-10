@@ -8,9 +8,13 @@ env:
 
 jobs:
   test:
-    name: 🎭 Integration tests
+    name: 🎭 Integration tests (${{ matrix.db-backend }})
     timeout-minutes: 10
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        db-backend: [sqlite, inmemory, postgres, mysql]
     steps:
       - name: 📦 Checkout Repository
         uses: actions/checkout@v6
@@ -41,6 +45,8 @@ jobs:
 
       - name: 🐋 Start server
         working-directory: tests
+        env:
+          DB_BACKEND: ${{ matrix.db-backend }}
         run: |
           make server
 
@@ -59,6 +65,6 @@ jobs:
       - uses: actions/upload-artifact@v5
         if: ${{ !cancelled() }}
         with:
-          name: playwright-report
+          name: playwright-report-${{ matrix.db-backend }}
           path: tests/playwright-report/
           retention-days: 5
