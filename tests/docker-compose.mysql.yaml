@@ -14,11 +14,12 @@ services:
     networks:
       - mechanus-public
     healthcheck:
-      # Simple health check for test environment - uses internal variable
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      # Health check using root password - MySQL 8 requires authentication
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot_password"]
       interval: 5s
       timeout: 5s
       retries: 10
+      start_period: 10s
 
   mechanus-server:
     image: mechanus:latest
