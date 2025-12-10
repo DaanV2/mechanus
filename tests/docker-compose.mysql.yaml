@@ -15,7 +15,7 @@ services:
       - mechanus-public
     healthcheck:
       # Health check using root password - MySQL 8 requires authentication
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot_password"]
+      test: ["CMD", "sh", "-c", "mysqladmin ping -h localhost -u root -p$$MYSQL_ROOT_PASSWORD"]
       interval: 5s
       timeout: 5s
       retries: 10
