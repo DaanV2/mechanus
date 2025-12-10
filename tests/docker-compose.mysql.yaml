@@ -3,6 +3,7 @@ services:
     image: mysql:8
     container_name: mysql-db
     environment:
+      # Test credentials - not for production use
       MYSQL_ROOT_PASSWORD: root_password
       MYSQL_DATABASE: mechanus_test
       MYSQL_USER: mechanus
@@ -13,8 +14,8 @@ services:
     networks:
       - mechanus-public
     healthcheck:
-      # Using root user for health check to avoid exposing mechanus user password
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "--password=$$MYSQL_ROOT_PASSWORD"]
+      # Simple health check for test environment - uses internal variable
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -28,7 +29,7 @@ services:
       dockerfile: Dockerfile
     container_name: mechanus-server
     environment:
-      # MySQL database configuration
+      # MySQL database configuration - test credentials only
       DATABASE_TYPE: mysql
       DATABASE_DSN: "mechanus:mechanus_test@tcp(mysql-db:3306)/mechanus_test?charset=utf8mb4&parseTime=True&loc=Local"
       LOG_LEVEL: debug
