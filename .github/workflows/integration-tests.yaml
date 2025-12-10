@@ -63,8 +63,7 @@ jobs:
         env:
           DB_BACKEND: ${{ matrix.db-backend }}
         run: |
-          mkdir -p ./playwright-report/server
-          docker compose -f docker-compose.${{ matrix.db-backend }}.yaml logs > ./playwright-report/server/logs.txt
+          make server-logs
 
       - uses: actions/upload-artifact@v5
         if: ${{ !cancelled() }}
