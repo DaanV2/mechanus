@@ -19,8 +19,6 @@ setup:
 browsers:
 	@echo "🌐 Installing browsers..."
 	npx playwright install
-
-setup:
 	-mkdir playwright-report
 
 # Start all required services
@@ -37,9 +35,20 @@ docker-server: server
 
 # Start server using Docker Compose
 # Can be overridden to test different database backends
+# Available backends: sqlite, inmemory, postgres, mysql
 # Usage: make server DB_BACKEND=postgres
 DB_BACKEND ?= inmemory
 default-compose-file := docker-compose.$(DB_BACKEND).yaml
+
+# Show available database backends
+list-backends:
+	@echo "Available database backends:"
+	@echo "  - sqlite    : File-based SQLite database"
+	@echo "  - inmemory  : In-memory SQLite database (default, fastest)"
+	@echo "  - postgres  : PostgreSQL database (requires Docker)"
+	@echo "  - mysql     : MySQL database (requires Docker)"
+	@echo ""
+	@echo "Usage: make server DB_BACKEND=<backend>"
 
 compose-up:
 	docker compose -f $(default-compose-file) up -d mechanus-server
@@ -75,4 +84,4 @@ test:
 clean: stop-services
 	@echo "🧹 Cleaning up..."
 
-.PHONY: setup browsers server docker-server local-server test clean dev-setup test-setup setup start-services stop-services
+.PHONY: setup browsers server docker-server local-server test clean dev-setup test-setup setup start-services stop-services list-backends compose-up compose-down

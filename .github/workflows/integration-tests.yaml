@@ -58,9 +58,11 @@ jobs:
       - name: ✒️ export server logs
         if: ${{ !cancelled() }}
         working-directory: tests
+        env:
+          DB_BACKEND: ${{ matrix.db-backend }}
         run: |
-          mkdir ./playwright-report/server
-          docker compose logs > ./playwright-report/server/logs.txt
+          mkdir -p ./playwright-report/server
+          docker compose -f docker-compose.${{ matrix.db-backend }}.yaml logs > ./playwright-report/server/logs.txt
 
       - uses: actions/upload-artifact@v5
         if: ${{ !cancelled() }}
