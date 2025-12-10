@@ -20,9 +20,15 @@ services:
       WEB_STATIC_FOLDER: "/web"
       LOG_FORMAT: "text"
       LOG_LEVEL: "debug"
+      
+      # OpenTelemetry Configuration
+      OTEL_ENABLED: "true"
+      OTEL_ENDPOINT: "otel-lgtm:4318"
+      OTEL_INSECURE: "true"
     restart: unless-stopped
     networks:
       - mechanus-dev
+      - default
     develop:
       watch:
         # Watch server Go files - rebuild on changes
