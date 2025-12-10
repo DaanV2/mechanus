@@ -128,6 +128,42 @@ The Playwright configuration is in `playwright.config.ts`. Key settings:
 - Tests are configured to run in Chromium, Firefox, WebKit, and mobile emulation
 - Traces are captured on test retry for debugging
 
+## Multi-Backend Database Testing
+
+The integration tests support running against multiple database backends: **SQLite**, **InMemory**, and **PostgreSQL**. Each backend has its own Docker Compose configuration file.
+
+### Running Tests with Different Database Backends
+
+To run tests against a specific database backend locally:
+
+```bash
+# SQLite (file-based database)
+make server DB_BACKEND=sqlite
+npm run test
+
+# InMemory (default - fastest, no persistence)
+make server DB_BACKEND=inmemory
+npm run test
+
+# PostgreSQL (requires Docker to start PostgreSQL container)
+make server DB_BACKEND=postgres
+npm run test
+```
+
+### Database Backend Configuration Files
+
+Each backend has a dedicated Docker Compose file in the `tests/` directory:
+
+- `docker-compose.sqlite.yaml` - SQLite file-based database
+- `docker-compose.inmemory.yaml` - In-memory SQLite database (default, fastest)
+- `docker-compose.postgres.yaml` - PostgreSQL with dedicated database container
+
+### CI/CD Matrix Testing
+
+In CI, the integration tests automatically run in parallel for all three database backends using GitHub Actions matrix strategy. This ensures compatibility across all tested database backends.
+
+The workflow configuration can be found in `.github/workflows/integration-tests.yaml`.
+
 ---
 
 For more information on Playwright, visit the [official documentation](https://playwright.dev/docs/intro).

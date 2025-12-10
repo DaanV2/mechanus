@@ -13,15 +13,13 @@ test-setup: setup start-services
 setup:
 	@echo "📦 Installing dependencies..."
 	npm install
+	mkdir -p playwright-report
 	$(MAKE) browsers
 
 # Install browser dependencies
 browsers:
 	@echo "🌐 Installing browsers..."
 	npx playwright install
-
-setup:
-	-mkdir playwright-report
 
 # Start all required services
 start-services: setup
@@ -36,7 +34,21 @@ start-services: setup
 docker-server: server
 
 # Start server using Docker Compose
-default-compose-file := docker-compose.yaml
+# Can be overridden to test different database backends
+# Available backends: sqlite, inmemory, postgres
+# Usage: make server DB_BACKEND=postgres
+DB_BACKEND ?= inmemory
+default-compose-file := docker-compose.$(DB_BACKEND).yaml
+
+# Show available database backends
+list-backends:
+	@echo "Available database backends:"
+	@echo "  - sqlite    : File-based SQLite database"
+	@echo "  - inmemory  : In-memory SQLite database (default, fastest)"
+	@echo "  - postgres  : PostgreSQL database (requires Docker)"
+	@echo ""
+	@echo "Usage: make server DB_BACKEND=<backend>"
+
 compose-up:
 	docker compose -f $(default-compose-file) up -d mechanus-server
 
@@ -49,8 +61,8 @@ server:
 	docker compose -f $(default-compose-file) up -d mechanus-server
 
 server-logs:
-	-mkdir ./playwright-report/server
-	docker-compose logs > ./playwright-report/server/logs.txt
+	mkdir -p ./playwright-report/server
+	docker compose -f $(default-compose-file) logs > ./playwright-report/server/logs.txt
 
 
 # Start local server for development
@@ -60,8 +72,8 @@ local-server:
 # Stop services
 stop-services:
 	@echo "Stopping services..."
-	docker compose -f $(default-compose-file) stop mechanus-server || true
-	docker compose -f $(default-compose-file) rm -sf mechanus-server || true
+	docker compose -f $(default-compose-file) stop || true
+	docker compose -f $(default-compose-file) rm -sf || true
 
 # Run tests
 test:
@@ -71,4 +83,4 @@ test:
 clean: stop-services
 	@echo "🧹 Cleaning up..."
 
-.PHONY: setup browsers server docker-server local-server test clean dev-setup test-setup setup start-services stop-services
+.PHONY: setup browsers server docker-server local-server test clean dev-setup test-setup setup start-services stop-services list-backends compose-up compose-down
