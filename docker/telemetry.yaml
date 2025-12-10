@@ -10,13 +10,17 @@ services:
     expose:
       - "3000"
     volumes:
-      - ./data:/data
+      - otel-lgtm-data:/data
     networks:
       default:
         aliases:
           - jaeger
           - otel-collector
           - prometheus
+
+volumes:
+  otel-lgtm-data:
+    driver: local
 
 networks:
   default:
