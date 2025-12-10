@@ -1,3 +1,6 @@
+# include:
+#   - ../docker/telemetry.yaml
+
 services:
   mechanus-server:
     image: mechanus:latest

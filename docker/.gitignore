@@ -1,0 +1,2 @@
+# Ignore data directory created by otel-lgtm
+data/
