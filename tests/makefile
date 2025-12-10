@@ -13,13 +13,13 @@ test-setup: setup start-services
 setup:
 	@echo "📦 Installing dependencies..."
 	npm install
+	-mkdir -p playwright-report
 	$(MAKE) browsers
 
 # Install browser dependencies
 browsers:
 	@echo "🌐 Installing browsers..."
 	npx playwright install
-	-mkdir playwright-report
 
 # Start all required services
 start-services: setup
