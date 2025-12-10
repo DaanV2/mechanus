@@ -35,7 +35,7 @@ docker-server: server
 
 # Start server using Docker Compose
 # Can be overridden to test different database backends
-# Available backends: sqlite, inmemory, postgres, mysql
+# Available backends: sqlite, inmemory, postgres
 # Usage: make server DB_BACKEND=postgres
 DB_BACKEND ?= inmemory
 default-compose-file := docker-compose.$(DB_BACKEND).yaml
@@ -46,7 +46,6 @@ list-backends:
 	@echo "  - sqlite    : File-based SQLite database"
 	@echo "  - inmemory  : In-memory SQLite database (default, fastest)"
 	@echo "  - postgres  : PostgreSQL database (requires Docker)"
-	@echo "  - mysql     : MySQL database (requires Docker)"
 	@echo ""
 	@echo "Usage: make server DB_BACKEND=<backend>"
 

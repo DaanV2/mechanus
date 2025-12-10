@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        db-backend: [sqlite, inmemory, postgres, mysql]
+        db-backend: [sqlite, inmemory, postgres]
     steps:
       - name: 📦 Checkout Repository
         uses: actions/checkout@v6
