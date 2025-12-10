@@ -27,6 +27,7 @@ services:
     environment:
       # PostgreSQL database configuration
       DATABASE_TYPE: postgres
+      # Note: sslmode=disable is used for testing to simplify setup. For production, use sslmode=require
       DATABASE_DSN: "host=postgres-db user=mechanus password=mechanus_test dbname=mechanus_test port=5432 sslmode=disable"
       LOG_LEVEL: debug
       LOG_FORMAT: text
