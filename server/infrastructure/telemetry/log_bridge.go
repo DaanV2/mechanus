@@ -3,6 +3,7 @@ package telemetry
 import (
 	"context"
 	"log/slog" //nolint:depguard // Required for slog.Handler interface compatibility
+	"math"
 	"time"
 
 	"github.com/charmbracelet/log"
@@ -111,8 +112,8 @@ func slogAttrToOtelKeyValue(attr slog.Attr) otellog.KeyValue {
 	case slog.KindUint64:
 		// Convert uint64 to int64, clamping at max int64 if needed
 		u := value.Uint64()
-		if u > 9223372036854775807 { // max int64
-			return otellog.Int64(key, 9223372036854775807)
+		if u > math.MaxInt64 {
+			return otellog.Int64(key, math.MaxInt64)
 		}
 
 		return otellog.Int64(key, int64(u)) //nolint:gosec // Checked for overflow above
