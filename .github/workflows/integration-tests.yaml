@@ -11,6 +11,8 @@ jobs:
     name: 🎭 Integration tests (${{ matrix.db-backend }})
     timeout-minutes: 10
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     strategy:
       fail-fast: false
       matrix:
