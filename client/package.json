@@ -46,11 +46,11 @@
     "prettier": "^3.7.4",
     "prettier-plugin-svelte": "^3.4.1",
     "prettier-plugin-tailwindcss": "^0.7.2",
-    "svelte": "^5.45.6",
-    "svelte-check": "^4.3.4",
+    "svelte": "^5.46.0",
+    "svelte-check": "^4.3.5",
     "tailwindcss": "^4.1.18",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.50.0",
-    "vite": "^7.2.7"
+    "vite": "^7.3.0"
   }
 }
