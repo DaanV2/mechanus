@@ -18,7 +18,7 @@
     "postinstall": "npx playwright install"
   },
   "dependencies": {
-    "pixi.js": "^8.14.3"
+    "pixi.js": "^8.15.0"
   },
   "devDependencies": {
     "@bufbuild/buf": "^1.62.1",
@@ -51,6 +51,6 @@
     "tailwindcss": "^4.1.18",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.51.0",
-    "vite": "^7.3.0"
+    "vite": "^7.3.1"
   }
 }
