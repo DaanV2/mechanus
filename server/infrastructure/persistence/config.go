@@ -66,7 +66,7 @@ func validateDatabaseFlags(conf *config.Config) error {
 // GetOptions builds a list of options from flags/envs variable via viper.
 // See [DatabaseConfig] for available values
 func GetOptions() ([]Option, error) {
-	opts := []Option{
+	opts := []Option{ // nolint:prealloc // No need for options
 		WithMaxIdleConns(MaxIdleConnsFlag.Value()),
 		WithMaxOpenConns(MaxOpenConnsFlag.Value()),
 		WithConnMaxLifetime(ConnMaxLifetimeFlag.Value()),
