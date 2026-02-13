@@ -25,8 +25,8 @@ func SpanLogger(ctx context.Context, name string, attributes ...attribute.KeyVal
 	return ctx, span, logger
 }
 
-func otelToCharmlogAttrs(attrs []attribute.KeyValue) []interface{} {
-	charmlogAttrs := make([]interface{}, 0, len(attrs) * 2)
+func otelToCharmlogAttrs(attrs []attribute.KeyValue) []any {
+	charmlogAttrs := make([]any, 0, len(attrs)*2)
 	for _, attr := range attrs {
 		charmlogAttrs = append(charmlogAttrs, string(attr.Key), attr.Value.AsInterface())
 	}

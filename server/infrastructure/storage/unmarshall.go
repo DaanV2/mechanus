@@ -13,7 +13,7 @@ func unmarshallGeneric[T any](data []byte) (T, error) {
 	var result T
 	var unmarshalTarget any
 	typeOfT := reflect.TypeFor[T]()
-	if typeOfT.Kind() == reflect.Ptr {
+	if typeOfT.Kind() == reflect.Pointer {
 		// T is a pointer type, allocate a new value of the element type
 		result = reflect.New(typeOfT.Elem()).Interface().(T)
 		unmarshalTarget = result

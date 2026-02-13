@@ -3,7 +3,6 @@ package screens
 import (
 	"context"
 
-	"github.com/DaanV2/mechanus/server/pkg/extensions/ptr"
 	screensv1 "github.com/DaanV2/mechanus/server/proto/screens/v1"
 )
 
@@ -31,9 +30,9 @@ func (s *ScreenHandler) HandleInitialSetupRequest(ctx context.Context, msg *scre
 			Action: &screensv1.ServerMessage_SplashScreenUpdate{
 				SplashScreenUpdate: &screensv1.SplashScreen{
 					Show:          true,
-					Title:         ptr.To("MECHANUS"),
-					Subtitle:      ptr.To(""),
-					BackgroundHex: ptr.To("#000000"),
+					Title:         new("MECHANUS"),
+					Subtitle:      new(""),
+					BackgroundHex: new("#000000"),
 				},
 			},
 		},

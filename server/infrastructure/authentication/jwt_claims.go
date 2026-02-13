@@ -53,11 +53,5 @@ func (u *JWTUser) HasCampaign(campaign string) bool {
 
 // HasAnyCampaign checks if the user has access to any of the specified campaigns.
 func (u *JWTUser) HasAnyCampaign(campaigns ...string) bool {
-	for _, c := range campaigns {
-		if u.HasCampaign(c) {
-			return true
-		}
-	}
-
-	return false
+	return slices.ContainsFunc(campaigns, u.HasCampaign)
 }

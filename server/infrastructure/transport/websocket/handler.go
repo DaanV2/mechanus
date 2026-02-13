@@ -92,8 +92,8 @@ func (handler *WebsocketHandler) authenticate(r *http.Request) (*screens.Connect
 	token := r.Header.Get("Authorization")
 
 	// Bearer token are only supported for users for now.
-	if strings.HasPrefix(token, "Bearer ") {
-		token = strings.TrimPrefix(token, "Bearer ")
+	if after, ok := strings.CutPrefix(token, "Bearer "); ok {
+		token = after
 		t, err := handler.jwt_authenticator.Validate(r.Context(), token)
 		if err != nil {
 			handler.logger.From(r.Context()).Error("Could not validate JWT", "error", err)

@@ -12,7 +12,7 @@ func Call[T any](call func() (T, error)) T {
 	if err != nil {
 		logger := log.Default()
 		logger.Helper()
-		logger.Fatal("couldn't perform call", "function", reflect.TypeOf(call).Name(), "error", err)
+		logger.Fatal("couldn't perform call", "function", reflect.TypeFor[func() (T, error)]().Name(), "error", err)
 	}
 
 	return first
@@ -24,7 +24,7 @@ func Must2[T any, U any](call func() (T, U, error)) (first T, second U) {
 	if err != nil {
 		logger := log.Default()
 		logger.Helper()
-		logger.Fatal("couldn't perform call", "function", reflect.TypeOf(call).Name(), "error", err)
+		logger.Fatal("couldn't perform call", "function", reflect.TypeFor[func() (T, U, error)]().Name(), "error", err)
 	}
 
 	return first, second

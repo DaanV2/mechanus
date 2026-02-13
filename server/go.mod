@@ -1,6 +1,6 @@
 module github.com/DaanV2/mechanus/server
 
-go 1.25.3
+go 1.26.0
 
 tool (
 	connectrpc.com/connect/cmd/protoc-gen-connect-go
