@@ -4,5 +4,5 @@ package ptr
 //
 //go:fix inline
 func To[T any](item T) *T {
-	return new(item)
+	return &item
 }
