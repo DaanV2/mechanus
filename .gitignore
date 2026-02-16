@@ -1,3 +1,4 @@
 *.exe
 db.sqlite
 *.test
+mechanus
