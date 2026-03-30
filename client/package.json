@@ -18,7 +18,7 @@
     "postinstall": "npx playwright install"
   },
   "dependencies": {
-    "pixi.js": "^8.16.0"
+    "pixi.js": "^8.17.1"
   },
   "devDependencies": {
     "@bufbuild/buf": "^1.66.1",
@@ -46,11 +46,11 @@
     "prettier": "^3.8.1",
     "prettier-plugin-svelte": "^3.5.1",
     "prettier-plugin-tailwindcss": "^0.7.2",
-    "svelte": "^5.53.7",
+    "svelte": "^5.55.1",
     "svelte-check": "^4.4.5",
     "tailwindcss": "^4.1.18",
-    "typescript": "^5.9.3",
+    "typescript": "^6.0.2",
     "typescript-eslint": "^8.57.1",
-    "vite": "^7.3.1"
+    "vite": "^8.0.3"
   }
 }
