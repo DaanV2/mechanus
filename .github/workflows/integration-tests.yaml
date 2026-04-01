@@ -29,14 +29,14 @@ jobs:
           node-version-file: tests/package.json
 
       - name: ⚒️ Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       - name: ⚒️ Install dependencies
         working-directory: tests
         run: npm ci
 
       - name: 🐋 Make image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         id: docker-build
         with:
           push: false
