@@ -5,8 +5,7 @@ WORKDIR /app
 ADD ./client/package.json .
 ADD ./client/package-lock.json .
 
-ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
-RUN npm ci
+RUN npm ci --ignore-scripts
 
 COPY ./client .
 
