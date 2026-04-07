@@ -31,19 +31,18 @@ jobs:
       - name: ⚒️ Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
 
+      - name: 📥 Download Docker image artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: docker-image
+          path: /tmp
+
+      - name: 🐋 Load Docker image
+        run: gunzip < /tmp/mechanus.tar.gz | docker load
+
       - name: ⚒️ Install dependencies
         working-directory: tests
         run: npm ci
-
-      - name: 🐋 Make image
-        uses: docker/build-push-action@v7
-        id: docker-build
-        with:
-          push: false
-          load: true
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-          tags: mechanus,mechanus:latest,mechanus:${{ github.sha }}
 
       - name: 🐋 Start server
         working-directory: tests

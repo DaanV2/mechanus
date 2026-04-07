@@ -23,6 +23,17 @@ jobs:
         id: docker-build
         with:
           push: false
+          load: true
           cache-from: type=gha
           cache-to: type=gha,mode=max
           tags: mechanus,mechanus:latest,mechanus:${{ github.sha }}
+
+      - name: 💾 Export Docker image
+        run: docker save mechanus:latest | gzip > /tmp/mechanus.tar.gz
+
+      - name: 📤 Upload Docker image artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: docker-image
+          path: /tmp/mechanus.tar.gz
+          retention-days: 1
