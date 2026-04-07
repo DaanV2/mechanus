@@ -33,9 +33,26 @@ updates:
         patterns:
           - "tailwindcss*"
           - "@tailwindcss*"
-      sveltejs:
+      rendering:
         patterns:
+          - "pixi*"
+          - "@pixi*"
+      testing:
+        patterns:
+          - "@playwright*"
+          - "playwright*"
+      building:
+        patterns:
+          - "vite*"
+          - "@vitejs*"
+      svelte:
+        patterns:
+          - "svelte*"
           - "@sveltejs*"
+      typescript:
+        patterns:
+          - "typescript*"
+          - "@types*"
       all:
         patterns:
           - "*"
