@@ -94,6 +94,11 @@ linters:
         - weakCond
         - whyNoLint
         - yodaStyleExpr
+  exclusions:
+    rules:
+      - path: "_test\\.go"
+        linters:
+          - goconst
   enable:
     - asciicheck
     - bidichk
@@ -148,8 +153,3 @@ linters:
     - unused
     - usestdlibvars
     - usetesting
-issues:
-  exclude-rules:
-    - path: "_test\\.go"
-      linters:
-        - goconst
