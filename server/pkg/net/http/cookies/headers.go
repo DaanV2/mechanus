@@ -32,7 +32,7 @@ func SetCookies(resp, req HeaderContainer, cs ...*Cookie) {
 			Path:     "/",
 			Domain:   domain,
 			Secure:   true,
-			HttpOnly: false,
+			HttpOnly: true,
 			SameSite: http.SameSiteLaxMode,
 		}
 		Set(resp, cookie)

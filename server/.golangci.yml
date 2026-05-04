@@ -19,6 +19,8 @@ linters:
     nolintlint:
       require-explanation: true
       require-specific: true
+    goconst:
+      min-occurrences: 10
     gocritic:
       enabled-checks:
         - appendCombine
@@ -92,6 +94,11 @@ linters:
         - weakCond
         - whyNoLint
         - yodaStyleExpr
+  exclusions:
+    rules:
+      - path: "_test\\.go"
+        linters:
+          - goconst
   enable:
     - asciicheck
     - bidichk
