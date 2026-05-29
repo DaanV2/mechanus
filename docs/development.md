@@ -20,10 +20,11 @@ For local development, you can use Docker Compose with the watch feature to auto
 To start the application with automatic rebuilds on code changes:
 
 ```bash
-docker compose watch
+docker compose watch # OR just dev
 ```
 
 This will:
+
 - Build and start the mechanus container
 - Watch for changes in:
   - Server Go files (`./server`)
@@ -43,12 +44,13 @@ docker compose up
 ### Stop and Clean Up
 
 ```bash
-docker compose down
+docker compose down # OR just dev-stop
 ```
 
 ### Ports
 
 The following ports are exposed:
+
 - `8080` - Main web server (HTTP)
 - `8443` - Secure web server (HTTPS)
 - `8666` - Additional service port
