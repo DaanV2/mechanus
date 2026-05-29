@@ -1,5 +1,6 @@
 # Documentation
 
+- [architecture](./architecture/README.md) — system design, layer overview, protocols
 - [configuration/config-file](./configuration/config-file.md)
 - [configuration/database](./configuration/persistence.md)
 - [configuration/opentelemetry](./configuration/opentelemetry.md)
