@@ -23,3 +23,11 @@ image:
 # Build the server binary
 server:
   go build -o mechanus ./server/main.go
+
+dev:
+  docker compose watch
+
+down:
+  just dev-stop
+dev-stop:
+  docker compose -f docker-compose.yaml down
