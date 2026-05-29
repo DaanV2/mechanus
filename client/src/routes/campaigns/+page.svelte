@@ -9,6 +9,7 @@
 
 <NavBar />
 
+<!-- TODO: Implement campaign list UI - show user's campaigns, create/join campaign actions -->
 <div></div>
 
 <Footer />

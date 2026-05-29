@@ -27,9 +27,10 @@ export class Application {
     }
     document.body.appendChild(this._app.canvas);
 
+    // TODO: Implement layer manager to handle resize events across all layers
     // this._app.renderer.on('resize', () => this.layers.handleResize(this._app.renderer));
 
-    // STEP: activate splashscreen first before anything
+    // TODO: Implement layer activation system and enable splashscreen on startup
     // this.layers.activate('splashScreen', this._app.stage);
 
     // Await the connection to open then send initial request
@@ -55,5 +56,6 @@ export class Application {
     return this._app.stage;
   }
 
+  // TODO: Implement start() - begin render loop, process incoming screen state updates
   start() {}
 }
