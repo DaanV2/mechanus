@@ -15,7 +15,7 @@ export class Application {
    * Initialize the application
    * @returns
    */
-  async init(conn: WebsocketHandler) {
+  async init(conn?: WebsocketHandler) {
     await this._app.init({
       background: '#1099bb',
       resizeTo: window,
@@ -34,14 +34,16 @@ export class Application {
 
     // Await the connection to open then send initial request
 
-    conn.addEventListener('open', () => {
-      conn.send({
-        action: {
-          case: 'initialSetupRequest',
-          value: create(InitialSetupRequestSchema, {})
-        }
+    if (conn) {
+      conn.addEventListener('open', () => {
+        conn.send({
+          action: {
+            case: 'initialSetupRequest',
+            value: create(InitialSetupRequestSchema, {})
+          }
+        });
       });
-    });
+    }
   }
 
   destroy() {
