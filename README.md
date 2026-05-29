@@ -35,7 +35,7 @@ This will build and start the application with automatic rebuilds on code change
 | [Buf](https://github.com/bufbuild/buf)                    | The compiler used by connectRPC and proto to generate the necessary object and services             |
 | [ConnectRPC](https://connectrpc.com/)                     | A collection of libraries and tools to setup grpc communication using proto3                        |
 | [Go](https://go.dev/)                                     | The language used for the server stack                                                              |
-| [Make](https://www.gnu.org/software/make/)                | A tool that can read and execute commands from a file, helping with local development               |
+| [Just](https://just.systems/)                             | A command runner for project-specific tasks, replacing Make for local development commands          |
 | [Nodejs](https://nodejs.org/en)                           | The stack enabling svelte and generation of browser code                                            |
 | [Playwright](https://playwright.dev/)                     | The browser testing suite that powers the clients testing suite and the integration tests           |
 | [Proto3](https://protobuf.dev/programming-guides/proto3/) | The protocol language used to connect the client <-> server                                         |
