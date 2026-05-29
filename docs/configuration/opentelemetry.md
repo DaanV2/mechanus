@@ -102,11 +102,13 @@ After starting the server with telemetry enabled and an OpenTelemetry Collector 
 The OpenTelemetry integration automatically captures:
 
 ### Traces
+
 - **HTTP requests** to both the web and API servers
 - **gRPC/Connect RPC calls** including login, user management, and other services
 - **Request context propagation** across service boundaries
 
 ### Logs
+
 - **Application logs** from the charm.sh logger are automatically forwarded to OpenTelemetry
 - Logs include all structured attributes (key-value pairs) from the charm.sh logger
 - Log severity levels are mapped to OpenTelemetry severity levels

@@ -4,7 +4,6 @@ This documents describes the process of scenes, and their events, being mapped t
 
 Listening clients can be any users logged in with the role of `admin`, `operator`, `user` or `viewer`, optionally they can request to listen to specific screens.
 
-
 ## Flow
 
 ![diagram](./screen-scene-users.svg)

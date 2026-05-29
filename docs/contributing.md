@@ -1,6 +1,5 @@
 # Contributing
 
-
 ## Tools
 
 You'll need the following tools:

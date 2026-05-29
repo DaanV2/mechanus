@@ -4,11 +4,11 @@ Mechanus will look for a couple of places to look for a config.yaml:
 
 ## Linux
 
--  `/home/<user>/.config/mechanus/config.yaml`
--  `/home/<user>/.local/share/mechanus/config.yaml`
--  `/home/<user>/.config/mechanus/.config/config.yaml`
--  `/home/<user>/.local/share/mechanus/.config/config.yaml`
--  `.config/config.yaml`
+- `/home/<user>/.config/mechanus/config.yaml`
+- `/home/<user>/.local/share/mechanus/config.yaml`
+- `/home/<user>/.config/mechanus/.config/config.yaml`
+- `/home/<user>/.local/share/mechanus/.config/config.yaml`
+- `.config/config.yaml`
 
 ## Macos
 
