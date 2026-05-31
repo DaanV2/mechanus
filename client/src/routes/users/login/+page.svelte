@@ -93,7 +93,7 @@
         </InputAddon>
       </ButtonGroup>
     </Label>
-    <Button type="submit" class="w-full1" disabled={!isFormValid}>Login</Button>
+    <Button type="submit" class="w-full" disabled={!isFormValid}>Login</Button>
     <p class="text-sm font-light text-white dark:text-white">
       Don't have an account yet? <a
         href="/users/signup"

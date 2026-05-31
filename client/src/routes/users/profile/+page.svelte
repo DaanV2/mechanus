@@ -33,15 +33,16 @@
 
 <NavBar />
 
-<div class="flex flex-col items-center py-5">
-  <form>
-    <h1>Welcome {user?.name}!</h1>
-    <div class="box-container">
-      {#if user}
-        <p id="user.name">name: {user.name}</p>
-      {/if}
-    </div>
-  </form>
+<div class="flex min-h-screen flex-col items-center justify-center">
+  <div class="w-full max-w-md space-y-4 rounded-lg border border-gray-700 bg-gray-800 p-8 shadow-lg">
+    <h1 class="text-2xl font-bold text-white">Welcome{user ? `, ${user.name}` : ''}!</h1>
+    {#if user}
+      <div class="space-y-2">
+        <p class="text-sm text-gray-400">Username</p>
+        <p class="font-medium text-white">{user.name}</p>
+      </div>
+    {/if}
+  </div>
 </div>
 
 <Footer />
