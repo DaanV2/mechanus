@@ -1,59 +1,108 @@
 <script lang="ts">
+  import { goto } from '$app/navigation';
+  import ErrorMessage from '$lib/components/error-message.svelte';
+  import type { MechanusError } from '$lib/components/errors';
+  import Footer from '$lib/components/footer.svelte';
+  import NavBar from '$lib/components/nav-bar.svelte';
+  import { Code, ConnectError } from '@connectrpc/connect';
+  import { Button, ButtonGroup, Input, InputAddon, Label } from 'flowbite-svelte';
+  import { EyeOutline, EyeSlashOutline } from 'flowbite-svelte-icons';
+  import { onMount } from 'svelte';
+  import { userHandler } from '../../lib/handlers/user';
+  import { sleep } from '../../lib/timings/sleep';
+
   let username = $state('');
   let password = $state('');
+  let errorObj = $state<MechanusError>(null);
+  let showPassword = $state(false);
+  let isFormValid = $derived(username.trim() !== '' && password.trim() !== '');
 
-  function handleSubmit(event: Event) {
+  async function handleSubmit(event: Event) {
     event.preventDefault();
-    // Handle login logic here
-    console.log('Username:', username);
-    console.log('Password:', password);
+    errorObj = null;
+    if (!isFormValid) return;
+
+    return login().catch((err) => {
+      if (err instanceof ConnectError) {
+        errorObj = err;
+
+        if (err.code == Code.Unauthenticated) {
+          errorObj = 'wrong password / username';
+        }
+      } else if (err instanceof Error) {
+        errorObj = err;
+      } else {
+        errorObj = new Error('An unexpected error occurred.');
+      }
+    });
   }
+
+  async function login() {
+    if (!isFormValid) return;
+
+    await userHandler.login(username, password);
+    await sleep(100);
+    goto('/views/game-master');
+  }
+
+  onMount(() => {
+    if (userHandler.current.loggedin) {
+      goto('/views/game-master');
+    }
+  });
 </script>
 
-<form class="login-form" onsubmit={handleSubmit}>
-  <input type="text" class="login-input" placeholder="Username" bind:value={username} required />
-  <input
-    type="password"
-    class="login-input"
-    placeholder="Password"
-    bind:value={password}
-    required
-  />
-  <button type="submit" class="login-button">Login</button>
-</form>
+<svelte:head>
+  <title>Game Master Login</title>
+</svelte:head>
 
-<style>
-  .login-form {
-    display: flex;
-    flex-direction: column;
-    width: 300px;
-    margin: 0 auto;
-    padding: 20px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    background-color: #f9f9f9;
-  }
+<NavBar />
 
-  .login-input {
-    margin-bottom: 10px;
-    padding: 8px;
-    font-size: 1rem;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-  }
+<div class="flex min-h-screen items-center justify-center">
+  <form class="space-y-6" onsubmit={handleSubmit}>
+    <h3 class="p-0 text-xl font-medium text-white dark:text-white">Game Master Login</h3>
+    <Label class="space-y-2">
+      <Label for="username" class="font-bold text-white">Your username</Label>
+      <Input
+        id="username"
+        type="text"
+        name="username"
+        placeholder="monotron"
+        required
+        bind:value={username}
+      />
+    </Label>
+    <Label class="space-y-2">
+      <Label for="password" class="font-bold text-white">Your password</Label>
+      <ButtonGroup class="w-full">
+        <Input
+          id="password"
+          type={showPassword ? 'text' : 'password'}
+          placeholder="Your password here"
+          required
+          bind:value={password}
+        />
+        <InputAddon class="rounded-r-lg">
+          <button onclick={() => (showPassword = !showPassword)}>
+            {#if showPassword}
+              <EyeOutline class="h-6 w-6" />
+            {:else}
+              <EyeSlashOutline class="h-6 w-6" />
+            {/if}
+          </button>
+        </InputAddon>
+      </ButtonGroup>
+    </Label>
+    <Button type="submit" class="w-full" disabled={!isFormValid}>Login</Button>
+    <p class="text-sm font-light text-white dark:text-white">
+      Need an account? <a
+        href="/users/signup"
+        class="text-primary-600 dark:text-primary-500 font-medium hover:underline">Sign up</a
+      >
+    </p>
 
-  .login-button {
-    padding: 10px;
-    font-size: 1rem;
-    cursor: pointer;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    transition: background-color 0.3s;
-  }
+    <ErrorMessage error={errorObj} />
+  </form>
+</div>
 
-  .login-button:hover {
-    background-color: #0056b3;
-  }
-</style>
+<Footer />
