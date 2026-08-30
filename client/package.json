@@ -18,7 +18,7 @@
     "postinstall": "npx playwright install"
   },
   "dependencies": {
-    "pixi.js": "^8.19.0"
+    "pixi.js": "^8.20.1"
   },
   "devDependencies": {
     "@bufbuild/buf": "^1.72.0",
