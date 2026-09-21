@@ -12,7 +12,7 @@ updates:
     labels:
       - dependencies
     schedule:
-      interval: "weekly"
+      interval: "monthly"
     groups:
       connect:
         patterns:
@@ -100,7 +100,7 @@ updates:
     labels:
       - dependencies
     schedule:
-      interval: "weekly"
+      interval: "monthly"
     groups:
       all:
         patterns:
