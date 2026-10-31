@@ -47,30 +47,37 @@ See `docs/development.md` for the full local dev guide.
 
 ## Common commands
 
+The root `justfile` imports `server/justfile` and `client/justfile` as `just` modules
+(`mod server`, `mod client`), so all recipes run from the repo root — no `cd` needed.
+`just server <recipe>` / `just client <recipe>` run with that directory as cwd, same as
+`cd server && just <recipe>`. (`just server::<recipe>` double-colon form also works.)
+
 ### Root
 ```bash
 just proto          # regenerate Go + TS code from .proto files
 just checks         # proto gen + format + lint + docker build
-just server         # build server binary
+just binary         # build server binary
 just dev            # docker compose watch
 ```
 
-### Server (`cd server`)
+### Server (`just server <recipe>`)
 ```bash
-just build          # go build ./...
-just test           # run all tests (Ginkgo, with coverage)
-just lint           # golangci-lint --fix
-just format         # go fmt
-just checks         # build + test + format + lint + docs
-just start-server   # go run main.go server
+just server build          # go build ./...
+just server test           # run all tests (Ginkgo, with coverage)
+just server lint           # golangci-lint --fix
+just server format         # go fmt
+just server checks         # build + test + format + lint + docs
+just server start-server   # go run main.go server
 ```
 
-### Client (`cd client`)
+### Client (`just client <recipe>`)
 ```bash
-npm install
-npm run dev         # vite dev server
-npm run build       # production build → output served by Go server
-npm run lint
+just client build   # production build → output served by Go server
+just client dev     # vite dev server
+just client lint    # eslint
+just client checks  # prettier --write + lint
+
+# Not wrapped by just — run directly in client/:
 npm run check       # svelte-check + tsc
 ```
 
