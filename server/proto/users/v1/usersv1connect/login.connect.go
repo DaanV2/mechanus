@@ -39,13 +39,6 @@ const (
 	LoginServiceRefreshProcedure = "/users.v1.LoginService/Refresh"
 )
 
-// These variables are the protoreflect.Descriptor objects for the RPCs defined in this package.
-var (
-	loginServiceServiceDescriptor       = v1.File_users_v1_login_proto.Services().ByName("LoginService")
-	loginServiceLoginMethodDescriptor   = loginServiceServiceDescriptor.Methods().ByName("Login")
-	loginServiceRefreshMethodDescriptor = loginServiceServiceDescriptor.Methods().ByName("Refresh")
-)
-
 // LoginServiceClient is a client for the users.v1.LoginService service.
 type LoginServiceClient interface {
 	// Log in the user, returns a JWT token
@@ -63,17 +56,18 @@ type LoginServiceClient interface {
 // http://api.acme.com or https://acme.com/grpc).
 func NewLoginServiceClient(httpClient connect.HTTPClient, baseURL string, opts ...connect.ClientOption) LoginServiceClient {
 	baseURL = strings.TrimRight(baseURL, "/")
+	loginServiceMethods := v1.File_users_v1_login_proto.Services().ByName("LoginService").Methods()
 	return &loginServiceClient{
 		login: connect.NewClient[v1.LoginRequest, v1.LoginResponse](
 			httpClient,
 			baseURL+LoginServiceLoginProcedure,
-			connect.WithSchema(loginServiceLoginMethodDescriptor),
+			connect.WithSchema(loginServiceMethods.ByName("Login")),
 			connect.WithClientOptions(opts...),
 		),
 		refresh: connect.NewClient[v1.RefreshTokenRequest, v1.RefreshTokenResponse](
 			httpClient,
 			baseURL+LoginServiceRefreshProcedure,
-			connect.WithSchema(loginServiceRefreshMethodDescriptor),
+			connect.WithSchema(loginServiceMethods.ByName("Refresh")),
 			connect.WithClientOptions(opts...),
 		),
 	}
@@ -109,16 +103,17 @@ type LoginServiceHandler interface {
 // By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
 // and JSON codecs. They also support gzip compression.
 func NewLoginServiceHandler(svc LoginServiceHandler, opts ...connect.HandlerOption) (string, http.Handler) {
+	loginServiceMethods := v1.File_users_v1_login_proto.Services().ByName("LoginService").Methods()
 	loginServiceLoginHandler := connect.NewUnaryHandler(
 		LoginServiceLoginProcedure,
 		svc.Login,
-		connect.WithSchema(loginServiceLoginMethodDescriptor),
+		connect.WithSchema(loginServiceMethods.ByName("Login")),
 		connect.WithHandlerOptions(opts...),
 	)
 	loginServiceRefreshHandler := connect.NewUnaryHandler(
 		LoginServiceRefreshProcedure,
 		svc.Refresh,
-		connect.WithSchema(loginServiceRefreshMethodDescriptor),
+		connect.WithSchema(loginServiceMethods.ByName("Refresh")),
 		connect.WithHandlerOptions(opts...),
 	)
 	return "/users.v1.LoginService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

@@ -6,8 +6,8 @@ type DeviceType int
 // Device type constants.
 const (
 	DeviceTypeUnknown DeviceType = iota // DeviceTypeUnknown represents an unknown device type.
-	DeviceTypeUser                       // DeviceTypeUser represents a user device.
-	DeviceTypeDevice                     // DeviceTypeDevice represents a device.
+	DeviceTypeUser                      // DeviceTypeUser represents a user device.
+	DeviceTypeDevice                    // DeviceTypeDevice represents a device.
 )
 
 func (d DeviceType) String() string {

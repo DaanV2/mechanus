@@ -15,11 +15,9 @@ func CreateUser() *models.User {
 	id := CreateUserID()
 
 	return &models.User{
-		Model: models.Model{
-			ID:        id,
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
-		},
+		ID:           id,
+		CreatedAt:    time.Now(),
+		UpdatedAt:    time.Now(),
 		Username:     "username_" + id,
 		Roles:        []string{"user"},
 		Campaigns:    []*models.Campaign{},

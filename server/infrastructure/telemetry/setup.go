@@ -9,10 +9,9 @@ import (
 	"go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploghttp"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
-	"go.opentelemetry.io/otel/log/global"
 	"go.opentelemetry.io/otel/propagation"
-	"go.opentelemetry.io/otel/sdk/resource"
 	sdklog "go.opentelemetry.io/otel/sdk/log"
+	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.21.0"
 )
@@ -103,7 +102,7 @@ func SetupLogging(exporter *otlploghttp.Exporter, res *resource.Resource) *sdklo
 	)
 
 	// Set global logger provider
-	global.SetLoggerProvider(lp)
+	otel.SetLoggerProvider(lp)
 
 	return lp
 }

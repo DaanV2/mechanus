@@ -5,7 +5,6 @@ import (
 
 	"github.com/DaanV2/mechanus/server/engine/authentication/roles"
 	"github.com/DaanV2/mechanus/server/infrastructure/authentication"
-	"github.com/golang-jwt/jwt/v5"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
@@ -13,10 +12,8 @@ import (
 var _ = Describe("Context", func() {
 	ctx := context.Background()
 	ctx = authentication.ContextWithJWT(ctx, &authentication.JWTClaims{
-		RegisteredClaims: jwt.RegisteredClaims{
-			Issuer:  "test-issuer",
-			Subject: "test-subject",
-		},
+		Issuer:  "test-issuer",
+		Subject: "test-subject",
 		User: authentication.JWTUser{
 			ID:        "test-user-id",
 			Name:      "Test User",

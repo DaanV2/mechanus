@@ -18,10 +18,8 @@ type ServerConfig struct {
 
 func GetServerConfig() *ServerConfig {
 	return &ServerConfig{
-		Config: Config{
-			Port: ServerPortFlag.Value(),
-			Host: ServerHostFlag.Value(),
-		},
+		Port:         ServerPortFlag.Value(),
+		Host:         ServerHostFlag.Value(),
 		StaticFolder: ServerStaticFolderFlag.Value(),
 	}
 }

@@ -15,7 +15,7 @@ import (
 
 const (
 	// JWT_ISSUER is the issuer name for JWT tokens.
-	JWT_ISSUER = mechanus.SERVICE_NAME
+	JWT_ISSUER   = mechanus.SERVICE_NAME
 	JWT_AUDIENCE = mechanus.SERVICE_NAME
 )
 

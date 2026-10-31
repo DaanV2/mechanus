@@ -35,7 +35,6 @@ const settings_section_template = `{{ $header := repeat "#" .Depth }}
 {{range .Fields}}| {{.Name}} | {{.Type}} | {{.Description}} | {{.Default}} | {{.Env}} |
 {{end}}{{end}}`
 
-
 func (s *Settings) render() ([]byte, error) {
 	v := template.New("settings").Funcs(template.FuncMap{"repeat": strings.Repeat})
 

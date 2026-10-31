@@ -115,13 +115,11 @@ func (s *serverConn) handlePacket(data []byte, src *net.UDPAddr) {
 
 	// Send answers
 	resp := dnsmessage.Message{
-		Header: dnsmessage.Header{
-			ID:            msg.ID,
-			Response:      true,
-			Authoritative: true,
-		},
-		Questions: msg.Questions,
-		Answers:   answers,
+		ID:            msg.ID,
+		Response:      true,
+		Authoritative: true,
+		Questions:     msg.Questions,
+		Answers:       answers,
 	}
 	err = s.sendMsg(src, &resp)
 	if err != nil {
@@ -214,11 +212,9 @@ func (s *serverConn) sendAnnouncement() error {
 	}
 
 	msg := dnsmessage.Message{
-		Header: dnsmessage.Header{
-			Response:      true,
-			Authoritative: true,
-		},
-		Answers: records,
+		Response:      true,
+		Authoritative: true,
+		Answers:       records,
 	}
 
 	// Multicast address for mDNS

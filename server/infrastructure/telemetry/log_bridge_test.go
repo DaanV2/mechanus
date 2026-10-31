@@ -16,10 +16,10 @@ import (
 var _ = Describe("LogBridge", func() {
 	Describe("OtelLogHandler", func() {
 		var (
-			buf      *bytes.Buffer
-			logger   *log.Logger
-			handler  *telemetry.OtelLogHandler
-			ctx      context.Context
+			buf     *bytes.Buffer
+			logger  *log.Logger
+			handler *telemetry.OtelLogHandler
+			ctx     context.Context
 		)
 
 		BeforeEach(func() {
@@ -139,8 +139,8 @@ var _ = Describe("LogBridge", func() {
 
 			// Verify that a warning was logged about log exporter failure
 			output := buf.String()
-			Expect(strings.Contains(output, "failed to create OTLP log exporter") || 
-			       strings.Contains(output, "WARN")).To(BeTrue())
+			Expect(strings.Contains(output, "failed to create OTLP log exporter") ||
+				strings.Contains(output, "WARN")).To(BeTrue())
 
 			// Clean up
 			err = manager.AfterShutDown(ctx)

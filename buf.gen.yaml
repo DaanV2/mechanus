@@ -11,7 +11,7 @@ plugins:
     opt:
       - paths=source_relative
   # Client
-  - remote: buf.build/bufbuild/es:v2.2.0
+  - remote: buf.build/bufbuild/es:v2.16.0
     out: client/src/proto
     include_imports: true
     opt: target=ts
