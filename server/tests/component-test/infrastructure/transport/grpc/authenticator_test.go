@@ -20,8 +20,11 @@ var _ = Describe("Authenticator", func() {
 		jtiService *authentication.JTIService
 		jwtService *authentication.JWTService
 		handler    connect.UnaryFunc
-		// The context the next handler in the chain received
-		received context.Context
+
+		// What the next handler in the chain found on its context
+		called bool
+		jwt    authentication.JWTContext
+		jwtErr error
 	)
 
 	BeforeEach(func(setupCtx SpecContext) {
@@ -31,11 +34,12 @@ var _ = Describe("Authenticator", func() {
 		Expect(err).ShouldNot(HaveOccurred())
 		jwtService = authentication.NewJWTService(jtiService, keyManager)
 
-		received = nil
+		called = false
 		handler = grpc.NewAuthenticator(jwtService).WrapUnary(func(ctx context.Context, _ connect.AnyRequest) (connect.AnyResponse, error) {
-			received = ctx
+			called = true
+			jwt, jwtErr = authentication.JWTFromContext(ctx)
 
-			return nil, nil
+			return connect.NewResponse(&usersv1.ListUsersResponse{}), nil
 		})
 	})
 
@@ -46,7 +50,7 @@ var _ = Describe("Authenticator", func() {
 		}
 
 		Expect(func() { _, _ = handler(ctx, req) }).ToNot(Panic())
-		Expect(received).ToNot(BeNil())
+		Expect(called).To(BeTrue())
 	}
 
 	createToken := func(ctx context.Context, scope string) string {
@@ -59,15 +63,13 @@ var _ = Describe("Authenticator", func() {
 	It("leaves the request anonymous without a token", func(ctx SpecContext) {
 		call(ctx, "")
 
-		_, err := authentication.JWTFromContext(received)
-		Expect(err).To(MatchError(authentication.ErrNoToken))
+		Expect(jwtErr).To(MatchError(authentication.ErrNoToken))
 	})
 
 	It("marks a valid token as authenticated", func(ctx SpecContext) {
 		call(ctx, "Bearer "+createToken(ctx, authentication.ScopeAll))
 
-		jwt, err := authentication.JWTFromContext(received)
-		Expect(err).ShouldNot(HaveOccurred())
+		Expect(jwtErr).ShouldNot(HaveOccurred())
 		Expect(jwt.IsAuthenicated()).To(BeTrue())
 	})
 
@@ -75,7 +77,7 @@ var _ = Describe("Authenticator", func() {
 		func(ctx SpecContext, authorization string) {
 			call(ctx, authorization)
 
-			Expect(authentication.IsAuthenicated(received)).To(BeFalse())
+			Expect(jwt.IsAuthenicated()).To(BeFalse())
 		},
 		Entry("malformed", "Bearer not.a.jwt"),
 		Entry("garbage", "Bearer garbage"),
@@ -88,7 +90,7 @@ var _ = Describe("Authenticator", func() {
 
 		call(ctx, "Bearer "+token)
 
-		Expect(authentication.IsAuthenicated(received)).To(BeFalse())
+		Expect(jwt.IsAuthenicated()).To(BeFalse())
 	})
 
 	It("treats a tampered token as anonymous", func(ctx SpecContext) {
@@ -103,7 +105,7 @@ var _ = Describe("Authenticator", func() {
 
 		call(ctx, "Bearer "+token)
 
-		Expect(authentication.IsAuthenicated(received)).To(BeFalse())
+		Expect(jwt.IsAuthenicated()).To(BeFalse())
 	})
 
 	It("marks a token with a revoked JTI as not authenticated", func(ctx SpecContext) {
@@ -117,14 +119,14 @@ var _ = Describe("Authenticator", func() {
 
 		call(ctx, "Bearer "+token)
 
-		Expect(authentication.IsAuthenicated(received)).To(BeFalse())
+		Expect(jwtErr).ShouldNot(HaveOccurred())
+		Expect(jwt.IsAuthenicated()).To(BeFalse())
 	})
 
 	It("does not authenticate a refresh-only token", func(ctx SpecContext) {
 		call(ctx, "Bearer "+createToken(ctx, authentication.ScopeRefresh))
 
-		jwt, err := authentication.JWTFromContext(received)
-		Expect(err).ShouldNot(HaveOccurred())
+		Expect(jwtErr).ShouldNot(HaveOccurred())
 		Expect(jwt.IsAuthenicated()).To(BeFalse())
 	})
 })
