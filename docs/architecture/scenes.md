@@ -7,7 +7,7 @@ Scenes are the core of Mechanus. The GM prepares scenes, and activating one make
 - A **scene** records which entities are present (players, NPCs, enemies, objects).
 - A scene has **variants** the GM built (time of day, weather, combat, ...) and can transition between them.
 - A scene **instructs devices** what to do:
-  - **Screens** show a _view_: battle map, scenery, information board, or a custom view.
+  - **Screens** show a _view_: battle map, scenery, information board, or a custom view, optionally with overlays such as an initiative tracker or the entities on screen.
   - **Lights** (Hue, Matter, Home Assistant, custom) get colour / brightness / effect instructions.
   - **Music** (Spotify, iTunes, custom) gets play / pause / volume instructions.
   - **Custom devices** get raw payloads over an event bus (MQTT or similar).
@@ -20,8 +20,9 @@ Scenes are the core of Mechanus. The GM prepares scenes, and activating one make
  │ Scene "tavern"                                       │      │ Room "living room"           │
  │   entities: barkeep (npc), spy (enemy, hidden), ...  │      │                              │
  │   instructions (base):                               │      │  target   →  devices         │
- │     screens.table   → battlemap tavern.dd2vtt        │      │  table    →  TV (screen)     │
+ │     screens.table   → battlemap tavern (custom)      │      │  table    →  TV (screen)     │
  │     screens.wall    → scenery  tavern-day.png        │      │  wall     →  monitor (screen)│
+ │                       + initiative tracker, entities │      │                              │
  │     lights.ambient  → #ffcc88 80%                    │      │  ambient  →  hue-1, hue-2    │
  │     music.music     → play spotify:playlist:tavern   │      │  music    →  spotify-speaker │
  │   variants:                                          │      │  fog      →  mqtt fog-machine│
@@ -93,14 +94,28 @@ Resolve never mutates the scene.
 
 A `ScreenInstruction` selects a view; the client renders it. Screens are browser clients connected over the screen WebSocket (see [communication.md](./communication.md)).
 
-| View        | Purpose                                                       | Typical `Asset`                    |
-| ----------- | ------------------------------------------------------------- | ---------------------------------- |
-| `battlemap` | Tactical grid with entities, fog of war, tokens               | `.dd2vtt` / `.dungeondraft_map`    |
-| `scenery`   | Atmospheric image or video backdrop                           | image / video                      |
-| `infoboard` | Handouts, initiative order, quest log, text                   | document / none                    |
-| `custom`    | Client component chosen by `Component`, configured by `Params`| anything                           |
-| `splash`    | Title card / loading screen                                   | image                              |
-| `blank`     | Black screen                                                  | —                                  |
+| View        | Purpose                                                        | Typical `Asset`                 |
+| ----------- | -------------------------------------------------------------- | ------------------------------- |
+| `battlemap` | Tactical grid with entities, fog of war, tokens                | Mechanus' own battle map format |
+| `scenery`   | Atmospheric image or video backdrop                            | image / video                   |
+| `infoboard` | Handouts, initiative order, quest log, text                    | document / none                 |
+| `custom`    | Client component chosen by `Component`, configured by `Params` | anything                        |
+| `splash`    | Title card / loading screen                                    | image                           |
+| `blank`     | Black screen                                                   | —                               |
+
+**Battle maps** use a custom, Mechanus-specific format rather than an existing VTT format, so the map can carry everything the battle map view needs (grid, walls, lighting, fog, token positions). The format itself is not defined yet. Importers for other formats (e.g. the Universal VTT parser in `infrastructure/vttrpg`) would convert into it rather than being rendered directly.
+
+#### Overlays
+
+Any view can carry `Overlays`: widgets drawn on top of it. This lets a scenery screen also show the initiative tracker, or portraits of the entities in the scene, without needing a dedicated view per combination.
+
+| Overlay      | Purpose                                                          |
+| ------------ | ---------------------------------------------------------------- |
+| `initiative` | Initiative / turn order tracker                                  |
+| `entities`   | Names / portraits of the scene's visible (non-hidden) entities   |
+| `custom`     | Client component chosen by `Component`, configured by `Params`   |
+
+Overlays are part of the screen instruction, so a variant (e.g. `combat`) can add the initiative tracker to the wall screen by overriding that target's instruction, and only that screen is re-instructed.
 
 The existing `engine/screens` package (`ScreenHandler`, `ScreenManager`, `state.ScreenState`) is the transport for the `screen` integration: a screen driver will translate a `ScreenInstruction` plus the scene's entities into `ScreenState` / proto messages and broadcast it to the screen's listeners. The intended mapping is one `ScreenHandler` per screen device, so the WebSocket `screenId` becomes the device ID and routing by role or device is answered by the room's bindings.
 
@@ -134,6 +149,7 @@ server/
 
 **Not implemented yet**:
 
+- The battle map format itself.
 - Persistence: no `SceneRepository` / `RoomProvider` implementation, no DB models or migrations. Scenes are campaign-owned; rooms are global (or per server).
 - `SceneService` is not wired in `components`.
 - No drivers: screen (to `engine/screens`), Hue, Matter, Home Assistant, Spotify, iTunes, MQTT.

@@ -20,7 +20,7 @@ type ViewKind string
 
 // View kind constants.
 const (
-	ViewBattleMap ViewKind = "battlemap" // ViewBattleMap is a tactical grid map with entities.
+	ViewBattleMap ViewKind = "battlemap" // ViewBattleMap is a tactical grid map with entities, in Mechanus' own map format.
 	ViewScenery   ViewKind = "scenery"   // ViewScenery is an image / video backdrop.
 	ViewInfoBoard ViewKind = "infoboard" // ViewInfoBoard shows text / handouts / initiative.
 	ViewCustom    ViewKind = "custom"    // ViewCustom is a client side component chosen by name.
@@ -28,12 +28,30 @@ const (
 	ViewBlank     ViewKind = "blank"     // ViewBlank turns the screen black.
 )
 
+// OverlayKind is the type of widget drawn on top of a view.
+type OverlayKind string
+
+// Overlay kind constants.
+const (
+	OverlayInitiative OverlayKind = "initiative" // OverlayInitiative is an initiative / turn order tracker.
+	OverlayEntities   OverlayKind = "entities"   // OverlayEntities shows the scene's visible entities.
+	OverlayCustom     OverlayKind = "custom"     // OverlayCustom is a client side component chosen by name.
+)
+
+// Overlay is a widget drawn on top of a screen's view.
+type Overlay struct {
+	Kind      OverlayKind       `json:"kind"`
+	Component string            `json:"component,omitempty"` // Client component name, for [OverlayCustom]
+	Params    map[string]string `json:"params,omitempty"`    // Overlay specific options (position, size, ...)
+}
+
 // ScreenInstruction tells a screen which view to show.
 type ScreenInstruction struct {
 	View      ViewKind          `json:"view"`
-	Asset     string            `json:"asset,omitempty"`     // Map file, image, video, ... depending on the view
+	Asset     string            `json:"asset,omitempty"`     // Battle map, image, video, ... depending on the view
 	Component string            `json:"component,omitempty"` // Client component name, for [ViewCustom]
 	Params    map[string]string `json:"params,omitempty"`    // View specific options
+	Overlays  []Overlay         `json:"overlays,omitempty"`  // Widgets drawn on top of the view, in order
 }
 
 // Kind implements [Instruction].

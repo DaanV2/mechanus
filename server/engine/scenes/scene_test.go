@@ -17,7 +17,7 @@ func tavern() *scenes.Scene {
 		},
 		Instructions: scenes.Instructions{
 			Screens: map[string]scenes.ScreenInstruction{
-				"table": {View: scenes.ViewBattleMap, Asset: "tavern.dd2vtt"},
+				"table": {View: scenes.ViewBattleMap, Asset: "tavern-map"},
 				"wall":  {View: scenes.ViewScenery, Asset: "tavern-day.png"},
 			},
 			Lights: map[string]scenes.LightInstruction{
@@ -40,6 +40,21 @@ func tavern() *scenes.Scene {
 					},
 				},
 			},
+			{
+				ID: "combat",
+				Instructions: scenes.Instructions{
+					Screens: map[string]scenes.ScreenInstruction{
+						"wall": {
+							View:  scenes.ViewScenery,
+							Asset: "tavern-day.png",
+							Overlays: []scenes.Overlay{
+								{Kind: scenes.OverlayInitiative},
+								{Kind: scenes.OverlayEntities},
+							},
+						},
+					},
+				},
+			},
 		},
 	}
 }
@@ -56,7 +71,7 @@ var _ = Describe("Scene", func() {
 		ins, err := tavern().Resolve("night")
 		Expect(err).ToNot(HaveOccurred())
 		Expect(ins.Screens["wall"].Asset).To(Equal("tavern-night.png"))
-		Expect(ins.Screens["table"].Asset).To(Equal("tavern.dd2vtt"), "untouched targets are kept")
+		Expect(ins.Screens["table"].Asset).To(Equal("tavern-map"), "untouched targets are kept")
 		Expect(ins.Lights["ambient"].Effect).To(Equal("candle"))
 		Expect(ins.Music).To(HaveKey("music"))
 	})
@@ -107,12 +122,20 @@ var _ = Describe("Plan", func() {
 		Expect(t.Changes.Music).To(BeEmpty())
 	})
 
+	It("re-instructs a screen when a variant only adds overlays", func() {
+		s := tavern()
+		t, err := scenes.Plan(s, "", s, "combat")
+		Expect(err).ToNot(HaveOccurred())
+		Expect(t.Changes.All()).To(HaveLen(1))
+		Expect(t.Changes.Screens["wall"].Overlays).To(HaveLen(2))
+	})
+
 	It("releases targets the next scene does not instruct", func() {
 		road := &scenes.Scene{
 			ID: "road",
 			Instructions: scenes.Instructions{
 				Screens: map[string]scenes.ScreenInstruction{
-					"table": {View: scenes.ViewBattleMap, Asset: "road.dd2vtt"},
+					"table": {View: scenes.ViewBattleMap, Asset: "road-map"},
 				},
 			},
 		}

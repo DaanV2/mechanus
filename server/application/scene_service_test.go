@@ -61,7 +61,7 @@ var _ = Describe("SceneService", func() {
 		repo := sceneRepo{"cave": {
 			ID: "cave",
 			Instructions: scenes.Instructions{
-				Screens: map[string]scenes.ScreenInstruction{"table": {View: scenes.ViewBattleMap, Asset: "cave.dd2vtt"}},
+				Screens: map[string]scenes.ScreenInstruction{"table": {View: scenes.ViewBattleMap, Asset: "cave-map"}},
 				Lights:  map[string]scenes.LightInstruction{"ambient": {On: true, Brightness: 0.2}},
 			},
 			Variants: []scenes.Variant{{
