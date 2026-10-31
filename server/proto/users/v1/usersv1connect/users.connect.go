@@ -39,6 +39,9 @@ const (
 	UserServiceGetProcedure = "/users.v1.UserService/Get"
 	// UserServiceListProcedure is the fully-qualified name of the UserService's List RPC.
 	UserServiceListProcedure = "/users.v1.UserService/List"
+	// UserServiceResetPasswordProcedure is the fully-qualified name of the UserService's ResetPassword
+	// RPC.
+	UserServiceResetPasswordProcedure = "/users.v1.UserService/ResetPassword"
 )
 
 // UserServiceClient is a client for the users.v1.UserService service.
@@ -47,6 +50,8 @@ type UserServiceClient interface {
 	Get(context.Context, *connect.Request[v1.GetUserRequest]) (*connect.Response[v1.GetUserResponse], error)
 	// List all users, requires the admin role
 	List(context.Context, *connect.Request[v1.ListUsersRequest]) (*connect.Response[v1.ListUsersResponse], error)
+	// Reset the password of a user to a new one, requires the admin role
+	ResetPassword(context.Context, *connect.Request[v1.ResetPasswordRequest]) (*connect.Response[v1.ResetPasswordResponse], error)
 }
 
 // NewUserServiceClient constructs a client for the users.v1.UserService service. By default, it
@@ -78,14 +83,21 @@ func NewUserServiceClient(httpClient connect.HTTPClient, baseURL string, opts ..
 			connect.WithSchema(userServiceMethods.ByName("List")),
 			connect.WithClientOptions(opts...),
 		),
+		resetPassword: connect.NewClient[v1.ResetPasswordRequest, v1.ResetPasswordResponse](
+			httpClient,
+			baseURL+UserServiceResetPasswordProcedure,
+			connect.WithSchema(userServiceMethods.ByName("ResetPassword")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
 // userServiceClient implements UserServiceClient.
 type userServiceClient struct {
-	create *connect.Client[v1.CreateAccountRequest, v1.CreateAccountResponse]
-	get    *connect.Client[v1.GetUserRequest, v1.GetUserResponse]
-	list   *connect.Client[v1.ListUsersRequest, v1.ListUsersResponse]
+	create        *connect.Client[v1.CreateAccountRequest, v1.CreateAccountResponse]
+	get           *connect.Client[v1.GetUserRequest, v1.GetUserResponse]
+	list          *connect.Client[v1.ListUsersRequest, v1.ListUsersResponse]
+	resetPassword *connect.Client[v1.ResetPasswordRequest, v1.ResetPasswordResponse]
 }
 
 // Create calls users.v1.UserService.Create.
@@ -103,12 +115,19 @@ func (c *userServiceClient) List(ctx context.Context, req *connect.Request[v1.Li
 	return c.list.CallUnary(ctx, req)
 }
 
+// ResetPassword calls users.v1.UserService.ResetPassword.
+func (c *userServiceClient) ResetPassword(ctx context.Context, req *connect.Request[v1.ResetPasswordRequest]) (*connect.Response[v1.ResetPasswordResponse], error) {
+	return c.resetPassword.CallUnary(ctx, req)
+}
+
 // UserServiceHandler is an implementation of the users.v1.UserService service.
 type UserServiceHandler interface {
 	Create(context.Context, *connect.Request[v1.CreateAccountRequest]) (*connect.Response[v1.CreateAccountResponse], error)
 	Get(context.Context, *connect.Request[v1.GetUserRequest]) (*connect.Response[v1.GetUserResponse], error)
 	// List all users, requires the admin role
 	List(context.Context, *connect.Request[v1.ListUsersRequest]) (*connect.Response[v1.ListUsersResponse], error)
+	// Reset the password of a user to a new one, requires the admin role
+	ResetPassword(context.Context, *connect.Request[v1.ResetPasswordRequest]) (*connect.Response[v1.ResetPasswordResponse], error)
 }
 
 // NewUserServiceHandler builds an HTTP handler from the service implementation. It returns the path
@@ -136,6 +155,12 @@ func NewUserServiceHandler(svc UserServiceHandler, opts ...connect.HandlerOption
 		connect.WithSchema(userServiceMethods.ByName("List")),
 		connect.WithHandlerOptions(opts...),
 	)
+	userServiceResetPasswordHandler := connect.NewUnaryHandler(
+		UserServiceResetPasswordProcedure,
+		svc.ResetPassword,
+		connect.WithSchema(userServiceMethods.ByName("ResetPassword")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/users.v1.UserService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case UserServiceCreateProcedure:
@@ -144,6 +169,8 @@ func NewUserServiceHandler(svc UserServiceHandler, opts ...connect.HandlerOption
 			userServiceGetHandler.ServeHTTP(w, r)
 		case UserServiceListProcedure:
 			userServiceListHandler.ServeHTTP(w, r)
+		case UserServiceResetPasswordProcedure:
+			userServiceResetPasswordHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -163,4 +190,8 @@ func (UnimplementedUserServiceHandler) Get(context.Context, *connect.Request[v1.
 
 func (UnimplementedUserServiceHandler) List(context.Context, *connect.Request[v1.ListUsersRequest]) (*connect.Response[v1.ListUsersResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("users.v1.UserService.List is not implemented"))
+}
+
+func (UnimplementedUserServiceHandler) ResetPassword(context.Context, *connect.Request[v1.ResetPasswordRequest]) (*connect.Response[v1.ResetPasswordResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("users.v1.UserService.ResetPassword is not implemented"))
 }

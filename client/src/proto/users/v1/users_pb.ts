@@ -10,7 +10,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file users/v1/users.proto.
  */
 export const file_users_v1_users: GenFile = /*@__PURE__*/
-  fileDesc("ChR1c2Vycy92MS91c2Vycy5wcm90bxIIdXNlcnMudjEiOgoUQ3JlYXRlQWNjb3VudFJlcXVlc3QSEAoIdXNlcm5hbWUYASABKAkSEAoIcGFzc3dvcmQYAiABKAkiNQoVQ3JlYXRlQWNjb3VudFJlc3BvbnNlEhwKBHVzZXIYASABKAsyDi51c2Vycy52MS5Vc2VyIhwKDkdldFVzZXJSZXF1ZXN0EgoKAmlkGAEgASgJIi8KD0dldFVzZXJSZXNwb25zZRIcCgR1c2VyGAEgASgLMg4udXNlcnMudjEuVXNlciISChBMaXN0VXNlcnNSZXF1ZXN0IjIKEUxpc3RVc2Vyc1Jlc3BvbnNlEh0KBXVzZXJzGAEgAygLMg4udXNlcnMudjEuVXNlciIvCgRVc2VyEgoKAmlkGAEgASgJEgwKBG5hbWUYAiABKAkSDQoFcm9sZXMYAyADKAky2wEKC1VzZXJTZXJ2aWNlEksKBkNyZWF0ZRIeLnVzZXJzLnYxLkNyZWF0ZUFjY291bnRSZXF1ZXN0Gh8udXNlcnMudjEuQ3JlYXRlQWNjb3VudFJlc3BvbnNlIgASPAoDR2V0EhgudXNlcnMudjEuR2V0VXNlclJlcXVlc3QaGS51c2Vycy52MS5HZXRVc2VyUmVzcG9uc2UiABJBCgRMaXN0EhoudXNlcnMudjEuTGlzdFVzZXJzUmVxdWVzdBobLnVzZXJzLnYxLkxpc3RVc2Vyc1Jlc3BvbnNlIgBCOlo4Z2l0aHViLmNvbS9EYWFuVjIvbWVjaGFudXMvc2VydmVyL3Byb3RvL3VzZXJzL3YxO3VzZXJzdjFiBnByb3RvMw");
+  fileDesc("ChR1c2Vycy92MS91c2Vycy5wcm90bxIIdXNlcnMudjEiOgoUQ3JlYXRlQWNjb3VudFJlcXVlc3QSEAoIdXNlcm5hbWUYASABKAkSEAoIcGFzc3dvcmQYAiABKAkiNQoVQ3JlYXRlQWNjb3VudFJlc3BvbnNlEhwKBHVzZXIYASABKAsyDi51c2Vycy52MS5Vc2VyIhwKDkdldFVzZXJSZXF1ZXN0EgoKAmlkGAEgASgJIi8KD0dldFVzZXJSZXNwb25zZRIcCgR1c2VyGAEgASgLMg4udXNlcnMudjEuVXNlciISChBMaXN0VXNlcnNSZXF1ZXN0IjIKEUxpc3RVc2Vyc1Jlc3BvbnNlEh0KBXVzZXJzGAEgAygLMg4udXNlcnMudjEuVXNlciI4ChRSZXNldFBhc3N3b3JkUmVxdWVzdBIKCgJpZBgBIAEoCRIUCgxuZXdfcGFzc3dvcmQYAiABKAkiFwoVUmVzZXRQYXNzd29yZFJlc3BvbnNlIi8KBFVzZXISCgoCaWQYASABKAkSDAoEbmFtZRgCIAEoCRINCgVyb2xlcxgDIAMoCTKvAgoLVXNlclNlcnZpY2USSwoGQ3JlYXRlEh4udXNlcnMudjEuQ3JlYXRlQWNjb3VudFJlcXVlc3QaHy51c2Vycy52MS5DcmVhdGVBY2NvdW50UmVzcG9uc2UiABI8CgNHZXQSGC51c2Vycy52MS5HZXRVc2VyUmVxdWVzdBoZLnVzZXJzLnYxLkdldFVzZXJSZXNwb25zZSIAEkEKBExpc3QSGi51c2Vycy52MS5MaXN0VXNlcnNSZXF1ZXN0GhsudXNlcnMudjEuTGlzdFVzZXJzUmVzcG9uc2UiABJSCg1SZXNldFBhc3N3b3JkEh4udXNlcnMudjEuUmVzZXRQYXNzd29yZFJlcXVlc3QaHy51c2Vycy52MS5SZXNldFBhc3N3b3JkUmVzcG9uc2UiAEI6WjhnaXRodWIuY29tL0RhYW5WMi9tZWNoYW51cy9zZXJ2ZXIvcHJvdG8vdXNlcnMvdjE7dXNlcnN2MWIGcHJvdG8z");
 
 /**
  * @generated from message users.v1.CreateAccountRequest
@@ -122,6 +122,45 @@ export const ListUsersResponseSchema: GenMessage<ListUsersResponse> = /*@__PURE_
   messageDesc(file_users_v1_users, 5);
 
 /**
+ * @generated from message users.v1.ResetPasswordRequest
+ */
+export type ResetPasswordRequest = Message<"users.v1.ResetPasswordRequest"> & {
+  /**
+   * The UUID of the user whose password is reset
+   *
+   * @generated from field: string id = 1;
+   */
+  id: string;
+
+  /**
+   * The new password
+   *
+   * @generated from field: string new_password = 2;
+   */
+  newPassword: string;
+};
+
+/**
+ * Describes the message users.v1.ResetPasswordRequest.
+ * Use `create(ResetPasswordRequestSchema)` to create a new message.
+ */
+export const ResetPasswordRequestSchema: GenMessage<ResetPasswordRequest> = /*@__PURE__*/
+  messageDesc(file_users_v1_users, 6);
+
+/**
+ * @generated from message users.v1.ResetPasswordResponse
+ */
+export type ResetPasswordResponse = Message<"users.v1.ResetPasswordResponse"> & {
+};
+
+/**
+ * Describes the message users.v1.ResetPasswordResponse.
+ * Use `create(ResetPasswordResponseSchema)` to create a new message.
+ */
+export const ResetPasswordResponseSchema: GenMessage<ResetPasswordResponse> = /*@__PURE__*/
+  messageDesc(file_users_v1_users, 7);
+
+/**
  * @generated from message users.v1.User
  */
 export type User = Message<"users.v1.User"> & {
@@ -152,7 +191,7 @@ export type User = Message<"users.v1.User"> & {
  * Use `create(UserSchema)` to create a new message.
  */
 export const UserSchema: GenMessage<User> = /*@__PURE__*/
-  messageDesc(file_users_v1_users, 6);
+  messageDesc(file_users_v1_users, 8);
 
 /**
  * @generated from service users.v1.UserService
@@ -183,6 +222,16 @@ export const UserService: GenService<{
     methodKind: "unary";
     input: typeof ListUsersRequestSchema;
     output: typeof ListUsersResponseSchema;
+  },
+  /**
+   * Reset the password of a user to a new one, requires the admin role
+   *
+   * @generated from rpc users.v1.UserService.ResetPassword
+   */
+  resetPassword: {
+    methodKind: "unary";
+    input: typeof ResetPasswordRequestSchema;
+    output: typeof ResetPasswordResponseSchema;
   },
 }> = /*@__PURE__*/
   serviceDesc(file_users_v1_users, 0);

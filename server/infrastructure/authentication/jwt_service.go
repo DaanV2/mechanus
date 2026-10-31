@@ -54,8 +54,8 @@ func NewJWTService(jtiService *JTIService, keys *KeyManager) *JWTService {
 
 // TODO Refresh
 
-// Create creates a new JWT token for the given user with the specified scope.
-func (s *JWTService) Create(ctx context.Context, user *models.User, scope string) (string, error) {
+// Create creates a new JWT token for the given user with the specified grant and scope.
+func (s *JWTService) Create(ctx context.Context, user *models.User, grant, scope string) (string, error) {
 	logging.Info(ctx, "creating jwt")
 
 	claims := &JWTClaims{
@@ -65,6 +65,7 @@ func (s *JWTService) Create(ctx context.Context, user *models.User, scope string
 			Roles:     user.Roles,
 			Campaigns: xslices.CollectIDs(user.Campaigns),
 		},
+		Grant: grant,
 		Scope: scope,
 	}
 

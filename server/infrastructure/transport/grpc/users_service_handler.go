@@ -9,6 +9,7 @@ import (
 	"github.com/DaanV2/mechanus/server/engine/authentication/roles"
 	"github.com/DaanV2/mechanus/server/infrastructure/authentication"
 	"github.com/DaanV2/mechanus/server/infrastructure/logging"
+	"github.com/DaanV2/mechanus/server/infrastructure/persistence"
 	"github.com/DaanV2/mechanus/server/infrastructure/persistence/models"
 	"github.com/DaanV2/mechanus/server/pkg/extensions/xerrors"
 	usersv1 "github.com/DaanV2/mechanus/server/proto/users/v1"
@@ -103,20 +104,13 @@ func (u *UserServiceHandler) Get(ctx context.Context, req *connect.Request[users
 	return connect.NewResponse(&usersv1.GetUserResponse{User: user}), nil
 }
 
-// List implements usersv1connect.UserServiceHandler.
-func (u *UserServiceHandler) List(ctx context.Context, req *connect.Request[usersv1.ListUsersRequest]) (*connect.Response[usersv1.ListUsersResponse], error) {
-	jwt, err := authentication.JWTFromContext(ctx)
-	if err != nil {
-		u.logger.From(ctx).Error("error during reading jwt", "error", err)
-
-		return nil, connect.NewError(connect.CodePermissionDenied, err)
+// List implements usersv1connect.UserServiceClient.
+func (u *UserServiceHandler) List(ctx context.Context, _ *connect.Request[usersv1.ListUsersRequest]) (*connect.Response[usersv1.ListUsersResponse], error) {
+	if err := u.requireAdmin(ctx); err != nil {
+		return nil, err
 	}
 
-	if !jwt.IsAuthenicatedWithRole(roles.Admin) {
-		return nil, connect.NewError(connect.CodePermissionDenied, errors.New("expecting an admin role"))
-	}
-
-	users, err := u.users.List(ctx)
+	users, err := u.users.Find(ctx, &models.User{})
 	if err != nil {
 		u.logger.From(ctx).Error("error during listing of users", "error", err)
 
@@ -131,6 +125,60 @@ func (u *UserServiceHandler) List(ctx context.Context, req *connect.Request[user
 	return connect.NewResponse(&usersv1.ListUsersResponse{Users: result}), nil
 }
 
+// ResetPassword implements usersv1connect.UserServiceClient.
+func (u *UserServiceHandler) ResetPassword(ctx context.Context, req *connect.Request[usersv1.ResetPasswordRequest]) (*connect.Response[usersv1.ResetPasswordResponse], error) {
+	if err := u.requireAdmin(ctx); err != nil {
+		return nil, err
+	}
+
+	id, password := req.Msg.GetId(), req.Msg.GetNewPassword()
+	if id == "" {
+		return nil, connect.NewError(connect.CodeInvalidArgument, xerrors.ErrNotExist)
+	}
+	if password == "" {
+		return nil, connect.NewError(connect.CodeInvalidArgument, application.ErrEmptyPassword)
+	}
+
+	logger := u.logger.With("userId", id)
+
+	err := u.users.UpdatePassword(ctx, id, []byte(password))
+	if err != nil {
+		if persistence.IsNotExist(err) {
+			return nil, connect.NewError(connect.CodeNotFound, xerrors.ErrNotExist)
+		}
+		logger.From(ctx).Error("error during password reset", "error", err)
+
+		return nil, connect.NewError(connect.CodeInternal, err)
+	}
+
+	logger.From(ctx).Info("password reset by admin")
+
+	return connect.NewResponse(&usersv1.ResetPasswordResponse{}), nil
+}
+
+func (u *UserServiceHandler) requireAdmin(ctx context.Context) error {
+	jwt, err := authentication.JWTFromContext(ctx)
+	if err != nil {
+		u.logger.From(ctx).Error("error during reading jwt", "error", err)
+
+		return connect.NewError(connect.CodePermissionDenied, err)
+	}
+
+	if !jwt.IsAuthenicatedWithRole(roles.Admin) {
+		return connect.NewError(connect.CodePermissionDenied, errors.New("expecting an admin role"))
+	}
+
+	return nil
+}
+
+func toFullUser(user *models.User) *usersv1.User {
+	return &usersv1.User{
+		Id:    user.ID,
+		Name:  user.Username,
+		Roles: user.Roles,
+	}
+}
+
 func (u *UserServiceHandler) getFullInfo(ctx context.Context, id string) (*usersv1.User, error) {
 	user, err := u.users.Get(ctx, id)
 	if err != nil {
@@ -138,14 +186,6 @@ func (u *UserServiceHandler) getFullInfo(ctx context.Context, id string) (*users
 	}
 
 	return toFullUser(user), nil
-}
-
-func toFullUser(user *models.User) *usersv1.User {
-	return &usersv1.User{
-		Id:    user.ID,
-		Name:  user.Username,
-		Roles: user.GetRoles(),
-	}
 }
 
 func (u *UserServiceHandler) getReducedInfo(ctx context.Context, id string) (*usersv1.User, error) {

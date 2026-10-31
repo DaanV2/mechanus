@@ -6,7 +6,8 @@ export interface JWTClaims {
   nbf: number;
   jti: string;
   user: JWtUser;
-  scope: 'password' | 'refresh';
+  grant: 'password' | 'refresh';
+  scope: '*' | 'refresh';
 }
 
 export interface JWtUser {

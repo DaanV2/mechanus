@@ -79,7 +79,7 @@ var _ = Describe("User Service", func() {
 			}
 
 			By("listing the users")
-			users, err := service.List(ctx)
+			users, err := service.Find(ctx, &models.User{})
 			Expect(err).ToNot(HaveOccurred())
 
 			usernames := make([]string, 0, len(users))
@@ -156,6 +156,22 @@ var _ = Describe("User Service", func() {
 
 			By("expecting the password to not be changed")
 			Expect(check.PasswordHash).ToNot(Equal(user.PasswordHash))
+		})
+
+		It("returns a not exist error when updating the password of an unknown user", func(ctx SpecContext) {
+			err := service.UpdatePassword(ctx, "does-not-exist", []byte("second"))
+			Expect(err).To(HaveOccurred())
+			Expect(persistence.IsNotExist(err)).To(BeTrue())
+		})
+
+		It("refuses to set an empty password", func(ctx SpecContext) {
+			user := &models.User{
+				Username:     "first",
+				PasswordHash: []byte("first"),
+			}
+			Expect(service.Create(ctx, user)).To(Succeed())
+
+			Expect(service.UpdatePassword(ctx, user.ID, []byte{})).To(MatchError(application.ErrEmptyPassword))
 		})
 	})
 })

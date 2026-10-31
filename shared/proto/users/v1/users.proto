@@ -8,6 +8,8 @@ service UserService {
   rpc Get(GetUserRequest) returns (GetUserResponse) {}
   // List all users, requires the admin role
   rpc List(ListUsersRequest) returns (ListUsersResponse) {}
+  // Reset the password of a user to a new one, requires the admin role
+  rpc ResetPassword(ResetPasswordRequest) returns (ResetPasswordResponse) {}
 }
 
 message CreateAccountRequest {
@@ -34,6 +36,13 @@ message ListUsersRequest {}
 message ListUsersResponse {
   repeated User users = 1;
 }
+
+message ResetPasswordRequest {
+  string id = 1; // The UUID of the user whose password is reset
+  string new_password = 2; // The new password
+}
+
+message ResetPasswordResponse {}
 
 message User {
   string id = 1; // The users UUID

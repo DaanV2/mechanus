@@ -27,7 +27,8 @@ Inside of a JWT there are the following fields contains the given information:
         "roles": ["<role id>"], // Assigned roles by the server
         "campaigns": ["<campaign id>"]
     },
-    "scope": "refresh" | "password"
+    "grant": "password" | "refresh", // How the token was obtained
+    "scope": "*" | "refresh" // What the token may be used for, a "refresh" token can only request a new token
 }
 ```
 

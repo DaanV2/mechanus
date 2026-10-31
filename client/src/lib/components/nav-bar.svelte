@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { isAdmin, userHandler, UserState } from '$lib/handlers/user';
+  import { userHandler, UserState } from '$lib/handlers/user';
   import {
     Avatar,
     Button,
@@ -46,6 +46,9 @@
         </DropdownHeader>
         <DropdownGroup>
           <DropdownItem href="/users/login">Profile</DropdownItem>
+          {#if userData.user.roles?.includes('admin')}
+            <DropdownItem href="/users">Users</DropdownItem>
+          {/if}
         </DropdownGroup>
         <DropdownHeader onclick={logout}>Sign out</DropdownHeader>
       </Dropdown>
@@ -76,13 +79,6 @@
           activeClass="text-secondary hover:bg-tertiary hover:text-quaternary transition-colors"
           nonActiveClass="hover:text-text-100 text-secondary transition-colors"
           href="/campaigns">Campaigns</NavLi
-        >
-      {/if}
-      {#if isAdmin(currentUser)}
-        <NavLi
-          activeClass="text-secondary hover:bg-tertiary hover:text-quaternary transition-colors"
-          nonActiveClass="hover:text-text-100 text-secondary transition-colors"
-          href="/admin/users">Users</NavLi
         >
       {/if}
       <NavLi

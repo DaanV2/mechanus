@@ -70,21 +70,22 @@ export class UserHandler {
     return createUserClient().get({ id: id ?? this.current.data?.user.id });
   }
 
-  /** Whether the current user has the admin role */
-  get isAdmin() {
-    return isAdmin(this.current);
+  /** Whether the logged in user has the admin role */
+  get isAdmin(): boolean {
+    return this.current.data?.user.roles?.includes('admin') ?? false;
   }
 
   /** Lists all users, requires the admin role */
   async list() {
-    const response = await createUserClient().list({});
+    const resp = await createUserClient().list({});
 
-    return response.users;
+    return resp.users;
   }
-}
 
-export function isAdmin(state: UserState): boolean {
-  return state.loggedin && (state.data.user.roles ?? []).includes('admin');
+  /** Resets the password of the given user, requires the admin role */
+  async resetPassword(id: string, newPassword: string) {
+    await createUserClient().resetPassword({ id, newPassword });
+  }
 }
 
 export const userHandler = new UserHandler();
