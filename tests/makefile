@@ -67,7 +67,7 @@ server-logs:
 
 # Start local server for development
 local-server:
-	cd .. && go run server/main.go server --log.level debug --web.static.folder "client/build"
+	cd .. && go run server/main.go server --log.level debug --server.static.folder "client/build"
 
 # Stop services
 stop-services:

@@ -37,6 +37,7 @@ Conventions:
 
 - [x] Go server with Clean Architecture layers, lifecycle, config, logging, OpenTelemetry
 - [~] User accounts, login, JWT / JTI auth, roles — works on the happy path, see [Auth & tokens](#auth--tokens) for what's broken or missing
+- [x] Admin user list page (`/users`, `UserService.List`)
 - [x] ConnectRPC services (users, login) and the screen WebSocket (`Ping`, `InitialSetupRequest`)
 - [x] Database backends (SQLite, Postgres, MySQL, in-memory) with migrations
 - [x] mDNS announcement of the server on the LAN
