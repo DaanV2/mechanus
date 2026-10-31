@@ -64,17 +64,25 @@ func (j *Authenticator) validateAndInject(ctx context.Context, headers http.Head
 
 	jwtStr = strings.TrimPrefix(jwtStr, "Bearer ")
 	token, err := j.jwtService.Validate(ctx, jwtStr)
+	if token == nil {
+		// The token couldn't be parsed at all (malformed, expired, bad signature, ...), treat the request as anonymous
+		logging.From(ctx).Debug("could not parse jwt", "error", err)
+
+		return ctx
+	}
 
 	claims, ok := authentication.GetClaims(token.Claims)
-	if ok {
-		// Tokens with a limited scope (e.g. refresh only) can't be used to access the API
-		valid := err == nil && claims.HasScope(authentication.ScopeAll)
-		logger := logging.From(ctx).With("user.valid", valid, "user.id", claims.User.ID, "user.name", claims.User.Name)
-		ctx = authentication.ContextWithJWT(ctx, claims, valid)
-		ctx = logging.Context(ctx, logger)
-	} else {
-		j.logger.Error("somehow the claims are not expect as it should", "token", jwtStr)
+	if !ok {
+		j.logger.Error("somehow the claims are not expect as it should")
+
+		return ctx
 	}
+
+	// Tokens with a limited scope (e.g. refresh only) can't be used to access the API
+	valid := err == nil && claims.HasScope(authentication.ScopeAll)
+	logger := logging.From(ctx).With("user.valid", valid, "user.id", claims.User.ID, "user.name", claims.User.Name)
+	ctx = authentication.ContextWithJWT(ctx, claims, valid)
+	ctx = logging.Context(ctx, logger)
 
 	return ctx
 }
