@@ -2,7 +2,7 @@ package roles
 
 const (
 	// Admin is the administrator role with full permissions.
-	Admin Role = "admin"
+	Admin    Role = "admin"
 	Operator Role = "operator"
 	User     Role = "user"
 	Viewer   Role = "viewer"

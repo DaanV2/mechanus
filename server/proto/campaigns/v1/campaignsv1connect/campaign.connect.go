@@ -6,7 +6,7 @@ package campaignsv1connect
 
 import (
 	connect "connectrpc.com/connect"
-	v1 "github.com/DaanV2/mechanus/server/proto/campaigns/v1"
+	_ "github.com/DaanV2/mechanus/server/proto/campaigns/v1"
 	http "net/http"
 )
 
@@ -20,11 +20,6 @@ const _ = connect.IsAtLeastVersion1_13_0
 const (
 	// CampaignServiceName is the fully-qualified name of the CampaignService service.
 	CampaignServiceName = "campaigns.v1.CampaignService"
-)
-
-// These variables are the protoreflect.Descriptor objects for the RPCs defined in this package.
-var (
-	campaignServiceServiceDescriptor = v1.File_campaigns_v1_campaign_proto.Services().ByName("CampaignService")
 )
 
 // CampaignServiceClient is a client for the campaigns.v1.CampaignService service.

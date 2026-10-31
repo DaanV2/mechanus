@@ -15,8 +15,8 @@ import (
 
 var (
 	_ lifecycle.AfterInitialize = &Manager{}
-	_ lifecycle.AfterShutDown = &Manager{}
-	_ lifecycle.BeforeShutdown = &Manager{}
+	_ lifecycle.AfterShutDown   = &Manager{}
+	_ lifecycle.BeforeShutdown  = &Manager{}
 	_ lifecycle.ShutdownCleanup = &Manager{}
 )
 

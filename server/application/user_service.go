@@ -60,7 +60,7 @@ func (s *UserService) Update(ctx context.Context, user *models.User) error {
 // UpdatePassword will update the password field with the new password in the database
 func (s *UserService) UpdatePassword(ctx context.Context, id string, newPassword []byte) error {
 	user := &models.User{
-		Model:        models.Model{ID: id},
+		ID:           id,
 		PasswordHash: newPassword,
 	}
 

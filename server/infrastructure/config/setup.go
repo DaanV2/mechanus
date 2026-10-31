@@ -12,8 +12,7 @@ import (
 func SetupConfig() {
 	viper.AutomaticEnv()
 	if err := viper.ReadInConfig(); err != nil {
-		var verr viper.ConfigFileNotFoundError
-		if errors.As(err, &verr) {
+		if _, ok := errors.AsType[viper.ConfigFileNotFoundError](err); ok {
 			log.Debug("couldn't find a log file, falling back to defaults, arguments and environment files", "error", err)
 			// Config file not found; ignore error if desired
 

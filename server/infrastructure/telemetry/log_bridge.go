@@ -7,8 +7,9 @@ import (
 	"time"
 
 	"github.com/charmbracelet/log"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
 	otellog "go.opentelemetry.io/otel/log"
-	"go.opentelemetry.io/otel/log/global"
 )
 
 // OtelLogHandler is a slog.Handler that forwards log entries to OpenTelemetry.
@@ -40,7 +41,7 @@ func (h *OtelLogHandler) Handle(ctx context.Context, record slog.Record) error {
 
 	// Convert and send to OpenTelemetry
 	h.sendToOtel(ctx, record)
-	
+
 	return nil
 }
 
@@ -60,27 +61,27 @@ func (h *OtelLogHandler) WithGroup(name string) slog.Handler {
 
 // sendToOtel converts the slog.Record to an OpenTelemetry log record and emits it.
 func (h *OtelLogHandler) sendToOtel(ctx context.Context, record slog.Record) { //nolint:gocritic // slog.Record is passed by value by design
-	logger := global.GetLoggerProvider().Logger("charm.sh")
-	
+	logger := otel.GetLoggerProvider().Logger("charm.sh")
+
 	// Convert slog level to OpenTelemetry severity
 	severity := slogLevelToOtelSeverity(record.Level)
-	
+
 	// Collect attributes
-	var attrs []otellog.KeyValue
+	var attrs []attribute.KeyValue
 	record.Attrs(func(attr slog.Attr) bool {
 		attrs = append(attrs, slogAttrToOtelKeyValue(attr))
 
 		return true
 	})
-	
+
 	// Create log record
 	var logRecord otellog.Record
 	logRecord.SetTimestamp(record.Time)
-	logRecord.SetBody(otellog.StringValue(record.Message))
+	logRecord.SetBody(attribute.StringValue(record.Message))
 	logRecord.SetSeverity(severity)
 	logRecord.SetSeverityText(record.Level.String())
 	logRecord.AddAttributes(attrs...)
-	
+
 	// Emit the log record
 	logger.Emit(ctx, logRecord)
 }
@@ -99,41 +100,41 @@ func slogLevelToOtelSeverity(level slog.Level) otellog.Severity {
 	}
 }
 
-// slogAttrToOtelKeyValue converts a slog.Attr to an OpenTelemetry KeyValue.
-func slogAttrToOtelKeyValue(attr slog.Attr) otellog.KeyValue {
+// slogAttrToOtelKeyValue converts a slog.Attr to an OpenTelemetry attribute.KeyValue.
+func slogAttrToOtelKeyValue(attr slog.Attr) attribute.KeyValue {
 	key := attr.Key
 	value := attr.Value
-	
+
 	switch value.Kind() {
 	case slog.KindBool:
-		return otellog.Bool(key, value.Bool())
+		return attribute.Bool(key, value.Bool())
 	case slog.KindInt64:
-		return otellog.Int64(key, value.Int64())
+		return attribute.Int64(key, value.Int64())
 	case slog.KindUint64:
 		// Convert uint64 to int64, clamping at max int64 if needed
 		u := value.Uint64()
 		if u > math.MaxInt64 {
-			return otellog.Int64(key, math.MaxInt64)
+			return attribute.Int64(key, math.MaxInt64)
 		}
 
-		return otellog.Int64(key, int64(u)) //nolint:gosec // Checked for overflow above
+		return attribute.Int64(key, int64(u)) //nolint:gosec // Checked for overflow above
 	case slog.KindFloat64:
-		return otellog.Float64(key, value.Float64())
+		return attribute.Float64(key, value.Float64())
 	case slog.KindString:
-		return otellog.String(key, value.String())
+		return attribute.String(key, value.String())
 	case slog.KindTime:
-		return otellog.String(key, value.Time().Format(time.RFC3339))
+		return attribute.String(key, value.Time().Format(time.RFC3339))
 	case slog.KindDuration:
-		return otellog.Int64(key, value.Duration().Milliseconds())
+		return attribute.Int64(key, value.Duration().Milliseconds())
 	case slog.KindGroup:
 		// For groups, we could flatten them or represent as a string
-		return otellog.String(key, value.String())
+		return attribute.String(key, value.String())
 	case slog.KindLogValuer:
-		return otellog.String(key, value.String())
+		return attribute.String(key, value.String())
 	case slog.KindAny:
-		return otellog.String(key, value.String())
+		return attribute.String(key, value.String())
 	default:
-		return otellog.String(key, value.String())
+		return attribute.String(key, value.String())
 	}
 }
 
@@ -144,7 +145,7 @@ func slogAttrToOtelKeyValue(attr slog.Attr) otellog.KeyValue {
 func WrapLoggerWithOtel(logger *log.Logger) {
 	// Wrap the logger (which implements slog.Handler) with our OpenTelemetry handler
 	handler := NewOtelLogHandler(logger)
-	
+
 	// Set the wrapped handler as the default slog handler
 	// This ensures all slog-based logging goes through our bridge
 	slog.SetDefault(slog.New(handler))
