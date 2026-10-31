@@ -50,7 +50,7 @@ func (l *LoginServiceHandler) Login(ctx context.Context, req *connect.Request[us
 	}
 
 	// Valid user, create a token for them
-	token, err := l.jwts.Create(ctx, u, "password")
+	token, err := l.jwts.Create(ctx, u, authentication.GrantPassword, authentication.ScopeAll)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("cannot create token: %w", err))
 	}
@@ -77,13 +77,16 @@ func (l *LoginServiceHandler) Refresh(ctx context.Context, req *connect.Request[
 	if !ok {
 		return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("token not provided by mechanus"))
 	}
+	if !claims.HasScope(authentication.ScopeRefresh) {
+		return nil, connect.NewError(connect.CodePermissionDenied, errors.New("token is not allowed to refresh"))
+	}
 
 	u, err := l.users.Get(ctx, claims.User.ID)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
 
-	token, err = l.jwts.Create(ctx, u, "refresh")
+	token, err = l.jwts.Create(ctx, u, authentication.GrantRefresh, authentication.ScopeAll)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
