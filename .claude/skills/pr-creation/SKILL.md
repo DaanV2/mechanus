@@ -15,7 +15,7 @@ Opening a PR notifies reviewers and kicks off CI across multiple workflows (`che
    - Check whether the branch tracks a remote and is up to date (`git status -sb` or `git rev-parse --abbrev-ref --symbolic-full-name @{u}` wrapped in a check), so you know whether a push is needed.
    - `git log main..HEAD` (or the actual base branch) and `git diff main...HEAD` — the **full** set of commits going into the PR, not just the latest one. A branch with several commits needs the PR body to reflect all of them, not just the tip.
 
-2. **Draft the title and body.**
+2. **Draft the title and body.** A human reviewer reads this before they read the diff — keep it short enough that they actually will. Favor a few tight bullets over an exhaustive rundown; skip anything the diff already makes obvious, and don't pad the body to look thorough.
    - Title: Conventional Commits format (`type(scope): short imperative summary`), under ~70 characters — same as this repo's commit messages (see `git log --oneline -20` for examples like `fix(auth): ...`, `chore(deps): ...`, `feat(scenes): ...`). Common types: `feat`, `fix`, `chore`, `docs`, `refactor`, `test`. Put detail in the body, not the title.
    - Body: use a HEREDOC so multi-line text and special characters survive the shell untouched — never try to inline a multi-line `-b` string.
    - Structure:
