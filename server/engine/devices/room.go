@@ -13,6 +13,7 @@ var (
 // Room is the physical setup scenes are played in. Scenes never reference devices directly; they
 // address logical targets (e.g. "table", "wall", "ambient", "music"). The room binds those targets
 // to the devices that happen to be present, so the same scene works in a different setup.
+// A room is configuration, loaded from file storage.
 type Room struct {
 	ID       string              `json:"id"`
 	Name     string              `json:"name"`
@@ -28,6 +29,11 @@ func NewRoom(id, name string) *Room {
 		Devices:  map[string]*Device{},
 		Bindings: map[string][]string{},
 	}
+}
+
+// GetID returns the room ID.
+func (r *Room) GetID() string {
+	return r.ID
 }
 
 // AddDevice adds or replaces a device in the room.

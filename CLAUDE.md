@@ -102,6 +102,7 @@ npm run check       # svelte-check + tsc
 ## Key conventions
 
 - **Layer boundaries**: `engine` must not import `infrastructure`. `application` may import `engine` and define ports (interfaces). `infrastructure` implements those ports. `components` is the only place that crosses all layers.
+- **Scenes — configuration vs state**: authored scene / room configuration (`scenes.Config`, `devices.Room`) is read-only at runtime and comes from file storage; everything that changes during play goes in `scenes.State` and is saved to the database when a scene is loaded or exited. Keep new fields on the right side of that line.
 - **Config**: use Viper config sets (`infrastructure/config`). Add flags to the relevant `*ConfigSet` and register them in the appropriate `cmd/*.go` file.
 - **Error handling**: wrap errors with `fmt.Errorf("context: %w", err)`. Use `errors.Join` to combine multiple errors.
 - **Logging**: use `infrastructure/logging` (Charm.sh). Pass `ctx` through and use `logging.From(ctx)` to get a logger with trace context.
