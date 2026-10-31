@@ -29,12 +29,47 @@ func (repo *CampaignRepository) Get(ctx context.Context, campaignId string) (*mo
 
 	var campaign models.Campaign
 
-	tx := repo.db.WithContext(ctx).First(&campaign, "id = ?", campaignId)
+	tx := repo.db.WithContext(ctx).Preload("Users").First(&campaign, "id = ?", campaignId)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
 
 	return &campaign, nil
+}
+
+// List returns all the campaigns, including their users, ordered by creation date.
+func (repo *CampaignRepository) List(ctx context.Context) ([]*models.Campaign, error) {
+	logger := repo.logger.From(ctx)
+	logger.Debug("Listing all campaigns")
+
+	var campaigns []*models.Campaign
+
+	tx := repo.db.WithContext(ctx).Preload("Users").Order("created_at").Find(&campaigns)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+
+	return campaigns, nil
+}
+
+// ListForUser returns all the campaigns the given user is in, including their users, ordered by creation date.
+func (repo *CampaignRepository) ListForUser(ctx context.Context, userId string) ([]*models.Campaign, error) {
+	logger := repo.logger.With("userId", userId).From(ctx)
+	logger.Debug("Listing campaigns for user")
+
+	var campaigns []*models.Campaign
+
+	tx := repo.db.WithContext(ctx).
+		Preload("Users").
+		Joins("JOIN user_campaigns ON user_campaigns.campaign_id = campaigns.id").
+		Where("user_campaigns.user_id = ?", userId).
+		Order("campaigns.created_at").
+		Find(&campaigns)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+
+	return campaigns, nil
 }
 
 // Create makes a new entry in the database
@@ -62,7 +97,8 @@ func (repo *CampaignRepository) LinkUser(ctx context.Context, campaign *models.C
 	logger := repo.logger.With("campaignId", campaign.ID, "userId", user.ID).From(ctx)
 	logger.Debug("add user to campaign")
 
-	return repo.db.WithContext(ctx).Model(campaign).Association("Users").Append(user)
+	// Omit "Users.*" so only the join row is written: upserting the user would run its BeforeCreate hook, giving it a new ID
+	return repo.db.WithContext(ctx).Model(campaign).Omit("Users.*").Association("Users").Append(user)
 }
 
 // UnlinkUser removes a user's association with a campaign.

@@ -3,6 +3,7 @@
   import type { MechanusError } from './errors';
 
   export let error: MechanusError = null;
+  export let title = 'Login failed';
 
   $: isVisible = !!error;
 
@@ -34,7 +35,7 @@
 {#if isVisible}
   <div class="error-message">
     {#if error && error instanceof Object && 'code' in error}
-      <strong>Login failed:</strong>
+      <strong>{title}:</strong>
       {error.message}
       <ul>
         <li style="text-align:left;">

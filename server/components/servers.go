@@ -20,6 +20,7 @@ import (
 	"github.com/DaanV2/mechanus/server/infrastructure/transport/routers"
 	"github.com/DaanV2/mechanus/server/infrastructure/transport/websocket"
 	"github.com/DaanV2/mechanus/server/mechanus"
+	"github.com/DaanV2/mechanus/server/proto/campaigns/v1/campaignsv1connect"
 	"github.com/DaanV2/mechanus/server/proto/users/v1/usersv1connect"
 )
 
@@ -46,8 +47,9 @@ type RouterSetup struct {
 
 // RouterRPCS contains the gRPC service handlers for the router.
 type RouterRPCS struct {
-	Login usersv1connect.LoginServiceHandler
-	User  usersv1connect.UserServiceHandler
+	Campaign campaignsv1connect.CampaignServiceHandler
+	Login    usersv1connect.LoginServiceHandler
+	User     usersv1connect.UserServiceHandler
 }
 
 // RouterConfig contains the configuration for creating a router.
@@ -67,6 +69,7 @@ func CreateRouter(setup RouterSetup, rpcs RouterRPCS, cfgs RouterConfig) (gohttp
 	}
 
 	reflecter := grpcreflect.NewStaticReflector(
+		campaignsv1connect.CampaignServiceName,
 		usersv1connect.LoginServiceName,
 		usersv1connect.UserServiceName,
 		grpchealth.HealthV1ServiceName,
@@ -75,6 +78,7 @@ func CreateRouter(setup RouterSetup, rpcs RouterRPCS, cfgs RouterConfig) (gohttp
 	wrouter := websocket.NewWebsocketRouter(setup.WebsocketHandler)
 	router := routers.CreateRouter(
 		// gRPC
+		routers.WithGrpcRoute(campaignsv1connect.NewCampaignServiceHandler, rpcs.Campaign, grpcOpts),
 		routers.WithGrpcRoute(usersv1connect.NewLoginServiceHandler, rpcs.Login, grpcOpts),
 		routers.WithGrpcRoute(usersv1connect.NewUserServiceHandler, rpcs.User, grpcOpts),
 		// gRPC utils

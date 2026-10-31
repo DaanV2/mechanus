@@ -1,6 +1,51 @@
 syntax = "proto3";
 package campaigns.v1;
 
+import "google/protobuf/timestamp.proto";
+
 option go_package = "github.com/DaanV2/mechanus/server/proto/campaigns/v1;campaignsv1";
 
-service CampaignService {}
+// A service for viewing and managing campaigns
+service CampaignService {
+  // Create a new campaign, the calling user becomes a member of it
+  rpc Create(CreateCampaignRequest) returns (CreateCampaignResponse) {}
+  // Get a single campaign, only available to admins and members of the campaign
+  rpc Get(GetCampaignRequest) returns (GetCampaignResponse) {}
+  // List the campaigns, admins see all campaigns, other users only the campaigns they are in
+  rpc List(ListCampaignsRequest) returns (ListCampaignsResponse) {}
+}
+
+message CreateCampaignRequest {
+  // The name of the campaign
+  string name = 1;
+}
+
+message CreateCampaignResponse {
+  Campaign campaign = 1;
+}
+
+message GetCampaignRequest {
+  string id = 1; // The campaign UUID to lookup
+}
+
+message GetCampaignResponse {
+  Campaign campaign = 1;
+}
+
+message ListCampaignsRequest {}
+
+message ListCampaignsResponse {
+  repeated Campaign campaigns = 1;
+}
+
+message Campaign {
+  string id = 1; // The campaign UUID
+  string name = 2; // The campaign name
+  google.protobuf.Timestamp created_at = 3; // When the campaign was created
+  repeated CampaignMember members = 4; // The users in the campaign
+}
+
+message CampaignMember {
+  string id = 1; // The users UUID
+  string name = 2; // The users name
+}

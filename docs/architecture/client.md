@@ -18,6 +18,8 @@ View assignment: when a client connects over WebSocket it sends an `InitialSetup
 
 **SvelteKit + Svelte** for all non-canvas views (GM dashboard, campaign management, login, etc.). Styled with TailwindCSS and Flowbite-Svelte components.
 
+Every page is prerendered (`adapter-static`), so dynamic route segments like `/campaigns/[id]` are not available. Detail pages take their id as a query parameter instead and read it client side in `onMount`, e.g. `/campaigns/view/?id=<uuid>`.
+
 **Pixi.js** for the device/TV view and any canvas-based 2D rendering. The entry point is `lib/2d/application.ts`. A composable layer system (background map, grid, tokens, fog of war, UI overlay) is planned under `lib/2d/components/`.
 
 ## Server communication

@@ -45,6 +45,7 @@ func BuildServer(setupCtx context.Context) (*ServerComponents, error) {
 	}
 
 	userRepo := repositories.NewUserRepository(db)
+	campaignRepo := repositories.NewCampaignRepository(db)
 	jtiService := authentication.NewJTIService(db)
 	storageProvider := storage.DBStorage[*authentication.KeyData](db)
 
@@ -55,6 +56,7 @@ func BuildServer(setupCtx context.Context) (*ServerComponents, error) {
 	}
 	jwtService := authentication.NewJWTService(jtiService, keyManager)
 	userService := application.NewUserService(userRepo)
+	campaignService := application.NewCampaignService(campaignRepo)
 	screenManager := screens.NewScreenManager()
 
 	// Servers
@@ -70,8 +72,9 @@ func BuildServer(setupCtx context.Context) (*ServerComponents, error) {
 			grpc.NewAuthenticator(jwtService),
 		},
 	}, RouterRPCS{
-		Login: grpc.NewLoginServiceHandler(userService, jwtService),
-		User:  grpc.NewUserServiceHandler(userService),
+		Campaign: grpc.NewCampaignServiceHandler(campaignService, userService),
+		Login:    grpc.NewLoginServiceHandler(userService, jwtService),
+		User:     grpc.NewUserServiceHandler(userService),
 	},
 		RouterConfig{
 			CORS:    corsCfg,

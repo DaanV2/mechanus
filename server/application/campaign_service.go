@@ -2,6 +2,7 @@ package application
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/DaanV2/mechanus/server/infrastructure/persistence/models"
 	"github.com/DaanV2/mechanus/server/infrastructure/persistence/repositories"
@@ -26,6 +27,31 @@ func (s *CampaignService) Create(ctx context.Context, campaign *models.Campaign)
 // Get retrieves a campaign by its ID.
 func (s *CampaignService) Get(ctx context.Context, campaignId string) (*models.Campaign, error) {
 	return s.repo.Get(ctx, campaignId)
+}
+
+// List retrieves all campaigns.
+func (s *CampaignService) List(ctx context.Context) ([]*models.Campaign, error) {
+	return s.repo.List(ctx)
+}
+
+// ListForUser retrieves all campaigns the given user is in.
+func (s *CampaignService) ListForUser(ctx context.Context, userId string) ([]*models.Campaign, error) {
+	return s.repo.ListForUser(ctx, userId)
+}
+
+// CreateWithUser creates a new campaign and adds the given user to it.
+func (s *CampaignService) CreateWithUser(ctx context.Context, campaign *models.Campaign, user *models.User) error {
+	err := s.Create(ctx, campaign)
+	if err != nil {
+		return fmt.Errorf("creating campaign: %w", err)
+	}
+
+	err = s.AddUsers(ctx, campaign, user)
+	if err != nil {
+		return fmt.Errorf("adding user to campaign: %w", err)
+	}
+
+	return nil
 }
 
 // AddUsers adds a user to a campaign and updates the relationships in both objects.

@@ -153,7 +153,8 @@ Conventions:
 
 **Goal**: campaigns, players and play sessions are managed in the app, and a session can be stopped and resumed exactly where it left off.
 
-- [ ] Campaign management UI: create, edit, delete campaigns; invite / manage players
+- [x] Campaign overview and detail pages: users see the campaigns they are in, admins see all; users can create a campaign
+- [ ] Campaign management UI: edit, delete campaigns; invite / manage players
 - [ ] Characters linked to scene entities (`Entity.CharacterID`)
 - [ ] Remember the active scene across server restarts
 - [ ] Session concept: start / end a session, which scenes were played

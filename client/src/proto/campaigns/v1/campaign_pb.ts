@@ -2,19 +2,222 @@
 // @generated from file campaigns/v1/campaign.proto (package campaigns.v1, syntax proto3)
 /* eslint-disable */
 
-import type { GenFile, GenService } from "@bufbuild/protobuf/codegenv2";
-import { fileDesc, serviceDesc } from "@bufbuild/protobuf/codegenv2";
+import type { GenFile, GenMessage, GenService } from "@bufbuild/protobuf/codegenv2";
+import { fileDesc, messageDesc, serviceDesc } from "@bufbuild/protobuf/codegenv2";
+import type { Timestamp } from "@bufbuild/protobuf/wkt";
+import { file_google_protobuf_timestamp } from "@bufbuild/protobuf/wkt";
+import type { Message } from "@bufbuild/protobuf";
 
 /**
  * Describes the file campaigns/v1/campaign.proto.
  */
 export const file_campaigns_v1_campaign: GenFile = /*@__PURE__*/
-  fileDesc("ChtjYW1wYWlnbnMvdjEvY2FtcGFpZ24ucHJvdG8SDGNhbXBhaWducy52MTIRCg9DYW1wYWlnblNlcnZpY2VCQlpAZ2l0aHViLmNvbS9EYWFuVjIvbWVjaGFudXMvc2VydmVyL3Byb3RvL2NhbXBhaWducy92MTtjYW1wYWlnbnN2MWIGcHJvdG8z");
+  fileDesc("ChtjYW1wYWlnbnMvdjEvY2FtcGFpZ24ucHJvdG8SDGNhbXBhaWducy52MSIlChVDcmVhdGVDYW1wYWlnblJlcXVlc3QSDAoEbmFtZRgBIAEoCSJCChZDcmVhdGVDYW1wYWlnblJlc3BvbnNlEigKCGNhbXBhaWduGAEgASgLMhYuY2FtcGFpZ25zLnYxLkNhbXBhaWduIiAKEkdldENhbXBhaWduUmVxdWVzdBIKCgJpZBgBIAEoCSI/ChNHZXRDYW1wYWlnblJlc3BvbnNlEigKCGNhbXBhaWduGAEgASgLMhYuY2FtcGFpZ25zLnYxLkNhbXBhaWduIhYKFExpc3RDYW1wYWlnbnNSZXF1ZXN0IkIKFUxpc3RDYW1wYWlnbnNSZXNwb25zZRIpCgljYW1wYWlnbnMYASADKAsyFi5jYW1wYWlnbnMudjEuQ2FtcGFpZ24igwEKCENhbXBhaWduEgoKAmlkGAEgASgJEgwKBG5hbWUYAiABKAkSLgoKY3JlYXRlZF9hdBgDIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASLQoHbWVtYmVycxgEIAMoCzIcLmNhbXBhaWducy52MS5DYW1wYWlnbk1lbWJlciIqCg5DYW1wYWlnbk1lbWJlchIKCgJpZBgBIAEoCRIMCgRuYW1lGAIgASgJMokCCg9DYW1wYWlnblNlcnZpY2USVQoGQ3JlYXRlEiMuY2FtcGFpZ25zLnYxLkNyZWF0ZUNhbXBhaWduUmVxdWVzdBokLmNhbXBhaWducy52MS5DcmVhdGVDYW1wYWlnblJlc3BvbnNlIgASTAoDR2V0EiAuY2FtcGFpZ25zLnYxLkdldENhbXBhaWduUmVxdWVzdBohLmNhbXBhaWducy52MS5HZXRDYW1wYWlnblJlc3BvbnNlIgASUQoETGlzdBIiLmNhbXBhaWducy52MS5MaXN0Q2FtcGFpZ25zUmVxdWVzdBojLmNhbXBhaWducy52MS5MaXN0Q2FtcGFpZ25zUmVzcG9uc2UiAEJCWkBnaXRodWIuY29tL0RhYW5WMi9tZWNoYW51cy9zZXJ2ZXIvcHJvdG8vY2FtcGFpZ25zL3YxO2NhbXBhaWduc3YxYgZwcm90bzM", [file_google_protobuf_timestamp]);
 
 /**
+ * @generated from message campaigns.v1.CreateCampaignRequest
+ */
+export type CreateCampaignRequest = Message<"campaigns.v1.CreateCampaignRequest"> & {
+  /**
+   * The name of the campaign
+   *
+   * @generated from field: string name = 1;
+   */
+  name: string;
+};
+
+/**
+ * Describes the message campaigns.v1.CreateCampaignRequest.
+ * Use `create(CreateCampaignRequestSchema)` to create a new message.
+ */
+export const CreateCampaignRequestSchema: GenMessage<CreateCampaignRequest> = /*@__PURE__*/
+  messageDesc(file_campaigns_v1_campaign, 0);
+
+/**
+ * @generated from message campaigns.v1.CreateCampaignResponse
+ */
+export type CreateCampaignResponse = Message<"campaigns.v1.CreateCampaignResponse"> & {
+  /**
+   * @generated from field: campaigns.v1.Campaign campaign = 1;
+   */
+  campaign?: Campaign | undefined;
+};
+
+/**
+ * Describes the message campaigns.v1.CreateCampaignResponse.
+ * Use `create(CreateCampaignResponseSchema)` to create a new message.
+ */
+export const CreateCampaignResponseSchema: GenMessage<CreateCampaignResponse> = /*@__PURE__*/
+  messageDesc(file_campaigns_v1_campaign, 1);
+
+/**
+ * @generated from message campaigns.v1.GetCampaignRequest
+ */
+export type GetCampaignRequest = Message<"campaigns.v1.GetCampaignRequest"> & {
+  /**
+   * The campaign UUID to lookup
+   *
+   * @generated from field: string id = 1;
+   */
+  id: string;
+};
+
+/**
+ * Describes the message campaigns.v1.GetCampaignRequest.
+ * Use `create(GetCampaignRequestSchema)` to create a new message.
+ */
+export const GetCampaignRequestSchema: GenMessage<GetCampaignRequest> = /*@__PURE__*/
+  messageDesc(file_campaigns_v1_campaign, 2);
+
+/**
+ * @generated from message campaigns.v1.GetCampaignResponse
+ */
+export type GetCampaignResponse = Message<"campaigns.v1.GetCampaignResponse"> & {
+  /**
+   * @generated from field: campaigns.v1.Campaign campaign = 1;
+   */
+  campaign?: Campaign | undefined;
+};
+
+/**
+ * Describes the message campaigns.v1.GetCampaignResponse.
+ * Use `create(GetCampaignResponseSchema)` to create a new message.
+ */
+export const GetCampaignResponseSchema: GenMessage<GetCampaignResponse> = /*@__PURE__*/
+  messageDesc(file_campaigns_v1_campaign, 3);
+
+/**
+ * @generated from message campaigns.v1.ListCampaignsRequest
+ */
+export type ListCampaignsRequest = Message<"campaigns.v1.ListCampaignsRequest"> & {
+};
+
+/**
+ * Describes the message campaigns.v1.ListCampaignsRequest.
+ * Use `create(ListCampaignsRequestSchema)` to create a new message.
+ */
+export const ListCampaignsRequestSchema: GenMessage<ListCampaignsRequest> = /*@__PURE__*/
+  messageDesc(file_campaigns_v1_campaign, 4);
+
+/**
+ * @generated from message campaigns.v1.ListCampaignsResponse
+ */
+export type ListCampaignsResponse = Message<"campaigns.v1.ListCampaignsResponse"> & {
+  /**
+   * @generated from field: repeated campaigns.v1.Campaign campaigns = 1;
+   */
+  campaigns: Campaign[];
+};
+
+/**
+ * Describes the message campaigns.v1.ListCampaignsResponse.
+ * Use `create(ListCampaignsResponseSchema)` to create a new message.
+ */
+export const ListCampaignsResponseSchema: GenMessage<ListCampaignsResponse> = /*@__PURE__*/
+  messageDesc(file_campaigns_v1_campaign, 5);
+
+/**
+ * @generated from message campaigns.v1.Campaign
+ */
+export type Campaign = Message<"campaigns.v1.Campaign"> & {
+  /**
+   * The campaign UUID
+   *
+   * @generated from field: string id = 1;
+   */
+  id: string;
+
+  /**
+   * The campaign name
+   *
+   * @generated from field: string name = 2;
+   */
+  name: string;
+
+  /**
+   * When the campaign was created
+   *
+   * @generated from field: google.protobuf.Timestamp created_at = 3;
+   */
+  createdAt?: Timestamp | undefined;
+
+  /**
+   * The users in the campaign
+   *
+   * @generated from field: repeated campaigns.v1.CampaignMember members = 4;
+   */
+  members: CampaignMember[];
+};
+
+/**
+ * Describes the message campaigns.v1.Campaign.
+ * Use `create(CampaignSchema)` to create a new message.
+ */
+export const CampaignSchema: GenMessage<Campaign> = /*@__PURE__*/
+  messageDesc(file_campaigns_v1_campaign, 6);
+
+/**
+ * @generated from message campaigns.v1.CampaignMember
+ */
+export type CampaignMember = Message<"campaigns.v1.CampaignMember"> & {
+  /**
+   * The users UUID
+   *
+   * @generated from field: string id = 1;
+   */
+  id: string;
+
+  /**
+   * The users name
+   *
+   * @generated from field: string name = 2;
+   */
+  name: string;
+};
+
+/**
+ * Describes the message campaigns.v1.CampaignMember.
+ * Use `create(CampaignMemberSchema)` to create a new message.
+ */
+export const CampaignMemberSchema: GenMessage<CampaignMember> = /*@__PURE__*/
+  messageDesc(file_campaigns_v1_campaign, 7);
+
+/**
+ * A service for viewing and managing campaigns
+ *
  * @generated from service campaigns.v1.CampaignService
  */
 export const CampaignService: GenService<{
+  /**
+   * Create a new campaign, the calling user becomes a member of it
+   *
+   * @generated from rpc campaigns.v1.CampaignService.Create
+   */
+  create: {
+    methodKind: "unary";
+    input: typeof CreateCampaignRequestSchema;
+    output: typeof CreateCampaignResponseSchema;
+  },
+  /**
+   * Get a single campaign, only available to admins and members of the campaign
+   *
+   * @generated from rpc campaigns.v1.CampaignService.Get
+   */
+  get: {
+    methodKind: "unary";
+    input: typeof GetCampaignRequestSchema;
+    output: typeof GetCampaignResponseSchema;
+  },
+  /**
+   * List the campaigns, admins see all campaigns, other users only the campaigns they are in
+   *
+   * @generated from rpc campaigns.v1.CampaignService.List
+   */
+  list: {
+    methodKind: "unary";
+    input: typeof ListCampaignsRequestSchema;
+    output: typeof ListCampaignsResponseSchema;
+  },
 }> = /*@__PURE__*/
   serviceDesc(file_campaigns_v1_campaign, 0);
 
