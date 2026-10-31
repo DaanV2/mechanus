@@ -6,6 +6,7 @@ Mechanus is a server-driven UI system for local TTRPG setups. A single Go server
 
 | Doc                                      | What it covers                                                                        |
 | ---------------------------------------- | ------------------------------------------------------------------------------------- |
+| [scenes.md](./scenes.md)                 | Scenes, variants, targets, rooms; how scenes instruct screens, lights, music, devices |
 | [server.md](./server.md)                 | Go server — Clean Architecture layers, startup/shutdown lifecycle, HTTP handler stack |
 | [client.md](./client.md)                 | SvelteKit + Pixi.js client — view types, rendering, toolchain                         |
 | [communication.md](./communication.md)   | ConnectRPC/gRPC services, WebSocket screen protocol, static file serving              |
@@ -37,6 +38,8 @@ Mechanus is a server-driven UI system for local TTRPG setups. A single Go server
 ```
 
 ## Key design decisions
+
+**Scenes drive the room** — a scene lists the entities present and instructs every output (screens, lights, music, custom devices) through logical targets that a room binds to physical devices. Variants (night, rain, combat) override parts of a scene. See [scenes.md](./scenes.md).
 
 **Server-driven UI** — the server owns all scene/game state and pushes it to clients over WebSocket. Clients are thin renderers.
 

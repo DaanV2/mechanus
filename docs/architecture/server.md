@@ -19,7 +19,8 @@ server/
 Pure domain logic. Zero imports from infrastructure. Current domains:
 
 - `engine/authentication` — JWT claims shape, JTI (token ID) revocation logic
-- `engine/scenes` — maps roles/devices to screen IDs _(partially implemented)_
+- `engine/devices` — devices, device kinds, integration identifiers, and the room (target → device bindings)
+- `engine/scenes` — scene model: entities, variants, per-target instructions, transition planning (see [scenes.md](./scenes.md))
 - `engine/screens` — `ScreenHandler` and `ScreenManager`; manages WebSocket listeners per screen, broadcasts state updates
 
 ### application — use cases
@@ -28,6 +29,7 @@ Orchestrates flows by combining engine rules with infrastructure ports:
 
 - `UserService` — user CRUD, password handling
 - `CampaignService` — campaign CRUD
+- `SceneService` — activates scenes/variants and dispatches instructions to `OutputDriver`s _(not wired in `components` yet)_
 - `Manager` — top-level coordinator _(stub)_
 
 ### infrastructure — adapters

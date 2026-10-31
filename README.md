@@ -6,7 +6,7 @@ This project provides software for a local vttrpg / gaming setup, by managing mu
 
 This project uses server driven UI, where the server written in [Go](https://go.dev/), The screen (or client) side is using [Pixi.js](https://pixijs.com/) for the rendering of the screens. While [connectRpc](https://connectrpc.com/) pins down the protocol between server and client. Each screen or client can connect and either login in as a viewer, device, player, or GM and either get their own screen rendered.
 
-This allows the server and thus GM to control a TV screen on the table as battle map. Or TV or PC monitors to display scenery, maps or anything else. Intheory when also music and lightning is integrated, it will allow you to control the entire game room via browser.
+Everything is driven by **scenes**: a scene knows which players, NPCs and enemies are present, can have variants (night, rain, combat, ...), and tells every device in the room what to do. The table TV shows the battle map, other screens show scenery or information boards, smart lights (Hue, Matter, Home Assistant) set the mood, music (Spotify, iTunes) plays the right track, and custom devices receive events over MQTT or similar. The goal is to control the entire game room from the browser. See [Scenes & Outputs](./docs/architecture/scenes.md).
 
 ![overview](./docs/assets/overview.svg)
 
@@ -29,12 +29,4 @@ This will build and start the application with automatic rebuilds on code change
 ## Tech Stack
 
 Go server + SvelteKit/Pixi.js client, connected via ConnectRPC (gRPC) and WebSocket. See [docs/architecture](./docs/architecture/README.md) for a full breakdown of the server layers, client structure, and communication protocols.
-
-## TODO Features
-
-- [x] Use https://connectrpc.com/docs/go/getting-started
-- [ ] Manage the TV on the table for battle map displayment
-- [ ] Player views
-- [ ] DM views
-- [ ] Support for other vttrpg file formats
 

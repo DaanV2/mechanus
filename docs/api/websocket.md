@@ -10,7 +10,7 @@ The screen WebSocket is the continuous, bidirectional channel each client (GM, p
 
 ## screenId
 
-The ID of a screen already registered with the server's `ScreenManager`. Routing by role name (`admin`, `operator`, `viewer`) or by device ID instead of a concrete screen ID is planned but not implemented yet — see the "Scene management" item in `TODO.md`.
+The ID of a screen already registered with the server's `ScreenManager`. Routing by device ID instead of a concrete screen ID is not implemented yet — see [scenes](../architecture/scenes.md#screens--views).
 
 ## id
 

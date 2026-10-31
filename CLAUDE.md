@@ -2,6 +2,8 @@
 
 Mechanus is a server-driven UI system for local TTRPG (tabletop RPG) setups. A Go server manages all game state and pushes it to browser clients (GM dashboard, player screens, TV/table battle map display) over ConnectRPC (gRPC) and WebSocket.
 
+The product is built around **scenes**: a scene holds the entities present (players / NPCs / enemies), has variants (time of day, weather, ...) it can transition between, and instructs every device in the room — screens (battle map, scenery, info board, custom views), lights (Hue / Matter / Home Assistant), music (Spotify / iTunes) and custom devices (MQTT / event bus). Read `docs/architecture/scenes.md` before working on scenes, devices, or integrations; its "Status" section lists what is and isn't implemented.
+
 ## Repo layout
 
 ```
@@ -25,6 +27,7 @@ Read `docs/architecture/README.md` for a full overview. Short version:
 - **Single binary in production**: the Go server serves both the API and the compiled SvelteKit SPA.
 
 Key architecture docs:
+- `docs/architecture/scenes.md` — scene / variant / target / room / driver model (the core domain)
 - `docs/architecture/server.md` — layers, lifecycle, HTTP handler stack
 - `docs/architecture/communication.md` — ConnectRPC services, WebSocket screen protocol
 - `docs/architecture/authentication.md` — JWT / JTI / RSA key flow
@@ -109,17 +112,6 @@ npm run check       # svelte-check + tsc
 
 - When working on a dedicated branch (i.e. not `main`), always commit your changes once the task is done — don't leave work uncommitted waiting for confirmation.
 - Still ask before committing directly on `main`, and never force-push.
-
-## Current state & what needs work
-
-See `TODO.md` for the full backlog. High-priority gaps:
-
-- **Scene management** — `engine/scenes` has the structure but `ScreenIDForRole` and `ScreenIDForDevice` are unimplemented stubs
-- **Battle map rendering pipeline** — server needs to process `.dd2vtt` / `.dungeondraft_map` files into screen state
-- **GM view** — client dashboard for controlling scenes and tokens
-- **Player view** — limited-visibility perspective
-- **WebSocket message handling** — only `Ping` and `InitialSetupRequest` are handled; pan, zoom, token moves are not yet wired up
-- **Device registration** — devices can connect but assignment to screens is not persisted
 
 ## Environment variables
 
