@@ -32,25 +32,26 @@ Used for the continuous bidirectional screen state stream. Each screen view (GM,
 <ws|wss>://<host>[:<port>]/api/v1/screen/{screenId}/{connectionId}
 ```
 
-**screenId** — a UUID for a specific screen, or one of the named roles: `player`, `admin`, `viewer`.
+**screenId** — the ID of a screen already registered with `engine/screens.ScreenManager`. Resolving a role name (e.g. `admin`, `operator`, `viewer`) or a device ID to a screen ID is planned but not implemented: `engine/scenes.Manager.ScreenIDForRole` and `.ScreenIDForDevice` are both `panic("not implemented")` stubs today — see the "Scene management" item in `TODO.md`.
 
 **connectionId** — the connecting user ID or device ID.
 
 ### Authentication
 
-| Client type | Credential                                                                 |
-| ----------- | -------------------------------------------------------------------------- |
-| Player / GM | JWT passed as a header or query parameter on the upgrade request           |
-| Device      | API key; device ID sent via `X-Device-ID` header or `deviceid` query param |
+| Client type | Credential                                                                                                                                                              |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Player / GM | JWT passed as `Authorization: Bearer <token>` on the upgrade request                                                                                                     |
+| Device      | **Not implemented yet.** Any connection without a `Bearer` JWT is currently accepted as an unauthenticated device — see [authentication.md](./authentication.md#device-authentication). |
 
 See [authentication.md](./authentication.md) for how JWTs are issued and validated.
 
 ### Connection headers
 
-| Header            | Description                                                               |
-| ----------------- | ------------------------------------------------------------------------- |
-| `X-Connection-ID` | UUID generated for this specific connection (used for tracking/telemetry) |
-| `X-Device-ID`     | Device identifier for hardware screen clients                             |
+| Header            | Description                                                                                 |
+| ----------------- | --------------------------------------------------------------------------------------------- |
+| `Authorization`   | `Bearer <jwt>` for player/GM connections — the only header currently read by the handler       |
+| `X-Connection-ID` | Planned: a UUID for tracking/telemetry per connection — not yet read by the handler             |
+| `X-Device-ID`     | Planned: device identifier for hardware screen clients — not yet read by the handler            |
 
 ### Message framing
 

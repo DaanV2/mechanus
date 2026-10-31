@@ -1,11 +1,8 @@
-api:
-  host: ""
-  port: 8666
 log:
   format: text
   level: debug
   report-caller: false
-web:
+server:
   host: ""
   port: 8080
   static:

@@ -15,9 +15,9 @@ services:
     environment:
       # Default environment variables (can be overridden by creating a .env file)
       # See .env.example for reference
-      WEB_HOST: ""
-      WEB_PORT: "8080"
-      WEB_STATIC_FOLDER: "/web"
+      SERVER_HOST: ""
+      SERVER_PORT: "8080"
+      SERVER_STATIC_FOLDER: "/web"
       LOG_FORMAT: "text"
       LOG_LEVEL: "debug"
       

@@ -51,6 +51,5 @@ docker compose down # OR just dev-stop
 
 The following ports are exposed:
 
-- `8080` - Main web server (HTTP)
-- `8443` - Secure web server (HTTPS)
-- `8666` - Additional service port
+- `8080` - Main web server (HTTP). Configurable via `--server.port` / `SERVER_PORT`.
+- `8443` - Reserved in `docker-compose.yaml` for a future HTTPS listener; the server does not yet bind to it.

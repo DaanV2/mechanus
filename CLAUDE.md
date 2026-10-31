@@ -115,8 +115,8 @@ See `.env.example`. Key ones:
 
 | Variable | Description |
 | --- | --- |
-| `WEB_PORT` | HTTP listen port (default `8080`) |
-| `WEB_STATIC_FOLDER` | Path to compiled SvelteKit output |
+| `SERVER_PORT` | HTTP listen port (default `8080`) |
+| `SERVER_STATIC_FOLDER` | Path to compiled SvelteKit output |
 | `LOG_LEVEL` | `debug`, `info`, `warn`, `error` |
 | `OTEL_ENABLED` | Enable OpenTelemetry tracing |
 | `INITIALIZE_ADMIN_USERNAME` / `_PASSWORD` | Seed an admin user on first start |

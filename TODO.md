@@ -24,10 +24,8 @@ Tracked items that don't have a natural place in the code yet.
 
 ## Documentation
 
-- [ ] Client development guide (`client/docs/development.md`)
-- [ ] WebSocket API protocol documentation (`docs/api/websocket.md`)
 - [ ] macOS configuration paths (`docs/configuration/config-file.md`)
-- [ ] Key-value storage link (`docs/configuration/database.md`)
+- [ ] Device authentication (API key, `X-Device-ID` header / `deviceid` query param) — currently unimplemented; docs describe the intended design but `WebsocketHandler.authenticate` accepts any non-JWT connection as a device without validation
 
 ## Future / Nice-to-have
 

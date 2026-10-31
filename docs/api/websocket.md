@@ -1,27 +1,32 @@
 # Websockets
 
-yada yada (TODo)
+The screen WebSocket is the continuous, bidirectional channel each client (GM, player, device/TV) uses to receive server-pushed screen state. For the full protocol — message framing, supported client messages, and the server-side flow — see [architecture/communication.md](../architecture/communication.md#websocket--screen-protocol).
 
-## Paths
+## Path
 
-The path is `<ws | wss>://<domain>:[port]/api/v1/screen/{screenid}/{id}`
+```text
+<ws|wss>://<host>[:<port>]/api/v1/screen/{screenId}/{id}
+```
 
-## Screen ID
+## screenId
 
-A screen ID can be a UUID used for specific screen identifiers or one of the following `player`, `admin` or `viewer`
+The ID of a screen already registered with the server's `ScreenManager`. Routing by role name (`admin`, `operator`, `viewer`) or by device ID instead of a concrete screen ID is planned but not implemented yet — see the "Scene management" item in `TODO.md`.
 
-## ID
+## id
 
-The user id or device id
+The connecting user ID or device ID.
 
 ## Authentication
 
-When connection, the JWT must be passed along for any player / admin.
-An API key can be given for devices. And either `deviceid` query parameter or `X-Device-ID` must be given
+| Client type | Credential |
+| ----------- | ---------- |
+| Player / GM | `Authorization: Bearer <jwt>` header on the upgrade request |
+| Device      | **Not implemented yet.** Any connection without a `Bearer` JWT is currently accepted as an unauthenticated device — see [architecture/authentication.md](../architecture/authentication.md#device-authentication). |
 
 ## Headers
 
-| Header            |                                                                                |
-| ----------------- | ------------------------------------------------------------------------------ |
-| `X-Connection-ID` | A UUID that has been generated for this specific connection, used for tracking |
-| `X-Device-ID`     | A header used to tell what the device id is                                    |
+| Header            | Description                                                                           |
+| ----------------- | --------------------------------------------------------------------------------------- |
+| `Authorization`   | `Bearer <jwt>` for player/GM connections — the only header currently read by the server  |
+| `X-Connection-ID` | Planned: a UUID for tracking/telemetry per connection — not yet read by the server       |
+| `X-Device-ID`     | Planned: device identifier for hardware screen clients — not yet read by the server      |
