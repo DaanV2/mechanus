@@ -23,6 +23,7 @@ This will build and start the application with automatic rebuilds on code change
 ## Contents
 
 - [Documentation](./docs/README.md)
+- [Roadmap](./docs/roadmap.md)
 - [Local development?](./docs/development.md)
 - [Want to contribute?](./docs/contributing.md)
 

@@ -8,5 +8,6 @@
 - [configuration/opentelemetry](./configuration/opentelemetry.md)
 - [contributing](./contributing.md)
 - [development](./development.md)
+- [roadmap](./roadmap.md) — milestones, features still to build, open decisions (`TBD`)
 - [server/docs](../server/docs/README.md) — supplementary backend reference (settings, traffic diagram, scene→screen flow)
 - [client/docs/development](../client/docs/development.md) — frontend dev commands
