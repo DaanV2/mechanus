@@ -106,6 +106,11 @@ func (handler *WebsocketHandler) authenticate(r *http.Request) (*screens.Connect
 
 			return nil, errors.New("could not get claims from JWT")
 		}
+		if !c.HasScope(authentication.ScopeAll) {
+			handler.logger.From(r.Context()).Error("JWT scope does not allow screen access", "scope", c.Scope)
+
+			return nil, errors.New("JWT scope does not allow screen access")
+		}
 
 		return &screens.ConnectionInfo{
 			Token: token,

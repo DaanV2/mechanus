@@ -38,7 +38,8 @@ Every token contains:
 | `user.name`         | Username                                                             |
 | `user.roles`        | Array of role strings                                                |
 | `user.campaigns`    | Array of campaign IDs the user has access to                         |
-| `scope`             | Token scope, e.g. `"password"`                                       |
+| `grant`             | How the token was obtained: `"password"` (login) or `"refresh"`      |
+| `scope`             | What the token may be used for: `"*"` (everything) or `"refresh"`    |
 
 ## RSA key management
 

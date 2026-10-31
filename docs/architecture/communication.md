@@ -13,7 +13,7 @@ Current services:
 | Service           | Proto package  | Purpose                                                                     |
 | ----------------- | -------------- | --------------------------------------------------------------------------- |
 | `LoginService`    | `users/v1`     | Authenticate and issue JWTs                                                 |
-| `UserService`     | `users/v1`     | User CRUD                                                                   |
+| `UserService`     | `users/v1`     | User CRUD, admin list / password reset                                      |
 | `CampaignService` | `campaigns/v1` | Create, get and list campaigns (admins see all, other users only their own) |
 
 ConnectRPC is called from the browser using either the Connect protocol or gRPC-web over HTTP/2. A gRPC reflection endpoint and gRPC health endpoint are available for tooling and infrastructure probes.
