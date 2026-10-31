@@ -15,13 +15,19 @@ import (
 	"gorm.io/gorm/clause"
 )
 
-// DBStorage creates a database-based storage provider for the given type.
+// DBStorage creates a database-based storage provider for the given type, keyed by the type name.
 func DBStorage[T Identifiable](db *persistence.DB) StorageProvider[T] {
-	return &dbProvider[T]{db}
+	return NamedDBStorage[T](db, generics.NameOf[T]())
+}
+
+// NamedDBStorage creates a database-based storage provider for the given type, keyed by the given name.
+func NamedDBStorage[T Identifiable](db *persistence.DB, name string) StorageProvider[T] {
+	return &dbProvider[T]{db: db, name: name}
 }
 
 type dbProvider[T Identifiable] struct {
-	db *persistence.DB
+	db   *persistence.DB
+	name string
 }
 
 type dbStorage[T Identifiable] struct {
@@ -33,7 +39,7 @@ type dbStorage[T Identifiable] struct {
 func (d *dbProvider[T]) AppStorage() (Storage[T], error) {
 	return &dbStorage[T]{
 		db:     d.db,
-		prefix: fmt.Sprintf("app/%s/", generics.NameOf[T]()),
+		prefix: fmt.Sprintf("app/%s/", d.name),
 	}, nil
 }
 
@@ -41,7 +47,7 @@ func (d *dbProvider[T]) AppStorage() (Storage[T], error) {
 func (d *dbProvider[T]) StateStorage() (Storage[T], error) {
 	return &dbStorage[T]{
 		db:     d.db,
-		prefix: fmt.Sprintf("state/%s/", generics.NameOf[T]()),
+		prefix: fmt.Sprintf("state/%s/", d.name),
 	}, nil
 }
 
@@ -49,7 +55,7 @@ func (d *dbProvider[T]) StateStorage() (Storage[T], error) {
 func (d *dbProvider[T]) UserStorage() (Storage[T], error) {
 	return &dbStorage[T]{
 		db:     d.db,
-		prefix: fmt.Sprintf("user/%s/", generics.NameOf[T]()),
+		prefix: fmt.Sprintf("user/%s/", d.name),
 	}, nil
 }
 

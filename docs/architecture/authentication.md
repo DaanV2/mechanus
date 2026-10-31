@@ -62,7 +62,7 @@ On validation, after the signature and expiry checks pass, the server fetches th
 
 ## Device authentication
 
-Devices (e.g. a TV running the screen client) are meant to authenticate with an API key rather than a user JWT. This is **not implemented yet**: `infrastructure/transport/websocket.WebsocketHandler.authenticate` currently treats any connection whose `Authorization` header is not a `Bearer <jwt>` as an unauthenticated device and assigns it the `Device` role without validating a token or device ID (see the `// TODO: check token for device and device id.` in that function). The `X-Device-ID` header and `deviceid` query parameter described in earlier drafts of this doc are not read by the server at all today. Track this gap via the "Device registration & management" item in `TODO.md`.
+Devices (e.g. a TV running the screen client) are meant to authenticate with an API key rather than a user JWT. This is **not implemented yet**: `infrastructure/transport/websocket.WebsocketHandler.authenticate` currently treats any connection whose `Authorization` header is not a `Bearer <jwt>` as an unauthenticated device and assigns it the `Device` role without validating a token or device ID (see the `// TODO: check token for device and device id.` in that function). The `X-Device-ID` header and `deviceid` query parameter described in earlier drafts of this doc are not read by the server at all today.
 
 ## Token validation summary
 

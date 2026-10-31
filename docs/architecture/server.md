@@ -19,7 +19,8 @@ server/
 Pure domain logic. Zero imports from infrastructure. Current domains:
 
 - `engine/authentication` — JWT claims shape, JTI (token ID) revocation logic
-- `engine/scenes` — maps roles/devices to screen IDs _(partially implemented)_
+- `engine/devices` — devices, device kinds, integration identifiers, and the room (target → device bindings)
+- `engine/scenes` — scene model: `Config` (authored, from file storage), `State` (runtime, saved in the database), `Scene` (both), per-target instructions, transitions (see [scenes.md](./scenes.md))
 - `engine/screens` — `ScreenHandler` and `ScreenManager`; manages WebSocket listeners per screen, broadcasts state updates
 
 ### application — use cases
@@ -28,6 +29,7 @@ Orchestrates flows by combining engine rules with infrastructure ports:
 
 - `UserService` — user CRUD, password handling
 - `CampaignService` — campaign CRUD
+- `SceneService` — loads / exits scenes (restoring and saving their state), switches variants, and dispatches instructions to `OutputDriver`s _(not wired in `components` yet)_
 - `Manager` — top-level coordinator _(stub)_
 
 ### infrastructure — adapters
@@ -42,8 +44,9 @@ All technical adapters. See dedicated sub-docs for detail:
 | `lifecycle`           | Ordered AfterInitialize / BeforeShutdown / AfterShutDown hooks | —                                                                         |
 | `logging`             | Charm.sh structured logger + HTTP middleware                   | —                                                                         |
 | `persistence`         | GORM + SQLite/Postgres/MySQL; auto-migrations; repositories    | [database.md](./database.md)                                              |
+| `scenestore`          | Scene config (file storage) and scene state (database) stores  | [scenes.md](./scenes.md#storage-layout)                                   |
 | `servers`             | `net/http` server wrapper with graceful shutdown               | —                                                                         |
-| `storage`             | Blob / asset storage                                           | —                                                                         |
+| `storage`             | Generic file / database key-value storage providers            | —                                                                         |
 | `telemetry`           | OpenTelemetry setup; trace HTTP middleware                     | [../../configuration/opentelemetry.md](../configuration/opentelemetry.md) |
 | `transport/cors`      | CORS middleware                                                | —                                                                         |
 | `transport/grpc`      | gRPC interceptors                                              | [communication.md](./communication.md)                                    |

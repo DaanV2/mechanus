@@ -2,6 +2,8 @@
 
 Mechanus is a server-driven UI system for local TTRPG (tabletop RPG) setups. A Go server manages all game state and pushes it to browser clients (GM dashboard, player screens, TV/table battle map display) over ConnectRPC (gRPC) and WebSocket.
 
+The product is built around **scenes**: a scene holds the entities present (players / NPCs / enemies), has variants (time of day, weather, ...) it can transition between, and instructs every device in the room — screens (battle map, scenery, info board, custom views), lights (Hue / Matter / Home Assistant), music (Spotify / iTunes) and custom devices (MQTT / event bus). Read `docs/architecture/scenes.md` before working on scenes, devices, or integrations; its "Status" section lists what is and isn't implemented.
+
 ## Repo layout
 
 ```
@@ -25,6 +27,7 @@ Read `docs/architecture/README.md` for a full overview. Short version:
 - **Single binary in production**: the Go server serves both the API and the compiled SvelteKit SPA.
 
 Key architecture docs:
+- `docs/architecture/scenes.md` — scene / variant / target / room / driver model (the core domain)
 - `docs/architecture/server.md` — layers, lifecycle, HTTP handler stack
 - `docs/architecture/communication.md` — ConnectRPC services, WebSocket screen protocol
 - `docs/architecture/authentication.md` — JWT / JTI / RSA key flow
@@ -99,6 +102,7 @@ npm run check       # svelte-check + tsc
 ## Key conventions
 
 - **Layer boundaries**: `engine` must not import `infrastructure`. `application` may import `engine` and define ports (interfaces). `infrastructure` implements those ports. `components` is the only place that crosses all layers.
+- **Scenes — configuration vs state**: authored scene / room configuration (`scenes.Config`, `devices.Room`) is read-only at runtime and comes from file storage; everything that changes during play goes in `scenes.State` and is saved to the database when a scene is loaded or exited. Keep new fields on the right side of that line.
 - **Config**: use Viper config sets (`infrastructure/config`). Add flags to the relevant `*ConfigSet` and register them in the appropriate `cmd/*.go` file.
 - **Error handling**: wrap errors with `fmt.Errorf("context: %w", err)`. Use `errors.Join` to combine multiple errors.
 - **Logging**: use `infrastructure/logging` (Charm.sh). Pass `ctx` through and use `logging.From(ctx)` to get a logger with trace context.
@@ -109,17 +113,6 @@ npm run check       # svelte-check + tsc
 
 - When working on a dedicated branch (i.e. not `main`), always commit your changes once the task is done — don't leave work uncommitted waiting for confirmation.
 - Still ask before committing directly on `main`, and never force-push.
-
-## Current state & what needs work
-
-See `TODO.md` for the full backlog. High-priority gaps:
-
-- **Scene management** — `engine/scenes` has the structure but `ScreenIDForRole` and `ScreenIDForDevice` are unimplemented stubs
-- **Battle map rendering pipeline** — server needs to process `.dd2vtt` / `.dungeondraft_map` files into screen state
-- **GM view** — client dashboard for controlling scenes and tokens
-- **Player view** — limited-visibility perspective
-- **WebSocket message handling** — only `Ping` and `InitialSetupRequest` are handled; pan, zoom, token moves are not yet wired up
-- **Device registration** — devices can connect but assignment to screens is not persisted
 
 ## Environment variables
 

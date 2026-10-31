@@ -32,7 +32,7 @@ Used for the continuous bidirectional screen state stream. Each screen view (GM,
 <ws|wss>://<host>[:<port>]/api/v1/screen/{screenId}/{connectionId}
 ```
 
-**screenId** — the ID of a screen already registered with `engine/screens.ScreenManager`. Resolving a role name (e.g. `admin`, `operator`, `viewer`) or a device ID to a screen ID is planned but not implemented: `engine/scenes.Manager.ScreenIDForRole` and `.ScreenIDForDevice` are both `panic("not implemented")` stubs today — see the "Scene management" item in `TODO.md`.
+**screenId** — the ID of a screen already registered with `engine/screens.ScreenManager`. Resolving a device to its screen is not implemented yet; the intended design is one screen per screen device, driven by the active scene through the room's target bindings — see [scenes.md](./scenes.md#screens--views).
 
 **connectionId** — the connecting user ID or device ID.
 
@@ -66,7 +66,7 @@ Request/response correlation: if a `ClientMessage` carries a non-empty `id` fiel
 | `Ping`                | Keep-alive / latency check                                 |
 | `InitialSetupRequest` | Sent on connect; server responds with initial screen state |
 
-_(Additional messages for pan, zoom, token moves, etc. are planned — see `TODO.md`.)_
+_(Additional messages for pan, zoom, token moves, etc. are not implemented yet.)_
 
 ### Server-side flow
 

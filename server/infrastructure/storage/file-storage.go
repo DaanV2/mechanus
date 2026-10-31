@@ -14,15 +14,22 @@ import (
 	"github.com/daanv2/go-locks"
 )
 
-// FileStorage creates a file-based storage provider for the given type.
+// FileStorage creates a file-based storage provider for the given type, stored in a folder named after the type.
 func FileStorage[T Identifiable]() StorageProvider[T] {
+	return NamedFileStorage[T](generics.NameOf[T]())
+}
+
+// NamedFileStorage creates a file-based storage provider for the given type, stored in the named folder.
+func NamedFileStorage[T Identifiable](name string) StorageProvider[T] {
 	return &fileStorage[T]{
 		locks: *locks.NewRWPool(),
+		name:  name,
 	}
 }
 
 type fileStorage[T Identifiable] struct {
 	locks locks.RWPool
+	name  string
 }
 
 type fileDirStorage[T Identifiable] struct {
@@ -37,7 +44,7 @@ func (f *fileStorage[T]) AppStorage() (Storage[T], error) {
 		return nil, err
 	}
 
-	dir = filepath.Join(dir, generics.NameOf[T]())
+	dir = filepath.Join(dir, f.name)
 	xio.MakeDirAll(dir)
 
 	return &fileDirStorage[T]{
@@ -53,7 +60,7 @@ func (f *fileStorage[T]) StateStorage() (Storage[T], error) {
 		return nil, err
 	}
 
-	dir = filepath.Join(dir, generics.NameOf[T]())
+	dir = filepath.Join(dir, f.name)
 	xio.MakeDirAll(dir)
 
 	return &fileDirStorage[T]{
@@ -69,7 +76,7 @@ func (f *fileStorage[T]) UserStorage() (Storage[T], error) {
 		return nil, err
 	}
 
-	dir = filepath.Join(dir, generics.NameOf[T]())
+	dir = filepath.Join(dir, f.name)
 	xio.MakeDirAll(dir)
 
 	return &fileDirStorage[T]{
@@ -145,7 +152,7 @@ func (f *fileDirStorage[T]) Keys(ctx context.Context) iter.Seq[string] {
 }
 
 func (f *fileDirStorage[T]) filepath(id string) string {
-	return filepath.Join(f.dir, id, ".dat")
+	return filepath.Join(f.dir, id+".dat")
 }
 
 // Get implements Storage.
