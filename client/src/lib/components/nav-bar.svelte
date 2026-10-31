@@ -46,6 +46,9 @@
         </DropdownHeader>
         <DropdownGroup>
           <DropdownItem href="/users/login">Profile</DropdownItem>
+          {#if userData.user.roles?.includes('admin')}
+            <DropdownItem href="/users">Users</DropdownItem>
+          {/if}
         </DropdownGroup>
         <DropdownHeader onclick={logout}>Sign out</DropdownHeader>
       </Dropdown>
