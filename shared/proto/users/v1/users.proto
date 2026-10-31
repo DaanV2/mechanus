@@ -6,6 +6,8 @@ option go_package = "github.com/DaanV2/mechanus/server/proto/users/v1;usersv1";
 service UserService {
   rpc Create(CreateAccountRequest) returns (CreateAccountResponse) {}
   rpc Get(GetUserRequest) returns (GetUserResponse) {}
+  // List all users, requires the admin role
+  rpc List(ListUsersRequest) returns (ListUsersResponse) {}
 }
 
 message CreateAccountRequest {
@@ -27,7 +29,14 @@ message GetUserResponse {
   User user = 1;
 }
 
+message ListUsersRequest {}
+
+message ListUsersResponse {
+  repeated User users = 1;
+}
+
 message User {
   string id = 1; // The users UUID
   string name = 2; // The users name
+  repeated string roles = 3; // The users roles, only filled in for admins or the user themselves
 }

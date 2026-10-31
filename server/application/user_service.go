@@ -77,6 +77,11 @@ func (s *UserService) Find(ctx context.Context, queries *models.User) ([]*models
 	return s.repo.Find(ctx, queries)
 }
 
+// List retrieves all users.
+func (s *UserService) List(ctx context.Context) ([]*models.User, error) {
+	return s.repo.Find(ctx, &models.User{})
+}
+
 func updatePassword(user *models.User) error {
 	pwhash, err := xcrypto.HashPassword(user.PasswordHash)
 	if err != nil {

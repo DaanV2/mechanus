@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { userHandler, UserState } from '$lib/handlers/user';
+  import { isAdmin, userHandler, UserState } from '$lib/handlers/user';
   import {
     Avatar,
     Button,
@@ -76,6 +76,13 @@
           activeClass="text-secondary hover:bg-tertiary hover:text-quaternary transition-colors"
           nonActiveClass="hover:text-text-100 text-secondary transition-colors"
           href="/campaigns">Campaigns</NavLi
+        >
+      {/if}
+      {#if isAdmin(currentUser)}
+        <NavLi
+          activeClass="text-secondary hover:bg-tertiary hover:text-quaternary transition-colors"
+          nonActiveClass="hover:text-text-100 text-secondary transition-colors"
+          href="/admin/users">Users</NavLi
         >
       {/if}
       <NavLi

@@ -207,17 +207,98 @@ func (x *GetUserResponse) GetUser() *User {
 	return nil
 }
 
+type ListUsersRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListUsersRequest) Reset() {
+	*x = ListUsersRequest{}
+	mi := &file_users_v1_users_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListUsersRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListUsersRequest) ProtoMessage() {}
+
+func (x *ListUsersRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_users_v1_users_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListUsersRequest.ProtoReflect.Descriptor instead.
+func (*ListUsersRequest) Descriptor() ([]byte, []int) {
+	return file_users_v1_users_proto_rawDescGZIP(), []int{4}
+}
+
+type ListUsersResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Users         []*User                `protobuf:"bytes,1,rep,name=users,proto3" json:"users,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListUsersResponse) Reset() {
+	*x = ListUsersResponse{}
+	mi := &file_users_v1_users_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListUsersResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListUsersResponse) ProtoMessage() {}
+
+func (x *ListUsersResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_users_v1_users_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListUsersResponse.ProtoReflect.Descriptor instead.
+func (*ListUsersResponse) Descriptor() ([]byte, []int) {
+	return file_users_v1_users_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *ListUsersResponse) GetUsers() []*User {
+	if x != nil {
+		return x.Users
+	}
+	return nil
+}
+
 type User struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`     // The users UUID
-	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"` // The users name
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`       // The users UUID
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`   // The users name
+	Roles         []string               `protobuf:"bytes,3,rep,name=roles,proto3" json:"roles,omitempty"` // The users roles, only filled in for admins or the user themselves
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *User) Reset() {
 	*x = User{}
-	mi := &file_users_v1_users_proto_msgTypes[4]
+	mi := &file_users_v1_users_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -229,7 +310,7 @@ func (x *User) String() string {
 func (*User) ProtoMessage() {}
 
 func (x *User) ProtoReflect() protoreflect.Message {
-	mi := &file_users_v1_users_proto_msgTypes[4]
+	mi := &file_users_v1_users_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -242,7 +323,7 @@ func (x *User) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use User.ProtoReflect.Descriptor instead.
 func (*User) Descriptor() ([]byte, []int) {
-	return file_users_v1_users_proto_rawDescGZIP(), []int{4}
+	return file_users_v1_users_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *User) GetId() string {
@@ -259,6 +340,13 @@ func (x *User) GetName() string {
 	return ""
 }
 
+func (x *User) GetRoles() []string {
+	if x != nil {
+		return x.Roles
+	}
+	return nil
+}
+
 var File_users_v1_users_proto protoreflect.FileDescriptor
 
 const file_users_v1_users_proto_rawDesc = "" +
@@ -272,13 +360,18 @@ const file_users_v1_users_proto_rawDesc = "" +
 	"\x0eGetUserRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\"5\n" +
 	"\x0fGetUserResponse\x12\"\n" +
-	"\x04user\x18\x01 \x01(\v2\x0e.users.v1.UserR\x04user\"*\n" +
+	"\x04user\x18\x01 \x01(\v2\x0e.users.v1.UserR\x04user\"\x12\n" +
+	"\x10ListUsersRequest\"9\n" +
+	"\x11ListUsersResponse\x12$\n" +
+	"\x05users\x18\x01 \x03(\v2\x0e.users.v1.UserR\x05users\"@\n" +
 	"\x04User\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name2\x98\x01\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12\x14\n" +
+	"\x05roles\x18\x03 \x03(\tR\x05roles2\xdb\x01\n" +
 	"\vUserService\x12K\n" +
 	"\x06Create\x12\x1e.users.v1.CreateAccountRequest\x1a\x1f.users.v1.CreateAccountResponse\"\x00\x12<\n" +
-	"\x03Get\x12\x18.users.v1.GetUserRequest\x1a\x19.users.v1.GetUserResponse\"\x00B:Z8github.com/DaanV2/mechanus/server/proto/users/v1;usersv1b\x06proto3"
+	"\x03Get\x12\x18.users.v1.GetUserRequest\x1a\x19.users.v1.GetUserResponse\"\x00\x12A\n" +
+	"\x04List\x12\x1a.users.v1.ListUsersRequest\x1a\x1b.users.v1.ListUsersResponse\"\x00B:Z8github.com/DaanV2/mechanus/server/proto/users/v1;usersv1b\x06proto3"
 
 var (
 	file_users_v1_users_proto_rawDescOnce sync.Once
@@ -292,26 +385,31 @@ func file_users_v1_users_proto_rawDescGZIP() []byte {
 	return file_users_v1_users_proto_rawDescData
 }
 
-var file_users_v1_users_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_users_v1_users_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_users_v1_users_proto_goTypes = []any{
 	(*CreateAccountRequest)(nil),  // 0: users.v1.CreateAccountRequest
 	(*CreateAccountResponse)(nil), // 1: users.v1.CreateAccountResponse
 	(*GetUserRequest)(nil),        // 2: users.v1.GetUserRequest
 	(*GetUserResponse)(nil),       // 3: users.v1.GetUserResponse
-	(*User)(nil),                  // 4: users.v1.User
+	(*ListUsersRequest)(nil),      // 4: users.v1.ListUsersRequest
+	(*ListUsersResponse)(nil),     // 5: users.v1.ListUsersResponse
+	(*User)(nil),                  // 6: users.v1.User
 }
 var file_users_v1_users_proto_depIdxs = []int32{
-	4, // 0: users.v1.CreateAccountResponse.user:type_name -> users.v1.User
-	4, // 1: users.v1.GetUserResponse.user:type_name -> users.v1.User
-	0, // 2: users.v1.UserService.Create:input_type -> users.v1.CreateAccountRequest
-	2, // 3: users.v1.UserService.Get:input_type -> users.v1.GetUserRequest
-	1, // 4: users.v1.UserService.Create:output_type -> users.v1.CreateAccountResponse
-	3, // 5: users.v1.UserService.Get:output_type -> users.v1.GetUserResponse
-	4, // [4:6] is the sub-list for method output_type
-	2, // [2:4] is the sub-list for method input_type
-	2, // [2:2] is the sub-list for extension type_name
-	2, // [2:2] is the sub-list for extension extendee
-	0, // [0:2] is the sub-list for field type_name
+	6, // 0: users.v1.CreateAccountResponse.user:type_name -> users.v1.User
+	6, // 1: users.v1.GetUserResponse.user:type_name -> users.v1.User
+	6, // 2: users.v1.ListUsersResponse.users:type_name -> users.v1.User
+	0, // 3: users.v1.UserService.Create:input_type -> users.v1.CreateAccountRequest
+	2, // 4: users.v1.UserService.Get:input_type -> users.v1.GetUserRequest
+	4, // 5: users.v1.UserService.List:input_type -> users.v1.ListUsersRequest
+	1, // 6: users.v1.UserService.Create:output_type -> users.v1.CreateAccountResponse
+	3, // 7: users.v1.UserService.Get:output_type -> users.v1.GetUserResponse
+	5, // 8: users.v1.UserService.List:output_type -> users.v1.ListUsersResponse
+	6, // [6:9] is the sub-list for method output_type
+	3, // [3:6] is the sub-list for method input_type
+	3, // [3:3] is the sub-list for extension type_name
+	3, // [3:3] is the sub-list for extension extendee
+	0, // [0:3] is the sub-list for field type_name
 }
 
 func init() { file_users_v1_users_proto_init() }
@@ -325,7 +423,7 @@ func file_users_v1_users_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_users_v1_users_proto_rawDesc), len(file_users_v1_users_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   5,
+			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

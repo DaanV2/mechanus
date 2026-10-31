@@ -37,12 +37,16 @@ const (
 	UserServiceCreateProcedure = "/users.v1.UserService/Create"
 	// UserServiceGetProcedure is the fully-qualified name of the UserService's Get RPC.
 	UserServiceGetProcedure = "/users.v1.UserService/Get"
+	// UserServiceListProcedure is the fully-qualified name of the UserService's List RPC.
+	UserServiceListProcedure = "/users.v1.UserService/List"
 )
 
 // UserServiceClient is a client for the users.v1.UserService service.
 type UserServiceClient interface {
 	Create(context.Context, *connect.Request[v1.CreateAccountRequest]) (*connect.Response[v1.CreateAccountResponse], error)
 	Get(context.Context, *connect.Request[v1.GetUserRequest]) (*connect.Response[v1.GetUserResponse], error)
+	// List all users, requires the admin role
+	List(context.Context, *connect.Request[v1.ListUsersRequest]) (*connect.Response[v1.ListUsersResponse], error)
 }
 
 // NewUserServiceClient constructs a client for the users.v1.UserService service. By default, it
@@ -68,6 +72,12 @@ func NewUserServiceClient(httpClient connect.HTTPClient, baseURL string, opts ..
 			connect.WithSchema(userServiceMethods.ByName("Get")),
 			connect.WithClientOptions(opts...),
 		),
+		list: connect.NewClient[v1.ListUsersRequest, v1.ListUsersResponse](
+			httpClient,
+			baseURL+UserServiceListProcedure,
+			connect.WithSchema(userServiceMethods.ByName("List")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -75,6 +85,7 @@ func NewUserServiceClient(httpClient connect.HTTPClient, baseURL string, opts ..
 type userServiceClient struct {
 	create *connect.Client[v1.CreateAccountRequest, v1.CreateAccountResponse]
 	get    *connect.Client[v1.GetUserRequest, v1.GetUserResponse]
+	list   *connect.Client[v1.ListUsersRequest, v1.ListUsersResponse]
 }
 
 // Create calls users.v1.UserService.Create.
@@ -87,10 +98,17 @@ func (c *userServiceClient) Get(ctx context.Context, req *connect.Request[v1.Get
 	return c.get.CallUnary(ctx, req)
 }
 
+// List calls users.v1.UserService.List.
+func (c *userServiceClient) List(ctx context.Context, req *connect.Request[v1.ListUsersRequest]) (*connect.Response[v1.ListUsersResponse], error) {
+	return c.list.CallUnary(ctx, req)
+}
+
 // UserServiceHandler is an implementation of the users.v1.UserService service.
 type UserServiceHandler interface {
 	Create(context.Context, *connect.Request[v1.CreateAccountRequest]) (*connect.Response[v1.CreateAccountResponse], error)
 	Get(context.Context, *connect.Request[v1.GetUserRequest]) (*connect.Response[v1.GetUserResponse], error)
+	// List all users, requires the admin role
+	List(context.Context, *connect.Request[v1.ListUsersRequest]) (*connect.Response[v1.ListUsersResponse], error)
 }
 
 // NewUserServiceHandler builds an HTTP handler from the service implementation. It returns the path
@@ -112,12 +130,20 @@ func NewUserServiceHandler(svc UserServiceHandler, opts ...connect.HandlerOption
 		connect.WithSchema(userServiceMethods.ByName("Get")),
 		connect.WithHandlerOptions(opts...),
 	)
+	userServiceListHandler := connect.NewUnaryHandler(
+		UserServiceListProcedure,
+		svc.List,
+		connect.WithSchema(userServiceMethods.ByName("List")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/users.v1.UserService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case UserServiceCreateProcedure:
 			userServiceCreateHandler.ServeHTTP(w, r)
 		case UserServiceGetProcedure:
 			userServiceGetHandler.ServeHTTP(w, r)
+		case UserServiceListProcedure:
+			userServiceListHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -133,4 +159,8 @@ func (UnimplementedUserServiceHandler) Create(context.Context, *connect.Request[
 
 func (UnimplementedUserServiceHandler) Get(context.Context, *connect.Request[v1.GetUserRequest]) (*connect.Response[v1.GetUserResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("users.v1.UserService.Get is not implemented"))
+}
+
+func (UnimplementedUserServiceHandler) List(context.Context, *connect.Request[v1.ListUsersRequest]) (*connect.Response[v1.ListUsersResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("users.v1.UserService.List is not implemented"))
 }

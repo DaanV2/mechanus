@@ -10,7 +10,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file users/v1/users.proto.
  */
 export const file_users_v1_users: GenFile = /*@__PURE__*/
-  fileDesc("ChR1c2Vycy92MS91c2Vycy5wcm90bxIIdXNlcnMudjEiOgoUQ3JlYXRlQWNjb3VudFJlcXVlc3QSEAoIdXNlcm5hbWUYASABKAkSEAoIcGFzc3dvcmQYAiABKAkiNQoVQ3JlYXRlQWNjb3VudFJlc3BvbnNlEhwKBHVzZXIYASABKAsyDi51c2Vycy52MS5Vc2VyIhwKDkdldFVzZXJSZXF1ZXN0EgoKAmlkGAEgASgJIi8KD0dldFVzZXJSZXNwb25zZRIcCgR1c2VyGAEgASgLMg4udXNlcnMudjEuVXNlciIgCgRVc2VyEgoKAmlkGAEgASgJEgwKBG5hbWUYAiABKAkymAEKC1VzZXJTZXJ2aWNlEksKBkNyZWF0ZRIeLnVzZXJzLnYxLkNyZWF0ZUFjY291bnRSZXF1ZXN0Gh8udXNlcnMudjEuQ3JlYXRlQWNjb3VudFJlc3BvbnNlIgASPAoDR2V0EhgudXNlcnMudjEuR2V0VXNlclJlcXVlc3QaGS51c2Vycy52MS5HZXRVc2VyUmVzcG9uc2UiAEI6WjhnaXRodWIuY29tL0RhYW5WMi9tZWNoYW51cy9zZXJ2ZXIvcHJvdG8vdXNlcnMvdjE7dXNlcnN2MWIGcHJvdG8z");
+  fileDesc("ChR1c2Vycy92MS91c2Vycy5wcm90bxIIdXNlcnMudjEiOgoUQ3JlYXRlQWNjb3VudFJlcXVlc3QSEAoIdXNlcm5hbWUYASABKAkSEAoIcGFzc3dvcmQYAiABKAkiNQoVQ3JlYXRlQWNjb3VudFJlc3BvbnNlEhwKBHVzZXIYASABKAsyDi51c2Vycy52MS5Vc2VyIhwKDkdldFVzZXJSZXF1ZXN0EgoKAmlkGAEgASgJIi8KD0dldFVzZXJSZXNwb25zZRIcCgR1c2VyGAEgASgLMg4udXNlcnMudjEuVXNlciISChBMaXN0VXNlcnNSZXF1ZXN0IjIKEUxpc3RVc2Vyc1Jlc3BvbnNlEh0KBXVzZXJzGAEgAygLMg4udXNlcnMudjEuVXNlciIvCgRVc2VyEgoKAmlkGAEgASgJEgwKBG5hbWUYAiABKAkSDQoFcm9sZXMYAyADKAky2wEKC1VzZXJTZXJ2aWNlEksKBkNyZWF0ZRIeLnVzZXJzLnYxLkNyZWF0ZUFjY291bnRSZXF1ZXN0Gh8udXNlcnMudjEuQ3JlYXRlQWNjb3VudFJlc3BvbnNlIgASPAoDR2V0EhgudXNlcnMudjEuR2V0VXNlclJlcXVlc3QaGS51c2Vycy52MS5HZXRVc2VyUmVzcG9uc2UiABJBCgRMaXN0EhoudXNlcnMudjEuTGlzdFVzZXJzUmVxdWVzdBobLnVzZXJzLnYxLkxpc3RVc2Vyc1Jlc3BvbnNlIgBCOlo4Z2l0aHViLmNvbS9EYWFuVjIvbWVjaGFudXMvc2VydmVyL3Byb3RvL3VzZXJzL3YxO3VzZXJzdjFiBnByb3RvMw");
 
 /**
  * @generated from message users.v1.CreateAccountRequest
@@ -92,6 +92,36 @@ export const GetUserResponseSchema: GenMessage<GetUserResponse> = /*@__PURE__*/
   messageDesc(file_users_v1_users, 3);
 
 /**
+ * @generated from message users.v1.ListUsersRequest
+ */
+export type ListUsersRequest = Message<"users.v1.ListUsersRequest"> & {
+};
+
+/**
+ * Describes the message users.v1.ListUsersRequest.
+ * Use `create(ListUsersRequestSchema)` to create a new message.
+ */
+export const ListUsersRequestSchema: GenMessage<ListUsersRequest> = /*@__PURE__*/
+  messageDesc(file_users_v1_users, 4);
+
+/**
+ * @generated from message users.v1.ListUsersResponse
+ */
+export type ListUsersResponse = Message<"users.v1.ListUsersResponse"> & {
+  /**
+   * @generated from field: repeated users.v1.User users = 1;
+   */
+  users: User[];
+};
+
+/**
+ * Describes the message users.v1.ListUsersResponse.
+ * Use `create(ListUsersResponseSchema)` to create a new message.
+ */
+export const ListUsersResponseSchema: GenMessage<ListUsersResponse> = /*@__PURE__*/
+  messageDesc(file_users_v1_users, 5);
+
+/**
  * @generated from message users.v1.User
  */
 export type User = Message<"users.v1.User"> & {
@@ -108,6 +138,13 @@ export type User = Message<"users.v1.User"> & {
    * @generated from field: string name = 2;
    */
   name: string;
+
+  /**
+   * The users roles, only filled in for admins or the user themselves
+   *
+   * @generated from field: repeated string roles = 3;
+   */
+  roles: string[];
 };
 
 /**
@@ -115,7 +152,7 @@ export type User = Message<"users.v1.User"> & {
  * Use `create(UserSchema)` to create a new message.
  */
 export const UserSchema: GenMessage<User> = /*@__PURE__*/
-  messageDesc(file_users_v1_users, 4);
+  messageDesc(file_users_v1_users, 6);
 
 /**
  * @generated from service users.v1.UserService
@@ -136,6 +173,16 @@ export const UserService: GenService<{
     methodKind: "unary";
     input: typeof GetUserRequestSchema;
     output: typeof GetUserResponseSchema;
+  },
+  /**
+   * List all users, requires the admin role
+   *
+   * @generated from rpc users.v1.UserService.List
+   */
+  list: {
+    methodKind: "unary";
+    input: typeof ListUsersRequestSchema;
+    output: typeof ListUsersResponseSchema;
   },
 }> = /*@__PURE__*/
   serviceDesc(file_users_v1_users, 0);

@@ -103,16 +103,49 @@ func (u *UserServiceHandler) Get(ctx context.Context, req *connect.Request[users
 	return connect.NewResponse(&usersv1.GetUserResponse{User: user}), nil
 }
 
+// List implements usersv1connect.UserServiceHandler.
+func (u *UserServiceHandler) List(ctx context.Context, req *connect.Request[usersv1.ListUsersRequest]) (*connect.Response[usersv1.ListUsersResponse], error) {
+	jwt, err := authentication.JWTFromContext(ctx)
+	if err != nil {
+		u.logger.From(ctx).Error("error during reading jwt", "error", err)
+
+		return nil, connect.NewError(connect.CodePermissionDenied, err)
+	}
+
+	if !jwt.IsAuthenicatedWithRole(roles.Admin) {
+		return nil, connect.NewError(connect.CodePermissionDenied, errors.New("expecting an admin role"))
+	}
+
+	users, err := u.users.List(ctx)
+	if err != nil {
+		u.logger.From(ctx).Error("error during listing of users", "error", err)
+
+		return nil, connect.NewError(connect.CodeInternal, err)
+	}
+
+	result := make([]*usersv1.User, 0, len(users))
+	for _, user := range users {
+		result = append(result, toFullUser(user))
+	}
+
+	return connect.NewResponse(&usersv1.ListUsersResponse{Users: result}), nil
+}
+
 func (u *UserServiceHandler) getFullInfo(ctx context.Context, id string) (*usersv1.User, error) {
 	user, err := u.users.Get(ctx, id)
 	if err != nil {
 		return nil, err
 	}
 
+	return toFullUser(user), nil
+}
+
+func toFullUser(user *models.User) *usersv1.User {
 	return &usersv1.User{
-		Id:   user.ID,
-		Name: user.Username,
-	}, nil
+		Id:    user.ID,
+		Name:  user.Username,
+		Roles: user.GetRoles(),
+	}
 }
 
 func (u *UserServiceHandler) getReducedInfo(ctx context.Context, id string) (*usersv1.User, error) {

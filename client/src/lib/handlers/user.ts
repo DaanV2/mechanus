@@ -69,6 +69,22 @@ export class UserHandler {
   async serverData(id?: string) {
     return createUserClient().get({ id: id ?? this.current.data?.user.id });
   }
+
+  /** Whether the current user has the admin role */
+  get isAdmin() {
+    return isAdmin(this.current);
+  }
+
+  /** Lists all users, requires the admin role */
+  async list() {
+    const response = await createUserClient().list({});
+
+    return response.users;
+  }
+}
+
+export function isAdmin(state: UserState): boolean {
+  return state.loggedin && (state.data.user.roles ?? []).includes('admin');
 }
 
 export const userHandler = new UserHandler();

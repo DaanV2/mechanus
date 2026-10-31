@@ -69,6 +69,27 @@ var _ = Describe("User Service", func() {
 		})
 	})
 
+	Context("List", func() {
+		It("can list all users", func(ctx SpecContext) {
+			names := []string{"frodo", "sam", "merry"}
+
+			By("creating new users")
+			for _, name := range names {
+				Expect(service.Create(ctx, &models.User{Username: name, PasswordHash: []byte(name)})).To(Succeed())
+			}
+
+			By("listing the users")
+			users, err := service.List(ctx)
+			Expect(err).ToNot(HaveOccurred())
+
+			usernames := make([]string, 0, len(users))
+			for _, u := range users {
+				usernames = append(usernames, u.Username)
+			}
+			Expect(usernames).To(ContainElements(names))
+		})
+	})
+
 	Context("Update", func() {
 		It("can update the user, but will skip the password and name", func(ctx SpecContext) {
 			user := &models.User{
