@@ -36,7 +36,7 @@ Conventions:
 **Goal**: the building blocks every later milestone relies on.
 
 - [x] Go server with Clean Architecture layers, lifecycle, config, logging, OpenTelemetry
-- [x] User accounts, login, JWT / JTI auth, roles
+- [~] User accounts, login, JWT / JTI auth, roles — works on the happy path, see [Auth & tokens](#auth--tokens) for what's broken or missing
 - [x] Admin user list page (`/users`, `UserService.List`)
 - [x] ConnectRPC services (users, login) and the screen WebSocket (`Ping`, `InitialSetupRequest`)
 - [x] Database backends (SQLite, Postgres, MySQL, in-memory) with migrations
@@ -44,8 +44,51 @@ Conventions:
 - [x] SvelteKit client shell with login / signup / profile and placeholder GM / player / device views
 - [~] Scene model: config vs. state, variants, targets, rooms, transitions, `SceneService`, `scenestore` (code + tests, not wired)
 
+### Auth & tokens
+
+What exists: login (`LoginService.Login`) issues an RS512 JWT (1 h, `grant` / `scope` claims) tied to a per-user `JTI` row; the ConnectRPC `Authenticator` interceptor validates it and puts the claims on the context; `UserService` checks roles; admins can list users and reset passwords. `JTIService.Revoke` exists but nothing calls it. Device auth is tracked under [M1](#m1--first-scene-on-the-table).
+
+**Bugs**
+
+- [x] `grpc.Authenticator.validateAndInject` panicked (nil pointer) on any malformed, expired or badly signed bearer token — now treated as an anonymous request
+- [ ] Screen WebSocket never authenticates browser users: browsers can't set an `Authorization` header on `new WebSocket(...)`, the client's `WebsocketHandler.getToken()` is never used, and the server doesn't read the cookie — so every browser connection falls through to the unauthenticated `Device` path.
+- [ ] Cookie fallback in `grpc.getJwtValue` never matches: the client stores `encodeURIComponent("Bearer <jwt>")`, so the cookie value starts with `Bearer%20`, not `Bearer `.
+- [ ] `Refresh` accepts any `scope: "*"` access token and reuses the same JTI, so a leaked token can be renewed forever; no `scope: "refresh"` token is ever issued (the client's `refresh-token` cookie key is unused).
+- [ ] Admin password reset (`ResetPassword`) does not revoke the user's JTI — existing sessions stay valid.
+- [ ] Tokens leak into logs: `JWTService.validate` logs the raw JWT at debug level, and the client `Cookie.get` / `Cookie.set` `console.log` the access token.
+- [ ] Invalid / expired tokens are silently treated as anonymous; handlers then answer `PermissionDenied`, so the client can't tell "log in again" (`Unauthenticated`) from "not allowed".
+- [ ] `KeyManager.GetSigningKey` picks whichever key the map yields first once more than one key exists — signing key is effectively random.
+- [ ] `authentication.md` claims a 5-minute expiry leeway; `jwt.ParseWithClaims` checks `exp` with zero leeway before the leeway validator runs, so the leeway never applies.
+
+**Missing**
+
+- [ ] Logout: server endpoint that revokes the JTI, plus the client flow (`UserHandler.logout` is a `TODO`)
+- [ ] Proper refresh flow: login returns an access token + a `scope: "refresh"` token; the client refreshes before expiry and on `Unauthenticated`
+- [ ] Client checks `exp` — `userHandler.current` reports logged-in for an expired token, and the cookie has no `Max-Age`
+- [ ] WebSocket auth for users (cookie, `Sec-WebSocket-Protocol`, or first-message token) and the `// TODO: check that screenHandler is allowed to be access by this requester` screen access check
+- [ ] Long-lived WebSocket connections are never re-checked when the token expires or the JTI is revoked
+- [ ] Per-session JTIs (so one device can be signed out) instead of one shared JTI per user; cleanup of revoked / old JTI rows
+- [ ] Self-service password change (revokes other sessions); admin role management API (role changes only reach the token on refresh)
+- [ ] Login hardening: rate limiting / lockout, and constant-time behaviour when the username doesn't exist (today an unknown user returns before hashing, which leaks which usernames exist)
+- [ ] Signing key rotation (new key on a schedule, retire old keys after the max token lifetime)
+- [ ] Configurable token lifetime (`JWTOptions.TokenDuration` is hard-coded to 1 h) via a config set
+- [ ] Cookie hardening: today the token lives in a JS-readable `SameSite=Lax` cookie with no `Secure` — revisit once HTTPS on the LAN is decided
+
+**Tests**
+
+- [~] `grpc.Authenticator`: no header, valid, malformed, expired, tampered, revoked and refresh-scope tokens are covered; cookie fallback is still untested (blocked on the cookie bug above)
+- [ ] `LoginServiceHandler`: login success, wrong password, unknown user, empty fields; refresh with valid / revoked / refresh-scope / non-refresh-scope tokens
+- [ ] `UserServiceHandler` authorization: `Get` (self / admin / other / anonymous), `List` and `ResetPassword` (admin vs. non-admin), reset revokes sessions
+- [ ] `JWTService` negative cases: expired, not-yet-valid, wrong issuer / audience, unknown or missing `kid`, tampered signature, JTI belonging to another user
+- [ ] `KeyData` PEM marshal / unmarshal round trip; `KeyManager` loads keys on `AfterInitialize`, reuses the signing key, errors on an unknown `kid`
+- [ ] WebSocket `authenticate`: user token accepted, bad token rejected, refresh-scope token rejected
+- [ ] Playwright: logout, session survives token expiry via refresh, revoked session is logged out, WebSocket connects as the logged-in user
+
 **Unknowns**
 
+- Is open sign-up (`UserService.Create` is unauthenticated) intended, or should accounts be invite / admin-created only? — TBD
+- Where tokens live on the client: JS-readable cookie, `HttpOnly` cookie set by the server, or memory + refresh cookie — TBD
+- HTTPS on a LAN server (self-signed, mDNS name, none)? Affects `Secure` cookies and WebSocket auth options — TBD
 - TBD
 
 ---
@@ -159,7 +202,6 @@ Conventions:
 - [ ] Characters linked to scene entities (`Entity.CharacterID`)
 - [ ] Remember the active scene across server restarts
 - [ ] Session concept: start / end a session, which scenes were played
-- [ ] Logout flow in the client (`src/lib/handlers/user.ts`)
 
 **Unknowns**
 
