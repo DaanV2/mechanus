@@ -105,6 +105,11 @@ npm run check       # svelte-check + tsc
 - **Tests**: Ginkgo + Gomega for Go unit/component tests. Playwright for integration/browser tests in `tests/`.
 - **Proto style**: follow Buf lint rules. Run `just proto-lint` before committing proto changes.
 
+## Git workflow
+
+- When working on a dedicated branch (i.e. not `main`), always commit your changes once the task is done — don't leave work uncommitted waiting for confirmation.
+- Still ask before committing directly on `main`, and never force-push.
+
 ## Current state & what needs work
 
 See `TODO.md` for the full backlog. High-priority gaps:
