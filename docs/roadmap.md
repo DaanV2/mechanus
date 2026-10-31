@@ -49,7 +49,7 @@ What exists: login (`LoginService.Login`) issues an RS512 JWT (1 h, `grant` / `s
 
 **Bugs**
 
-- [ ] `grpc.Authenticator.validateAndInject` panics (nil pointer) on any malformed, expired or badly signed bearer token: `JWTService.validate` returns a `nil` token on parse errors and the interceptor reads `token.Claims` without checking. Since the client never refreshes, every request panics once the 1 h token expires. Verified with a component test.
+- [x] `grpc.Authenticator.validateAndInject` panicked (nil pointer) on any malformed, expired or badly signed bearer token — now treated as an anonymous request
 - [ ] Screen WebSocket never authenticates browser users: browsers can't set an `Authorization` header on `new WebSocket(...)`, the client's `WebsocketHandler.getToken()` is never used, and the server doesn't read the cookie — so every browser connection falls through to the unauthenticated `Device` path.
 - [ ] Cookie fallback in `grpc.getJwtValue` never matches: the client stores `encodeURIComponent("Bearer <jwt>")`, so the cookie value starts with `Bearer%20`, not `Bearer `.
 - [ ] `Refresh` accepts any `scope: "*"` access token and reuses the same JTI, so a leaked token can be renewed forever; no `scope: "refresh"` token is ever issued (the client's `refresh-token` cookie key is unused).
@@ -75,7 +75,7 @@ What exists: login (`LoginService.Login`) issues an RS512 JWT (1 h, `grant` / `s
 
 **Tests**
 
-- [ ] `grpc.Authenticator`: no header, valid token, malformed / expired / revoked token, refresh-scope token, cookie fallback
+- [~] `grpc.Authenticator`: no header, valid, malformed, expired, tampered, revoked and refresh-scope tokens are covered; cookie fallback is still untested (blocked on the cookie bug above)
 - [ ] `LoginServiceHandler`: login success, wrong password, unknown user, empty fields; refresh with valid / revoked / refresh-scope / non-refresh-scope tokens
 - [ ] `UserServiceHandler` authorization: `Get` (self / admin / other / anonymous), `List` and `ResetPassword` (admin vs. non-admin), reset revokes sessions
 - [ ] `JWTService` negative cases: expired, not-yet-valid, wrong issuer / audience, unknown or missing `kid`, tampered signature, JTI belonging to another user
