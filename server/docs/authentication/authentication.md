@@ -4,7 +4,7 @@
 
 When users are logged in, JWT with an coupled JTI are created. These should be valid for an hour and can be used to refresh for a new one.
 
-See [JWT service](server\pkg\authentication\jwt_service.go)
+See [JWT service](../../infrastructure/authentication/jwt_service.go)
 
 ### JWT Fields
 
@@ -39,4 +39,4 @@ Devices are not allowed to use JWT, but will receive support for API keys and ba
 
 The server knowns some pre built in roles that help manage permissions:
 
-See [Roles](server\pkg\authentication\roles\role.go)
+See [Roles](../../engine/authentication/roles/role.go)

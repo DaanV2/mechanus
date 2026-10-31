@@ -85,4 +85,4 @@ DATABASE_DSN="mechanus:secret@tcp(localhost:3306)/mechanus?charset=utf8mb4&parse
 
 ## Key-value storage
 
-Mechanus also uses key-value storage for things like certificates. This can be configured separately — see `server/pkg/storage` for details. Backends: local file storage, or a table in the relational database.
+Mechanus also uses key-value storage for things like certificates. This can be configured separately — see `server/infrastructure/storage` for details. Backends: local file storage, or a table in the relational database.

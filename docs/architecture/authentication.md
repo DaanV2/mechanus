@@ -1,6 +1,6 @@
 # Authentication
 
-Mechanus uses JWT (JSON Web Tokens) for user authentication, signed with RSA-512 keys managed by the server. Device clients authenticate with API keys instead.
+Mechanus uses JWT (JSON Web Tokens) for user authentication. Tokens are signed with server-managed RSA-2048 keys using the RS512 algorithm (RSA + SHA-512). Device clients are intended to authenticate with API keys instead, but that path is not implemented yet — see "Device authentication" below.
 
 ## JWT flow
 
@@ -11,7 +11,7 @@ Client                            Server
   │                                 │
   │                                 │  verify password hash
   │                                 │  get or create JTI (JWT ID) for user
-  │                                 │  sign JWT with RSA-512 private key
+  │                                 │  sign JWT with RSA-2048 private key (RS512)
   │                                 │
   │◄──────── JWT token ─────────────│
   │                                 │
@@ -62,12 +62,7 @@ On validation, after the signature and expiry checks pass, the server fetches th
 
 ## Device authentication
 
-Devices (e.g. a TV running the screen client) authenticate with an API key rather than a user JWT. The device ID is passed as:
-
-- `X-Device-ID` HTTP header, or
-- `deviceid` query parameter
-
-on the WebSocket upgrade request. The server uses this to identify and assign the device to a screen.
+Devices (e.g. a TV running the screen client) are meant to authenticate with an API key rather than a user JWT. This is **not implemented yet**: `infrastructure/transport/websocket.WebsocketHandler.authenticate` currently treats any connection whose `Authorization` header is not a `Bearer <jwt>` as an unauthenticated device and assigns it the `Device` role without validating a token or device ID (see the `// TODO: check token for device and device id.` in that function). The `X-Device-ID` header and `deviceid` query parameter described in earlier drafts of this doc are not read by the server at all today. Track this gap via the "Device registration & management" item in `TODO.md`.
 
 ## Token validation summary
 
