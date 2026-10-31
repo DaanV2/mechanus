@@ -2,7 +2,7 @@
 
 Mechanus is a server-driven UI system for local TTRPG (tabletop RPG) setups. A Go server manages all game state and pushes it to browser clients (GM dashboard, player screens, TV/table battle map display) over ConnectRPC (gRPC) and WebSocket.
 
-The product is built around **scenes**: a scene holds the entities present (players / NPCs / enemies), has variants (time of day, weather, ...) it can transition between, and instructs every device in the room — screens (battle map, scenery, info board, custom views), lights (Hue / Matter / Home Assistant), music (Spotify / iTunes) and custom devices (MQTT / event bus). Read `docs/architecture/scenes.md` before working on scenes, devices, or integrations; its "Status" section lists what is and isn't implemented.
+The product is built around **scenes**: a scene holds the entities present (players / NPCs / enemies), has variants (time of day, weather, ...) it can transition between, and instructs every device in the room — screens (battle map, scenery, info board, custom views), lights (Hue / Matter / Home Assistant), music (Spotify / iTunes) and custom devices (MQTT / event bus). Read `docs/architecture/scenes.md` before working on scenes, devices, or integrations; its "Status" section lists what is and isn't implemented. `docs/roadmap.md` lists the milestones and features still to build; keep it updated when a feature lands or an unknown (`TBD`) is decided.
 
 ## Repo layout
 
