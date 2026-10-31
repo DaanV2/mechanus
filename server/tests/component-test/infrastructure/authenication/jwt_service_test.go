@@ -11,7 +11,10 @@ import (
 )
 
 var _ = Describe("JwtService", func() {
-	const scope = "password"
+	const (
+		grant = authentication.GrantPassword
+		scope = authentication.ScopeAll
+	)
 
 	var (
 		db         *persistence.DB
@@ -37,12 +40,12 @@ var _ = Describe("JwtService", func() {
 			user := util_test.CreateUser()
 
 			// Create first JWT
-			token1, err := service.Create(ctx, user, scope)
+			token1, err := service.Create(ctx, user, grant, scope)
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(token1).ToNot(BeEmpty())
 
 			// Create second JWT, should reuse the same JTI
-			token2, err := service.Create(ctx, user, scope)
+			token2, err := service.Create(ctx, user, grant, scope)
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(token2).ToNot(BeEmpty())
 
@@ -64,7 +67,7 @@ var _ = Describe("JwtService", func() {
 		It("should create a new JTI if the previous one is revoked", func(ctx SpecContext) {
 			user := util_test.CreateUser()
 
-			token1, err := service.Create(ctx, user, scope)
+			token1, err := service.Create(ctx, user, grant, scope)
 			Expect(err).ShouldNot(HaveOccurred())
 			t1, err := service.Validate(ctx, token1)
 			Expect(err).ShouldNot(HaveOccurred())
@@ -76,7 +79,7 @@ var _ = Describe("JwtService", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 
 			// Create a new JWT, should have a new JTI
-			token2, err := service.Create(ctx, user, scope)
+			token2, err := service.Create(ctx, user, grant, scope)
 			Expect(err).ShouldNot(HaveOccurred())
 			t2, err := service.Validate(ctx, token2)
 			Expect(err).ShouldNot(HaveOccurred())
@@ -90,7 +93,7 @@ var _ = Describe("JwtService", func() {
 	Describe("Validate", func() {
 		It("should validate a valid JWT and return claims", func(ctx SpecContext) {
 			user := util_test.CreateUser()
-			token, err := service.Create(ctx, user, scope)
+			token, err := service.Create(ctx, user, grant, scope)
 			Expect(err).ShouldNot(HaveOccurred())
 
 			t, err := service.Validate(ctx, token)
@@ -98,12 +101,13 @@ var _ = Describe("JwtService", func() {
 			claims, ok := authentication.GetClaims(t.Claims)
 			Expect(ok).To(BeTrue())
 			Expect(claims.User.ID).To(Equal(user.ID))
+			Expect(claims.Grant).To(Equal(grant))
 			Expect(claims.Scope).To(Equal(scope))
 		})
 
 		It("should fail validation if the JTI is revoked", func(ctx SpecContext) {
 			user := util_test.CreateUser()
-			token, err := service.Create(ctx, user, scope)
+			token, err := service.Create(ctx, user, grant, scope)
 			Expect(err).ShouldNot(HaveOccurred())
 
 			t, err := service.Validate(ctx, token)
