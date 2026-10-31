@@ -14,6 +14,8 @@ import (
 var (
 	// ErrUserAlreadyExists is returned when attempting to create a user that already exists.
 	ErrUserAlreadyExists = errors.New("user already exists")
+	// ErrEmptyPassword is returned when attempting to set an empty password.
+	ErrEmptyPassword = errors.New("password cannot be empty")
 )
 
 // UserService provides operations for managing users in the application.
@@ -59,6 +61,13 @@ func (s *UserService) Update(ctx context.Context, user *models.User) error {
 
 // UpdatePassword will update the password field with the new password in the database
 func (s *UserService) UpdatePassword(ctx context.Context, id string, newPassword []byte) error {
+	if len(newPassword) == 0 {
+		return ErrEmptyPassword
+	}
+	if _, err := s.repo.Get(ctx, id); err != nil {
+		return fmt.Errorf("error retrieving user to update password: %w", err)
+	}
+
 	user := &models.User{
 		ID:           id,
 		PasswordHash: newPassword,
