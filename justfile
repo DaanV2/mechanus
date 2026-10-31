@@ -1,3 +1,6 @@
+mod client
+mod server
+
 default:
   just --list
 
@@ -21,7 +24,7 @@ image:
   docker build . -t mechanus
 
 # Build the server binary
-server:
+binary:
   go build -o mechanus ./server/main.go
 
 dev:
