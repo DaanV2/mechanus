@@ -59,7 +59,7 @@ var _ = Describe("CampaignServiceHandler", func() {
 		resp, err := handler.List(ctx, connect.NewRequest(&campaignsv1.ListCampaignsRequest{}))
 		Expect(err).ToNot(HaveOccurred())
 
-		ids := []string{}
+		ids := make([]string, 0, len(resp.Msg.GetCampaigns()))
 		for _, c := range resp.Msg.GetCampaigns() {
 			ids = append(ids, c.GetId())
 		}
