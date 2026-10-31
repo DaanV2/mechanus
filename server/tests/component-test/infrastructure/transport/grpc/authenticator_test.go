@@ -2,6 +2,7 @@ package grpc_test
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	"connectrpc.com/connect"
@@ -95,13 +96,14 @@ var _ = Describe("Authenticator", func() {
 
 	It("treats a tampered token as anonymous", func(ctx SpecContext) {
 		token := createToken(ctx, authentication.ScopeAll)
-		// Flip the last character of the signature
-		last := token[len(token)-1]
+		// Change a character in the middle of the signature. Not the last one: its low bits are base64 padding,
+		// so changing it can decode to the same signature bytes.
+		i := strings.LastIndex(token, ".") + 10
 		replacement := byte('A')
-		if last == 'A' {
+		if token[i] == 'A' {
 			replacement = 'B'
 		}
-		token = token[:len(token)-1] + string(replacement)
+		token = token[:i] + string(replacement) + token[i+1:]
 
 		call(ctx, "Bearer "+token)
 
