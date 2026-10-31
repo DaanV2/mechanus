@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 import { Campaign } from "../../lib/api/campaigns";
 import { createUserAndLogin } from "../../lib/api/client";
 import { User } from "../../lib/users/create";
-import { loginViaUI } from "../../lib/users/login";
+import { login } from "../../lib/users/login";
 
 test.describe("campaigns", { tag: ["@campaigns"] }, () => {
   test("a user can create a campaign and view its details", async ({
@@ -14,7 +14,7 @@ test.describe("campaigns", { tag: ["@campaigns"] }, () => {
     await createUserAndLogin(request, user);
 
     await test.step("by logging in and opening the campaigns page", async () => {
-      await loginViaUI(page, user);
+      await login(page, user);
       await page.goto("/campaigns/");
       await expect(page).toHaveTitle("Campaigns");
       await expect(page.getByText("You are not in any campaigns yet.")).toBeVisible();
@@ -48,7 +48,7 @@ test.describe("campaigns", { tag: ["@campaigns"] }, () => {
     const own = await Campaign.create(request, await createUserAndLogin(request, user));
     const notOwn = await Campaign.create(request, await createUserAndLogin(request, other));
 
-    await loginViaUI(page, user);
+    await login(page, user);
     await page.goto("/campaigns/");
 
     await expect(page.getByRole("heading", { name: "Your campaigns" })).toBeVisible();
@@ -65,7 +65,7 @@ test.describe("campaigns", { tag: ["@campaigns"] }, () => {
     await createUserAndLogin(request, user);
     const notOwn = await Campaign.create(request, await createUserAndLogin(request, other));
 
-    await loginViaUI(page, user);
+    await login(page, user);
     await page.goto(`/campaigns/view/?id=${notOwn.id}`);
 
     await expect(page.getByText("Campaign not found")).toBeVisible();
@@ -81,7 +81,7 @@ test.describe("campaigns", { tag: ["@campaigns"] }, () => {
     const campaignA = await Campaign.create(request, await createUserAndLogin(request, userA));
     const campaignB = await Campaign.create(request, await createUserAndLogin(request, userB));
 
-    await loginViaUI(page, User.createAdmin());
+    await login(page, User.createAdmin());
     await page.goto("/campaigns/");
 
     await test.step("by seeing campaigns of other users in the list", async () => {
