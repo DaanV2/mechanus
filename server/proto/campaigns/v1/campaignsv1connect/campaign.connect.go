@@ -6,8 +6,11 @@ package campaignsv1connect
 
 import (
 	connect "connectrpc.com/connect"
-	_ "github.com/DaanV2/mechanus/server/proto/campaigns/v1"
+	context "context"
+	errors "errors"
+	v1 "github.com/DaanV2/mechanus/server/proto/campaigns/v1"
 	http "net/http"
+	strings "strings"
 )
 
 // This is a compile-time assertion to ensure that this generated file and the connect package are
@@ -22,8 +25,30 @@ const (
 	CampaignServiceName = "campaigns.v1.CampaignService"
 )
 
+// These constants are the fully-qualified names of the RPCs defined in this package. They're
+// exposed at runtime as Spec.Procedure and as the final two segments of the HTTP route.
+//
+// Note that these are different from the fully-qualified method names used by
+// google.golang.org/protobuf/reflect/protoreflect. To convert from these constants to
+// reflection-formatted method names, remove the leading slash and convert the remaining slash to a
+// period.
+const (
+	// CampaignServiceCreateProcedure is the fully-qualified name of the CampaignService's Create RPC.
+	CampaignServiceCreateProcedure = "/campaigns.v1.CampaignService/Create"
+	// CampaignServiceGetProcedure is the fully-qualified name of the CampaignService's Get RPC.
+	CampaignServiceGetProcedure = "/campaigns.v1.CampaignService/Get"
+	// CampaignServiceListProcedure is the fully-qualified name of the CampaignService's List RPC.
+	CampaignServiceListProcedure = "/campaigns.v1.CampaignService/List"
+)
+
 // CampaignServiceClient is a client for the campaigns.v1.CampaignService service.
 type CampaignServiceClient interface {
+	// Create a new campaign, the calling user becomes a member of it
+	Create(context.Context, *connect.Request[v1.CreateCampaignRequest]) (*connect.Response[v1.CreateCampaignResponse], error)
+	// Get a single campaign, only available to admins and members of the campaign
+	Get(context.Context, *connect.Request[v1.GetCampaignRequest]) (*connect.Response[v1.GetCampaignResponse], error)
+	// List the campaigns, admins see all campaigns, other users only the campaigns they are in
+	List(context.Context, *connect.Request[v1.ListCampaignsRequest]) (*connect.Response[v1.ListCampaignsResponse], error)
 }
 
 // NewCampaignServiceClient constructs a client for the campaigns.v1.CampaignService service. By
@@ -34,15 +59,60 @@ type CampaignServiceClient interface {
 // The URL supplied here should be the base URL for the Connect or gRPC server (for example,
 // http://api.acme.com or https://acme.com/grpc).
 func NewCampaignServiceClient(httpClient connect.HTTPClient, baseURL string, opts ...connect.ClientOption) CampaignServiceClient {
-	return &campaignServiceClient{}
+	baseURL = strings.TrimRight(baseURL, "/")
+	campaignServiceMethods := v1.File_campaigns_v1_campaign_proto.Services().ByName("CampaignService").Methods()
+	return &campaignServiceClient{
+		create: connect.NewClient[v1.CreateCampaignRequest, v1.CreateCampaignResponse](
+			httpClient,
+			baseURL+CampaignServiceCreateProcedure,
+			connect.WithSchema(campaignServiceMethods.ByName("Create")),
+			connect.WithClientOptions(opts...),
+		),
+		get: connect.NewClient[v1.GetCampaignRequest, v1.GetCampaignResponse](
+			httpClient,
+			baseURL+CampaignServiceGetProcedure,
+			connect.WithSchema(campaignServiceMethods.ByName("Get")),
+			connect.WithClientOptions(opts...),
+		),
+		list: connect.NewClient[v1.ListCampaignsRequest, v1.ListCampaignsResponse](
+			httpClient,
+			baseURL+CampaignServiceListProcedure,
+			connect.WithSchema(campaignServiceMethods.ByName("List")),
+			connect.WithClientOptions(opts...),
+		),
+	}
 }
 
 // campaignServiceClient implements CampaignServiceClient.
 type campaignServiceClient struct {
+	create *connect.Client[v1.CreateCampaignRequest, v1.CreateCampaignResponse]
+	get    *connect.Client[v1.GetCampaignRequest, v1.GetCampaignResponse]
+	list   *connect.Client[v1.ListCampaignsRequest, v1.ListCampaignsResponse]
+}
+
+// Create calls campaigns.v1.CampaignService.Create.
+func (c *campaignServiceClient) Create(ctx context.Context, req *connect.Request[v1.CreateCampaignRequest]) (*connect.Response[v1.CreateCampaignResponse], error) {
+	return c.create.CallUnary(ctx, req)
+}
+
+// Get calls campaigns.v1.CampaignService.Get.
+func (c *campaignServiceClient) Get(ctx context.Context, req *connect.Request[v1.GetCampaignRequest]) (*connect.Response[v1.GetCampaignResponse], error) {
+	return c.get.CallUnary(ctx, req)
+}
+
+// List calls campaigns.v1.CampaignService.List.
+func (c *campaignServiceClient) List(ctx context.Context, req *connect.Request[v1.ListCampaignsRequest]) (*connect.Response[v1.ListCampaignsResponse], error) {
+	return c.list.CallUnary(ctx, req)
 }
 
 // CampaignServiceHandler is an implementation of the campaigns.v1.CampaignService service.
 type CampaignServiceHandler interface {
+	// Create a new campaign, the calling user becomes a member of it
+	Create(context.Context, *connect.Request[v1.CreateCampaignRequest]) (*connect.Response[v1.CreateCampaignResponse], error)
+	// Get a single campaign, only available to admins and members of the campaign
+	Get(context.Context, *connect.Request[v1.GetCampaignRequest]) (*connect.Response[v1.GetCampaignResponse], error)
+	// List the campaigns, admins see all campaigns, other users only the campaigns they are in
+	List(context.Context, *connect.Request[v1.ListCampaignsRequest]) (*connect.Response[v1.ListCampaignsResponse], error)
 }
 
 // NewCampaignServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -51,8 +121,33 @@ type CampaignServiceHandler interface {
 // By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
 // and JSON codecs. They also support gzip compression.
 func NewCampaignServiceHandler(svc CampaignServiceHandler, opts ...connect.HandlerOption) (string, http.Handler) {
+	campaignServiceMethods := v1.File_campaigns_v1_campaign_proto.Services().ByName("CampaignService").Methods()
+	campaignServiceCreateHandler := connect.NewUnaryHandler(
+		CampaignServiceCreateProcedure,
+		svc.Create,
+		connect.WithSchema(campaignServiceMethods.ByName("Create")),
+		connect.WithHandlerOptions(opts...),
+	)
+	campaignServiceGetHandler := connect.NewUnaryHandler(
+		CampaignServiceGetProcedure,
+		svc.Get,
+		connect.WithSchema(campaignServiceMethods.ByName("Get")),
+		connect.WithHandlerOptions(opts...),
+	)
+	campaignServiceListHandler := connect.NewUnaryHandler(
+		CampaignServiceListProcedure,
+		svc.List,
+		connect.WithSchema(campaignServiceMethods.ByName("List")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/campaigns.v1.CampaignService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
+		case CampaignServiceCreateProcedure:
+			campaignServiceCreateHandler.ServeHTTP(w, r)
+		case CampaignServiceGetProcedure:
+			campaignServiceGetHandler.ServeHTTP(w, r)
+		case CampaignServiceListProcedure:
+			campaignServiceListHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -61,3 +156,15 @@ func NewCampaignServiceHandler(svc CampaignServiceHandler, opts ...connect.Handl
 
 // UnimplementedCampaignServiceHandler returns CodeUnimplemented from all methods.
 type UnimplementedCampaignServiceHandler struct{}
+
+func (UnimplementedCampaignServiceHandler) Create(context.Context, *connect.Request[v1.CreateCampaignRequest]) (*connect.Response[v1.CreateCampaignResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("campaigns.v1.CampaignService.Create is not implemented"))
+}
+
+func (UnimplementedCampaignServiceHandler) Get(context.Context, *connect.Request[v1.GetCampaignRequest]) (*connect.Response[v1.GetCampaignResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("campaigns.v1.CampaignService.Get is not implemented"))
+}
+
+func (UnimplementedCampaignServiceHandler) List(context.Context, *connect.Request[v1.ListCampaignsRequest]) (*connect.Response[v1.ListCampaignsResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("campaigns.v1.CampaignService.List is not implemented"))
+}

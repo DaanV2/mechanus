@@ -100,6 +100,13 @@ func NewDB(opts ...Option) (*DB, error) {
 		return nil, fmt.Errorf("failed to get database connection: %w", err)
 	}
 
+	// Every connection to "file::memory:" is its own empty database, so the pool must hold exactly one connection that is never closed
+	if config.Type == InMemory {
+		config.MaxIdleConns = 1
+		config.MaxOpenConns = 1
+		config.ConnMaxLifetime = 0
+	}
+
 	log.WithPrefix("db").Debug("applying database settings", "max idle conns", config.MaxIdleConns, "max open conns", config.MaxOpenConns, "conn max lifetime", config.ConnMaxLifetime)
 	sqlDB.SetMaxIdleConns(config.MaxIdleConns)
 	sqlDB.SetMaxOpenConns(config.MaxOpenConns)

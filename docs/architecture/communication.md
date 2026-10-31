@@ -10,15 +10,15 @@ Used for request/response flows: login, user management, campaign CRUD.
 
 Current services:
 
-| Service          | Proto package  | Purpose                         |
-| ---------------- | -------------- | ------------------------------- |
-| `LoginService`   | `users/v1`     | Authenticate and issue JWTs     |
-| `UserService`    | `users/v1`     | User CRUD, admin list / password reset |
-| _(campaigns/v1)_ | `campaigns/v1` | Campaign management _(planned)_ |
+| Service           | Proto package  | Purpose                                                                     |
+| ----------------- | -------------- | --------------------------------------------------------------------------- |
+| `LoginService`    | `users/v1`     | Authenticate and issue JWTs                                                 |
+| `UserService`     | `users/v1`     | User CRUD, admin list / password reset                                      |
+| `CampaignService` | `campaigns/v1` | Create, get and list campaigns (admins see all, other users only their own) |
 
 ConnectRPC is called from the browser using either the Connect protocol or gRPC-web over HTTP/2. A gRPC reflection endpoint and gRPC health endpoint are available for tooling and infrastructure probes.
 
-**Client:** `client/src/lib/api/client.ts` sets up the transport; service-specific files (`users_v1.ts`, etc.) wrap the generated stubs.
+**Client:** `client/src/lib/api/client.ts` sets up the transport; service-specific files (`users_v1.ts`, `campaigns_v1.ts`, etc.) wrap the generated stubs.
 
 **Server:** `infrastructure/transport/routers` assembles the route table. gRPC interceptors (logging, auth, telemetry) are wired in `infrastructure/transport/grpc`.
 
