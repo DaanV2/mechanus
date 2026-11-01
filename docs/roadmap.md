@@ -81,7 +81,7 @@ What exists: login (`LoginService.Login`) issues an RS512 JWT (1 h, `grant` / `s
 - [ ] `UserServiceHandler` authorization: `Get` (self / admin / other / anonymous), `List` and `ResetPassword` (admin vs. non-admin), reset revokes sessions
 - [ ] `JWTService` negative cases: expired, not-yet-valid, wrong issuer / audience, unknown or missing `kid`, tampered signature, JTI belonging to another user
 - [ ] `KeyData` PEM marshal / unmarshal round trip; `KeyManager` loads keys on `AfterInitialize`, reuses the signing key, errors on an unknown `kid`
-- [ ] WebSocket `authenticate`: user token accepted, bad token rejected, refresh-scope token rejected
+- [ ] WebSocket `authenticate`: user token accepted, bad token rejected (not downgraded to anonymous), refresh-scope token rejected, route policies return 401 / 403, device ID / type read from header and query fallback
 - [ ] Playwright: logout, session survives token expiry via refresh, revoked session is logged out, WebSocket connects as the logged-in user
 
 **Unknowns**
@@ -103,8 +103,10 @@ What exists: login (`LoginService.Login`) issues an RS512 JWT (1 h, `grant` / `s
 - [x] Screen state proto: `ScreenState` (view, overlays, layers, entities, grid, camera) is sent on initial setup and via `ScreenHandler.SetState`; entity / camera delta messages defined
 - [ ] Screen driver: turn a `ScreenInstruction` + scene entities into screen state and push it over the WebSocket
 - [ ] Route screen WebSocket connections by device ID (one screen per screen device)
+- [ ] Per-route auth policies (`anonymous`, `device`, `user`, `role:<role>`): authentication is optional at connect, enforced by the route; invalid credentials are rejected instead of treated as anonymous — see [authentication.md](./architecture/authentication.md#device-authentication)
+- [ ] Device identity: read `X-Device-ID` / `X-Device-Type` (query fallback `deviceId` / `deviceType` for browsers) and store them in the connection's session info (`screens.ConnectionInfo`, logger / trace attributes)
 - [ ] Device registration: a device identifies itself, gets a stable ID, and can be bound to a target
-- [ ] Device authentication (API key / pairing) — currently any non-JWT connection is accepted
+- [ ] Device pairing: 4-digit single-use code requested by the device, confirmed by an admin, rate-limited; issues a revocable device token (`Authorization: Device <token>`) — currently any non-JWT connection is accepted
 - [ ] Scene control API (`scenes/v1` proto): list scenes, activate, switch variant, get active state
 - [ ] Asset serving for scene assets (maps, images, video)
 - [ ] Battle map format v0 — just enough to render a background and grid
@@ -115,13 +117,16 @@ What exists: login (`LoginService.Login`) issues an RS512 JWT (1 h, `grant` / `s
 - [ ] Layer system in `src/lib/2d` (background, grid, entities, overlays) and the render loop
 - [ ] Views: `battlemap` (background + grid), `scenery`, `splash`, `blank`
 - [ ] GM view v0: list scenes, activate one, switch variant
-- [ ] Device setup page: show device ID / pairing state
+- [ ] Device pairing page (`/devices/pair`): generates and persists the device ID, shows the 4-digit pairing code full screen, renews it on expiry, stores the device token once paired
+- [ ] Devices admin page (`/devices`): type in a pairing code + device name, list paired and connected devices (ID, type, name), revoke a device
 
 **Unknowns**
 
 - Battle map format: what goes in v0 (grid, walls, lighting, fog?) and how it is stored — TBD
 - Where assets live (file storage folder per campaign? content-addressed?) and how they are referenced from configs — TBD
-- Device pairing UX: code on the TV screen, QR code, or GM approves new devices? — TBD
+- ~~Device pairing UX~~ — decided: the device shows a 4-digit code, an admin types it in on the devices page
+- Device pairing transport (ConnectRPC server stream vs. WebSocket on an `anonymous` route), code lifetime, and device token format (JWT vs. opaque hashed token) — TBD
+- Allowed `X-Device-Type` values — TBD
 - Which room is active when there's more than one — TBD
 - TBD
 

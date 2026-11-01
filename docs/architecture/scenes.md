@@ -16,13 +16,13 @@ Scenes are the core of Mechanus. The GM prepares scenes, and activating one make
 
 Everything in this model is either **configuration** or **state**, and the two are kept in separate types and separate storage.
 
-|                 | Configuration                                                                 | State                                                                                   |
-| --------------- | ----------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| What            | What the GM prepared: scenes, variants, starting entities, rooms, devices     | What happened during play: active variant, revealed / removed / spawned entities, live tweaks |
-| Types           | `scenes.Config`, `scenes.Variant`, `scenes.Entity`, `devices.Room`, `devices.Device` | `scenes.State`, `scenes.EntityState`                                              |
-| Stored in       | **File storage** (app config folder)                                          | **Database** (key-value table)                                                          |
-| Written by      | The GM / tooling, outside of play. The server only reads it.                  | The server, when a scene is loaded and when it is exited                                |
-| Adapter         | `infrastructure/scenestore.ConfigStore`                                       | `infrastructure/scenestore.StateStore`                                                  |
+|            | Configuration                                                                        | State                                                                                         |
+| ---------- | ------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------- |
+| What       | What the GM prepared: scenes, variants, starting entities, rooms, devices            | What happened during play: active variant, revealed / removed / spawned entities, live tweaks |
+| Types      | `scenes.Config`, `scenes.Variant`, `scenes.Entity`, `devices.Room`, `devices.Device` | `scenes.State`, `scenes.EntityState`                                                          |
+| Stored in  | **File storage** (app config folder)                                                 | **Database** (key-value table)                                                                |
+| Written by | The GM / tooling, outside of play. The server only reads it.                         | The server, when a scene is loaded and when it is exited                                      |
+| Adapter    | `infrastructure/scenestore.ConfigStore`                                              | `infrastructure/scenestore.StateStore`                                                        |
 
 A **loaded scene** (`scenes.Scene`) is a `Config` plus its `State`. It computes the effective instructions and entities from both and never modifies the `Config`.
 
@@ -78,19 +78,19 @@ State only records what differs from or adds to the configuration. That keeps th
                                    (WebSocket)
 ```
 
-| Concept          | Kind   | What it is                                                                                                                                  | Code                               |
-| ---------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
-| **Scene config** | config | A place or moment in the game. Starting entities, base instructions, variants, default variant. Belongs to a campaign.                      | `engine/scenes.Config`             |
-| **Entity**       | config | Something present in the scene: `player`, `npc`, `enemy`, `object`. Can start hidden. Optionally links to a persisted character.            | `engine/scenes.Entity`             |
-| **Variant**      | config | An alternative state of a scene (night, rain, combat). Overrides base instructions per target. Has free-form tags (`time_of_day: night`).   | `engine/scenes.Variant`            |
-| **Instructions** | config | What every output should do, keyed by **target** per device kind (`Screens`, `Lights`, `Music`, `Custom`).                                  | `engine/scenes.Instructions`       |
-| **Target**       | config | A logical output name chosen by the GM (`table`, `wall`, `ambient`, `music`). Scenes only ever talk to targets, never to physical devices.  | map keys in `Instructions`         |
-| **Room**         | config | The physical setup. Lists devices and binds targets to them. The same scene can be played in a different room by changing only the bindings. | `engine/devices.Room`            |
-| **Device**       | config | A physical or virtual output with a `Kind` (`screen`, `light`, `music`, `custom`) and an `Integration` (`screen`, `hue`, `spotify`, `mqtt`, ...). | `engine/devices.Device`        |
-| **Scene state**  | state  | Active variant, per-entity status (hidden / removed), spawned entities, live instruction overrides.                                         | `engine/scenes.State`              |
-| **Scene**        | both   | A loaded scene: config + state. Computes effective instructions and present entities.                                                       | `engine/scenes.Scene`              |
-| **Transition**   | —      | What changes for the devices between two sets of instructions: full instructions, changes to send, released targets.                        | `engine/scenes.Transition`         |
-| **Driver**       | —      | Infrastructure adapter that delivers an instruction to one device of its integration.                                                       | `application.OutputDriver` (port)  |
+| Concept          | Kind   | What it is                                                                                                                                        | Code                              |
+| ---------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------- |
+| **Scene config** | config | A place or moment in the game. Starting entities, base instructions, variants, default variant. Belongs to a campaign.                            | `engine/scenes.Config`            |
+| **Entity**       | config | Something present in the scene: `player`, `npc`, `enemy`, `object`. Can start hidden. Optionally links to a persisted character.                  | `engine/scenes.Entity`            |
+| **Variant**      | config | An alternative state of a scene (night, rain, combat). Overrides base instructions per target. Has free-form tags (`time_of_day: night`).         | `engine/scenes.Variant`           |
+| **Instructions** | config | What every output should do, keyed by **target** per device kind (`Screens`, `Lights`, `Music`, `Custom`).                                        | `engine/scenes.Instructions`      |
+| **Target**       | config | A logical output name chosen by the GM (`table`, `wall`, `ambient`, `music`). Scenes only ever talk to targets, never to physical devices.        | map keys in `Instructions`        |
+| **Room**         | config | The physical setup. Lists devices and binds targets to them. The same scene can be played in a different room by changing only the bindings.      | `engine/devices.Room`             |
+| **Device**       | config | A physical or virtual output with a `Kind` (`screen`, `light`, `music`, `custom`) and an `Integration` (`screen`, `hue`, `spotify`, `mqtt`, ...). | `engine/devices.Device`           |
+| **Scene state**  | state  | Active variant, per-entity status (hidden / removed), spawned entities, live instruction overrides.                                               | `engine/scenes.State`             |
+| **Scene**        | both   | A loaded scene: config + state. Computes effective instructions and present entities.                                                             | `engine/scenes.Scene`             |
+| **Transition**   | —      | What changes for the devices between two sets of instructions: full instructions, changes to send, released targets.                              | `engine/scenes.Transition`        |
+| **Driver**       | —      | Infrastructure adapter that delivers an instruction to one device of its integration.                                                             | `application.OutputDriver` (port) |
 
 ### Why targets instead of devices
 
@@ -130,20 +130,20 @@ The config lists the entities present when the scene starts (`Entity.Hidden` = s
 
 `application.SceneService` owns the active scene and talks to the stores through ports:
 
-| Port               | Backed by    | Used for                                           |
-| ------------------ | ------------ | -------------------------------------------------- |
-| `SceneConfigStore` | file storage | `GetSceneConfig(sceneID)`                          |
-| `RoomConfigStore`  | file storage | `CurrentRoom()` — devices and target bindings      |
-| `SceneStateStore`  | database     | `LoadSceneState` / `SaveSceneState`                |
-| `OutputDriver`     | integrations | `Apply(device, instruction)`, one per integration  |
+| Port               | Backed by    | Used for                                          |
+| ------------------ | ------------ | ------------------------------------------------- |
+| `SceneConfigStore` | file storage | `GetSceneConfig(sceneID)`                         |
+| `RoomConfigStore`  | file storage | `CurrentRoom()` — devices and target bindings     |
+| `SceneStateStore`  | database     | `LoadSceneState` / `SaveSceneState`               |
+| `OutputDriver`     | integrations | `Apply(device, instruction)`, one per integration |
 
-| Method                        | Effect                                                                                                      |
-| ----------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| `Activate(sceneID, variantID)`| Load (see [Lifecycle](#lifecycle)). Same scene → only switches variant.                                     |
-| `SetVariant(variantID)`       | Switch variant of the active scene, clears live overrides.                                                  |
-| `Adjust(overrides)`           | Apply live overrides to the active scene.                                                                   |
-| `Exit()`                      | Save state, deactivate. Intended for `BeforeShutdown`.                                                      |
-| `Active()`                    | Active scene + variant.                                                                                     |
+| Method                         | Effect                                                                  |
+| ------------------------------ | ----------------------------------------------------------------------- |
+| `Activate(sceneID, variantID)` | Load (see [Lifecycle](#lifecycle)). Same scene → only switches variant. |
+| `SetVariant(variantID)`        | Switch variant of the active scene, clears live overrides.              |
+| `Adjust(overrides)`            | Apply live overrides to the active scene.                               |
+| `Exit()`                       | Save state, deactivate. Intended for `BeforeShutdown`.                  |
+| `Active()`                     | Active scene + variant.                                                 |
 
 Each change computes a transition and dispatches `Changes`: for every changed instruction, find the devices bound to its target with the matching kind and hand each to the driver registered for `device.Integration`. Device errors (including `ErrNoDriver`) are joined and returned; other devices are still instructed.
 
@@ -151,11 +151,11 @@ Each change computes a transition and dispatches `Changes`: for every changed in
 
 `infrastructure/scenestore` builds on the generic `infrastructure/storage` providers:
 
-| Data          | Provider                                           | Location                                   |
-| ------------- | -------------------------------------------------- | ------------------------------------------ |
-| Scene configs | `NamedFileStorage[*scenes.Config]("scenes")`       | `<app config dir>/scenes/<scene id>.dat`   |
-| Rooms         | `NamedFileStorage[*devices.Room]("rooms")`         | `<app config dir>/rooms/<room id>.dat`     |
-| Scene states  | `NamedDBStorage[*scenes.State](db, "scene")`       | `key_values` row `state/scene/<scene id>`  |
+| Data          | Provider                                     | Location                                  |
+| ------------- | -------------------------------------------- | ----------------------------------------- |
+| Scene configs | `NamedFileStorage[*scenes.Config]("scenes")` | `<app config dir>/scenes/<scene id>.dat`  |
+| Rooms         | `NamedFileStorage[*devices.Room]("rooms")`   | `<app config dir>/rooms/<room id>.dat`    |
+| Scene states  | `NamedDBStorage[*scenes.State](db, "scene")` | `key_values` row `state/scene/<scene id>` |
 
 Files and rows contain JSON. Scene and room IDs are used as file names, so `ConfigStore` only accepts `[A-Za-z0-9_-]` IDs and checks that a file's `id` matches its name.
 
@@ -236,7 +236,7 @@ server/
 - No proto / ConnectRPC service for GM scene control (activate, switch variant, adjust, reveal / spawn entities).
 - Screen routing by device: `WebsocketHandler` still takes a raw `screenId`.
 - Handling of `Transition.Released`.
-- Device registration / authentication (see [authentication.md](./authentication.md#device-authentication)).
+- Device registration, per-route auth policies, device identity headers and pairing (designed in [authentication.md](./authentication.md#device-authentication)).
 
 ## Extending
 

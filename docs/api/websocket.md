@@ -18,15 +18,23 @@ The connecting user ID or device ID.
 
 ## Authentication
 
-| Client type | Credential |
-| ----------- | ---------- |
-| Player / GM | `Authorization: Bearer <jwt>` header on the upgrade request |
-| Device      | **Not implemented yet.** Any connection without a `Bearer` JWT is currently accepted as an unauthenticated device — see [architecture/authentication.md](../architecture/authentication.md#device-authentication). |
+Optional when connecting, enforced per route (`anonymous`, `device`, `user`, `role:<role>`). A credential that is present but invalid is rejected with `401`. See [architecture/authentication.md](../architecture/authentication.md#device-authentication).
+
+| Client type      | Credential                                                         |
+| ---------------- | ------------------------------------------------------------------ |
+| Player / GM      | `Authorization: Bearer <jwt>`                                      |
+| Paired device    | `Authorization: Device <token>`, token issued by pairing — planned |
+| Anonymous device | None; only allowed on `anonymous` routes (pairing) — planned       |
+
+Today only `Bearer` is implemented; any other connection is accepted as an unauthenticated device.
 
 ## Headers
 
-| Header            | Description                                                                           |
-| ----------------- | --------------------------------------------------------------------------------------- |
-| `Authorization`   | `Bearer <jwt>` for player/GM connections — the only header currently read by the server  |
-| `X-Connection-ID` | Planned: a UUID for tracking/telemetry per connection — not yet read by the server       |
-| `X-Device-ID`     | Planned: device identifier for hardware screen clients — not yet read by the server      |
+Browsers cannot set headers on `new WebSocket(...)`, so browser clients use the query parameter fallback; the header wins when both are present.
+
+| Header            | Query fallback | Description                                                                        |
+| ----------------- | -------------- | ---------------------------------------------------------------------------------- |
+| `Authorization`   | TBD            | `Bearer <jwt>` or `Device <token>` — only `Bearer` is read today                   |
+| `X-Device-ID`     | `deviceId`     | Planned: stable device ID, stored in the connection's session info                 |
+| `X-Device-Type`   | `deviceType`   | Planned: kind of client (`screen`, `tablet`, ...), stored in the session info      |
+| `X-Connection-ID` | —              | Planned: a UUID for tracking/telemetry per connection — not yet read by the server |

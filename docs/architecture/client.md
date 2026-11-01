@@ -34,7 +34,7 @@ Proto-generated TypeScript types in `src/proto/` are shared between both channel
 
 ## Authentication
 
-JWTs issued by the server are stored client-side and attached to ConnectRPC requests. For device connections an API key is used instead, passed as the `X-Device-ID` header or `deviceid` query parameter. See [authentication.md](./authentication.md).
+JWTs issued by the server are stored client-side and attached to ConnectRPC requests. Devices (planned) generate and persist a device ID, send it with their device type as `deviceId` / `deviceType` query parameters on the WebSocket (browsers can't set `X-Device-ID` / `X-Device-Type` headers there), and get a device token by pairing: the device page `/devices/pair` shows a 4-digit code that an admin types in on `/devices`. See [authentication.md](./authentication.md#device-authentication).
 
 ## Build toolchain
 
