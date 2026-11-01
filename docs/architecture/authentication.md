@@ -63,7 +63,7 @@ On validation, after the signature and expiry checks pass, the server fetches th
 
 ## Device authentication
 
-> **Status**: design only. Today `infrastructure/transport/websocket.WebsocketHandler.authenticate` accepts any connection whose `Authorization` header is not a `Bearer <jwt>` as an unauthenticated device with the `Device` role, without reading a device ID, device type or token (see the `// TODO: check token for device and device id.` in that function). Everything below describes the intended behaviour; [roadmap M1](../roadmap.md#m1--first-scene-on-the-table) tracks the work.
+> **Status**: design only. Today `infrastructure/transport/websocket.WebsocketHandler.authenticate` accepts any connection without a user JWT (from the `Authorization` header, the `mechanus.bearer.<jwt>` subprotocol or the `access-token` cookie) as an unauthenticated device with the `Device` role, without reading a device ID, device type or token (see the `// TODO: check token for device and device id.` in that function). Everything below describes the intended behaviour; [roadmap M1](../roadmap.md#m1--first-scene-on-the-table) tracks the work.
 
 ### Optional authentication, enforced per route
 
@@ -71,7 +71,7 @@ Authentication on the WebSocket (and on device-facing ConnectRPC routes) is **op
 
 | Identity         | Resolved from                                              | Roles            |
 | ---------------- | ---------------------------------------------------------- | ---------------- |
-| User             | `Authorization: Bearer <jwt>` (user JWT, `scope: "*"`)     | the user's roles |
+| User             | `Authorization: Bearer <jwt>` (user JWT, `scope: "*"`); browsers use the `mechanus.bearer.<jwt>` subprotocol or the `access-token` cookie, see [communication.md](./communication.md#browser-credentials) | the user's roles |
 | Paired device    | `Authorization: Device <device token>` (issued by pairing) | `device`         |
 | Anonymous device | no credential, only the device identity headers            | none             |
 

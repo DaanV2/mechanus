@@ -3,7 +3,6 @@ package websocket
 import (
 	"errors"
 	"net/http"
-	"strings"
 
 	cwebsocket "github.com/coder/websocket"
 
@@ -41,7 +40,11 @@ func NewWebsocketHandler(handler *screens.ScreenManager, jwt_authenticator *auth
 }
 
 func (handler *WebsocketHandler) acceptOptions() *cwebsocket.AcceptOptions {
-	return nil // TODO: Fill in options connected via config.
+	// TODO: Fill in options connected via config.
+	return &cwebsocket.AcceptOptions{
+		// A browser that offers subprotocols (to pass its token) fails the connection unless the server selects one.
+		Subprotocols: []string{authentication.WebsocketSubprotocol},
+	}
 }
 
 // ServeHTTP implements http.Handler.
@@ -54,6 +57,19 @@ func (handler *WebsocketHandler) ServeHTTP(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
+	logger, connCtx := handler.logger.
+		With("id", id, "screen", screenid).
+		FromUpdate(r.Context())
+	r = r.WithContext(connCtx)
+
+	// Authenticate before looking up the screen, so unauthenticated requests can't probe which screens exist
+	auth, err := handler.authenticate(r)
+	if err != nil {
+		http.Error(w, "Could not authenticate: "+err.Error(), http.StatusUnauthorized)
+
+		return
+	}
+
 	screenHandler, ok := handler.screenManager.Get(screenid)
 	if !ok {
 		http.Error(w, "Screen not found", http.StatusNotFound)
@@ -62,17 +78,6 @@ func (handler *WebsocketHandler) ServeHTTP(w http.ResponseWriter, r *http.Reques
 	}
 
 	//TODO: check that screenHandler is allowed to be access by this requester
-	logger, connCtx := handler.logger.
-		With("id", id, "screen", screenid).
-		FromUpdate(r.Context())
-	r = r.WithContext(connCtx)
-
-	auth, err := handler.authenticate(r)
-	if err != nil {
-		http.Error(w, "Could not authenticate: "+err.Error(), http.StatusUnauthorized)
-
-		return
-	}
 
 	conn, err := cwebsocket.Accept(w, r, handler.acceptOptions())
 	if err != nil {
@@ -89,11 +94,9 @@ func (handler *WebsocketHandler) ServeHTTP(w http.ResponseWriter, r *http.Reques
 }
 
 func (handler *WebsocketHandler) authenticate(r *http.Request) (*screens.ConnectionInfo, error) {
-	token := r.Header.Get("Authorization")
-
 	// Bearer token are only supported for users for now.
-	if after, ok := strings.CutPrefix(token, "Bearer "); ok {
-		token = after
+	// Browsers can't set the Authorization header, so they pass it as a subprotocol or cookie instead.
+	if token := authentication.BearerFromHeaders(r.Header); token != "" {
 		t, err := handler.jwt_authenticator.Validate(r.Context(), token)
 		if err != nil {
 			handler.logger.From(r.Context()).Error("Could not validate JWT", "error", err)
@@ -121,7 +124,7 @@ func (handler *WebsocketHandler) authenticate(r *http.Request) (*screens.Connect
 	}
 
 	return &screens.ConnectionInfo{
-		Token: token, // TODO: check token for device and device id.
+		Token: r.Header.Get("Authorization"), // TODO: check token for device and device id.
 		ID:    r.PathValue("id"),
 		Roles: []string{roles.Device.String()},
 		Type:  devices.DeviceTypeDevice,

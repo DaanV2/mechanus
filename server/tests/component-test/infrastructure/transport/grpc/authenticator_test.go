@@ -2,6 +2,7 @@ package grpc_test
 
 import (
 	"context"
+	"net/url"
 	"strings"
 	"time"
 
@@ -123,6 +124,17 @@ var _ = Describe("Authenticator", func() {
 
 		Expect(jwtErr).ShouldNot(HaveOccurred())
 		Expect(jwt.IsAuthenicated()).To(BeFalse())
+	})
+
+	It("falls back to the url-encoded access token cookie", func(ctx SpecContext) {
+		req := connect.NewRequest(&usersv1.ListUsersRequest{})
+		req.Header().Set("Cookie", authentication.AccessTokenCookie+"="+url.PathEscape("Bearer "+createToken(ctx, authentication.ScopeAll)))
+
+		_, _ = handler(ctx, req)
+
+		Expect(called).To(BeTrue())
+		Expect(jwtErr).ShouldNot(HaveOccurred())
+		Expect(jwt.IsAuthenicated()).To(BeTrue())
 	})
 
 	It("does not authenticate a refresh-only token", func(ctx SpecContext) {

@@ -9,6 +9,10 @@ import {
 import { ServerMessagesSchema, type ServerMessage } from '../../proto/screens/v1/server_pb';
 import { ServerEventHandler } from './server-events';
 
+// Subprotocols negotiated with the screen WebSocket, must match the server's authentication package.
+const SUBPROTOCOL = 'mechanus.v1';
+const BEARER_SUBPROTOCOL_PREFIX = 'mechanus.bearer.';
+
 export class WebsocketHandler {
   readonly screenid: string;
   readonly id: string;
@@ -22,13 +26,24 @@ export class WebsocketHandler {
     this.id = id;
     this.token = token;
     const url = server_websocket_url() + `/api/v1/screen/${this.screenid}/${this.id}`;
-    this.socket = new WebSocket(url);
+    this.socket = new WebSocket(url, this.subprotocols());
     console.log('opening websocket on', url);
     this.socket.addEventListener('message', this._received.bind(this));
   }
 
   getToken() {
     return this.token ?? Cookie.get('access-token');
+  }
+
+  /**
+   * Browsers can't set an Authorization header on `new WebSocket(...)`, so the bearer token is passed as a
+   * subprotocol instead. The server always selects {@link SUBPROTOCOL}, never echoing the token back.
+   */
+  private subprotocols(): string[] | undefined {
+    const token = this.getToken()?.replace(/^Bearer /, '');
+    if (!token) return undefined;
+
+    return [SUBPROTOCOL, BEARER_SUBPROTOCOL_PREFIX + token];
   }
 
   addEventListener<K extends keyof WebSocketEventMap>(
