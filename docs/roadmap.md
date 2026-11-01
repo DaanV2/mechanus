@@ -75,7 +75,7 @@ Done: per-login sessions (one JTI each) with an RS512 access token (1 h) and a `
 - [x] Screen state proto (`ScreenState`: view, overlays, layers, entities, grid, camera) sent on initial setup and via `ScreenHandler.SetState`; entity / camera delta messages defined
 - [~] Screen driver (`infrastructure/outputs/screen`): view, overlays and asset URL are pushed; entities, grid and layers wait on the battle map format
 - [x] Screen WebSocket connections routed by device ID
-- [~] Device identity from `X-Device-ID` / `X-Device-Type` (query fallback `deviceId` / `deviceType`) stored in `screens.ConnectionInfo` and logs; not yet on trace spans
+- [x] Device identity from `X-Device-ID` / `X-Device-Type` (query fallback `deviceId` / `deviceType`) stored in `screens.ConnectionInfo`, logs and the connection's trace span (`device.id`, `device.type`, `screen.id`)
 - [x] Scene control API (`scenes/v1`): list, activate, switch variant, get active state — any logged-in user until a GM role exists
 - [x] Scene asset serving with content-hashed URLs (`/assets/scenes/<scene id>/...`, `/assets/shared/...`)
 - [ ] Per-route auth policies (`anonymous`, `device`, `user`, `role:<role>`): auth optional at connect, enforced by the route; invalid credentials rejected instead of treated as anonymous — see [authentication.md](./architecture/authentication.md#device-authentication)
@@ -202,7 +202,7 @@ Done: per-login sessions (one JTI each) with an RS512 access token (1 h) and a `
 - [ ] Client discovers the server via mDNS (the server already announces)
 - [ ] Packaging: single binary for Linux, Windows and macOS (amd64 + arm64), multi-arch Docker image, all tested in CI
 - [ ] About page content and licenses (`client/src/routes/about`)
-- [ ] macOS configuration paths documented (`docs/configuration/config-file.md`)
+- [x] macOS configuration paths documented (`docs/configuration/config-file.md`)
 - [ ] User-facing documentation: setting up a room, writing scenes
 
 **Decisions**

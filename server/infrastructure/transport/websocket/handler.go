@@ -6,6 +6,8 @@ import (
 	"time"
 
 	cwebsocket "github.com/coder/websocket"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 
 	"github.com/DaanV2/mechanus/server/engine/authentication/roles"
 	"github.com/DaanV2/mechanus/server/engine/devices"
@@ -59,6 +61,12 @@ func (handler *WebsocketHandler) ServeHTTP(w http.ResponseWriter, r *http.Reques
 	}
 
 	deviceID, hardware := deviceIdentity(r)
+	// The span comes from the HTTP tracing middleware and lasts as long as the connection.
+	trace.SpanFromContext(r.Context()).SetAttributes(
+		attribute.String("device.id", deviceID),
+		attribute.String("device.type", string(hardware)),
+		attribute.String("screen.id", screenid),
+	)
 	logger, connCtx := handler.logger.
 		With("id", id, "screen", screenid, "device_id", deviceID, "device_type", hardware).
 		FromUpdate(r.Context())
