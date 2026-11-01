@@ -15,7 +15,13 @@ Opening a PR notifies reviewers and kicks off CI across multiple workflows (`che
    - Check whether the branch tracks a remote and is up to date (`git status -sb` or `git rev-parse --abbrev-ref --symbolic-full-name @{u}` wrapped in a check), so you know whether a push is needed.
    - `git log main..HEAD` (or the actual base branch) and `git diff main...HEAD` — the **full** set of commits going into the PR, not just the latest one. A branch with several commits needs the PR body to reflect all of them, not just the tip.
 
-2. **Draft the title and body.** A human reviewer reads this before they read the diff — keep it short enough that they actually will. Favor a few tight bullets over an exhaustive rundown; skip anything the diff already makes obvious, and don't pad the body to look thorough.
+2. **Run lint and tests before pushing.** CI fails on lint, so run the checks for every part of the repo the branch touches (`git diff --name-only main...HEAD`) and fix every reported issue, committing the fixes, before you push:
+   - `server/` → `just server lint` (uses the pinned `go tool golangci-lint`; never a global install) and `just server test`.
+   - `client/` → `just client lint` and `npm run check` in `client/`.
+   - `server/proto/` → `just proto-lint`.
+   Don't open the PR while any of these fail. If a tool itself crashes and you can't run it, say so in the PR body's test plan instead of claiming it passed.
+
+3. **Draft the title and body.** A human reviewer reads this before they read the diff — keep it short enough that they actually will. Favor a few tight bullets over an exhaustive rundown; skip anything the diff already makes obvious, and don't pad the body to look thorough.
    - Title: Conventional Commits format (`type(scope): short imperative summary`), under ~70 characters — same as this repo's commit messages (see `git log --oneline -20` for examples like `fix(auth): ...`, `chore(deps): ...`, `feat(scenes): ...`). Common types: `feat`, `fix`, `chore`, `docs`, `refactor`, `test`. Put detail in the body, not the title.
    - Body: use a HEREDOC so multi-line text and special characters survive the shell untouched — never try to inline a multi-line `-b` string.
    - Structure:
@@ -28,7 +34,7 @@ Opening a PR notifies reviewers and kicks off CI across multiple workflows (`che
      ```
    - If this session's context includes a PR attribution footer (Claude Code's own instructions specify this — check for a line like `🤖 Generated with [Claude Code](https://claude.com/claude-code)`), end the body with it. Don't invent a footer if none was specified.
 
-3. **Push and create, in that order, only after confirming with the user if either is a new action:**
+4. **Push and create, in that order, only after confirming with the user if either is a new action:**
    - If the branch has no upstream yet or has unpushed commits, push it (`git push -u origin <branch>` or `git push`) — but only do this if the user has already asked you to open a PR; opening a PR implies pushing the branch that backs it, so a second confirmation isn't needed for the push itself.
    - Create the PR **as a draft**:
      ```bash
@@ -45,7 +51,7 @@ Opening a PR notifies reviewers and kicks off CI across multiple workflows (`che
      ```
    - If the user explicitly said the PR should be ready for review (not draft), omit `--draft`. Otherwise always include it — don't ask permission for this part, just do it; the draft rule is the whole point of this skill.
 
-4. **Report back** with the PR URL (`gh pr create` prints it; also available via `gh pr view --json url`).
+5. **Report back** with the PR URL (`gh pr create` prints it; also available via `gh pr view --json url`).
 
 ## What NOT to do without being asked
 

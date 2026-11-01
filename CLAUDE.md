@@ -113,6 +113,11 @@ npm run check       # svelte-check + tsc
 
 - When working on a dedicated branch (i.e. not `main`), always commit your changes once the task is done — don't leave work uncommitted waiting for confirmation.
 - Still ask before committing directly on `main`, and never force-push.
+- **Lint before every commit and PR** — CI fails on lint, so run the checks for each part you touched and fix every reported issue first:
+  - Server: `just server lint` (runs `go tool golangci-lint`, the version pinned in `server/go.mod` — don't use a globally installed `golangci-lint`, which may not match CI or may crash on this Go version) plus `just server test`.
+  - Client: `just client lint` and `npm run check` in `client/`.
+  - Proto: `just proto-lint`.
+  - Linter rules worth knowing: Go tests must live in an external `<pkg>_test` package (`testpackage`); expose unexported identifiers to tests through an `export_test.go` in the package itself.
 
 ## Environment variables
 
