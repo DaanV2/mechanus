@@ -3,8 +3,6 @@ package grpc
 import (
 	"context"
 	"net/http"
-	"net/url"
-	"strings"
 
 	"connectrpc.com/connect"
 	"github.com/DaanV2/mechanus/server/infrastructure/authentication"
@@ -58,12 +56,11 @@ func (j *Authenticator) WrapUnary(next connect.UnaryFunc) connect.UnaryFunc {
 // validateAndInject retrieves the bearer jwt from the request, validates it and stores the result on the context
 // Which can be retrieved with [authentication.JWTFromContext]
 func (j *Authenticator) validateAndInject(ctx context.Context, headers http.Header) context.Context {
-	jwtStr := getJwtValue(headers)
+	jwtStr := authentication.BearerFromHeaders(headers)
 	if jwtStr == "" {
 		return ctx
 	}
 
-	jwtStr = strings.TrimPrefix(jwtStr, "Bearer ")
 	token, err := j.jwtService.Validate(ctx, jwtStr)
 	if token == nil {
 		// The token couldn't be parsed at all (malformed, expired, bad signature, ...), treat the request as anonymous
@@ -86,36 +83,4 @@ func (j *Authenticator) validateAndInject(ctx context.Context, headers http.Head
 	ctx = logging.Context(ctx, logger)
 
 	return ctx
-}
-
-func getJwtValue(headers http.Header) string {
-	for _, auth := range headers.Values("Authorization") {
-		if strings.HasPrefix(auth, "Bearer ") {
-			return auth
-		}
-	}
-
-	for _, cookieData := range headers.Values("Cookie") {
-		cookies, err := http.ParseCookie(cookieData)
-		if err != nil {
-			continue
-		}
-
-		for _, cookie := range cookies {
-			if cookie.Name != "access-token" {
-				continue
-			}
-
-			// The client stores the cookie with encodeURIComponent, so "Bearer <jwt>" arrives as "Bearer%20<jwt>"
-			value, err := url.PathUnescape(cookie.Value)
-			if err != nil {
-				continue
-			}
-			if strings.HasPrefix(value, "Bearer ") {
-				return value
-			}
-		}
-	}
-
-	return ""
 }

@@ -51,8 +51,8 @@ What exists: login (`LoginService.Login`) issues an RS512 JWT (1 h, `grant` / `s
 **Bugs**
 
 - [x] `grpc.Authenticator.validateAndInject` panicked (nil pointer) on any malformed, expired or badly signed bearer token — now treated as an anonymous request
-- [ ] Screen WebSocket never authenticates browser users: browsers can't set an `Authorization` header on `new WebSocket(...)`, the client's `WebsocketHandler.getToken()` is never used, and the server doesn't read the cookie — so every browser connection falls through to the unauthenticated `Device` path.
-- [x] Cookie fallback in `grpc.getJwtValue` never matched: the client stores `encodeURIComponent("Bearer <jwt>")`, so the cookie value starts with `Bearer%20` — the cookie value is now URL-decoded before the prefix check
+- [x] Screen WebSocket never authenticated browser users (browsers can't set `Authorization` on `new WebSocket(...)`) — the client now passes its token as a `mechanus.bearer.<jwt>` subprotocol and the server also reads the `access-token` cookie (`authentication.BearerFromHeaders`)
+- [x] Cookie fallback in `grpc.getJwtValue` never matched the URL-encoded `Bearer%20<jwt>` cookie — replaced by `authentication.BearerFromHeaders`, which unescapes it
 - [ ] `Refresh` accepts any `scope: "*"` access token and reuses the same JTI, so a leaked token can be renewed forever; no `scope: "refresh"` token is ever issued (the client's `refresh-token` cookie key is unused).
 - [ ] Admin password reset (`ResetPassword`) does not revoke the user's JTI — existing sessions stay valid.
 - [ ] Tokens leak into logs: `JWTService.validate` logs the raw JWT at debug level, and the client `Cookie.get` / `Cookie.set` `console.log` the access token.
@@ -65,7 +65,8 @@ What exists: login (`LoginService.Login`) issues an RS512 JWT (1 h, `grant` / `s
 - [ ] Logout: server endpoint that revokes the JTI, plus the client flow (`UserHandler.logout` is a `TODO`)
 - [ ] Proper refresh flow: login returns an access token + a `scope: "refresh"` token; the client refreshes before expiry and on `Unauthenticated`
 - [ ] Client checks `exp` — `userHandler.current` reports logged-in for an expired token, and the cookie has no `Max-Age`
-- [ ] WebSocket auth for users (cookie, `Sec-WebSocket-Protocol`, or first-message token) and the `// TODO: check that screenHandler is allowed to be access by this requester` screen access check
+- [x] WebSocket auth for users: `Authorization` header, `mechanus.bearer.<jwt>` subprotocol, or `access-token` cookie
+- [ ] The `// TODO: check that screenHandler is allowed to be access by this requester` screen access check
 - [ ] Long-lived WebSocket connections are never re-checked when the token expires or the JTI is revoked
 - [ ] Per-session JTIs (so one device can be signed out) instead of one shared JTI per user; cleanup of revoked / old JTI rows
 - [ ] Self-service password change (revokes other sessions); admin role management API (role changes only reach the token on refresh)
@@ -76,12 +77,12 @@ What exists: login (`LoginService.Login`) issues an RS512 JWT (1 h, `grant` / `s
 
 **Tests**
 
-- [~] `grpc.Authenticator`: no header, valid, malformed, expired, tampered, revoked and refresh-scope tokens are covered; cookie fallback is still untested (blocked on the cookie bug above)
+- [x] `grpc.Authenticator`: no header, valid, malformed, expired, tampered, revoked and refresh-scope tokens, and the URL-encoded cookie fallback
 - [ ] `LoginServiceHandler`: login success, wrong password, unknown user, empty fields; refresh with valid / revoked / refresh-scope / non-refresh-scope tokens
 - [ ] `UserServiceHandler` authorization: `Get` (self / admin / other / anonymous), `List` and `ResetPassword` (admin vs. non-admin), reset revokes sessions
 - [ ] `JWTService` negative cases: expired, not-yet-valid, wrong issuer / audience, unknown or missing `kid`, tampered signature, JTI belonging to another user
 - [ ] `KeyData` PEM marshal / unmarshal round trip; `KeyManager` loads keys on `AfterInitialize`, reuses the signing key, errors on an unknown `kid`
-- [ ] WebSocket `authenticate`: user token accepted, bad token rejected (not downgraded to anonymous), refresh-scope token rejected, route policies return 401 / 403, device ID / type read from header and query fallback
+- [~] WebSocket `authenticate`: user token accepted and bad token rejected (header, subprotocol and cookie), refresh-scope token rejected are covered; still missing: route policies return 401 / 403, device ID / type read from header and query fallback
 - [ ] Playwright: logout, session survives token expiry via refresh, revoked session is logged out, WebSocket connects as the logged-in user
 
 **Unknowns**

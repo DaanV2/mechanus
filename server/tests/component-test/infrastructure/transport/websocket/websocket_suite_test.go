@@ -1,4 +1,4 @@
-package grpc_test
+package websocket_test
 
 import (
 	"testing"
@@ -7,7 +7,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-func Test_Grpc(t *testing.T) {
+func Test_Websocket(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "grpc Suite")
+	RunSpecs(t, "websocket Suite")
 }
