@@ -3,6 +3,7 @@ package grpc
 import (
 	"context"
 	"net/http"
+	"net/url"
 	"strings"
 
 	"connectrpc.com/connect"
@@ -101,8 +102,17 @@ func getJwtValue(headers http.Header) string {
 		}
 
 		for _, cookie := range cookies {
-			if cookie.Name == "access-token" && strings.HasPrefix(cookie.Value, "Bearer ") {
-				return cookie.Value
+			if cookie.Name != "access-token" {
+				continue
+			}
+
+			// The client stores the cookie with encodeURIComponent, so "Bearer <jwt>" arrives as "Bearer%20<jwt>"
+			value, err := url.PathUnescape(cookie.Value)
+			if err != nil {
+				continue
+			}
+			if strings.HasPrefix(value, "Bearer ") {
+				return value
 			}
 		}
 	}
