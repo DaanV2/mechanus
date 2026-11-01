@@ -3,6 +3,8 @@ package authentication
 import (
 	"context"
 	"errors"
+	"fmt"
+	"time"
 
 	"github.com/DaanV2/mechanus/server/infrastructure/logging"
 	"github.com/DaanV2/mechanus/server/infrastructure/persistence"
@@ -133,4 +135,54 @@ func (s *JTIService) Revoke(ctx context.Context, jti string) (bool, error) {
 	}
 
 	return tx.RowsAffected > 0, nil
+}
+
+// RevokeUser revokes all JTIs (sessions) of the given user, except the ones listed in except.
+// It returns the amount of revoked JTIs.
+func (s *JTIService) RevokeUser(ctx context.Context, userId string, except ...string) (int64, error) {
+	if userId == "" {
+		return 0, errors.New("string is empty: userId")
+	}
+
+	logger := s.logger.From(ctx).With("userId", userId)
+	logger.Debug("revoking all jti's of user")
+
+	tx := s.db.WithContext(ctx).Model(&models.JTI{}).Where("user_id = ? AND revoked = ?", userId, false)
+	if len(except) > 0 {
+		tx = tx.Where("id NOT IN ?", except)
+	}
+
+	tx = tx.Update("revoked", true)
+	if tx.Error != nil {
+		return 0, tx.Error
+	}
+
+	return tx.RowsAffected, nil
+}
+
+// Touch marks the JTI as used now, so [JTIService.Cleanup] keeps it around.
+func (s *JTIService) Touch(ctx context.Context, jti string) error {
+	if jti == "" {
+		return errors.New("string is empty: jti")
+	}
+
+	tx := s.db.WithContext(ctx).Model(&models.JTI{}).Where("id = ?", jti).Update("updated_at", time.Now())
+
+	return tx.Error
+}
+
+// Cleanup permanently deletes revoked JTIs, and JTIs that haven't been used for longer than maxAge.
+// It returns the amount of deleted JTIs.
+func (s *JTIService) Cleanup(ctx context.Context, maxAge time.Duration) (int64, error) {
+	logger := s.logger.From(ctx)
+
+	cutoff := time.Now().Add(-maxAge)
+	tx := s.db.WithContext(ctx).Unscoped().Where("revoked = ? OR updated_at < ?", true, cutoff).Delete(&models.JTI{})
+	if tx.Error != nil {
+		return 0, fmt.Errorf("error cleaning up jti's: %w", tx.Error)
+	}
+
+	logger.Debug("cleaned up jti's", "amount", tx.RowsAffected)
+
+	return tx.RowsAffected, nil
 }

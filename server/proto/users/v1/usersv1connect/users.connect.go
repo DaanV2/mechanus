@@ -42,16 +42,27 @@ const (
 	// UserServiceResetPasswordProcedure is the fully-qualified name of the UserService's ResetPassword
 	// RPC.
 	UserServiceResetPasswordProcedure = "/users.v1.UserService/ResetPassword"
+	// UserServiceChangePasswordProcedure is the fully-qualified name of the UserService's
+	// ChangePassword RPC.
+	UserServiceChangePasswordProcedure = "/users.v1.UserService/ChangePassword"
+	// UserServiceSetRolesProcedure is the fully-qualified name of the UserService's SetRoles RPC.
+	UserServiceSetRolesProcedure = "/users.v1.UserService/SetRoles"
 )
 
 // UserServiceClient is a client for the users.v1.UserService service.
 type UserServiceClient interface {
+	// Create a new account. Requires the admin role, unless open sign-up is enabled on the server
 	Create(context.Context, *connect.Request[v1.CreateAccountRequest]) (*connect.Response[v1.CreateAccountResponse], error)
 	Get(context.Context, *connect.Request[v1.GetUserRequest]) (*connect.Response[v1.GetUserResponse], error)
 	// List all users, requires the admin role
 	List(context.Context, *connect.Request[v1.ListUsersRequest]) (*connect.Response[v1.ListUsersResponse], error)
-	// Reset the password of a user to a new one, requires the admin role
+	// Reset the password of a user to a new one, requires the admin role. Signs out all sessions of that user
 	ResetPassword(context.Context, *connect.Request[v1.ResetPasswordRequest]) (*connect.Response[v1.ResetPasswordResponse], error)
+	// Change the password of the logged in user, signs out all their other sessions
+	ChangePassword(context.Context, *connect.Request[v1.ChangePasswordRequest]) (*connect.Response[v1.ChangePasswordResponse], error)
+	// Replace the roles of a user, requires the admin role.
+	// Existing access tokens keep the old roles until they are refreshed.
+	SetRoles(context.Context, *connect.Request[v1.SetRolesRequest]) (*connect.Response[v1.SetRolesResponse], error)
 }
 
 // NewUserServiceClient constructs a client for the users.v1.UserService service. By default, it
@@ -89,15 +100,29 @@ func NewUserServiceClient(httpClient connect.HTTPClient, baseURL string, opts ..
 			connect.WithSchema(userServiceMethods.ByName("ResetPassword")),
 			connect.WithClientOptions(opts...),
 		),
+		changePassword: connect.NewClient[v1.ChangePasswordRequest, v1.ChangePasswordResponse](
+			httpClient,
+			baseURL+UserServiceChangePasswordProcedure,
+			connect.WithSchema(userServiceMethods.ByName("ChangePassword")),
+			connect.WithClientOptions(opts...),
+		),
+		setRoles: connect.NewClient[v1.SetRolesRequest, v1.SetRolesResponse](
+			httpClient,
+			baseURL+UserServiceSetRolesProcedure,
+			connect.WithSchema(userServiceMethods.ByName("SetRoles")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
 // userServiceClient implements UserServiceClient.
 type userServiceClient struct {
-	create        *connect.Client[v1.CreateAccountRequest, v1.CreateAccountResponse]
-	get           *connect.Client[v1.GetUserRequest, v1.GetUserResponse]
-	list          *connect.Client[v1.ListUsersRequest, v1.ListUsersResponse]
-	resetPassword *connect.Client[v1.ResetPasswordRequest, v1.ResetPasswordResponse]
+	create         *connect.Client[v1.CreateAccountRequest, v1.CreateAccountResponse]
+	get            *connect.Client[v1.GetUserRequest, v1.GetUserResponse]
+	list           *connect.Client[v1.ListUsersRequest, v1.ListUsersResponse]
+	resetPassword  *connect.Client[v1.ResetPasswordRequest, v1.ResetPasswordResponse]
+	changePassword *connect.Client[v1.ChangePasswordRequest, v1.ChangePasswordResponse]
+	setRoles       *connect.Client[v1.SetRolesRequest, v1.SetRolesResponse]
 }
 
 // Create calls users.v1.UserService.Create.
@@ -120,14 +145,30 @@ func (c *userServiceClient) ResetPassword(ctx context.Context, req *connect.Requ
 	return c.resetPassword.CallUnary(ctx, req)
 }
 
+// ChangePassword calls users.v1.UserService.ChangePassword.
+func (c *userServiceClient) ChangePassword(ctx context.Context, req *connect.Request[v1.ChangePasswordRequest]) (*connect.Response[v1.ChangePasswordResponse], error) {
+	return c.changePassword.CallUnary(ctx, req)
+}
+
+// SetRoles calls users.v1.UserService.SetRoles.
+func (c *userServiceClient) SetRoles(ctx context.Context, req *connect.Request[v1.SetRolesRequest]) (*connect.Response[v1.SetRolesResponse], error) {
+	return c.setRoles.CallUnary(ctx, req)
+}
+
 // UserServiceHandler is an implementation of the users.v1.UserService service.
 type UserServiceHandler interface {
+	// Create a new account. Requires the admin role, unless open sign-up is enabled on the server
 	Create(context.Context, *connect.Request[v1.CreateAccountRequest]) (*connect.Response[v1.CreateAccountResponse], error)
 	Get(context.Context, *connect.Request[v1.GetUserRequest]) (*connect.Response[v1.GetUserResponse], error)
 	// List all users, requires the admin role
 	List(context.Context, *connect.Request[v1.ListUsersRequest]) (*connect.Response[v1.ListUsersResponse], error)
-	// Reset the password of a user to a new one, requires the admin role
+	// Reset the password of a user to a new one, requires the admin role. Signs out all sessions of that user
 	ResetPassword(context.Context, *connect.Request[v1.ResetPasswordRequest]) (*connect.Response[v1.ResetPasswordResponse], error)
+	// Change the password of the logged in user, signs out all their other sessions
+	ChangePassword(context.Context, *connect.Request[v1.ChangePasswordRequest]) (*connect.Response[v1.ChangePasswordResponse], error)
+	// Replace the roles of a user, requires the admin role.
+	// Existing access tokens keep the old roles until they are refreshed.
+	SetRoles(context.Context, *connect.Request[v1.SetRolesRequest]) (*connect.Response[v1.SetRolesResponse], error)
 }
 
 // NewUserServiceHandler builds an HTTP handler from the service implementation. It returns the path
@@ -161,6 +202,18 @@ func NewUserServiceHandler(svc UserServiceHandler, opts ...connect.HandlerOption
 		connect.WithSchema(userServiceMethods.ByName("ResetPassword")),
 		connect.WithHandlerOptions(opts...),
 	)
+	userServiceChangePasswordHandler := connect.NewUnaryHandler(
+		UserServiceChangePasswordProcedure,
+		svc.ChangePassword,
+		connect.WithSchema(userServiceMethods.ByName("ChangePassword")),
+		connect.WithHandlerOptions(opts...),
+	)
+	userServiceSetRolesHandler := connect.NewUnaryHandler(
+		UserServiceSetRolesProcedure,
+		svc.SetRoles,
+		connect.WithSchema(userServiceMethods.ByName("SetRoles")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/users.v1.UserService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case UserServiceCreateProcedure:
@@ -171,6 +224,10 @@ func NewUserServiceHandler(svc UserServiceHandler, opts ...connect.HandlerOption
 			userServiceListHandler.ServeHTTP(w, r)
 		case UserServiceResetPasswordProcedure:
 			userServiceResetPasswordHandler.ServeHTTP(w, r)
+		case UserServiceChangePasswordProcedure:
+			userServiceChangePasswordHandler.ServeHTTP(w, r)
+		case UserServiceSetRolesProcedure:
+			userServiceSetRolesHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -194,4 +251,12 @@ func (UnimplementedUserServiceHandler) List(context.Context, *connect.Request[v1
 
 func (UnimplementedUserServiceHandler) ResetPassword(context.Context, *connect.Request[v1.ResetPasswordRequest]) (*connect.Response[v1.ResetPasswordResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("users.v1.UserService.ResetPassword is not implemented"))
+}
+
+func (UnimplementedUserServiceHandler) ChangePassword(context.Context, *connect.Request[v1.ChangePasswordRequest]) (*connect.Response[v1.ChangePasswordResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("users.v1.UserService.ChangePassword is not implemented"))
+}
+
+func (UnimplementedUserServiceHandler) SetRoles(context.Context, *connect.Request[v1.SetRolesRequest]) (*connect.Response[v1.SetRolesResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("users.v1.UserService.SetRoles is not implemented"))
 }

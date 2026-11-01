@@ -1,6 +1,8 @@
 package authentication_test
 
 import (
+	"time"
+
 	"github.com/DaanV2/mechanus/server/infrastructure/authentication"
 	"github.com/DaanV2/mechanus/server/infrastructure/persistence"
 	util_test "github.com/DaanV2/mechanus/server/tests/component-test/util"
@@ -184,4 +186,55 @@ var _ = Describe("JtiServer", func() {
 		})
 	})
 
+	Context("RevokeUser", func() {
+		It("revokes every session of the user, except the given ones", func(ctx SpecContext) {
+			userId := util_test.CreateUserID()
+			kept, err := service.Create(ctx, userId)
+			Expect(err).ShouldNot(HaveOccurred())
+			other1, err := service.Create(ctx, userId)
+			Expect(err).ShouldNot(HaveOccurred())
+			other2, err := service.Create(ctx, userId)
+			Expect(err).ShouldNot(HaveOccurred())
+			otherUser, err := service.Create(ctx, util_test.CreateUserID())
+			Expect(err).ShouldNot(HaveOccurred())
+
+			revoked, err := service.RevokeUser(ctx, userId, kept.ID)
+			Expect(err).ShouldNot(HaveOccurred())
+			Expect(revoked).To(BeEquivalentTo(2))
+
+			for _, id := range []string{other1.ID, other2.ID} {
+				jti, gerr := service.Get(ctx, id)
+				Expect(gerr).ShouldNot(HaveOccurred())
+				Expect(jti.Revoked).To(BeTrue())
+			}
+			for _, id := range []string{kept.ID, otherUser.ID} {
+				jti, gerr := service.Get(ctx, id)
+				Expect(gerr).ShouldNot(HaveOccurred())
+				Expect(jti.Revoked).To(BeFalse())
+			}
+		})
+	})
+
+	Context("Cleanup", func() {
+		It("deletes revoked and unused sessions", func(ctx SpecContext) {
+			userId := util_test.CreateUserID()
+			revoked, err := service.Create(ctx, userId)
+			Expect(err).ShouldNot(HaveOccurred())
+			_, err = service.Revoke(ctx, revoked.ID)
+			Expect(err).ShouldNot(HaveOccurred())
+			active, err := service.Create(ctx, userId)
+			Expect(err).ShouldNot(HaveOccurred())
+
+			deleted, err := service.Cleanup(ctx, time.Hour)
+			Expect(err).ShouldNot(HaveOccurred())
+			Expect(deleted).To(BeEquivalentTo(1))
+			_, err = service.Get(ctx, active.ID)
+			Expect(err).ShouldNot(HaveOccurred())
+
+			// Nothing is used within a negative age, so the active session goes too
+			deleted, err = service.Cleanup(ctx, -time.Hour)
+			Expect(err).ShouldNot(HaveOccurred())
+			Expect(deleted).To(BeEquivalentTo(1))
+		})
+	})
 })

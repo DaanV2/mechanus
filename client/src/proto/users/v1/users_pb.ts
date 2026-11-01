@@ -10,7 +10,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file users/v1/users.proto.
  */
 export const file_users_v1_users: GenFile = /*@__PURE__*/
-  fileDesc("ChR1c2Vycy92MS91c2Vycy5wcm90bxIIdXNlcnMudjEiOgoUQ3JlYXRlQWNjb3VudFJlcXVlc3QSEAoIdXNlcm5hbWUYASABKAkSEAoIcGFzc3dvcmQYAiABKAkiNQoVQ3JlYXRlQWNjb3VudFJlc3BvbnNlEhwKBHVzZXIYASABKAsyDi51c2Vycy52MS5Vc2VyIhwKDkdldFVzZXJSZXF1ZXN0EgoKAmlkGAEgASgJIi8KD0dldFVzZXJSZXNwb25zZRIcCgR1c2VyGAEgASgLMg4udXNlcnMudjEuVXNlciISChBMaXN0VXNlcnNSZXF1ZXN0IjIKEUxpc3RVc2Vyc1Jlc3BvbnNlEh0KBXVzZXJzGAEgAygLMg4udXNlcnMudjEuVXNlciI4ChRSZXNldFBhc3N3b3JkUmVxdWVzdBIKCgJpZBgBIAEoCRIUCgxuZXdfcGFzc3dvcmQYAiABKAkiFwoVUmVzZXRQYXNzd29yZFJlc3BvbnNlIi8KBFVzZXISCgoCaWQYASABKAkSDAoEbmFtZRgCIAEoCRINCgVyb2xlcxgDIAMoCTKvAgoLVXNlclNlcnZpY2USSwoGQ3JlYXRlEh4udXNlcnMudjEuQ3JlYXRlQWNjb3VudFJlcXVlc3QaHy51c2Vycy52MS5DcmVhdGVBY2NvdW50UmVzcG9uc2UiABI8CgNHZXQSGC51c2Vycy52MS5HZXRVc2VyUmVxdWVzdBoZLnVzZXJzLnYxLkdldFVzZXJSZXNwb25zZSIAEkEKBExpc3QSGi51c2Vycy52MS5MaXN0VXNlcnNSZXF1ZXN0GhsudXNlcnMudjEuTGlzdFVzZXJzUmVzcG9uc2UiABJSCg1SZXNldFBhc3N3b3JkEh4udXNlcnMudjEuUmVzZXRQYXNzd29yZFJlcXVlc3QaHy51c2Vycy52MS5SZXNldFBhc3N3b3JkUmVzcG9uc2UiAEI6WjhnaXRodWIuY29tL0RhYW5WMi9tZWNoYW51cy9zZXJ2ZXIvcHJvdG8vdXNlcnMvdjE7dXNlcnN2MWIGcHJvdG8z");
+  fileDesc("ChR1c2Vycy92MS91c2Vycy5wcm90bxIIdXNlcnMudjEiOgoUQ3JlYXRlQWNjb3VudFJlcXVlc3QSEAoIdXNlcm5hbWUYASABKAkSEAoIcGFzc3dvcmQYAiABKAkiNQoVQ3JlYXRlQWNjb3VudFJlc3BvbnNlEhwKBHVzZXIYASABKAsyDi51c2Vycy52MS5Vc2VyIhwKDkdldFVzZXJSZXF1ZXN0EgoKAmlkGAEgASgJIi8KD0dldFVzZXJSZXNwb25zZRIcCgR1c2VyGAEgASgLMg4udXNlcnMudjEuVXNlciISChBMaXN0VXNlcnNSZXF1ZXN0IjIKEUxpc3RVc2Vyc1Jlc3BvbnNlEh0KBXVzZXJzGAEgAygLMg4udXNlcnMudjEuVXNlciI4ChRSZXNldFBhc3N3b3JkUmVxdWVzdBIKCgJpZBgBIAEoCRIUCgxuZXdfcGFzc3dvcmQYAiABKAkiFwoVUmVzZXRQYXNzd29yZFJlc3BvbnNlIkcKFUNoYW5nZVBhc3N3b3JkUmVxdWVzdBIYChBjdXJyZW50X3Bhc3N3b3JkGAEgASgJEhQKDG5ld19wYXNzd29yZBgCIAEoCSIYChZDaGFuZ2VQYXNzd29yZFJlc3BvbnNlIiwKD1NldFJvbGVzUmVxdWVzdBIKCgJpZBgBIAEoCRINCgVyb2xlcxgCIAMoCSIwChBTZXRSb2xlc1Jlc3BvbnNlEhwKBHVzZXIYASABKAsyDi51c2Vycy52MS5Vc2VyIi8KBFVzZXISCgoCaWQYASABKAkSDAoEbmFtZRgCIAEoCRINCgVyb2xlcxgDIAMoCTLLAwoLVXNlclNlcnZpY2USSwoGQ3JlYXRlEh4udXNlcnMudjEuQ3JlYXRlQWNjb3VudFJlcXVlc3QaHy51c2Vycy52MS5DcmVhdGVBY2NvdW50UmVzcG9uc2UiABI8CgNHZXQSGC51c2Vycy52MS5HZXRVc2VyUmVxdWVzdBoZLnVzZXJzLnYxLkdldFVzZXJSZXNwb25zZSIAEkEKBExpc3QSGi51c2Vycy52MS5MaXN0VXNlcnNSZXF1ZXN0GhsudXNlcnMudjEuTGlzdFVzZXJzUmVzcG9uc2UiABJSCg1SZXNldFBhc3N3b3JkEh4udXNlcnMudjEuUmVzZXRQYXNzd29yZFJlcXVlc3QaHy51c2Vycy52MS5SZXNldFBhc3N3b3JkUmVzcG9uc2UiABJVCg5DaGFuZ2VQYXNzd29yZBIfLnVzZXJzLnYxLkNoYW5nZVBhc3N3b3JkUmVxdWVzdBogLnVzZXJzLnYxLkNoYW5nZVBhc3N3b3JkUmVzcG9uc2UiABJDCghTZXRSb2xlcxIZLnVzZXJzLnYxLlNldFJvbGVzUmVxdWVzdBoaLnVzZXJzLnYxLlNldFJvbGVzUmVzcG9uc2UiAEI6WjhnaXRodWIuY29tL0RhYW5WMi9tZWNoYW51cy9zZXJ2ZXIvcHJvdG8vdXNlcnMvdjE7dXNlcnN2MWIGcHJvdG8z");
 
 /**
  * @generated from message users.v1.CreateAccountRequest
@@ -161,6 +161,88 @@ export const ResetPasswordResponseSchema: GenMessage<ResetPasswordResponse> = /*
   messageDesc(file_users_v1_users, 7);
 
 /**
+ * @generated from message users.v1.ChangePasswordRequest
+ */
+export type ChangePasswordRequest = Message<"users.v1.ChangePasswordRequest"> & {
+  /**
+   * The current password of the logged in user
+   *
+   * @generated from field: string current_password = 1;
+   */
+  currentPassword: string;
+
+  /**
+   * The new password
+   *
+   * @generated from field: string new_password = 2;
+   */
+  newPassword: string;
+};
+
+/**
+ * Describes the message users.v1.ChangePasswordRequest.
+ * Use `create(ChangePasswordRequestSchema)` to create a new message.
+ */
+export const ChangePasswordRequestSchema: GenMessage<ChangePasswordRequest> = /*@__PURE__*/
+  messageDesc(file_users_v1_users, 8);
+
+/**
+ * @generated from message users.v1.ChangePasswordResponse
+ */
+export type ChangePasswordResponse = Message<"users.v1.ChangePasswordResponse"> & {
+};
+
+/**
+ * Describes the message users.v1.ChangePasswordResponse.
+ * Use `create(ChangePasswordResponseSchema)` to create a new message.
+ */
+export const ChangePasswordResponseSchema: GenMessage<ChangePasswordResponse> = /*@__PURE__*/
+  messageDesc(file_users_v1_users, 9);
+
+/**
+ * @generated from message users.v1.SetRolesRequest
+ */
+export type SetRolesRequest = Message<"users.v1.SetRolesRequest"> & {
+  /**
+   * The UUID of the user whose roles are replaced
+   *
+   * @generated from field: string id = 1;
+   */
+  id: string;
+
+  /**
+   * The new roles, eg: admin, operator, user, viewer
+   *
+   * @generated from field: repeated string roles = 2;
+   */
+  roles: string[];
+};
+
+/**
+ * Describes the message users.v1.SetRolesRequest.
+ * Use `create(SetRolesRequestSchema)` to create a new message.
+ */
+export const SetRolesRequestSchema: GenMessage<SetRolesRequest> = /*@__PURE__*/
+  messageDesc(file_users_v1_users, 10);
+
+/**
+ * @generated from message users.v1.SetRolesResponse
+ */
+export type SetRolesResponse = Message<"users.v1.SetRolesResponse"> & {
+  /**
+   * @generated from field: users.v1.User user = 1;
+   */
+  user?: User | undefined;
+};
+
+/**
+ * Describes the message users.v1.SetRolesResponse.
+ * Use `create(SetRolesResponseSchema)` to create a new message.
+ */
+export const SetRolesResponseSchema: GenMessage<SetRolesResponse> = /*@__PURE__*/
+  messageDesc(file_users_v1_users, 11);
+
+/**
  * @generated from message users.v1.User
  */
 export type User = Message<"users.v1.User"> & {
@@ -191,13 +273,15 @@ export type User = Message<"users.v1.User"> & {
  * Use `create(UserSchema)` to create a new message.
  */
 export const UserSchema: GenMessage<User> = /*@__PURE__*/
-  messageDesc(file_users_v1_users, 8);
+  messageDesc(file_users_v1_users, 12);
 
 /**
  * @generated from service users.v1.UserService
  */
 export const UserService: GenService<{
   /**
+   * Create a new account. Requires the admin role, unless open sign-up is enabled on the server
+   *
    * @generated from rpc users.v1.UserService.Create
    */
   create: {
@@ -224,7 +308,7 @@ export const UserService: GenService<{
     output: typeof ListUsersResponseSchema;
   },
   /**
-   * Reset the password of a user to a new one, requires the admin role
+   * Reset the password of a user to a new one, requires the admin role. Signs out all sessions of that user
    *
    * @generated from rpc users.v1.UserService.ResetPassword
    */
@@ -232,6 +316,27 @@ export const UserService: GenService<{
     methodKind: "unary";
     input: typeof ResetPasswordRequestSchema;
     output: typeof ResetPasswordResponseSchema;
+  },
+  /**
+   * Change the password of the logged in user, signs out all their other sessions
+   *
+   * @generated from rpc users.v1.UserService.ChangePassword
+   */
+  changePassword: {
+    methodKind: "unary";
+    input: typeof ChangePasswordRequestSchema;
+    output: typeof ChangePasswordResponseSchema;
+  },
+  /**
+   * Replace the roles of a user, requires the admin role.
+   * Existing access tokens keep the old roles until they are refreshed.
+   *
+   * @generated from rpc users.v1.UserService.SetRoles
+   */
+  setRoles: {
+    methodKind: "unary";
+    input: typeof SetRolesRequestSchema;
+    output: typeof SetRolesResponseSchema;
   },
 }> = /*@__PURE__*/
   serviceDesc(file_users_v1_users, 0);

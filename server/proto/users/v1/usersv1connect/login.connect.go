@@ -37,14 +37,18 @@ const (
 	LoginServiceLoginProcedure = "/users.v1.LoginService/Login"
 	// LoginServiceRefreshProcedure is the fully-qualified name of the LoginService's Refresh RPC.
 	LoginServiceRefreshProcedure = "/users.v1.LoginService/Refresh"
+	// LoginServiceLogoutProcedure is the fully-qualified name of the LoginService's Logout RPC.
+	LoginServiceLogoutProcedure = "/users.v1.LoginService/Logout"
 )
 
 // LoginServiceClient is a client for the users.v1.LoginService service.
 type LoginServiceClient interface {
-	// Log in the user, returns a JWT token
+	// Log in the user, returns an access token and a refresh token
 	Login(context.Context, *connect.Request[v1.LoginRequest]) (*connect.Response[v1.LoginResponse], error)
-	// Refresh a given token, with a new JWT token
+	// Exchange a refresh token for a new access token and refresh token
 	Refresh(context.Context, *connect.Request[v1.RefreshTokenRequest]) (*connect.Response[v1.RefreshTokenResponse], error)
+	// Log out a session, revoking all its access and refresh tokens
+	Logout(context.Context, *connect.Request[v1.LogoutRequest]) (*connect.Response[v1.LogoutResponse], error)
 }
 
 // NewLoginServiceClient constructs a client for the users.v1.LoginService service. By default, it
@@ -70,6 +74,12 @@ func NewLoginServiceClient(httpClient connect.HTTPClient, baseURL string, opts .
 			connect.WithSchema(loginServiceMethods.ByName("Refresh")),
 			connect.WithClientOptions(opts...),
 		),
+		logout: connect.NewClient[v1.LogoutRequest, v1.LogoutResponse](
+			httpClient,
+			baseURL+LoginServiceLogoutProcedure,
+			connect.WithSchema(loginServiceMethods.ByName("Logout")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -77,6 +87,7 @@ func NewLoginServiceClient(httpClient connect.HTTPClient, baseURL string, opts .
 type loginServiceClient struct {
 	login   *connect.Client[v1.LoginRequest, v1.LoginResponse]
 	refresh *connect.Client[v1.RefreshTokenRequest, v1.RefreshTokenResponse]
+	logout  *connect.Client[v1.LogoutRequest, v1.LogoutResponse]
 }
 
 // Login calls users.v1.LoginService.Login.
@@ -89,12 +100,19 @@ func (c *loginServiceClient) Refresh(ctx context.Context, req *connect.Request[v
 	return c.refresh.CallUnary(ctx, req)
 }
 
+// Logout calls users.v1.LoginService.Logout.
+func (c *loginServiceClient) Logout(ctx context.Context, req *connect.Request[v1.LogoutRequest]) (*connect.Response[v1.LogoutResponse], error) {
+	return c.logout.CallUnary(ctx, req)
+}
+
 // LoginServiceHandler is an implementation of the users.v1.LoginService service.
 type LoginServiceHandler interface {
-	// Log in the user, returns a JWT token
+	// Log in the user, returns an access token and a refresh token
 	Login(context.Context, *connect.Request[v1.LoginRequest]) (*connect.Response[v1.LoginResponse], error)
-	// Refresh a given token, with a new JWT token
+	// Exchange a refresh token for a new access token and refresh token
 	Refresh(context.Context, *connect.Request[v1.RefreshTokenRequest]) (*connect.Response[v1.RefreshTokenResponse], error)
+	// Log out a session, revoking all its access and refresh tokens
+	Logout(context.Context, *connect.Request[v1.LogoutRequest]) (*connect.Response[v1.LogoutResponse], error)
 }
 
 // NewLoginServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -116,12 +134,20 @@ func NewLoginServiceHandler(svc LoginServiceHandler, opts ...connect.HandlerOpti
 		connect.WithSchema(loginServiceMethods.ByName("Refresh")),
 		connect.WithHandlerOptions(opts...),
 	)
+	loginServiceLogoutHandler := connect.NewUnaryHandler(
+		LoginServiceLogoutProcedure,
+		svc.Logout,
+		connect.WithSchema(loginServiceMethods.ByName("Logout")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/users.v1.LoginService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case LoginServiceLoginProcedure:
 			loginServiceLoginHandler.ServeHTTP(w, r)
 		case LoginServiceRefreshProcedure:
 			loginServiceRefreshHandler.ServeHTTP(w, r)
+		case LoginServiceLogoutProcedure:
+			loginServiceLogoutHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -137,4 +163,8 @@ func (UnimplementedLoginServiceHandler) Login(context.Context, *connect.Request[
 
 func (UnimplementedLoginServiceHandler) Refresh(context.Context, *connect.Request[v1.RefreshTokenRequest]) (*connect.Response[v1.RefreshTokenResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("users.v1.LoginService.Refresh is not implemented"))
+}
+
+func (UnimplementedLoginServiceHandler) Logout(context.Context, *connect.Request[v1.LogoutRequest]) (*connect.Response[v1.LogoutResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("users.v1.LoginService.Logout is not implemented"))
 }

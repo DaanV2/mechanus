@@ -20,6 +20,8 @@ services:
       SERVER_STATIC_FOLDER: "/web"
       LOG_FORMAT: "text"
       LOG_LEVEL: "debug"
+      # Let anyone create an account while developing, defaults to admins only
+      AUTH_SIGNUP_ENABLED: "true"
       
       # OpenTelemetry Configuration
       OTEL_ENABLED: "true"

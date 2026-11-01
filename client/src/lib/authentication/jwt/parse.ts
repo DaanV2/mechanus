@@ -18,7 +18,7 @@ export interface JWtUser {
 }
 
 export function parseJwt(token: string): JWTClaims {
-  const base64Url = token.split('.')[1];
+  const base64Url = token.replace(/^Bearer /, '').split('.')[1];
   const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
   const jsonPayload = decodeURIComponent(
     window
@@ -31,4 +31,14 @@ export function parseJwt(token: string): JWTClaims {
   );
 
   return JSON.parse(jsonPayload);
+}
+
+/** Seconds until the token expires, negative once expired */
+export function secondsUntilExpiry(claims: Pick<JWTClaims, 'exp'>): number {
+  return claims.exp - Date.now() / 1000;
+}
+
+/** Whether the token expired, or will within the given margin in seconds */
+export function isExpired(claims: Pick<JWTClaims, 'exp'>, marginSeconds = 0): boolean {
+  return typeof claims.exp !== 'number' || secondsUntilExpiry(claims) <= marginSeconds;
 }

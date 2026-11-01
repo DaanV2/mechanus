@@ -8,6 +8,7 @@ import (
 
 	"github.com/DaanV2/mechanus/server/application/checks"
 	"github.com/DaanV2/mechanus/server/components"
+	"github.com/DaanV2/mechanus/server/infrastructure/authentication"
 	"github.com/DaanV2/mechanus/server/infrastructure/persistence"
 	"github.com/DaanV2/mechanus/server/infrastructure/servers"
 	"github.com/DaanV2/mechanus/server/infrastructure/telemetry"
@@ -49,6 +50,7 @@ func init() {
 	telemetry.OtelConfigSet.AddToSet(serverCmd.Flags())
 	cors.CorsConfig.AddToSet(serverCmd.Flags())
 	websocket.WebsocketConfigSet.AddToSet(serverCmd.Flags())
+	authentication.AuthConfigSet.AddToSet(serverCmd.Flags())
 }
 
 // ServerWorkload starts and manages the server lifecycle.
