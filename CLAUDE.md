@@ -50,7 +50,7 @@ See `docs/development.md` for the full local dev guide.
 
 ## Common commands
 
-The root `justfile` imports `server/justfile` and `client/justfile` as `just` modules
+The root `.justfile` imports `server/.justfile` and `client/.justfile` as `just` modules
 (`mod server`, `mod client`), so all recipes run from the repo root — no `cd` needed.
 `just server <recipe>` / `just client <recipe>` run with that directory as cwd, same as
 `cd server && just <recipe>`. (`just server::<recipe>` double-colon form also works.)

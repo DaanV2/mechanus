@@ -11,7 +11,7 @@ You'll need the following tools:
 
 ## Common commands
 
-The root `justfile` imports `server/justfile` and `client/justfile` as modules, so every
+The root `.justfile` imports `server/.justfile` and `client/.justfile` as modules, so every
 recipe is runnable from the repo root — no need to `cd` into a subdirectory.
 
 Root-level recipes:
