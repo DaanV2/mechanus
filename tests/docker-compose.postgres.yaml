@@ -35,6 +35,8 @@ services:
       # Inits for database
       INITIALIZE_ADMIN_USERNAME: admin
       INITIALIZE_ADMIN_PASSWORD: admin
+      # Tests sign up their own users
+      AUTH_SIGNUP_ENABLED: "true"
     command: ./mechanus server --log.level debug --log.format text --log.report-caller
     ports:
       - "8080:8080"

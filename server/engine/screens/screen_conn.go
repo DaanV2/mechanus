@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io"
 	"net"
+	"time"
 
 	"github.com/DaanV2/mechanus/server/engine/devices"
 	"github.com/DaanV2/mechanus/server/infrastructure/logging"
@@ -46,6 +47,8 @@ type ConnectionInfo struct {
 	ID    string
 	Roles []string
 	Type  devices.DeviceType
+	// When the credential of the connection expires, zero if it doesn't.
+	ExpiresAt time.Time
 }
 
 // Context returns the connection's context.

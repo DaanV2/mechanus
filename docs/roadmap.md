@@ -36,7 +36,7 @@ Conventions:
 **Goal**: the building blocks every later milestone relies on.
 
 - [x] Go server with Clean Architecture layers, lifecycle, config, logging, OpenTelemetry
-- [~] User accounts, login, JWT / JTI auth, roles — works on the happy path, see [Auth & tokens](#auth--tokens) for what's broken or missing
+- [~] User accounts, login, JWT / JTI auth with refresh / logout, roles — see [Auth & tokens](#auth--tokens) for what is still missing (invites, screen access check)
 - [x] Admin user list page (`/users`, `UserService.List`)
 - [x] ConnectRPC services (users, login) and the screen WebSocket (`Ping`, `InitialSetupRequest`)
 - [x] Database backends (SQLite, Postgres, MySQL, in-memory) with migrations
@@ -46,46 +46,48 @@ Conventions:
 
 ### Auth & tokens
 
-What exists: login (`LoginService.Login`) issues an RS512 JWT (1 h, `grant` / `scope` claims) tied to a per-user `JTI` row; the ConnectRPC `Authenticator` interceptor validates it and puts the claims on the context; `UserService` checks roles; admins can list users and reset passwords. `JTIService.Revoke` exists but nothing calls it. Device auth is tracked under [M1](#m1--first-scene-on-the-table).
+What exists: login (`LoginService.Login`) starts a session (one `JTI` row per login) and issues an RS512 access token (`scope: "*"`, 1 h) plus a refresh token (`scope: "refresh"`, 7 days); `Refresh` rotates both, `Logout` revokes the session. The ConnectRPC `Authenticator` interceptor validates tokens and puts the claims on the context; handlers answer `Unauthenticated` vs `PermissionDenied` through `grpc.requireRole`. Admins can list users, create accounts, reset passwords (revoking sessions) and set roles; users can change their own password. Lifetimes, signing key rotation and open sign-up are configurable (`auth.*`), see [authentication.md](./architecture/authentication.md). Device auth is tracked under [M1](#m1--first-scene-on-the-table).
 
 **Bugs**
 
 - [x] `grpc.Authenticator.validateAndInject` panicked (nil pointer) on any malformed, expired or badly signed bearer token — now treated as an anonymous request
 - [x] Screen WebSocket never authenticated browser users (browsers can't set `Authorization` on `new WebSocket(...)`) — the client now passes its token as a `mechanus.bearer.<jwt>` subprotocol and the server also reads the `access-token` cookie (`authentication.BearerFromHeaders`)
 - [x] Cookie fallback in `grpc.getJwtValue` never matched the URL-encoded `Bearer%20<jwt>` cookie — replaced by `authentication.BearerFromHeaders`, which unescapes it
-- [ ] `Refresh` accepts any `scope: "*"` access token and reuses the same JTI, so a leaked token can be renewed forever; no `scope: "refresh"` token is ever issued (the client's `refresh-token` cookie key is unused).
-- [ ] Admin password reset (`ResetPassword`) does not revoke the user's JTI — existing sessions stay valid.
-- [ ] Tokens leak into logs: `JWTService.validate` logs the raw JWT at debug level, and the client `Cookie.get` / `Cookie.set` `console.log` the access token.
-- [ ] Invalid / expired tokens are silently treated as anonymous; handlers then answer `PermissionDenied`, so the client can't tell "log in again" (`Unauthenticated`) from "not allowed".
-- [ ] `KeyManager.GetSigningKey` picks whichever key the map yields first once more than one key exists — signing key is effectively random.
-- [ ] `authentication.md` claims a 5-minute expiry leeway; `jwt.ParseWithClaims` checks `exp` with zero leeway before the leeway validator runs, so the leeway never applies.
+- [x] `Refresh` accepted any `scope: "*"` access token, so a leaked token could be renewed forever — it now only accepts `scope: "refresh"` tokens, which login issues next to the access token
+- [x] Admin password reset (`ResetPassword`) didn't revoke the user's JTI — it now revokes every session of the user
+- [x] Tokens leaked into logs (`JWTService.validate` debug log, client `Cookie.get` / `Cookie.set` and the profile page `console.log`) — removed
+- [x] Invalid / expired tokens made handlers answer `PermissionDenied` — they now answer `Unauthenticated` (no valid token) vs `PermissionDenied` (missing role)
+- [x] `KeyManager.GetSigningKey` picked a random key once more than one existed — it now signs with the newest key (creation time is stored with the key)
+- [x] The documented 5-minute expiry leeway never applied — it is now passed to the parser (`JWT_LEEWAY`), which also pins the algorithm to RS512 and checks the audience
+- [x] `dbStorage.Delete` passed the key as a raw SQL condition, so deleting a stored item always failed
+- [x] The signup page created every account with the password `password` instead of the one typed in
 
 **Missing**
 
-- [ ] Account creation: invites (GM generates a link / QR code with expiry, player picks their own credentials), admin-created accounts, and an open sign-up config flag (default off) gating the unauthenticated `UserService.Create`
-- [ ] Logout: server endpoint that revokes the JTI, plus the client flow (`UserHandler.logout` is a `TODO`)
-- [ ] Proper refresh flow: login returns an access token + a `scope: "refresh"` token; the client refreshes before expiry and on `Unauthenticated`
-- [ ] Client checks `exp` — `userHandler.current` reports logged-in for an expired token, and the cookie has no `Max-Age`
+- [~] Account creation: admin-created accounts and the open sign-up flag (`auth.signup-enabled`, default off, on in the dev / test compose files) gating `UserService.Create` are done; still missing: invites (GM generates a link / QR code with expiry, player picks their own credentials) and an admin UI to create accounts
+- [x] Logout: `LoginService.Logout` revokes the session (from a given access / refresh token or the request's access token); the nav bar's sign out calls it and clears the cookies
+- [x] Proper refresh flow: login returns an access token + a `scope: "refresh"` token; the client refreshes a minute before expiry and once on `Unauthenticated` (`client/src/lib/authentication/session.ts`)
+- [x] Client checks `exp` — an expired access token no longer counts as logged in (`userHandler.restore()` refreshes first), and both cookies get a `Max-Age` matching their token
 - [x] WebSocket auth for users: `Authorization` header, `mechanus.bearer.<jwt>` subprotocol, or `access-token` cookie
-- [ ] The `// TODO: check that screenHandler is allowed to be access by this requester` screen access check
-- [ ] Long-lived WebSocket connections are never re-checked when the token expires or the JTI is revoked
-- [ ] Per-session JTIs (so one device can be signed out) instead of one shared JTI per user; cleanup of revoked / old JTI rows
-- [ ] Self-service password change (revokes other sessions); admin role management API (role changes only reach the token on refresh)
-- [ ] Login hardening: rate limiting / lockout, and constant-time behaviour when the username doesn't exist (today an unknown user returns before hashing, which leaks which usernames exist)
-- [ ] Signing key rotation (new key on a schedule, retire old keys after the max token lifetime)
-- [ ] Configurable token lifetime (`JWTOptions.TokenDuration` is hard-coded to 1 h) via a config set
-- [ ] Cookie hardening: the token stays in a JS-readable `SameSite=Lax` cookie; add `Max-Age` matching the token expiry and set `Secure` when the request arrived over HTTPS
-- [ ] Optional TLS: `SERVER_TLS_CERT` / `SERVER_TLS_KEY` config, and honour `X-Forwarded-Proto` behind a reverse proxy
+- [ ] The `// TODO: check that screenHandler is allowed to be access by this requester` screen access check — needs the screen / room ownership model from M1 first
+- [x] Long-lived WebSocket connections: user connections are closed (1008) when the access token expires, and when a periodic check (`server.websocket.session-check-interval`) finds the session revoked. The client doesn't reconnect with a refreshed token yet
+- [x] Per-session JTIs (one per login, so one device can be signed out); revoked JTIs and JTIs unused for longer than the max token lifetime are deleted on startup
+- [x] Self-service password change (`UserService.ChangePassword`, revokes other sessions, form on the profile page); admin role management API (`UserService.SetRoles`, role changes reach the token on refresh). No admin UI for roles yet
+- [x] Login hardening: per-username lockout after 5 failures for 15 minutes (in memory, per server process), and an unknown username is compared against a dummy hash so it takes as long as a wrong password
+- [x] Signing key rotation: new key every `auth.key-rotation` (30 days), old keys are deleted once every token they signed has expired
+- [x] Configurable token lifetimes: `auth.access-token-duration`, `auth.refresh-token-duration`
+- [x] Cookie hardening: `Max-Age` matching the token expiry, `Secure` when the page is served over HTTPS. The tokens stay in JS-readable `SameSite=Lax` cookies (see Unknowns)
+- [~] Optional TLS: `server.tls.cert` / `server.tls.key` (`SERVER_TLS_CERT` / `SERVER_TLS_KEY`) serve HTTPS; still missing: honour `X-Forwarded-Proto` behind a reverse proxy (nothing server-side depends on the scheme yet)
 
 **Tests**
 
 - [x] `grpc.Authenticator`: no header, valid, malformed, expired, tampered, revoked and refresh-scope tokens, and the URL-encoded cookie fallback
-- [ ] `LoginServiceHandler`: login success, wrong password, unknown user, empty fields; refresh with valid / revoked / refresh-scope / non-refresh-scope tokens
-- [ ] `UserServiceHandler` authorization: `Get` (self / admin / other / anonymous), `List` and `ResetPassword` (admin vs. non-admin), reset revokes sessions
-- [ ] `JWTService` negative cases: expired, not-yet-valid, wrong issuer / audience, unknown or missing `kid`, tampered signature, JTI belonging to another user
-- [ ] `KeyData` PEM marshal / unmarshal round trip; `KeyManager` loads keys on `AfterInitialize`, reuses the signing key, errors on an unknown `kid`
-- [~] WebSocket `authenticate`: user token accepted and bad token rejected (header, subprotocol and cookie), refresh-scope token rejected are covered; still missing: route policies return 401 / 403, device ID / type read from header and query fallback
-- [ ] Playwright: logout, session survives token expiry via refresh, revoked session is logged out, WebSocket connects as the logged-in user
+- [x] `LoginServiceHandler`: login success, wrong password, unknown user, empty fields, lockout; refresh with valid / revoked / access / garbage tokens; logout by token and by request
+- [x] `UserServiceHandler` authorization: `Create` (sign-up on / off), `Get` (self / admin / other / anonymous / invalid token), `List` and `ResetPassword` (admin vs. non-admin), reset revokes sessions, `ChangePassword`, `SetRoles`
+- [x] `JWTService` negative cases: expired, within leeway, not-yet-valid, missing `exp`, wrong issuer / audience, unknown / missing / non-string `kid`, tampered signature, JTI belonging to another user, unknown JTI; sessions, refresh and cleanup
+- [x] `KeyData` PEM marshal / unmarshal round trip; `KeyManager` loads keys on `AfterInitialize`, reuses the signing key, picks the newest, errors on an unknown `kid`, rotates and retires keys
+- [~] WebSocket `authenticate`: user token accepted and bad token rejected (header, subprotocol and cookie), refresh-scope token rejected are covered; still missing: route policies return 401 / 403, device ID / type read from header and query fallback, connections closed on expiry / revocation (needs a way to register a screen in tests)
+- [ ] Playwright: logout, session survives token expiry via refresh, revoked session is logged out, WebSocket connects as the logged-in user, change password
 
 **Unknowns**
 

@@ -26,6 +26,7 @@ func BuildServer(setupCtx context.Context) (*ServerComponents, error) {
 	serverCfg := servers.GetServerConfig()
 	websocketCfg := websocket.GetWebsocketConfig()
 	tracingCfg := telemetry.GetConfig()
+	authCfg := authentication.GetAuthConfig()
 
 	// Setup OpenTelemetry telemetry
 	otelmanager, err := telemetry.Setup(setupCtx, tracingCfg)
@@ -54,7 +55,8 @@ func BuildServer(setupCtx context.Context) (*ServerComponents, error) {
 	if keyErr != nil {
 		return nil, keyErr
 	}
-	jwtService := authentication.NewJWTService(jtiService, keyManager)
+	jwtService := authentication.NewJWTService(jtiService, keyManager).WithOptions(authCfg.JWT)
+	keyManager.WithRotation(authCfg.KeyRotation, jwtService.MaxTokenLifetime())
 	userService := application.NewUserService(userRepo)
 	campaignService := application.NewCampaignService(campaignRepo)
 	screenManager := screens.NewScreenManager()
@@ -73,8 +75,8 @@ func BuildServer(setupCtx context.Context) (*ServerComponents, error) {
 		},
 	}, RouterRPCS{
 		Campaign: grpc.NewCampaignServiceHandler(campaignService, userService),
-		Login:    grpc.NewLoginServiceHandler(userService, jwtService),
-		User:     grpc.NewUserServiceHandler(userService),
+		Login:    grpc.NewLoginServiceHandler(userService, jwtService, jtiService),
+		User:     grpc.NewUserServiceHandler(userService, jtiService, grpc.UserServiceOptions{SignupEnabled: authCfg.SignupEnabled}),
 	},
 		RouterConfig{
 			CORS:    corsCfg,
@@ -91,7 +93,7 @@ func BuildServer(setupCtx context.Context) (*ServerComponents, error) {
 		DB:         db,
 		Components: lfManager,
 	}
-	lfManager.Add(screenManager, keyManager, db, otelmanager, server.Server)
+	lfManager.Add(screenManager, keyManager, jwtService, db, otelmanager, server.Server)
 
 	return server, nil
 }

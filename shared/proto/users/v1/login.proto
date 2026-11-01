@@ -5,10 +5,12 @@ option go_package = "github.com/DaanV2/mechanus/server/proto/users/v1;usersv1";
 
 // A service for logging in a user, or creating their account
 service LoginService {
-  // Log in the user, returns a JWT token
+  // Log in the user, returns an access token and a refresh token
   rpc Login(LoginRequest) returns (LoginResponse) {}
-  // Refresh a given token, with a new JWT token
+  // Exchange a refresh token for a new access token and refresh token
   rpc Refresh(RefreshTokenRequest) returns (RefreshTokenResponse) {}
+  // Log out a session, revoking all its access and refresh tokens
+  rpc Logout(LogoutRequest) returns (LogoutResponse) {}
 }
 
 // A login request
@@ -20,20 +22,32 @@ message LoginRequest {
 }
 
 message LoginResponse {
-  // The JWT token, without prefix
+  // The JWT access token, without prefix
   string token = 1;
   // The prefix to be used, so far always Bearer
   string type = 2;
+  // The JWT refresh token (scope "refresh"), without prefix. Only accepted by Refresh and Logout
+  string refresh_token = 3;
 }
 
 message RefreshTokenRequest {
-  // The JWT token, without prefix
+  // The JWT refresh token, without prefix
   string token = 1;
 }
 
 message RefreshTokenResponse {
-  // The JWT token, without prefix
+  // The JWT access token, without prefix
   string token = 1;
   // The prefix to be used, so far always Bearer
   string type = 2;
+  // The new JWT refresh token, without prefix
+  string refresh_token = 3;
 }
+
+message LogoutRequest {
+  // A JWT access or refresh token of the session to log out, without prefix.
+  // When empty, the session of the access token on the request is logged out.
+  string token = 1;
+}
+
+message LogoutResponse {}

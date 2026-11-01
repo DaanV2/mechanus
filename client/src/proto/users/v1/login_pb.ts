@@ -10,7 +10,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file users/v1/login.proto.
  */
 export const file_users_v1_login: GenFile = /*@__PURE__*/
-  fileDesc("ChR1c2Vycy92MS9sb2dpbi5wcm90bxIIdXNlcnMudjEiMgoMTG9naW5SZXF1ZXN0EhAKCHVzZXJuYW1lGAEgASgJEhAKCHBhc3N3b3JkGAIgASgJIiwKDUxvZ2luUmVzcG9uc2USDQoFdG9rZW4YASABKAkSDAoEdHlwZRgCIAEoCSIkChNSZWZyZXNoVG9rZW5SZXF1ZXN0Eg0KBXRva2VuGAEgASgJIjMKFFJlZnJlc2hUb2tlblJlc3BvbnNlEg0KBXRva2VuGAEgASgJEgwKBHR5cGUYAiABKAkylgEKDExvZ2luU2VydmljZRI6CgVMb2dpbhIWLnVzZXJzLnYxLkxvZ2luUmVxdWVzdBoXLnVzZXJzLnYxLkxvZ2luUmVzcG9uc2UiABJKCgdSZWZyZXNoEh0udXNlcnMudjEuUmVmcmVzaFRva2VuUmVxdWVzdBoeLnVzZXJzLnYxLlJlZnJlc2hUb2tlblJlc3BvbnNlIgBCOlo4Z2l0aHViLmNvbS9EYWFuVjIvbWVjaGFudXMvc2VydmVyL3Byb3RvL3VzZXJzL3YxO3VzZXJzdjFiBnByb3RvMw");
+  fileDesc("ChR1c2Vycy92MS9sb2dpbi5wcm90bxIIdXNlcnMudjEiMgoMTG9naW5SZXF1ZXN0EhAKCHVzZXJuYW1lGAEgASgJEhAKCHBhc3N3b3JkGAIgASgJIkMKDUxvZ2luUmVzcG9uc2USDQoFdG9rZW4YASABKAkSDAoEdHlwZRgCIAEoCRIVCg1yZWZyZXNoX3Rva2VuGAMgASgJIiQKE1JlZnJlc2hUb2tlblJlcXVlc3QSDQoFdG9rZW4YASABKAkiSgoUUmVmcmVzaFRva2VuUmVzcG9uc2USDQoFdG9rZW4YASABKAkSDAoEdHlwZRgCIAEoCRIVCg1yZWZyZXNoX3Rva2VuGAMgASgJIh4KDUxvZ291dFJlcXVlc3QSDQoFdG9rZW4YASABKAkiEAoOTG9nb3V0UmVzcG9uc2Uy1QEKDExvZ2luU2VydmljZRI6CgVMb2dpbhIWLnVzZXJzLnYxLkxvZ2luUmVxdWVzdBoXLnVzZXJzLnYxLkxvZ2luUmVzcG9uc2UiABJKCgdSZWZyZXNoEh0udXNlcnMudjEuUmVmcmVzaFRva2VuUmVxdWVzdBoeLnVzZXJzLnYxLlJlZnJlc2hUb2tlblJlc3BvbnNlIgASPQoGTG9nb3V0EhcudXNlcnMudjEuTG9nb3V0UmVxdWVzdBoYLnVzZXJzLnYxLkxvZ291dFJlc3BvbnNlIgBCOlo4Z2l0aHViLmNvbS9EYWFuVjIvbWVjaGFudXMvc2VydmVyL3Byb3RvL3VzZXJzL3YxO3VzZXJzdjFiBnByb3RvMw");
 
 /**
  * A login request
@@ -45,7 +45,7 @@ export const LoginRequestSchema: GenMessage<LoginRequest> = /*@__PURE__*/
  */
 export type LoginResponse = Message<"users.v1.LoginResponse"> & {
   /**
-   * The JWT token, without prefix
+   * The JWT access token, without prefix
    *
    * @generated from field: string token = 1;
    */
@@ -57,6 +57,13 @@ export type LoginResponse = Message<"users.v1.LoginResponse"> & {
    * @generated from field: string type = 2;
    */
   type: string;
+
+  /**
+   * The JWT refresh token (scope "refresh"), without prefix. Only accepted by Refresh and Logout
+   *
+   * @generated from field: string refresh_token = 3;
+   */
+  refreshToken: string;
 };
 
 /**
@@ -71,7 +78,7 @@ export const LoginResponseSchema: GenMessage<LoginResponse> = /*@__PURE__*/
  */
 export type RefreshTokenRequest = Message<"users.v1.RefreshTokenRequest"> & {
   /**
-   * The JWT token, without prefix
+   * The JWT refresh token, without prefix
    *
    * @generated from field: string token = 1;
    */
@@ -90,7 +97,7 @@ export const RefreshTokenRequestSchema: GenMessage<RefreshTokenRequest> = /*@__P
  */
 export type RefreshTokenResponse = Message<"users.v1.RefreshTokenResponse"> & {
   /**
-   * The JWT token, without prefix
+   * The JWT access token, without prefix
    *
    * @generated from field: string token = 1;
    */
@@ -102,6 +109,13 @@ export type RefreshTokenResponse = Message<"users.v1.RefreshTokenResponse"> & {
    * @generated from field: string type = 2;
    */
   type: string;
+
+  /**
+   * The new JWT refresh token, without prefix
+   *
+   * @generated from field: string refresh_token = 3;
+   */
+  refreshToken: string;
 };
 
 /**
@@ -112,13 +126,46 @@ export const RefreshTokenResponseSchema: GenMessage<RefreshTokenResponse> = /*@_
   messageDesc(file_users_v1_login, 3);
 
 /**
+ * @generated from message users.v1.LogoutRequest
+ */
+export type LogoutRequest = Message<"users.v1.LogoutRequest"> & {
+  /**
+   * A JWT access or refresh token of the session to log out, without prefix.
+   * When empty, the session of the access token on the request is logged out.
+   *
+   * @generated from field: string token = 1;
+   */
+  token: string;
+};
+
+/**
+ * Describes the message users.v1.LogoutRequest.
+ * Use `create(LogoutRequestSchema)` to create a new message.
+ */
+export const LogoutRequestSchema: GenMessage<LogoutRequest> = /*@__PURE__*/
+  messageDesc(file_users_v1_login, 4);
+
+/**
+ * @generated from message users.v1.LogoutResponse
+ */
+export type LogoutResponse = Message<"users.v1.LogoutResponse"> & {
+};
+
+/**
+ * Describes the message users.v1.LogoutResponse.
+ * Use `create(LogoutResponseSchema)` to create a new message.
+ */
+export const LogoutResponseSchema: GenMessage<LogoutResponse> = /*@__PURE__*/
+  messageDesc(file_users_v1_login, 5);
+
+/**
  * A service for logging in a user, or creating their account
  *
  * @generated from service users.v1.LoginService
  */
 export const LoginService: GenService<{
   /**
-   * Log in the user, returns a JWT token
+   * Log in the user, returns an access token and a refresh token
    *
    * @generated from rpc users.v1.LoginService.Login
    */
@@ -128,7 +175,7 @@ export const LoginService: GenService<{
     output: typeof LoginResponseSchema;
   },
   /**
-   * Refresh a given token, with a new JWT token
+   * Exchange a refresh token for a new access token and refresh token
    *
    * @generated from rpc users.v1.LoginService.Refresh
    */
@@ -136,6 +183,16 @@ export const LoginService: GenService<{
     methodKind: "unary";
     input: typeof RefreshTokenRequestSchema;
     output: typeof RefreshTokenResponseSchema;
+  },
+  /**
+   * Log out a session, revoking all its access and refresh tokens
+   *
+   * @generated from rpc users.v1.LoginService.Logout
+   */
+  logout: {
+    methodKind: "unary";
+    input: typeof LogoutRequestSchema;
+    output: typeof LogoutResponseSchema;
   },
 }> = /*@__PURE__*/
   serviceDesc(file_users_v1_login, 0);

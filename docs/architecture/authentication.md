@@ -5,61 +5,92 @@ Mechanus uses JWT (JSON Web Tokens) for user authentication. Tokens are signed w
 ## JWT flow
 
 ```ascii
-Client                            Server
-  │                                 │
-  │── POST /users.v1.LoginService ─►│  credentials (username + password)
-  │                                 │
-  │                                 │  verify password hash
-  │                                 │  get or create JTI (JWT ID) for user
-  │                                 │  sign JWT with RSA-2048 private key (RS512)
-  │                                 │
-  │◄──────── JWT token ─────────────│
-  │                                 │
-  │── ConnectRPC request ──────────►│  Authorization: Bearer <token>
-  │                                 │
-  │                                 │  parse JWT → extract kid from header
-  │                                 │  look up public key by kid
-  │                                 │  verify signature, expiry, audience, issuer
-  │                                 │  check JTI is not revoked
-  │◄────── response ────────────────│
+Client                                   Server
+  │                                        │
+  │── LoginService.Login ─────────────────►│  credentials (username + password)
+  │                                        │  rate limit per username, verify password hash
+  │                                        │  create a new session (JTI) for the user
+  │                                        │  sign an access token (scope "*") and a
+  │                                        │  refresh token (scope "refresh"), same JTI
+  │◄──────── access + refresh token ───────│
+  │                                        │
+  │── ConnectRPC request ─────────────────►│  Authorization: Bearer <access token>
+  │                                        │  parse JWT → kid → public key
+  │                                        │  verify signature, exp / nbf (5 min leeway), aud, iss
+  │                                        │  check the JTI belongs to the user and isn't revoked
+  │◄────── response ───────────────────────│
+  │                                        │
+  │── LoginService.Refresh ───────────────►│  refresh token (only scope "refresh" is accepted)
+  │◄──────── new access + refresh token ───│  same JTI, user's current roles
+  │                                        │
+  │── LoginService.Logout ────────────────►│  revoke the session's JTI
 ```
+
+### Client behaviour
+
+The browser client (`client/src/lib/authentication/session.ts`) stores the access token in the `access-token` cookie (`Bearer <jwt>`) and the refresh token in the `refresh-token` cookie. Both cookies get a `Max-Age` matching their token's expiry, and `Secure` when the page was served over HTTPS. Before every ConnectRPC request it refreshes the access token when it expires within a minute, and on an `Unauthenticated` answer it refreshes once and retries. A token whose `exp` passed doesn't count as logged in.
+
+### Error codes
+
+Handlers answer `Unauthenticated` when a request needs a user but has no valid access token (none, malformed, expired, revoked or refresh-only) — the client should refresh or log in again — and `PermissionDenied` when the user is known but lacks the role (`grpc.requireRole`). The `Authenticator` interceptor itself never rejects a request: it only puts the claims, and whether they are valid, on the context.
 
 ## JWT claims
 
 Every token contains:
 
-| Field               | Description                                                          |
-| ------------------- | -------------------------------------------------------------------- |
-| `sub`               | User ID                                                              |
-| `jti`               | JWT ID — links the token to a revocable `JTI` record in the database |
-| `iss` / `aud`       | Both set to `mechanus`                                               |
-| `iat`, `nbf`, `exp` | Issued at, not-before (−1 min leeway), expires at (+1 hour)          |
-| `user.id`           | User ID (redundant with `sub`, kept for convenience)                 |
-| `user.name`         | Username                                                             |
-| `user.roles`        | Array of role strings                                                |
-| `user.campaigns`    | Array of campaign IDs the user has access to                         |
-| `grant`             | How the token was obtained: `"password"` (login) or `"refresh"`      |
-| `scope`             | What the token may be used for: `"*"` (everything) or `"refresh"`    |
+| Field               | Description                                                                                   |
+| ------------------- | --------------------------------------------------------------------------------------------- |
+| `sub`               | User ID                                                                                       |
+| `jti`               | JWT ID — links the token to a revocable `JTI` (session) record in the database                 |
+| `iss` / `aud`       | Both set to `mechanus`                                                                        |
+| `iat`, `nbf`, `exp` | Issued at, not-before (−1 min), expires at (`auth.access-token-duration` / `auth.refresh-token-duration`) |
+| `user.id`           | User ID (redundant with `sub`, kept for convenience)                                          |
+| `user.name`         | Username                                                                                      |
+| `user.roles`        | Array of role strings — role changes reach the token on the next refresh                      |
+| `user.campaigns`    | Array of campaign IDs the user has access to                                                  |
+| `grant`             | How the token was obtained: `"password"` (login) or `"refresh"`                               |
+| `scope`             | What the token may be used for: `"*"` (everything) or `"refresh"` (only `Refresh` / `Logout`) |
+
+## Configuration
+
+| Flag / env                                                     | Default | Description                                                              |
+| -------------------------------------------------------------- | ------- | ------------------------------------------------------------------------ |
+| `auth.access-token-duration` / `AUTH_ACCESS_TOKEN_DURATION`    | `1h`    | Lifetime of an access token                                              |
+| `auth.refresh-token-duration` / `AUTH_REFRESH_TOKEN_DURATION`  | `168h`  | Lifetime of a refresh token; a session not refreshed in this time ends   |
+| `auth.key-rotation` / `AUTH_KEY_ROTATION`                      | `720h`  | How often a new signing key is generated, `0` disables rotation          |
+| `auth.signup-enabled` / `AUTH_SIGNUP_ENABLED`                  | `false` | Let anyone call `UserService.Create`; otherwise only admins can          |
+| `server.tls.cert` + `server.tls.key` / `SERVER_TLS_CERT` + `SERVER_TLS_KEY` | — | Serve HTTPS with these PEM files                              |
+
+## Accounts
+
+- `UserService.Create` requires the admin role unless `auth.signup-enabled` is on (the dev / test compose files turn it on).
+- `UserService.ResetPassword` (admin) revokes every session of the user.
+- `UserService.ChangePassword` (the user, needs the current password) revokes every other session of the user, keeping the one that made the call.
+- `UserService.SetRoles` (admin) replaces a user's roles; an admin can't remove their own admin role.
+- `LoginService.Login` locks a username out for 15 minutes after 5 failed attempts (in memory, per server), and compares against a dummy hash when the username doesn't exist, so an unknown username takes as long as a wrong password.
 
 ## RSA key management
 
-Keys are generated as RSA key pairs and persisted via `infrastructure/storage`. The `KeyManager` loads all keys from storage on startup (`AfterInitialize` lifecycle hook) and caches them in memory.
+Keys are generated as RSA key pairs and persisted via `infrastructure/storage`, with their creation time in the PEM headers. The `KeyManager` loads all keys from storage on startup (`AfterInitialize` lifecycle hook) and caches them in memory.
 
-Each key has a `kid` (key ID) stored in the JWT header. On validation the server looks up the public key by `kid`, which allows key rotation: old tokens signed with a previous key remain valid as long as that key is still in storage.
+Each key has a `kid` (key ID) stored in the JWT header. On validation the server looks up the public key by `kid`, so tokens signed with an older key stay valid as long as that key is still in storage.
 
-`KeyManager.GetSigningKey` returns the first available private key, or generates a new one if none exist.
+`KeyManager.GetSigningKey` signs with the newest key (ties broken on the `kid`), generating one when there is none or when the newest is older than `auth.key-rotation`. A key is deleted once it stopped signing longer ago than the longest token lifetime, so every token it signed has expired. Keys stored before creation times were tracked start their rotation period at the next startup.
 
-## JTI (JWT ID) revocation
+## JTI (session) revocation
 
-Every token is tied to a `JTI` database record (`infrastructure/persistence/models.JTI`). A JTI record has:
+Every token is tied to a `JTI` database record (`infrastructure/persistence/models.JTI`), one per login session. A JTI record has:
 
 - `ID` — UUID, used as the JWT `jti` claim
 - `UserID` — the user it belongs to
 - `Revoked` — boolean flag
+- `UpdatedAt` — touched on every refresh
 
-On validation, after the signature and expiry checks pass, the server fetches the JTI record and rejects the token if `Revoked = true`. This enables instant token invalidation (e.g. on logout or password change) without waiting for natural expiry.
+On validation, after the signature and time checks pass, the server fetches the JTI record and rejects the token if it belongs to another user or `Revoked = true`. Revoking a JTI signs out that one session (both its access and refresh tokens) right away; `JTIService.RevokeUser` signs out all sessions of a user.
 
-`JTIService.GetActiveOrCreate` reuses an existing active JTI for a user rather than creating a new one each login, so all active sessions share a JTI and a single revoke call signs out all of them.
+Long-lived screen WebSocket connections of a user are closed (status 1008) when their access token expires, and when a periodic check (`server.websocket.session-check-interval`, default 1 minute) finds the session revoked.
+
+On startup `JWTService.Cleanup` deletes revoked JTIs and JTIs not refreshed within the longest token lifetime.
 
 ## Device authentication
 
@@ -132,6 +163,7 @@ Device (/devices/pair)              Server                          Admin (/devi
 
 1. Parse JWT, extract `kid` from header
 2. Look up RSA public key by `kid`
-3. Verify signature with RS512
-4. Check `exp`, `iss`, `aud` (5-minute leeway on expiry)
+3. Verify signature, only RS512 is accepted
+4. Check `exp` (required), `nbf`, `iat`, `iss`, `aud`, with a 5-minute leeway on the time claims (`JWT_LEEWAY`)
 5. Fetch `JTI` record; confirm `UserID` matches and `Revoked = false`
+6. The caller checks the `scope`: the API and WebSocket only accept `"*"`, `Refresh` only `"refresh"`
