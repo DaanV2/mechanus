@@ -78,10 +78,12 @@ func (x *LoginRequest) GetPassword() string {
 
 type LoginResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// The JWT token, without prefix
+	// The JWT access token, without prefix
 	Token string `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
 	// The prefix to be used, so far always Bearer
-	Type          string `protobuf:"bytes,2,opt,name=type,proto3" json:"type,omitempty"`
+	Type string `protobuf:"bytes,2,opt,name=type,proto3" json:"type,omitempty"`
+	// The JWT refresh token (scope "refresh"), without prefix. Only accepted by Refresh and Logout
+	RefreshToken  string `protobuf:"bytes,3,opt,name=refresh_token,json=refreshToken,proto3" json:"refresh_token,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -130,9 +132,16 @@ func (x *LoginResponse) GetType() string {
 	return ""
 }
 
+func (x *LoginResponse) GetRefreshToken() string {
+	if x != nil {
+		return x.RefreshToken
+	}
+	return ""
+}
+
 type RefreshTokenRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// The JWT token, without prefix
+	// The JWT refresh token, without prefix
 	Token         string `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -177,10 +186,12 @@ func (x *RefreshTokenRequest) GetToken() string {
 
 type RefreshTokenResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// The JWT token, without prefix
+	// The JWT access token, without prefix
 	Token string `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
 	// The prefix to be used, so far always Bearer
-	Type          string `protobuf:"bytes,2,opt,name=type,proto3" json:"type,omitempty"`
+	Type string `protobuf:"bytes,2,opt,name=type,proto3" json:"type,omitempty"`
+	// The new JWT refresh token, without prefix
+	RefreshToken  string `protobuf:"bytes,3,opt,name=refresh_token,json=refreshToken,proto3" json:"refresh_token,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -229,6 +240,95 @@ func (x *RefreshTokenResponse) GetType() string {
 	return ""
 }
 
+func (x *RefreshTokenResponse) GetRefreshToken() string {
+	if x != nil {
+		return x.RefreshToken
+	}
+	return ""
+}
+
+type LogoutRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// A JWT access or refresh token of the session to log out, without prefix.
+	// When empty, the session of the access token on the request is logged out.
+	Token         string `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *LogoutRequest) Reset() {
+	*x = LogoutRequest{}
+	mi := &file_users_v1_login_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *LogoutRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*LogoutRequest) ProtoMessage() {}
+
+func (x *LogoutRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_users_v1_login_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use LogoutRequest.ProtoReflect.Descriptor instead.
+func (*LogoutRequest) Descriptor() ([]byte, []int) {
+	return file_users_v1_login_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *LogoutRequest) GetToken() string {
+	if x != nil {
+		return x.Token
+	}
+	return ""
+}
+
+type LogoutResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *LogoutResponse) Reset() {
+	*x = LogoutResponse{}
+	mi := &file_users_v1_login_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *LogoutResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*LogoutResponse) ProtoMessage() {}
+
+func (x *LogoutResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_users_v1_login_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use LogoutResponse.ProtoReflect.Descriptor instead.
+func (*LogoutResponse) Descriptor() ([]byte, []int) {
+	return file_users_v1_login_proto_rawDescGZIP(), []int{5}
+}
+
 var File_users_v1_login_proto protoreflect.FileDescriptor
 
 const file_users_v1_login_proto_rawDesc = "" +
@@ -236,18 +336,24 @@ const file_users_v1_login_proto_rawDesc = "" +
 	"\x14users/v1/login.proto\x12\busers.v1\"F\n" +
 	"\fLoginRequest\x12\x1a\n" +
 	"\busername\x18\x01 \x01(\tR\busername\x12\x1a\n" +
-	"\bpassword\x18\x02 \x01(\tR\bpassword\"9\n" +
+	"\bpassword\x18\x02 \x01(\tR\bpassword\"^\n" +
 	"\rLoginResponse\x12\x14\n" +
 	"\x05token\x18\x01 \x01(\tR\x05token\x12\x12\n" +
-	"\x04type\x18\x02 \x01(\tR\x04type\"+\n" +
+	"\x04type\x18\x02 \x01(\tR\x04type\x12#\n" +
+	"\rrefresh_token\x18\x03 \x01(\tR\frefreshToken\"+\n" +
 	"\x13RefreshTokenRequest\x12\x14\n" +
-	"\x05token\x18\x01 \x01(\tR\x05token\"@\n" +
+	"\x05token\x18\x01 \x01(\tR\x05token\"e\n" +
 	"\x14RefreshTokenResponse\x12\x14\n" +
 	"\x05token\x18\x01 \x01(\tR\x05token\x12\x12\n" +
-	"\x04type\x18\x02 \x01(\tR\x04type2\x96\x01\n" +
+	"\x04type\x18\x02 \x01(\tR\x04type\x12#\n" +
+	"\rrefresh_token\x18\x03 \x01(\tR\frefreshToken\"%\n" +
+	"\rLogoutRequest\x12\x14\n" +
+	"\x05token\x18\x01 \x01(\tR\x05token\"\x10\n" +
+	"\x0eLogoutResponse2\xd5\x01\n" +
 	"\fLoginService\x12:\n" +
 	"\x05Login\x12\x16.users.v1.LoginRequest\x1a\x17.users.v1.LoginResponse\"\x00\x12J\n" +
-	"\aRefresh\x12\x1d.users.v1.RefreshTokenRequest\x1a\x1e.users.v1.RefreshTokenResponse\"\x00B:Z8github.com/DaanV2/mechanus/server/proto/users/v1;usersv1b\x06proto3"
+	"\aRefresh\x12\x1d.users.v1.RefreshTokenRequest\x1a\x1e.users.v1.RefreshTokenResponse\"\x00\x12=\n" +
+	"\x06Logout\x12\x17.users.v1.LogoutRequest\x1a\x18.users.v1.LogoutResponse\"\x00B:Z8github.com/DaanV2/mechanus/server/proto/users/v1;usersv1b\x06proto3"
 
 var (
 	file_users_v1_login_proto_rawDescOnce sync.Once
@@ -261,20 +367,24 @@ func file_users_v1_login_proto_rawDescGZIP() []byte {
 	return file_users_v1_login_proto_rawDescData
 }
 
-var file_users_v1_login_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
+var file_users_v1_login_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_users_v1_login_proto_goTypes = []any{
 	(*LoginRequest)(nil),         // 0: users.v1.LoginRequest
 	(*LoginResponse)(nil),        // 1: users.v1.LoginResponse
 	(*RefreshTokenRequest)(nil),  // 2: users.v1.RefreshTokenRequest
 	(*RefreshTokenResponse)(nil), // 3: users.v1.RefreshTokenResponse
+	(*LogoutRequest)(nil),        // 4: users.v1.LogoutRequest
+	(*LogoutResponse)(nil),       // 5: users.v1.LogoutResponse
 }
 var file_users_v1_login_proto_depIdxs = []int32{
 	0, // 0: users.v1.LoginService.Login:input_type -> users.v1.LoginRequest
 	2, // 1: users.v1.LoginService.Refresh:input_type -> users.v1.RefreshTokenRequest
-	1, // 2: users.v1.LoginService.Login:output_type -> users.v1.LoginResponse
-	3, // 3: users.v1.LoginService.Refresh:output_type -> users.v1.RefreshTokenResponse
-	2, // [2:4] is the sub-list for method output_type
-	0, // [0:2] is the sub-list for method input_type
+	4, // 2: users.v1.LoginService.Logout:input_type -> users.v1.LogoutRequest
+	1, // 3: users.v1.LoginService.Login:output_type -> users.v1.LoginResponse
+	3, // 4: users.v1.LoginService.Refresh:output_type -> users.v1.RefreshTokenResponse
+	5, // 5: users.v1.LoginService.Logout:output_type -> users.v1.LogoutResponse
+	3, // [3:6] is the sub-list for method output_type
+	0, // [0:3] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
@@ -291,7 +401,7 @@ func file_users_v1_login_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_users_v1_login_proto_rawDesc), len(file_users_v1_login_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   4,
+			NumMessages:   6,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

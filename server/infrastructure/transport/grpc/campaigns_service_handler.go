@@ -9,7 +9,6 @@ import (
 	"connectrpc.com/connect"
 	"github.com/DaanV2/mechanus/server/application"
 	"github.com/DaanV2/mechanus/server/engine/authentication/roles"
-	"github.com/DaanV2/mechanus/server/infrastructure/authentication"
 	"github.com/DaanV2/mechanus/server/infrastructure/logging"
 	"github.com/DaanV2/mechanus/server/infrastructure/persistence"
 	"github.com/DaanV2/mechanus/server/infrastructure/persistence/models"
@@ -44,7 +43,7 @@ func NewCampaignServiceHandler(campaigns *application.CampaignService, users *ap
 
 // Create implements campaignsv1connect.CampaignServiceHandler.
 func (c *CampaignServiceHandler) Create(ctx context.Context, req *connect.Request[campaignsv1.CreateCampaignRequest]) (*connect.Response[campaignsv1.CreateCampaignResponse], error) {
-	jwt, err := c.requireRole(ctx, roles.User)
+	jwt, err := requireRole(ctx, roles.User)
 	if err != nil {
 		return nil, err
 	}
@@ -76,7 +75,7 @@ func (c *CampaignServiceHandler) Create(ctx context.Context, req *connect.Reques
 
 // Get implements campaignsv1connect.CampaignServiceHandler.
 func (c *CampaignServiceHandler) Get(ctx context.Context, req *connect.Request[campaignsv1.GetCampaignRequest]) (*connect.Response[campaignsv1.GetCampaignResponse], error) {
-	jwt, err := c.requireRole(ctx, roles.Viewer)
+	jwt, err := requireRole(ctx, roles.Viewer)
 	if err != nil {
 		return nil, err
 	}
@@ -108,7 +107,7 @@ func (c *CampaignServiceHandler) Get(ctx context.Context, req *connect.Request[c
 
 // List implements campaignsv1connect.CampaignServiceHandler.
 func (c *CampaignServiceHandler) List(ctx context.Context, _ *connect.Request[campaignsv1.ListCampaignsRequest]) (*connect.Response[campaignsv1.ListCampaignsResponse], error) {
-	jwt, err := c.requireRole(ctx, roles.Viewer)
+	jwt, err := requireRole(ctx, roles.Viewer)
 	if err != nil {
 		return nil, err
 	}
@@ -131,11 +130,6 @@ func (c *CampaignServiceHandler) List(ctx context.Context, _ *connect.Request[ca
 	}
 
 	return connect.NewResponse(&campaignsv1.ListCampaignsResponse{Campaigns: result}), nil
-}
-
-// requireRole returns the jwt of the request, or a connect error if the request is not authenticated with the given role.
-func (c *CampaignServiceHandler) requireRole(ctx context.Context, role roles.Role) (authentication.JWTContext, error) {
-	return requireRole(ctx, role)
 }
 
 func isMember(campaign *models.Campaign, userId string) bool {

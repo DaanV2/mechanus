@@ -9,7 +9,6 @@ import (
 	"github.com/DaanV2/mechanus/server/application"
 	"github.com/DaanV2/mechanus/server/engine/authentication/roles"
 	"github.com/DaanV2/mechanus/server/engine/scenes"
-	"github.com/DaanV2/mechanus/server/infrastructure/authentication"
 	"github.com/DaanV2/mechanus/server/infrastructure/logging"
 	"github.com/DaanV2/mechanus/server/infrastructure/scenestore"
 	scenesv1 "github.com/DaanV2/mechanus/server/proto/scenes/v1"
@@ -161,18 +160,4 @@ func toScene(cfg *scenes.Config) *scenesv1.Scene {
 		Variants:       variants,
 		DefaultVariant: cfg.DefaultVariant,
 	}
-}
-
-// requireRole returns the jwt of the request, or a connect error if the request is not authenticated with the given role.
-func requireRole(ctx context.Context, role roles.Role) (authentication.JWTContext, error) {
-	jwt, err := authentication.JWTFromContext(ctx)
-	if err != nil {
-		return jwt, connect.NewError(connect.CodeUnauthenticated, err)
-	}
-
-	if !jwt.IsAuthenicatedWithRole(role) {
-		return jwt, connect.NewError(connect.CodePermissionDenied, errors.New("expecting atleast a "+role.String()+" role"))
-	}
-
-	return jwt, nil
 }

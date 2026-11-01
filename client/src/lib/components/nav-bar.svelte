@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { goto } from '$app/navigation';
   import { userHandler, UserState } from '$lib/handlers/user';
   import {
     Avatar,
@@ -19,12 +20,14 @@
   let currentUser: UserState = $state(UserState.LOGGED_OUT);
   let userData = $derived(currentUser.loggedin ? currentUser.data : undefined);
 
-  onMount(() => {
-    currentUser = userHandler.current;
+  onMount(async () => {
+    currentUser = await userHandler.restore();
   });
 
   async function logout() {
-    return userHandler.logout();
+    await userHandler.logout();
+    currentUser = UserState.LOGGED_OUT;
+    await goto('/users/login');
   }
 </script>
 

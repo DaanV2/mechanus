@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/DaanV2/mechanus/server/infrastructure/lifecycle"
 	"github.com/DaanV2/mechanus/server/infrastructure/logging"
 	"github.com/DaanV2/mechanus/server/infrastructure/persistence/models"
 	"github.com/DaanV2/mechanus/server/mechanus"
@@ -17,34 +18,48 @@ const (
 	// JWT_ISSUER is the issuer name for JWT tokens.
 	JWT_ISSUER   = mechanus.SERVICE_NAME
 	JWT_AUDIENCE = mechanus.SERVICE_NAME
+	// JWT_LEEWAY is the clock skew allowed when checking the time based claims (exp, nbf, iat).
+	JWT_LEEWAY = time.Minute * 5
 )
+
+var _ lifecycle.AfterInitialize = &JWTService{}
 
 type (
 	// JWTOptions contains configuration options for JWT tokens.
 	JWTOptions struct {
+		// How long an access token ([ScopeAll]) is valid for.
 		TokenDuration time.Duration
+		// How long a refresh token ([ScopeRefresh]) is valid for.
+		RefreshTokenDuration time.Duration
 	}
 
 	// JWTService manages JWT token creation and validation.
 	JWTService struct {
 		options    *JWTOptions
-		validator  *jwt.Validator
 		jtiService *JTIService
 		keys       *KeyManager
 	}
+
+	// TokenPair is the result of logging in or refreshing: an access token and the refresh token of the same session.
+	TokenPair struct {
+		Access  string
+		Refresh string
+	}
 )
+
+// DefaultJWTOptions returns the default token lifetimes.
+func DefaultJWTOptions() JWTOptions {
+	return JWTOptions{
+		TokenDuration:        time.Hour,
+		RefreshTokenDuration: time.Hour * 24 * 7,
+	}
+}
 
 // NewJWTService creates a new JWT service with the provided JTI service and key manager.
 func NewJWTService(jtiService *JTIService, keys *KeyManager) *JWTService {
+	options := DefaultJWTOptions()
 	service := &JWTService{
-		options: &JWTOptions{
-			TokenDuration: time.Hour * 1,
-		},
-		validator: jwt.NewValidator(
-			jwt.WithAudience(JWT_AUDIENCE),
-			jwt.WithIssuer(JWT_ISSUER),
-			jwt.WithLeeway(time.Minute*5),
-		),
+		options:    &options,
 		jtiService: jtiService,
 		keys:       keys,
 	}
@@ -52,29 +67,59 @@ func NewJWTService(jtiService *JTIService, keys *KeyManager) *JWTService {
 	return service
 }
 
-// TODO Refresh
+// WithOptions replaces the token options of the service.
+func (s *JWTService) WithOptions(options JWTOptions) *JWTService {
+	s.options = &options
 
-// Create creates a new JWT token for the given user with the specified grant and scope.
+	return s
+}
+
+// AfterInitialize implements lifecycle.AfterInitialize, it removes revoked and expired sessions.
+func (s *JWTService) AfterInitialize(ctx context.Context) error {
+	return s.Cleanup(ctx)
+}
+
+// Cleanup removes the JTIs of sessions that are revoked, or haven't been refreshed within the refresh token lifetime.
+func (s *JWTService) Cleanup(ctx context.Context) error {
+	_, err := s.jtiService.Cleanup(ctx, s.MaxTokenLifetime())
+
+	return err
+}
+
+// MaxTokenLifetime returns the longest time any token issued by this service stays valid.
+func (s *JWTService) MaxTokenLifetime() time.Duration {
+	return max(s.options.TokenDuration, s.options.RefreshTokenDuration) + JWT_LEEWAY
+}
+
+// Create creates a new JWT token for the given user with the specified grant and scope, in a new session.
 func (s *JWTService) Create(ctx context.Context, user *models.User, grant, scope string) (string, error) {
 	logging.Info(ctx, "creating jwt")
 
-	claims := &JWTClaims{
-		User: JWTUser{
-			ID:        user.ID,
-			Name:      user.Username,
-			Roles:     user.Roles,
-			Campaigns: xslices.CollectIDs(user.Campaigns),
-		},
-		Grant: grant,
-		Scope: scope,
-	}
-
-	jti, err := s.jtiService.GetActiveOrCreate(ctx, user.ID)
+	jti, err := s.jtiService.Create(ctx, user.ID)
 	if err != nil {
 		return "", err
 	}
 
-	return s.sign(ctx, jti.ID, claims)
+	return s.sign(ctx, jti.ID, newClaims(user, grant, scope))
+}
+
+// CreateSession starts a new session (JTI) for the user and returns its access and refresh token.
+func (s *JWTService) CreateSession(ctx context.Context, user *models.User, grant string) (*TokenPair, error) {
+	jti, err := s.jtiService.Create(ctx, user.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	return s.signPair(ctx, jti.ID, user, grant)
+}
+
+// RefreshSession issues a new access and refresh token for an existing session, picking up the user's current roles.
+func (s *JWTService) RefreshSession(ctx context.Context, user *models.User, jti string) (*TokenPair, error) {
+	if err := s.jtiService.Touch(ctx, jti); err != nil {
+		return nil, fmt.Errorf("error updating the session: %w", err)
+	}
+
+	return s.signPair(ctx, jti, user, GrantRefresh)
 }
 
 // Options returns the JWT service configuration options.
@@ -83,19 +128,24 @@ func (s *JWTService) Options() *JWTOptions {
 }
 
 // Validate validates a JWT token and returns the parsed token.
+// It does not check the scope of the token, callers have to check [JWTClaims.HasScope] themselves.
 func (s *JWTService) Validate(ctx context.Context, token string) (*jwt.Token, error) {
-	jToken, err := s.validate(ctx, token, jwt.WithExpirationRequired(), jwt.WithIssuer(JWT_ISSUER))
-
-	return jToken, err
+	return s.validate(ctx, token,
+		jwt.WithExpirationRequired(),
+		jwt.WithIssuer(JWT_ISSUER),
+		jwt.WithAudience(JWT_AUDIENCE),
+		jwt.WithLeeway(JWT_LEEWAY),
+		jwt.WithValidMethods([]string{jwt.SigningMethodRS512.Alg()}),
+	)
 }
 
 func (s *JWTService) validate(ctx context.Context, token string, options ...jwt.ParserOption) (*jwt.Token, error) {
 	logger := logging.From(ctx)
-	logger.Debug("validating jwt token", "jwt", token)
+	logger.Debug("validating jwt token")
 
 	jToken, err := jwt.ParseWithClaims(token, &JWTClaims{}, s.findPublicKeyFn(ctx), options...)
 	if err != nil {
-		logger.Error("jwt is not valid", "error", err)
+		logger.Debug("jwt is not valid", "error", err)
 
 		return nil, err
 	}
@@ -111,12 +161,6 @@ func (s *JWTService) validate(ctx context.Context, token string, options ...jwt.
 		"userId", claims.User.ID,
 	)
 
-	// Validate the token, then the JTI
-	err = s.validator.Validate(jToken.Claims)
-	if err != nil {
-		return jToken, err
-	}
-
 	jti, err := s.jtiService.Get(ctx, claims.ID)
 	if err != nil {
 		return jToken, fmt.Errorf("error finding the JTI: %w", err)
@@ -125,7 +169,7 @@ func (s *JWTService) validate(ctx context.Context, token string, options ...jwt.
 	if jti.UserID != claims.User.ID {
 		logger.Error("a JTI has the wrong userId")
 
-		return jToken, errors.New("this token doesn't belong to the user")
+		return jToken, ErrJTIWrongUser
 	}
 
 	if jti.Revoked {
@@ -135,10 +179,42 @@ func (s *JWTService) validate(ctx context.Context, token string, options ...jwt.
 	return jToken, nil
 }
 
+func newClaims(user *models.User, grant, scope string) *JWTClaims {
+	return &JWTClaims{
+		User: JWTUser{
+			ID:        user.ID,
+			Name:      user.Username,
+			Roles:     user.Roles,
+			Campaigns: xslices.CollectIDs(user.Campaigns),
+		},
+		Grant: grant,
+		Scope: scope,
+	}
+}
+
+func (s *JWTService) signPair(ctx context.Context, jti string, user *models.User, grant string) (*TokenPair, error) {
+	access, err := s.sign(ctx, jti, newClaims(user, grant, ScopeAll))
+	if err != nil {
+		return nil, err
+	}
+
+	refresh, err := s.sign(ctx, jti, newClaims(user, grant, ScopeRefresh))
+	if err != nil {
+		return nil, err
+	}
+
+	return &TokenPair{Access: access, Refresh: refresh}, nil
+}
+
 func (s *JWTService) sign(ctx context.Context, jti string, claims *JWTClaims) (string, error) {
 	now := time.Now()
 
-	expirationTime := now.Add(s.options.TokenDuration)
+	duration := s.options.TokenDuration
+	if claims.Scope == ScopeRefresh {
+		duration = s.options.RefreshTokenDuration
+	}
+
+	expirationTime := now.Add(duration)
 	claims.RegisteredClaims = jwt.RegisteredClaims{
 		ExpiresAt: jwt.NewNumericDate(expirationTime),
 		ID:        jti,

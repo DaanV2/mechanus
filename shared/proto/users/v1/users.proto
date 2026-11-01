@@ -4,12 +4,18 @@ package users.v1;
 option go_package = "github.com/DaanV2/mechanus/server/proto/users/v1;usersv1";
 
 service UserService {
+  // Create a new account. Requires the admin role, unless open sign-up is enabled on the server
   rpc Create(CreateAccountRequest) returns (CreateAccountResponse) {}
   rpc Get(GetUserRequest) returns (GetUserResponse) {}
   // List all users, requires the admin role
   rpc List(ListUsersRequest) returns (ListUsersResponse) {}
-  // Reset the password of a user to a new one, requires the admin role
+  // Reset the password of a user to a new one, requires the admin role. Signs out all sessions of that user
   rpc ResetPassword(ResetPasswordRequest) returns (ResetPasswordResponse) {}
+  // Change the password of the logged in user, signs out all their other sessions
+  rpc ChangePassword(ChangePasswordRequest) returns (ChangePasswordResponse) {}
+  // Replace the roles of a user, requires the admin role.
+  // Existing access tokens keep the old roles until they are refreshed.
+  rpc SetRoles(SetRolesRequest) returns (SetRolesResponse) {}
 }
 
 message CreateAccountRequest {
@@ -43,6 +49,22 @@ message ResetPasswordRequest {
 }
 
 message ResetPasswordResponse {}
+
+message ChangePasswordRequest {
+  string current_password = 1; // The current password of the logged in user
+  string new_password = 2; // The new password
+}
+
+message ChangePasswordResponse {}
+
+message SetRolesRequest {
+  string id = 1; // The UUID of the user whose roles are replaced
+  repeated string roles = 2; // The new roles, eg: admin, operator, user, viewer
+}
+
+message SetRolesResponse {
+  User user = 1;
+}
 
 message User {
   string id = 1; // The users UUID

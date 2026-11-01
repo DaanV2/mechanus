@@ -1,5 +1,5 @@
 import { server_websocket_url } from '$lib/config';
-import { Cookie } from '$lib/storage';
+import { Session } from '$lib/authentication/session';
 import { create, fromBinary, toBinary } from '@bufbuild/protobuf';
 import {
   ClientMessageSchema,
@@ -38,7 +38,7 @@ export class WebsocketHandler {
   }
 
   getToken() {
-    return this.token ?? Cookie.get('access-token');
+    return this.token ?? Session.accessToken();
   }
 
   /**

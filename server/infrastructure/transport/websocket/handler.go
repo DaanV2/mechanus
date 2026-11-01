@@ -3,6 +3,7 @@ package websocket
 import (
 	"errors"
 	"net/http"
+	"time"
 
 	cwebsocket "github.com/coder/websocket"
 
@@ -85,9 +86,50 @@ func (handler *WebsocketHandler) ServeHTTP(w http.ResponseWriter, r *http.Reques
 	screenHandler := handler.screenManager.GetOrCreate(screenid)
 	h := screens.NewScreenConn(id, screenid, connCtx, conn, auth)
 	screenHandler.AddListener(connCtx, h)
+	if auth.Type == devices.DeviceTypeUser {
+		go handler.watchSession(h, auth)
+	}
 
 	// Wait until closed
 	<-h.Context().Done()
+}
+
+// watchSession closes a user connection once its token expires, or its session (JTI) gets revoked,
+// so a long lived connection doesn't outlive the credential it was opened with.
+func (handler *WebsocketHandler) watchSession(h *screens.ScreenConn, auth *screens.ConnectionInfo) {
+	ctx := h.Context()
+
+	var expired <-chan time.Time
+	if !auth.ExpiresAt.IsZero() {
+		timer := time.NewTimer(time.Until(auth.ExpiresAt))
+		defer timer.Stop()
+		expired = timer.C
+	}
+
+	var check <-chan time.Time
+	if handler.config.SessionCheckInterval > 0 {
+		ticker := time.NewTicker(handler.config.SessionCheckInterval)
+		defer ticker.Stop()
+		check = ticker.C
+	}
+
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-expired:
+			h.CloseWith(cwebsocket.StatusPolicyViolation, "token expired")
+
+			return
+		case <-check:
+			if _, err := handler.jwt_authenticator.Validate(ctx, auth.Token); err != nil {
+				handler.logger.From(ctx).Info("closing websocket, session no longer valid", "error", err)
+				h.CloseWith(cwebsocket.StatusPolicyViolation, "session no longer valid")
+
+				return
+			}
+		}
+	}
 }
 
 func (handler *WebsocketHandler) authenticate(r *http.Request) (*screens.ConnectionInfo, error) {
@@ -112,12 +154,17 @@ func (handler *WebsocketHandler) authenticate(r *http.Request) (*screens.Connect
 			return nil, errors.New("JWT scope does not allow screen access")
 		}
 
-		return &screens.ConnectionInfo{
+		info := &screens.ConnectionInfo{
 			Token: token,
 			ID:    c.User.ID,
 			Roles: c.User.Roles,
 			Type:  devices.DeviceTypeUser,
-		}, nil
+		}
+		if c.ExpiresAt != nil {
+			info.ExpiresAt = c.ExpiresAt.Time
+		}
+
+		return info, nil
 	}
 
 	return &screens.ConnectionInfo{

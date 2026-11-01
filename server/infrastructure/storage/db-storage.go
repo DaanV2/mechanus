@@ -68,8 +68,8 @@ func (d *dbStorage[T]) Delete(ctx context.Context, item T) (bool, error) {
 	id := d.dbID(item.GetID())
 	logging.FromPrefix(ctx, "db-storage").Debug("deleting item: " + id)
 
-	var kv models.KeyValue
-	tx := d.db.WithContext(ctx).Limit(1).Delete(&kv, id)
+	// Deletes by primary key, a string condition would be used as raw SQL
+	tx := d.db.WithContext(ctx).Delete(&models.KeyValue{Key: id})
 
 	return tx.RowsAffected > 0, tx.Error
 }

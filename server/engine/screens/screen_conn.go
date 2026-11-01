@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io"
 	"net"
+	"time"
 
 	"github.com/DaanV2/mechanus/server/engine/devices"
 	"github.com/DaanV2/mechanus/server/infrastructure/logging"
@@ -48,6 +49,8 @@ type ConnectionInfo struct {
 	Type     devices.DeviceType
 	DeviceID string               // Stable device ID reported by the client (X-Device-ID), empty when not given
 	Hardware devices.HardwareType // Hardware reported by the client (X-Device-Type), metadata only
+	// When the credential of the connection expires, zero if it doesn't.
+	ExpiresAt time.Time
 }
 
 // Context returns the connection's context.

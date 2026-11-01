@@ -1,6 +1,5 @@
-import type { LoginResponse } from '../../proto/users/v1/login_pb';
-import { parseJwt, type JWTClaims } from '../authentication/jwt/parse';
-import { Cookie } from '../storage';
+import { type JWTClaims } from '../authentication/jwt/parse';
+import { Session, type TokenResponse } from '../authentication/session';
 import { createLoginClient, createUserClient } from '../stores/clients';
 
 export type UserState = { loggedin: false; data?: undefined } | { loggedin: true; data: JWTClaims };
@@ -10,37 +9,20 @@ export namespace UserState {
 }
 
 function getCurrentUser(): UserState {
-  const jwt = Cookie.get('access-token');
-  if (!jwt) {
-    return {
-      loggedin: false
-    };
-  }
+  // An expired access token doesn't count as logged in, requests refresh it before they are sent
+  const claims = Session.claims();
+  if (!claims) return UserState.LOGGED_OUT;
 
-  return parseToken(jwt);
+  return { loggedin: true, data: claims };
 }
 
-function updateCurrentUser(data: LoginResponse): UserState {
-  if (data === undefined || data.token === '') return { loggedin: false };
+function updateCurrentUser(data: TokenResponse): UserState {
+  if (data === undefined || data.token === '') return UserState.LOGGED_OUT;
 
-  Cookie.set('access-token', `${data.type} ${data.token}`);
+  const claims = Session.store(data);
+  if (!claims) return UserState.LOGGED_OUT;
 
-  return parseToken(data.token);
-}
-
-function parseToken(jwt: string): UserState {
-  try {
-    return {
-      loggedin: true,
-      data: parseJwt(jwt)
-    };
-  } catch (err) {
-    console.log('something is weird with the jwt', jwt, err);
-  }
-
-  return {
-    loggedin: false
-  };
+  return { loggedin: true, data: claims };
 }
 
 export class UserHandler {
@@ -50,6 +32,17 @@ export class UserHandler {
     return getCurrentUser();
   }
 
+  /**
+   * The current user, refreshing the access token first when it expired but the session can still be refreshed.
+   * Use this on page load, {@link current} only looks at the access token.
+   */
+  async restore(): Promise<UserState> {
+    await Session.ensureFresh();
+
+    return getCurrentUser();
+  }
+
+  /** Creates an account, then logs in as it */
   async create(username: string, password: string) {
     await createUserClient().create({ username, password });
 
@@ -62,8 +55,9 @@ export class UserHandler {
     return updateCurrentUser(login);
   }
 
+  /** Logs out the current session on the server and forgets its tokens */
   async logout() {
-    // TODO;
+    await Session.logout();
   }
 
   async serverData(id?: string) {
@@ -82,9 +76,21 @@ export class UserHandler {
     return resp.users;
   }
 
-  /** Resets the password of the given user, requires the admin role */
+  /** Resets the password of the given user, requires the admin role. Signs out all their sessions */
   async resetPassword(id: string, newPassword: string) {
     await createUserClient().resetPassword({ id, newPassword });
+  }
+
+  /** Changes the password of the logged in user, signs out all their other sessions */
+  async changePassword(currentPassword: string, newPassword: string) {
+    await createUserClient().changePassword({ currentPassword, newPassword });
+  }
+
+  /** Replaces the roles of the given user, requires the admin role */
+  async setRoles(id: string, roles: string[]) {
+    const resp = await createUserClient().setRoles({ id, roles });
+
+    return resp.user;
   }
 }
 
