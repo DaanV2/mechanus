@@ -11,7 +11,7 @@ func HttpMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log.Debugf("request: %s %s %v", r.Method, r.URL.String(), r.ContentLength)
 		ctx := r.Context()
-		ctx = Context(ctx, log.With("request_method", r.Method, "request_path", r.URL.String()))
+		ctx = Context(ctx, log.With("request_method", r.Method, "request_path", r.URL.String(), "remote_addr", r.RemoteAddr))
 
 		r = r.WithContext(ctx)
 

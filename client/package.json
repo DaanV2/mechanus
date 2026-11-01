@@ -18,7 +18,8 @@
     "postinstall": "npx playwright install"
   },
   "dependencies": {
-    "pixi.js": "^8.21.0"
+    "pixi.js": "^8.21.0",
+    "qrcode": "^1.5.4"
   },
   "devDependencies": {
     "@bufbuild/buf": "^1.73.0",
@@ -36,6 +37,7 @@
     "@tailwindcss/vite": "^4.3.3",
     "@types/eslint": "^9.6.0",
     "@types/node": "^26.1.1",
+    "@types/qrcode": "^1.5.5",
     "eslint": "^10.11.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-svelte": "^3.23.0",

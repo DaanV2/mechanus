@@ -54,6 +54,7 @@ type RouterRPCS struct {
 	Login    usersv1connect.LoginServiceHandler
 	Scene    scenesv1connect.SceneServiceHandler
 	User     usersv1connect.UserServiceHandler
+	Invite   usersv1connect.InviteServiceHandler
 }
 
 // RouterConfig contains the configuration for creating a router.
@@ -64,7 +65,7 @@ type RouterConfig struct {
 }
 
 // CreateRouter creates an HTTP handler with all routes, middleware, and services configured.
-func CreateRouter(setup *RouterSetup, rpcs RouterRPCS, cfgs RouterConfig) (gohttp.Handler, error) {
+func CreateRouter(setup *RouterSetup, rpcs *RouterRPCS, cfgs RouterConfig) (gohttp.Handler, error) {
 	healthServ := health.NewHealthService(setup.HealthChecker)
 	readyServ := health.NewReadyService(setup.ReadyChecker)
 
@@ -77,6 +78,7 @@ func CreateRouter(setup *RouterSetup, rpcs RouterRPCS, cfgs RouterConfig) (gohtt
 		usersv1connect.LoginServiceName,
 		scenesv1connect.SceneServiceName,
 		usersv1connect.UserServiceName,
+		usersv1connect.InviteServiceName,
 		grpchealth.HealthV1ServiceName,
 	)
 
@@ -87,6 +89,7 @@ func CreateRouter(setup *RouterSetup, rpcs RouterRPCS, cfgs RouterConfig) (gohtt
 		routers.WithGrpcRoute(usersv1connect.NewLoginServiceHandler, rpcs.Login, grpcOpts),
 		routers.WithGrpcRoute(scenesv1connect.NewSceneServiceHandler, rpcs.Scene, grpcOpts),
 		routers.WithGrpcRoute(usersv1connect.NewUserServiceHandler, rpcs.User, grpcOpts),
+		routers.WithGrpcRoute(usersv1connect.NewInviteServiceHandler, rpcs.Invite, grpcOpts),
 		// gRPC utils
 		routers.WithGrpcRoute(grpcreflect.NewHandlerV1, reflecter, grpcOpts),
 		routers.WithGrpcRoute(grpcreflect.NewHandlerV1Alpha, reflecter, grpcOpts),
@@ -107,6 +110,9 @@ func CreateRouter(setup *RouterSetup, rpcs RouterRPCS, cfgs RouterConfig) (gohtt
 	hrouter = http.NewWebsocketSplitter(wrouter, hrouter)
 	hrouter = telemetry.TraceHttpMiddleware(cfgs.Tracing, hrouter)
 	hrouter = logging.HttpMiddleware(hrouter)
+	if cfgs.Server.TrustProxyHeaders {
+		hrouter = http.NewForwardedHeaders(hrouter)
+	}
 
 	return hrouter, nil
 }

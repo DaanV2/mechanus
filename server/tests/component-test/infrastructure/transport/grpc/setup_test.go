@@ -9,6 +9,7 @@ import (
 
 	"github.com/DaanV2/mechanus/server/application"
 	"github.com/DaanV2/mechanus/server/infrastructure/authentication"
+	"github.com/DaanV2/mechanus/server/infrastructure/persistence"
 	"github.com/DaanV2/mechanus/server/infrastructure/persistence/models"
 	"github.com/DaanV2/mechanus/server/infrastructure/persistence/repositories"
 	"github.com/DaanV2/mechanus/server/infrastructure/storage"
@@ -17,6 +18,7 @@ import (
 
 // authEnv holds the services needed to test the authenticated gRPC handlers against a test database.
 type authEnv struct {
+	db    *persistence.DB
 	users *application.UserService
 	jtis  *authentication.JTIService
 	jwts  *authentication.JWTService
@@ -31,6 +33,7 @@ func newAuthEnv(ctx context.Context) *authEnv {
 	jtis := authentication.NewJTIService(db)
 
 	return &authEnv{
+		db:    db,
 		users: application.NewUserService(repositories.NewUserRepository(db)),
 		jtis:  jtis,
 		jwts:  authentication.NewJWTService(jtis, keys),

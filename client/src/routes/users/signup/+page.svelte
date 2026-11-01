@@ -1,5 +1,7 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
+  import { page } from '$app/state';
+  import { INVITE_PARAM, inviteHandler } from '$lib/handlers/invites';
   import ErrorMessage from '$lib/components/error-message.svelte';
   import type { MechanusError } from '$lib/components/errors';
   import Footer from '$lib/components/footer.svelte';
@@ -18,9 +20,16 @@
   let showPassword = $state(false);
   let showConfirmPassword = $state(false);
 
+  // Signing up with an invite link (`?invite=<id>`) instead of open sign-up
+  let invite = $state('');
+  let inviteExpires = $state<Date | undefined>(undefined);
+  let inviteInvalid = $state(false);
+
   // Computed property to check if both fields are filled
   let correct_password = $derived(password === confirm_password);
-  let isFormValid = $derived(username.trim() !== '' && password.trim() !== '' && correct_password);
+  let isFormValid = $derived(
+    username.trim() !== '' && password.trim() !== '' && correct_password && !inviteInvalid
+  );
   let password_wrong = $derived(password.trim() !== '' && !correct_password);
 
   async function handleSubmit(event: Event) {
@@ -49,7 +58,11 @@
       throw new Error('passwords not the same');
     }
 
-    await userHandler.create(username, password);
+    if (invite) {
+      await inviteHandler.accept(invite, username, password);
+    } else {
+      await userHandler.create(username, password);
+    }
 
     await sleep(100);
     goto('/users/profile');
@@ -59,6 +72,22 @@
     if (userHandler.current.loggedin) {
       console.error('already logged in for sign up');
       goto('/users/profile');
+
+      return;
+    }
+
+    invite = page.url.searchParams.get(INVITE_PARAM) ?? '';
+    if (invite) {
+      inviteHandler
+        .check(invite)
+        .then((expires) => {
+          inviteExpires = expires;
+          inviteInvalid = expires === undefined;
+        })
+        .catch((err) => {
+          console.error('could not check the invite', err);
+          inviteInvalid = true;
+        });
     }
   });
 </script>
@@ -72,6 +101,15 @@
 <div class="flex min-h-screen items-center justify-center">
   <form class="space-y-6" onsubmit={handleSubmit}>
     <h3 class="p-0 text-xl font-medium text-white dark:text-white">Signup</h3>
+    {#if inviteInvalid}
+      <p role="alert" class="rounded-lg bg-red-800 p-4 text-white">
+        This invite is invalid, expired or already used. Ask your game master for a new one.
+      </p>
+    {:else if inviteExpires}
+      <p class="text-sm text-white">
+        You were invited, this invite expires {inviteExpires.toLocaleString()}.
+      </p>
+    {/if}
     <Label class="space-y-2">
       <Label for="username" class="font-bold text-white">Your username</Label>
       <Input

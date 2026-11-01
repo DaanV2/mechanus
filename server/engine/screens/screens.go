@@ -92,10 +92,14 @@ func (s *ScreenHandler) AddListener(ctx context.Context, listener *ScreenConn) {
 	s.setupListener(listener)
 }
 
+// setupListener reads the messages of the listener in the background, and forgets the listener once its
+// connection ends. Must not block: the caller still has to watch the connection's session.
 func (s *ScreenHandler) setupListener(listener *ScreenConn) {
-	defer listener.Close(nil)
+	go func() {
+		defer s.listeners.CompareAndDelete(listener.id, listener)
 
-	go listener.startReadLoop(s.HandleMessages)
+		listener.startReadLoop(s.HandleMessages)
+	}()
 }
 
 // HandleMessages processes a batch of client messages from a listener.
@@ -173,4 +177,14 @@ func (s *ScreenHandler) Close() {
 
 func isClosed(err error) bool {
 	return errors.Is(err, net.ErrClosed)
+}
+
+// Connections returns the connection info of every listener of this screen.
+func (s *ScreenHandler) Connections() []*ConnectionInfo {
+	var result []*ConnectionInfo
+	for _, listener := range s.listeners.Items() {
+		result = append(result, listener.info)
+	}
+
+	return result
 }

@@ -62,6 +62,7 @@ func BuildServer(setupCtx context.Context) (*ServerComponents, error) {
 	keyManager.WithRotation(authCfg.KeyRotation, jwtService.MaxTokenLifetime())
 	userService := application.NewUserService(userRepo)
 	campaignService := application.NewCampaignService(campaignRepo)
+	inviteService := application.NewInviteService(repositories.NewInviteRepository(db), userService, authCfg.InviteDuration)
 	screenManager := screens.NewScreenManager()
 
 	// Scenes: configuration from files, state in the database, devices instructed through drivers
@@ -94,11 +95,12 @@ func BuildServer(setupCtx context.Context) (*ServerComponents, error) {
 			&grpc.LoggingInterceptor{},
 			grpc.NewAuthenticator(jwtService),
 		},
-	}, RouterRPCS{
+	}, &RouterRPCS{
 		Campaign: grpc.NewCampaignServiceHandler(campaignService, userService),
 		Login:    grpc.NewLoginServiceHandler(userService, jwtService, jtiService),
 		Scene:    grpc.NewSceneServiceHandler(sceneService),
 		User:     grpc.NewUserServiceHandler(userService, jtiService, grpc.UserServiceOptions{SignupEnabled: authCfg.SignupEnabled}),
+		Invite:   grpc.NewInviteServiceHandler(inviteService),
 	},
 		RouterConfig{
 			CORS:    corsCfg,

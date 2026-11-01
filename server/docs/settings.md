@@ -16,6 +16,7 @@
 | Name | Type | Description | Default | Env |
 |------|------|-------------|---------|-----|
 | access-token-duration | duration | How long an access token is valid for | 1h0m0s | AUTH_ACCESS_TOKEN_DURATION |
+| invite-duration | duration | How long an invite link stays valid when no duration is given, at most 30 days | 168h0m0s | AUTH_INVITE_DURATION |
 | key-rotation | duration | How often a new jwt signing key is generated, old keys are removed once every token they signed has expired. 0 disables rotation | 720h0m0s | AUTH_KEY_ROTATION |
 | refresh-token-duration | duration | How long a refresh token is valid for, a session that isn't refreshed within this time has to log in again | 168h0m0s | AUTH_REFRESH_TOKEN_DURATION |
 | signup-enabled | bool | Whenever or not anyone can create an account, when disabled only admins can create accounts | false | AUTH_SIGNUP_ENABLED |
@@ -74,6 +75,7 @@
 |------|------|-------------|---------|-----|
 | host | string | What host to bind on, such as: "", "localhost" or "0.0.0.0" |  | SERVER_HOST |
 | port | uint16 | The port to server web traffic to | 8080 | SERVER_PORT |
+| trust-proxy-headers | bool | Trust the X-Forwarded-Proto, X-Forwarded-Host and X-Forwarded-For headers of a reverse proxy in front of the server. Only enable when every request goes through that proxy | false | SERVER_TRUST_PROXY_HEADERS |
 | cors | object | see: [cors](#cors) |  |  |
 | static | object | see: [static](#static) |  |  |
 | tls | object | see: [tls](#tls) |  |  |

@@ -37,7 +37,7 @@ Conventions:
 **Goal**: the building blocks every later milestone relies on.
 
 - [x] Go server with Clean Architecture layers, lifecycle, config, logging, OpenTelemetry
-- [~] User accounts and auth — see [Auth](#auth) below for what is still missing
+- [x] User accounts and auth — see [Auth](#auth) below
 - [x] Admin user list page (`/users`, `UserService.List`)
 - [x] ConnectRPC services (users, login) and the screen WebSocket (`Ping`, `InitialSetupRequest`)
 - [x] Database backends (SQLite, Postgres, MySQL, in-memory) with migrations
@@ -49,17 +49,18 @@ Conventions:
 
 Done: per-login sessions (one JTI each) with an RS512 access token (1 h) and a `scope: "refresh"` token (7 days); refresh rotation and logout; client-side refresh and `exp` checks; `Unauthenticated` vs. `PermissionDenied` via `grpc.requireRole`; WebSocket auth by header, `mechanus.bearer.<jwt>` subprotocol or cookie, with connections closed on expiry / revocation; admin account creation, password reset and role management; self-service password change; open sign-up behind `auth.signup-enabled`; login lockout and timing-safe unknown users; signing key rotation; configurable lifetimes; cookie `Max-Age` / `Secure`; optional TLS. See [authentication.md](./architecture/authentication.md). Device auth is tracked under [M1](#m1--first-scene-on-the-table).
 
-- [ ] Invites: GM generates a link / QR code with expiry, player picks their own credentials
-- [ ] Admin UI to create accounts and manage roles
-- [ ] Screen access check (`// TODO: check that screenHandler is allowed to be access by this requester`) — needs the screen / room ownership model
-- [ ] Client reconnects the WebSocket with a refreshed token after the server closes it on expiry
-- [ ] Honour `X-Forwarded-Proto` behind a reverse proxy
-- [ ] Tests: WebSocket route policies (401 / 403), device ID / type from header and query, close on expiry / revocation (needs a way to register a screen in tests)
-- [ ] Playwright: logout, session survives token expiry via refresh, revoked session is logged out, WebSocket connects as the logged-in user, change password
+- [x] Invites (`InviteService`, `/users/invites`): admin generates a single use link / QR code with expiry, player picks their own credentials on `/users/signup?invite=<id>`
+- [x] Admin UI to create accounts and manage roles (`/users`)
+- [~] Screen access check (`ConnectionInfo.CanAccess`, `403` when denied): users open every screen, a device only its own. Per-screen ownership waits on the screen / room ownership model
+- [x] Client reconnects the WebSocket with a refreshed token after the server closes it on expiry; a refresh that fails on the network no longer logs the user out
+- [x] Honour `X-Forwarded-Proto` / `-Host` / `-For` behind a reverse proxy (`server.trust-proxy-headers`)
+- [x] Tests: WebSocket 401 / 403, device ID / type from header and query, close on expiry / revocation
+- [x] Playwright: logout, session survives token expiry via refresh, revoked session is logged out, WebSocket connects as the logged-in user, change password, invites, admin account / role management
 
 **Decisions**
 
-- Accounts come from GM invites or admin creation; open sign-up only behind a config flag, off by default
+- Accounts come from GM invites or admin creation; open sign-up only behind a config flag, off by default. Until a GM role exists, invites need the admin role
+- Invites are single use, expire after a chosen duration (default 7 days, at most 30) and give the `user` role; the invite ID is the secret in the link
 - Tokens stay in JS-readable `SameSite=Lax` cookies (not `HttpOnly` / in-memory); same-origin cookies also authenticate the WebSocket upgrade
 - Plain HTTP by default, optional TLS via config and reverse-proxy support. Cookies get `Secure` only over HTTPS. Screens need a wake-lock fallback, since the Screen Wake Lock API requires a secure context
 

@@ -80,7 +80,12 @@ func (handler *WebsocketHandler) ServeHTTP(w http.ResponseWriter, r *http.Reques
 	}
 	auth.DeviceID, auth.Hardware = deviceID, hardware
 
-	//TODO: check that screenHandler is allowed to be access by this requester
+	if !auth.CanAccess(screenid) {
+		logger.Warn("screen access denied", "connection_type", auth.Type)
+		http.Error(w, "Not allowed to access this screen", http.StatusForbidden)
+
+		return
+	}
 
 	conn, err := cwebsocket.Accept(w, r, handler.acceptOptions())
 	if err != nil {

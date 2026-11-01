@@ -59,11 +59,15 @@ Every token contains:
 | `auth.refresh-token-duration` / `AUTH_REFRESH_TOKEN_DURATION`  | `168h`  | Lifetime of a refresh token; a session not refreshed in this time ends   |
 | `auth.key-rotation` / `AUTH_KEY_ROTATION`                      | `720h`  | How often a new signing key is generated, `0` disables rotation          |
 | `auth.signup-enabled` / `AUTH_SIGNUP_ENABLED`                  | `false` | Let anyone call `UserService.Create`; otherwise only admins can          |
+| `auth.invite-duration` / `AUTH_INVITE_DURATION`                  | `168h`  | How long an invite link stays valid when the admin picks no duration, at most 30 days |
 | `server.tls.cert` + `server.tls.key` / `SERVER_TLS_CERT` + `SERVER_TLS_KEY` | — | Serve HTTPS with these PEM files                              |
+| `server.trust-proxy-headers` / `SERVER_TRUST_PROXY_HEADERS`   | `false` | Apply `X-Forwarded-Proto` / `-Host` / `-For` of a reverse proxy in front of the server, see "Reverse proxy" below |
 
 ## Accounts
 
 - `UserService.Create` requires the admin role unless `auth.signup-enabled` is on (the dev / test compose files turn it on).
+- Admins create accounts and change roles on the users page (`/users`).
+- `InviteService` (admin) hands out single use invite links (`/users/signup?invite=<id>`, also shown as a QR code on `/users/invites`). The invite ID is a random UUID and the secret part of the link; an invite expires after the chosen duration (default `auth.invite-duration`, capped at 30 days) and can be revoked. `InviteService.Check` and `InviteService.Accept` need no login: accepting creates an account with the `user` role and uses up the invite. The invite is claimed before the account is created, so concurrent accepts can't both succeed; when the account can't be created (username taken) the invite stays usable. Unknown, expired, used and revoked invites all give the same answer.
 - `UserService.ResetPassword` (admin) revokes every session of the user.
 - `UserService.ChangePassword` (the user, needs the current password) revokes every other session of the user, keeping the one that made the call.
 - `UserService.SetRoles` (admin) replaces a user's roles; an admin can't remove their own admin role.
@@ -88,13 +92,13 @@ Every token is tied to a `JTI` database record (`infrastructure/persistence/mode
 
 On validation, after the signature and time checks pass, the server fetches the JTI record and rejects the token if it belongs to another user or `Revoked = true`. Revoking a JTI signs out that one session (both its access and refresh tokens) right away; `JTIService.RevokeUser` signs out all sessions of a user.
 
-Long-lived screen WebSocket connections of a user are closed (status 1008) when their access token expires, and when a periodic check (`server.websocket.session-check-interval`, default 1 minute) finds the session revoked.
+Long-lived screen WebSocket connections of a user are closed (status 1008) when their access token expires, and when a periodic check (`server.websocket.session-check-interval`, default 1 minute) finds the session revoked. The browser client refreshes its access token before every (re)connect (`WebsocketHandler.open`), so a screen reconnects as the same user after such a close. A refresh that fails because of the network (or because the page was left) keeps the tokens; only a refresh the server refuses logs the user out.
 
 On startup `JWTService.Cleanup` deletes revoked JTIs and JTIs not refreshed within the longest token lifetime.
 
 ## Device authentication
 
-> **Status**: design only. Today `infrastructure/transport/websocket.WebsocketHandler.authenticate` accepts any connection without a user JWT (from the `Authorization` header, the `mechanus.bearer.<jwt>` subprotocol or the `access-token` cookie) as an unauthenticated device with the `Device` role, without reading a device ID, device type or token (see the `// TODO: check token for device and device id.` in that function). Everything below describes the intended behaviour; [roadmap M1](../roadmap.md#m1--first-scene-on-the-table) tracks the work.
+> **Status**: design only. Today `infrastructure/transport/websocket.WebsocketHandler.authenticate` accepts any connection without a user JWT (from the `Authorization` header, the `mechanus.bearer.<jwt>` subprotocol or the `access-token` cookie) as an unauthenticated device with the `Device` role, without checking a device token: it may only open the screen named after the device ID it reports (see the `// TODO: check token for device and device id.` in that function). Everything below describes the intended behaviour; [roadmap M1](../roadmap.md#m1--first-scene-on-the-table) tracks the work.
 
 ### Optional authentication, enforced per route
 
@@ -117,7 +121,7 @@ Each route registers a policy alongside its handler:
 | `user`        | users only                                | GM / player screens                        |
 | `role:<role>` | users holding that role                   | admin actions such as confirming a pairing |
 
-No identity on a route that needs one → `401 Unauthorized`; identity present but not allowed → `403 Forbidden`. The per-screen access check (`// TODO: check that screenHandler is allowed to be access by this requester`) runs after the route policy.
+No identity on a route that needs one → `401 Unauthorized`; identity present but not allowed → `403 Forbidden`. The per-screen access check (`screens.ConnectionInfo.CanAccess`) runs after the route policy. Until screens have owners it lets users open every screen and a device only its own screen (screen ID = device ID); anything else gets `403 Forbidden`.
 
 ### Device identity headers
 
@@ -167,3 +171,7 @@ Device (/devices/pair)              Server                          Admin (/devi
 4. Check `exp` (required), `nbf`, `iat`, `iss`, `aud`, with a 5-minute leeway on the time claims (`JWT_LEEWAY`)
 5. Fetch `JTI` record; confirm `UserID` matches and `Revoked = false`
 6. The caller checks the `scope`: the API and WebSocket only accept `"*"`, `Refresh` only `"refresh"`
+
+## Reverse proxy
+
+When Mechanus runs behind a reverse proxy that terminates TLS, enable `server.trust-proxy-headers`. The server then takes the scheme from `X-Forwarded-Proto`, the host from `X-Forwarded-Host` (the WebSocket upgrade compares the `Origin` against it) and the client address from the first `X-Forwarded-For` entry, for logs and traces. Only enable it when every request goes through the proxy, otherwise clients can spoof these headers. Cookies get `Secure` from the browser's own `location.protocol`, so they are already right behind a proxy.

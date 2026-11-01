@@ -28,8 +28,15 @@
       return goto('/users/login');
     }
 
-    const data = await userHandler.serverData();
-    user = data.user;
+    try {
+      const data = await userHandler.serverData();
+      user = data.user;
+    } catch (err) {
+      // A revoked session fails to refresh, which forgets its tokens
+      if (!userHandler.current.loggedin) return goto('/users/login');
+
+      throw err;
+    }
   });
 
   async function changePassword(event: Event) {
