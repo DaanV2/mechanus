@@ -3,7 +3,6 @@ package screens
 import (
 	"context"
 	"errors"
-	"io"
 	"net"
 	"time"
 
@@ -91,24 +90,14 @@ func (connh *ScreenConn) Close(err error) {
 }
 
 func (connh *ScreenConn) startReadLoop(handleMessage func(ctx context.Context, connh *ScreenConn, msg *screensv1.ClientMessages) error) {
+	// However the loop ends, the connection is over: release whoever waits on its context
+	defer connh.cancelfn()
+
 	logger := connh.logger.From(connh.connctx)
-	readerType, reader, err := connh.conn.Reader(connh.connctx)
-	if err != nil {
-		logger.Error("Could not open websocket reader", "error", err)
-		connh.Close(err)
-
-		return
-	}
-	if readerType != websocket.MessageBinary {
-		logger.Error("Unsupported websocket message type", "type", readerType)
-		connh.Close(err)
-
-		return
-	}
 
 	for {
 		// Read
-		message, err := io.ReadAll(reader)
+		messageType, message, err := connh.conn.Read(connh.connctx)
 		if err != nil {
 			logger = logger.With("error", err)
 			if errors.Is(err, net.ErrClosed) || errors.Is(err, context.Canceled) {
@@ -129,6 +118,13 @@ func (connh *ScreenConn) startReadLoop(handleMessage func(ctx context.Context, c
 
 			logger.Error("Could not read websocket message", "error", err)
 			connh.Close(err)
+
+			return
+		}
+
+		if messageType != websocket.MessageBinary {
+			logger.Error("Unsupported websocket message type", "type", messageType)
+			connh.CloseWith(websocket.StatusUnsupportedData, "only binary messages are supported")
 
 			return
 		}
@@ -165,4 +161,19 @@ func (connh *ScreenConn) CloseWith(code websocket.StatusCode, reason string) {
 	if crr != nil {
 		connh.logger.From(connh.connctx).Error("Could not close websocket connection", "error", crr)
 	}
+}
+
+// CanAccess reports whether the connection may open the screen with the given ID.
+// Screens don't have owners yet, so for now: users may open every screen (GM and player views),
+// a device only its own screen, whose ID is its device ID.
+func (info *ConnectionInfo) CanAccess(screenID string) bool {
+	switch info.Type {
+	case devices.DeviceTypeUser:
+		return true
+	case devices.DeviceTypeDevice:
+		return info.DeviceID != "" && info.DeviceID == screenID
+	case devices.DeviceTypeUnknown:
+	}
+
+	return false
 }

@@ -13,5 +13,6 @@ export function grpcTransport(): Transport {
 
 export const createUserClient = () => users.createUserClient(grpcTransport());
 export const createLoginClient = () => users.createLoginClient(grpcTransport());
+export const createInviteClient = () => users.createInviteClient(grpcTransport());
 export const createCampaignClient = () => campaigns.createCampaignClient(grpcTransport());
 export const createSceneClient = () => scenes.createSceneClient(grpcTransport());

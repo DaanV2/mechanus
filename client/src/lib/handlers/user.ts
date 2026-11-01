@@ -49,6 +49,21 @@ export class UserHandler {
     return this.login(username, password);
   }
 
+  /**
+   * Creates an account for someone else with the given roles, without logging in as it. Requires the admin role,
+   * unless open sign-up is enabled on the server
+   */
+  async createAccount(username: string, password: string, roles: string[]) {
+    const resp = await createUserClient().create({ username, password });
+    const id = resp.user?.id ?? '';
+    // New accounts start with the user role
+    if (roles.length > 0 && !(roles.length === 1 && roles[0] === 'user')) {
+      await this.setRoles(id, roles);
+    }
+
+    return id;
+  }
+
   async login(username: string, password: string) {
     const login = await createLoginClient().login({ username, password });
 

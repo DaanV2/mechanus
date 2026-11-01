@@ -24,12 +24,15 @@
     let reconnect: ReturnType<typeof setTimeout> | undefined;
     let stopped = false;
 
-    function connect() {
+    // Reconnects refresh the access token first (when a user is logged in on this screen), the server closes
+    // the connection once the token expires
+    async function connect() {
       status = 'connecting';
-      conn = new WebsocketHandler(screenId, connectionId, undefined, {
+      conn = await WebsocketHandler.open(screenId, connectionId, {
         deviceId: screenId,
         deviceType: hardware
       });
+      if (stopped) return conn.socket.close();
       conn.events.add('initialSetup', (_, msg) => renderer.setState(msg.state));
       conn.events.add('screenState', (_, msg) => renderer.setState(msg));
       conn.events.add('splashScreenUpdate', (_, msg) => renderer.setSplash(msg));

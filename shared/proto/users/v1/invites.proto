@@ -1,0 +1,72 @@
+syntax = "proto3";
+package users.v1;
+
+import "google/protobuf/timestamp.proto";
+import "users/v1/users.proto";
+
+option go_package = "github.com/DaanV2/mechanus/server/proto/users/v1;usersv1";
+
+// Invites let a new player create their own account through a link, without open sign-up
+service InviteService {
+  // Create a single use invite, requires the admin role
+  rpc Create(CreateInviteRequest) returns (CreateInviteResponse) {}
+  // List the invites that can still be used, requires the admin role
+  rpc List(ListInvitesRequest) returns (ListInvitesResponse) {}
+  // Revoke an invite so it can't be used anymore, requires the admin role
+  rpc Revoke(RevokeInviteRequest) returns (RevokeInviteResponse) {}
+  // Check whenever an invite can still be used, needs no login
+  rpc Check(CheckInviteRequest) returns (CheckInviteResponse) {}
+  // Create an account with an invite, needs no login. Uses up the invite
+  rpc Accept(AcceptInviteRequest) returns (AcceptInviteResponse) {}
+}
+
+message CreateInviteRequest {
+  // How long the invite stays valid in seconds, 0 uses the server default. Capped by the server
+  int64 valid_for_seconds = 1;
+}
+
+message CreateInviteResponse {
+  Invite invite = 1;
+}
+
+message ListInvitesRequest {}
+
+message ListInvitesResponse {
+  repeated Invite invites = 1;
+}
+
+message RevokeInviteRequest {
+  string id = 1; // The invite to revoke
+}
+
+message RevokeInviteResponse {}
+
+message CheckInviteRequest {
+  string id = 1; // The invite to check
+}
+
+message CheckInviteResponse {
+  // Whenever the invite can be used, false when it doesn't exist, expired, was used or revoked
+  bool valid = 1;
+  // When the invite expires, only set when valid
+  google.protobuf.Timestamp expires_at = 2;
+}
+
+message AcceptInviteRequest {
+  string id = 1; // The invite to use
+  string username = 2; // The username of the new account
+  string password = 3; // The password of the new account
+}
+
+message AcceptInviteResponse {
+  User user = 1;
+}
+
+message Invite {
+  // The invite ID, also the secret part of the invite link
+  string id = 1;
+  // The ID of the user who created the invite
+  string created_by = 2;
+  google.protobuf.Timestamp created_at = 3;
+  google.protobuf.Timestamp expires_at = 4;
+}

@@ -1,4 +1,5 @@
 import { server_grpc_url } from '$lib/config';
+import { Code, ConnectError } from '@connectrpc/connect';
 import { createConnectTransport } from '@connectrpc/connect-web';
 import { createLoginClient } from '../api/users_v1';
 import { Cookie } from '../storage';
@@ -6,6 +7,9 @@ import { isExpired, parseJwt, secondsUntilExpiry, type JWTClaims } from './jwt/p
 
 /** Refresh the access token when it expires within this many seconds */
 const REFRESH_MARGIN_SECONDS = 60;
+
+/** Answers to a refresh that mean the refresh token is no longer accepted */
+const REJECTED_CODES = [Code.Unauthenticated, Code.PermissionDenied, Code.InvalidArgument];
 
 export interface TokenResponse {
   /** The access token, without prefix */
@@ -108,7 +112,9 @@ export namespace Session {
       return store(resp) !== undefined;
     } catch (err) {
       console.error('could not refresh the session', err);
-      clear();
+      // Only forget the tokens when the server refused them. A network error, or a request aborted by leaving
+      // the page, says nothing about the session and must not log the user out
+      if (err instanceof ConnectError && REJECTED_CODES.includes(err.code)) clear();
 
       return false;
     }

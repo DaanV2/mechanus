@@ -37,6 +37,21 @@ export class WebsocketHandler {
     this.socket.addEventListener('message', this._received.bind(this));
   }
 
+  /**
+   * Opens a connection as the logged in user (if any), refreshing the access token first when it expired or is
+   * about to. Use this to (re)connect: the server closes a connection once its token expires, and the stored token
+   * is only refreshed by API requests.
+   */
+  static async open(
+    screenid: string,
+    id: string,
+    query?: Record<string, string>
+  ): Promise<WebsocketHandler> {
+    await Session.ensureFresh();
+
+    return new WebsocketHandler(screenid, id, undefined, query);
+  }
+
   getToken() {
     return this.token ?? Session.accessToken();
   }

@@ -40,6 +40,7 @@ func setupDatabase(setupCtx context.Context, dbOptions ...persistence.Option) (*
 		&models.Campaign{},
 		&models.Character{},
 		&models.JTI{},
+		&models.Invite{},
 		&models.KeyValue{},
 	}
 

@@ -51,8 +51,12 @@ func (m *Map[K, V]) Store(key K, value V) {
 // The loaded result reports whether the key was present.
 func (m *Map[K, V]) Swap(key K, value V) (previous V, loaded bool) {
 	v, loaded := m.data.Swap(key, value)
+	if !loaded {
+		return generics.Empty[V](), false
+	}
+	previous, _ = v.(V)
 
-	return v.(V), loaded
+	return previous, loaded
 }
 
 // StoreAll stores all key-value pairs from the provided iterator into the map.
