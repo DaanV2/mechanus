@@ -6,41 +6,103 @@ import "screens/v1/splash_screen.proto";
 
 option go_package = "github.com/DaanV2/mechanus/server/proto/screens/v1;screensv1";
 
+// ScreenState is everything a screen renders. It is sent as a full snapshot that replaces whatever
+// the client was showing; smaller changes are sent as the update messages in server.proto.
 message ScreenState {
   Environment environment = 1;
   GridSettings grid = 2;
-  repeated Layer layer = 3;
+  repeated Layer layer = 3; // Rendered in order, the first layer at the bottom
+  View view = 4; // What the screen shows
+  Camera camera = 5; // Which part of the view is visible
   optional SplashScreen splash_screen = 20;
 }
 
 message Environment {
   google.protobuf.Timestamp current_time = 1;
-  string background_color = 2;
-  double light_intensity = 3;
+  string background_color = 2; // Hex color code
+  double light_intensity = 3; // Value between 0.0 (dark) and 1.0 (bright)
 }
 
 message GridSettings {
-  int32 x_offset = 1;
-  int32 y_offset = 2;
-  int32 x_ratio = 3;
-  int32 y_ratio = 4;
+  int32 x_offset = 1; // Horizontal offset in pixels
+  int32 y_offset = 2; // Vertical offset in pixels
+  int32 x_ratio = 3; // Horizontal ratio for scaling
+  int32 y_ratio = 4; // Vertical ratio for scaling
+  bool show = 5; // Whether the grid lines are drawn
+  double cell_size = 6; // Size of one grid cell in pixels of the view's asset
+  string line_color = 7; // Hex color code of the grid lines
+}
+
+// ViewKind is the type of view a screen shows.
+enum ViewKind {
+  VIEW_KIND_UNSPECIFIED = 0;
+  VIEW_KIND_BATTLEMAP = 1; // Tactical grid map with entities
+  VIEW_KIND_SCENERY = 2; // Image / video backdrop
+  VIEW_KIND_INFOBOARD = 3; // Text / handouts / initiative
+  VIEW_KIND_CUSTOM = 4; // Client side component chosen by name
+  VIEW_KIND_SPLASH = 5; // Title card / loading screen
+  VIEW_KIND_BLANK = 6; // Black screen
+}
+
+// View is the view a screen shows, with the overlays drawn on top of it.
+message View {
+  ViewKind kind = 1;
+  optional Asset asset = 2; // Battle map, image, video, ... depending on the view
+  optional string component = 3; // Client component name, for VIEW_KIND_CUSTOM
+  map<string, string> params = 4; // View specific options
+  repeated Overlay overlay = 5; // Widgets drawn on top of the view, in order
+}
+
+// OverlayKind is the type of widget drawn on top of a view.
+enum OverlayKind {
+  OVERLAY_KIND_UNSPECIFIED = 0;
+  OVERLAY_KIND_INITIATIVE = 1; // Initiative / turn order tracker
+  OVERLAY_KIND_ENTITIES = 2; // Names / portraits of the visible entities
+  OVERLAY_KIND_CUSTOM = 3; // Client side component chosen by name
+}
+
+message Overlay {
+  OverlayKind kind = 1;
+  optional string component = 2; // Client component name, for OVERLAY_KIND_CUSTOM
+  map<string, string> params = 3; // Overlay specific options (position, size, ...)
+}
+
+// Camera is the part of the view that is visible on the screen.
+message Camera {
+  Vector2 center = 1; // Center of the screen, in grid units
+  double zoom = 2; // Scale factor, 1.0 is the default size
 }
 
 message Layer {
   repeated Entity entity = 1;
+  string id = 2; // Unique identifier for the layer within the screen
+}
+
+// EntityKind is the role an entity plays in a scene.
+enum EntityKind {
+  ENTITY_KIND_UNSPECIFIED = 0;
+  ENTITY_KIND_PLAYER = 1;
+  ENTITY_KIND_NPC = 2;
+  ENTITY_KIND_ENEMY = 3;
+  ENTITY_KIND_OBJECT = 4;
 }
 
 message Entity {
-  string id = 1;
-  Asset asset = 2;
-  Vector2 position = 3;
-  Vector2 scale = 4;
-  double rotation = 5;
+  string id = 1; // Unique identifier for the entity
+  Asset asset = 2; // Token / image to render
+  Vector2 position = 3; // Position in grid units
+  Vector2 size = 4; // Size in grid units
+  double rotation = 5; // Rotation in degrees
+  string name = 6; // Display name
+  EntityKind kind = 7;
+  bool hidden = 8; // Hidden from players, only sent to screens allowed to see hidden entities
 }
 
 message Asset {
-  string name = 1;
-  string url = 2;
+  string name = 1; // Display name of the asset
+  string url = 2; // Where the client loads the asset from
+  string id = 3; // Unique identifier for the asset
+  string media_type = 4; // MIME type, e.g. "image/png" or "video/mp4", empty when unknown
 }
 
 message Vector2 {

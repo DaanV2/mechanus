@@ -22,7 +22,9 @@ func (s *ScreenHandler) HandleInitialSetupRequest(ctx context.Context, msg *scre
 	return []*screensv1.ServerMessage{
 		{
 			Action: &screensv1.ServerMessage_InitialSetup{
-				InitialSetup: &screensv1.InitialSetupResponse{},
+				InitialSetup: &screensv1.InitialSetupResponse{
+					State: s.State(),
+				},
 			},
 		},
 		{

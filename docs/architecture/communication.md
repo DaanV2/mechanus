@@ -68,6 +68,32 @@ Request/response correlation: if a `ClientMessage` carries a non-empty `id` fiel
 
 _(Additional messages for pan, zoom, token moves, etc. are not implemented yet.)_
 
+### Server messages
+
+| Message                  | Description                                                                                          |
+| ------------------------ | ---------------------------------------------------------------------------------------------------- |
+| `InitialSetupResponse`   | Answer to `InitialSetupRequest`, carries the screen's current `ScreenState`                          |
+| `ScreenState`            | Full snapshot; the client replaces everything it renders. Sent by `ScreenHandler.SetState`           |
+| `EntityUpdate`           | Add or replace one entity in a layer (token moved, revealed, spawned)                                 |
+| `EntityRemove`           | Remove one entity from a layer                                                                        |
+| `Camera` (`camera_update`) | Change the visible part of the view (pan / zoom)                                                   |
+| `SplashScreen`           | Show / hide the title card                                                                            |
+| `SceneChange` / `SceneChangeCompleted` | Scene load started / finished                                                          |
+| `Ping`                   | Broadcast of a client ping                                                                            |
+
+`ScreenState` (`screens/v1/state.proto`) is what the Pixi.js renderer draws:
+
+| Field          | Content                                                                                                   |
+| -------------- | --------------------------------------------------------------------------------------------------------- |
+| `view`         | `ViewKind` (battlemap, scenery, infoboard, custom, splash, blank), its `Asset`, `component`, `params` and `overlay`s — mirrors `scenes.ScreenInstruction` |
+| `layer`        | Ordered layers (bottom first) of `Entity`: id, name, `EntityKind`, asset, position / size in grid units, rotation, hidden |
+| `grid`         | Offset, cell size (in pixels of the view's asset), whether lines are shown and their colour                |
+| `camera`       | Center (grid units) and zoom                                                                               |
+| `environment`  | In-game time, background colour, light intensity                                                           |
+| `splash_screen`| Optional title card                                                                                        |
+
+The server-side model is `engine/screens/state`; `ScreenState.ToProto()` converts it. Delta messages (`EntityUpdate`, `EntityRemove`, `camera_update`) are defined but nothing sends them yet. Fog of war and walls are not in the model — they wait on the battle map format (see [scenes.md](./scenes.md#screens--views)).
+
 ### Server-side flow
 
 `infrastructure/transport/http.WebsocketSplitter` intercepts HTTP requests with `Upgrade: websocket` before they reach the ConnectRPC router, handing them to `infrastructure/transport/websocket.WebsocketHandler`.

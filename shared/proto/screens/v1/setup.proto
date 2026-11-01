@@ -1,8 +1,12 @@
 syntax = "proto3";
 package screens.v1;
 
+import "screens/v1/state.proto";
+
 option go_package = "github.com/DaanV2/mechanus/server/proto/screens/v1;screensv1";
 
 message InitialSetupRequest {}
 
-message InitialSetupResponse {}
+message InitialSetupResponse {
+  ScreenState state = 1; // The current state of the screen
+}

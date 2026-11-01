@@ -4,13 +4,15 @@
 
 import type { GenFile, GenMessage } from "@bufbuild/protobuf/codegenv2";
 import { fileDesc, messageDesc } from "@bufbuild/protobuf/codegenv2";
+import type { ScreenState } from "./state_pb";
+import { file_screens_v1_state } from "./state_pb";
 import type { Message } from "@bufbuild/protobuf";
 
 /**
  * Describes the file screens/v1/setup.proto.
  */
 export const file_screens_v1_setup: GenFile = /*@__PURE__*/
-  fileDesc("ChZzY3JlZW5zL3YxL3NldHVwLnByb3RvEgpzY3JlZW5zLnYxIhUKE0luaXRpYWxTZXR1cFJlcXVlc3QiFgoUSW5pdGlhbFNldHVwUmVzcG9uc2VCPlo8Z2l0aHViLmNvbS9EYWFuVjIvbWVjaGFudXMvc2VydmVyL3Byb3RvL3NjcmVlbnMvdjE7c2NyZWVuc3YxYgZwcm90bzM");
+  fileDesc("ChZzY3JlZW5zL3YxL3NldHVwLnByb3RvEgpzY3JlZW5zLnYxIhUKE0luaXRpYWxTZXR1cFJlcXVlc3QiPgoUSW5pdGlhbFNldHVwUmVzcG9uc2USJgoFc3RhdGUYASABKAsyFy5zY3JlZW5zLnYxLlNjcmVlblN0YXRlQj5aPGdpdGh1Yi5jb20vRGFhblYyL21lY2hhbnVzL3NlcnZlci9wcm90by9zY3JlZW5zL3YxO3NjcmVlbnN2MWIGcHJvdG8z", [file_screens_v1_state]);
 
 /**
  * @generated from message screens.v1.InitialSetupRequest
@@ -29,6 +31,12 @@ export const InitialSetupRequestSchema: GenMessage<InitialSetupRequest> = /*@__P
  * @generated from message screens.v1.InitialSetupResponse
  */
 export type InitialSetupResponse = Message<"screens.v1.InitialSetupResponse"> & {
+  /**
+   * The current state of the screen
+   *
+   * @generated from field: screens.v1.ScreenState state = 1;
+   */
+  state?: ScreenState | undefined;
 };
 
 /**

@@ -6,6 +6,7 @@ import (
 	"net"
 	"sync"
 
+	"github.com/DaanV2/mechanus/server/engine/screens/state"
 	"github.com/DaanV2/mechanus/server/infrastructure/logging"
 	"github.com/DaanV2/mechanus/server/pkg/extensions/xsync"
 	screensv1 "github.com/DaanV2/mechanus/server/proto/screens/v1"
@@ -17,6 +18,9 @@ type ScreenHandler struct {
 	id        string
 	listeners *xsync.Map[string, *ScreenConn]
 	logger    logging.Enriched
+
+	stateLock sync.RWMutex
+	state     *state.ScreenState
 }
 
 // NewScreenHandler creates a new screen handler with the given ID.
@@ -25,7 +29,28 @@ func NewScreenHandler(id string) *ScreenHandler {
 		id:        id,
 		listeners: xsync.NewMap[string, *ScreenConn](),
 		logger:    logging.Enriched{}.WithPrefix("screen").With("screen_id", id),
+		state:     state.NewScreenState(),
 	}
+}
+
+// State returns the proto snapshot of the screen's current state.
+func (s *ScreenHandler) State() *screensv1.ScreenState {
+	s.stateLock.RLock()
+	defer s.stateLock.RUnlock()
+
+	return s.state.ToProto()
+}
+
+// SetState replaces the screen's state and broadcasts the new snapshot to all listeners.
+func (s *ScreenHandler) SetState(ctx context.Context, st *state.ScreenState) {
+	s.stateLock.Lock()
+	s.state = st
+	snapshot := st.ToProto()
+	s.stateLock.Unlock()
+
+	s.Broadcast(ctx, &screensv1.ServerMessage{
+		Action: &screensv1.ServerMessage_ScreenState{ScreenState: snapshot},
+	})
 }
 
 // GetID returns the screen's unique identifier.

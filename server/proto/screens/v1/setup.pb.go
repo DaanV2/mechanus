@@ -59,6 +59,7 @@ func (*InitialSetupRequest) Descriptor() ([]byte, []int) {
 
 type InitialSetupResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
+	State         *ScreenState           `protobuf:"bytes,1,opt,name=state,proto3" json:"state,omitempty"` // The current state of the screen
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -93,14 +94,22 @@ func (*InitialSetupResponse) Descriptor() ([]byte, []int) {
 	return file_screens_v1_setup_proto_rawDescGZIP(), []int{1}
 }
 
+func (x *InitialSetupResponse) GetState() *ScreenState {
+	if x != nil {
+		return x.State
+	}
+	return nil
+}
+
 var File_screens_v1_setup_proto protoreflect.FileDescriptor
 
 const file_screens_v1_setup_proto_rawDesc = "" +
 	"\n" +
 	"\x16screens/v1/setup.proto\x12\n" +
-	"screens.v1\"\x15\n" +
-	"\x13InitialSetupRequest\"\x16\n" +
-	"\x14InitialSetupResponseB>Z<github.com/DaanV2/mechanus/server/proto/screens/v1;screensv1b\x06proto3"
+	"screens.v1\x1a\x16screens/v1/state.proto\"\x15\n" +
+	"\x13InitialSetupRequest\"E\n" +
+	"\x14InitialSetupResponse\x12-\n" +
+	"\x05state\x18\x01 \x01(\v2\x17.screens.v1.ScreenStateR\x05stateB>Z<github.com/DaanV2/mechanus/server/proto/screens/v1;screensv1b\x06proto3"
 
 var (
 	file_screens_v1_setup_proto_rawDescOnce sync.Once
@@ -118,13 +127,15 @@ var file_screens_v1_setup_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_screens_v1_setup_proto_goTypes = []any{
 	(*InitialSetupRequest)(nil),  // 0: screens.v1.InitialSetupRequest
 	(*InitialSetupResponse)(nil), // 1: screens.v1.InitialSetupResponse
+	(*ScreenState)(nil),          // 2: screens.v1.ScreenState
 }
 var file_screens_v1_setup_proto_depIdxs = []int32{
-	0, // [0:0] is the sub-list for method output_type
-	0, // [0:0] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	2, // 0: screens.v1.InitialSetupResponse.state:type_name -> screens.v1.ScreenState
+	1, // [1:1] is the sub-list for method output_type
+	1, // [1:1] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_screens_v1_setup_proto_init() }
@@ -132,6 +143,7 @@ func file_screens_v1_setup_proto_init() {
 	if File_screens_v1_setup_proto != nil {
 		return
 	}
+	file_screens_v1_state_proto_init()
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
