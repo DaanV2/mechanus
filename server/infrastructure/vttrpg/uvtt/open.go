@@ -9,6 +9,7 @@ import (
 	"github.com/DaanV2/mechanus/server/pkg/extensions/xos"
 )
 
+// Open tries to read the file as uvtt and return the data within
 func Open(filename string) (*MapData, error) {
 	filename = filepath.Clean(filename)
 	f, err := os.Open(filename)
