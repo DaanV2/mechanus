@@ -2,8 +2,8 @@
 // @generated from file screens/v1/state.proto (package screens.v1, syntax proto3)
 /* eslint-disable */
 
-import type { GenFile, GenMessage } from "@bufbuild/protobuf/codegenv2";
-import { fileDesc, messageDesc } from "@bufbuild/protobuf/codegenv2";
+import type { GenEnum, GenFile, GenMessage } from "@bufbuild/protobuf/codegenv2";
+import { enumDesc, fileDesc, messageDesc } from "@bufbuild/protobuf/codegenv2";
 import type { Timestamp } from "@bufbuild/protobuf/wkt";
 import { file_google_protobuf_timestamp } from "@bufbuild/protobuf/wkt";
 import type { SplashScreen } from "./splash_screen_pb";
@@ -14,9 +14,12 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file screens/v1/state.proto.
  */
 export const file_screens_v1_state: GenFile = /*@__PURE__*/
-  fileDesc("ChZzY3JlZW5zL3YxL3N0YXRlLnByb3RvEgpzY3JlZW5zLnYxIs0BCgtTY3JlZW5TdGF0ZRIsCgtlbnZpcm9ubWVudBgBIAEoCzIXLnNjcmVlbnMudjEuRW52aXJvbm1lbnQSJgoEZ3JpZBgCIAEoCzIYLnNjcmVlbnMudjEuR3JpZFNldHRpbmdzEiAKBWxheWVyGAMgAygLMhEuc2NyZWVucy52MS5MYXllchI0Cg1zcGxhc2hfc2NyZWVuGBQgASgLMhguc2NyZWVucy52MS5TcGxhc2hTY3JlZW5IAIgBAUIQCg5fc3BsYXNoX3NjcmVlbiJyCgtFbnZpcm9ubWVudBIwCgxjdXJyZW50X3RpbWUYASABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEhgKEGJhY2tncm91bmRfY29sb3IYAiABKAkSFwoPbGlnaHRfaW50ZW5zaXR5GAMgASgBIlQKDEdyaWRTZXR0aW5ncxIQCgh4X29mZnNldBgBIAEoBRIQCgh5X29mZnNldBgCIAEoBRIPCgd4X3JhdGlvGAMgASgFEg8KB3lfcmF0aW8YBCABKAUiKwoFTGF5ZXISIgoGZW50aXR5GAEgAygLMhIuc2NyZWVucy52MS5FbnRpdHkikwEKBkVudGl0eRIKCgJpZBgBIAEoCRIgCgVhc3NldBgCIAEoCzIRLnNjcmVlbnMudjEuQXNzZXQSJQoIcG9zaXRpb24YAyABKAsyEy5zY3JlZW5zLnYxLlZlY3RvcjISIgoFc2NhbGUYBCABKAsyEy5zY3JlZW5zLnYxLlZlY3RvcjISEAoIcm90YXRpb24YBSABKAEiIgoFQXNzZXQSDAoEbmFtZRgBIAEoCRILCgN1cmwYAiABKAkiHwoHVmVjdG9yMhIJCgF4GAEgASgBEgkKAXkYAiABKAFCPlo8Z2l0aHViLmNvbS9EYWFuVjIvbWVjaGFudXMvc2VydmVyL3Byb3RvL3NjcmVlbnMvdjE7c2NyZWVuc3YxYgZwcm90bzM", [file_google_protobuf_timestamp, file_screens_v1_splash_screen]);
+  fileDesc("ChZzY3JlZW5zL3YxL3N0YXRlLnByb3RvEgpzY3JlZW5zLnYxIpECCgtTY3JlZW5TdGF0ZRIsCgtlbnZpcm9ubWVudBgBIAEoCzIXLnNjcmVlbnMudjEuRW52aXJvbm1lbnQSJgoEZ3JpZBgCIAEoCzIYLnNjcmVlbnMudjEuR3JpZFNldHRpbmdzEiAKBWxheWVyGAMgAygLMhEuc2NyZWVucy52MS5MYXllchIeCgR2aWV3GAQgASgLMhAuc2NyZWVucy52MS5WaWV3EiIKBmNhbWVyYRgFIAEoCzISLnNjcmVlbnMudjEuQ2FtZXJhEjQKDXNwbGFzaF9zY3JlZW4YFCABKAsyGC5zY3JlZW5zLnYxLlNwbGFzaFNjcmVlbkgAiAEBQhAKDl9zcGxhc2hfc2NyZWVuInIKC0Vudmlyb25tZW50EjAKDGN1cnJlbnRfdGltZRgBIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASGAoQYmFja2dyb3VuZF9jb2xvchgCIAEoCRIXCg9saWdodF9pbnRlbnNpdHkYAyABKAEiiQEKDEdyaWRTZXR0aW5ncxIQCgh4X29mZnNldBgBIAEoBRIQCgh5X29mZnNldBgCIAEoBRIPCgd4X3JhdGlvGAMgASgFEg8KB3lfcmF0aW8YBCABKAUSDAoEc2hvdxgFIAEoCBIRCgljZWxsX3NpemUYBiABKAESEgoKbGluZV9jb2xvchgHIAEoCSKEAgoEVmlldxIiCgRraW5kGAEgASgOMhQuc2NyZWVucy52MS5WaWV3S2luZBIlCgVhc3NldBgCIAEoCzIRLnNjcmVlbnMudjEuQXNzZXRIAIgBARIWCgljb21wb25lbnQYAyABKAlIAYgBARIsCgZwYXJhbXMYBCADKAsyHC5zY3JlZW5zLnYxLlZpZXcuUGFyYW1zRW50cnkSJAoHb3ZlcmxheRgFIAMoCzITLnNjcmVlbnMudjEuT3ZlcmxheRotCgtQYXJhbXNFbnRyeRILCgNrZXkYASABKAkSDQoFdmFsdWUYAiABKAk6AjgBQggKBl9hc3NldEIMCgpfY29tcG9uZW50IrYBCgdPdmVybGF5EiUKBGtpbmQYASABKA4yFy5zY3JlZW5zLnYxLk92ZXJsYXlLaW5kEhYKCWNvbXBvbmVudBgCIAEoCUgAiAEBEi8KBnBhcmFtcxgDIAMoCzIfLnNjcmVlbnMudjEuT3ZlcmxheS5QYXJhbXNFbnRyeRotCgtQYXJhbXNFbnRyeRILCgNrZXkYASABKAkSDQoFdmFsdWUYAiABKAk6AjgBQgwKCl9jb21wb25lbnQiOwoGQ2FtZXJhEiMKBmNlbnRlchgBIAEoCzITLnNjcmVlbnMudjEuVmVjdG9yMhIMCgR6b29tGAIgASgBIjcKBUxheWVyEiIKBmVudGl0eRgBIAMoCzISLnNjcmVlbnMudjEuRW50aXR5EgoKAmlkGAIgASgJItYBCgZFbnRpdHkSCgoCaWQYASABKAkSIAoFYXNzZXQYAiABKAsyES5zY3JlZW5zLnYxLkFzc2V0EiUKCHBvc2l0aW9uGAMgASgLMhMuc2NyZWVucy52MS5WZWN0b3IyEiEKBHNpemUYBCABKAsyEy5zY3JlZW5zLnYxLlZlY3RvcjISEAoIcm90YXRpb24YBSABKAESDAoEbmFtZRgGIAEoCRIkCgRraW5kGAcgASgOMhYuc2NyZWVucy52MS5FbnRpdHlLaW5kEg4KBmhpZGRlbhgIIAEoCCJCCgVBc3NldBIMCgRuYW1lGAEgASgJEgsKA3VybBgCIAEoCRIKCgJpZBgDIAEoCRISCgptZWRpYV90eXBlGAQgASgJIh8KB1ZlY3RvcjISCQoBeBgBIAEoARIJCgF5GAIgASgBKq8BCghWaWV3S2luZBIZChVWSUVXX0tJTkRfVU5TUEVDSUZJRUQQABIXChNWSUVXX0tJTkRfQkFUVExFTUFQEAESFQoRVklFV19LSU5EX1NDRU5FUlkQAhIXChNWSUVXX0tJTkRfSU5GT0JPQVJEEAMSFAoQVklFV19LSU5EX0NVU1RPTRAEEhQKEFZJRVdfS0lORF9TUExBU0gQBRITCg9WSUVXX0tJTkRfQkxBTksQBip8CgtPdmVybGF5S2luZBIcChhPVkVSTEFZX0tJTkRfVU5TUEVDSUZJRUQQABIbChdPVkVSTEFZX0tJTkRfSU5JVElBVElWRRABEhkKFU9WRVJMQVlfS0lORF9FTlRJVElFUxACEhcKE09WRVJMQVlfS0lORF9DVVNUT00QAyqFAQoKRW50aXR5S2luZBIbChdFTlRJVFlfS0lORF9VTlNQRUNJRklFRBAAEhYKEkVOVElUWV9LSU5EX1BMQVlFUhABEhMKD0VOVElUWV9LSU5EX05QQxACEhUKEUVOVElUWV9LSU5EX0VORU1ZEAMSFgoSRU5USVRZX0tJTkRfT0JKRUNUEARCPlo8Z2l0aHViLmNvbS9EYWFuVjIvbWVjaGFudXMvc2VydmVyL3Byb3RvL3NjcmVlbnMvdjE7c2NyZWVuc3YxYgZwcm90bzM", [file_google_protobuf_timestamp, file_screens_v1_splash_screen]);
 
 /**
+ * ScreenState is everything a screen renders. It is sent as a full snapshot that replaces whatever
+ * the client was showing; smaller changes are sent as the update messages in server.proto.
+ *
  * @generated from message screens.v1.ScreenState
  */
 export type ScreenState = Message<"screens.v1.ScreenState"> & {
@@ -31,9 +34,25 @@ export type ScreenState = Message<"screens.v1.ScreenState"> & {
   grid?: GridSettings | undefined;
 
   /**
+   * Rendered in order, the first layer at the bottom
+   *
    * @generated from field: repeated screens.v1.Layer layer = 3;
    */
   layer: Layer[];
+
+  /**
+   * What the screen shows
+   *
+   * @generated from field: screens.v1.View view = 4;
+   */
+  view?: View | undefined;
+
+  /**
+   * Which part of the view is visible
+   *
+   * @generated from field: screens.v1.Camera camera = 5;
+   */
+  camera?: Camera | undefined;
 
   /**
    * @generated from field: optional screens.v1.SplashScreen splash_screen = 20;
@@ -58,11 +77,15 @@ export type Environment = Message<"screens.v1.Environment"> & {
   currentTime?: Timestamp | undefined;
 
   /**
+   * Hex color code
+   *
    * @generated from field: string background_color = 2;
    */
   backgroundColor: string;
 
   /**
+   * Value between 0.0 (dark) and 1.0 (bright)
+   *
    * @generated from field: double light_intensity = 3;
    */
   lightIntensity: number;
@@ -80,24 +103,53 @@ export const EnvironmentSchema: GenMessage<Environment> = /*@__PURE__*/
  */
 export type GridSettings = Message<"screens.v1.GridSettings"> & {
   /**
+   * Horizontal offset in pixels
+   *
    * @generated from field: int32 x_offset = 1;
    */
   xOffset: number;
 
   /**
+   * Vertical offset in pixels
+   *
    * @generated from field: int32 y_offset = 2;
    */
   yOffset: number;
 
   /**
+   * Horizontal ratio for scaling
+   *
    * @generated from field: int32 x_ratio = 3;
    */
   xRatio: number;
 
   /**
+   * Vertical ratio for scaling
+   *
    * @generated from field: int32 y_ratio = 4;
    */
   yRatio: number;
+
+  /**
+   * Whether the grid lines are drawn
+   *
+   * @generated from field: bool show = 5;
+   */
+  show: boolean;
+
+  /**
+   * Size of one grid cell in pixels of the view's asset
+   *
+   * @generated from field: double cell_size = 6;
+   */
+  cellSize: number;
+
+  /**
+   * Hex color code of the grid lines
+   *
+   * @generated from field: string line_color = 7;
+   */
+  lineColor: string;
 };
 
 /**
@@ -108,6 +160,112 @@ export const GridSettingsSchema: GenMessage<GridSettings> = /*@__PURE__*/
   messageDesc(file_screens_v1_state, 2);
 
 /**
+ * View is the view a screen shows, with the overlays drawn on top of it.
+ *
+ * @generated from message screens.v1.View
+ */
+export type View = Message<"screens.v1.View"> & {
+  /**
+   * @generated from field: screens.v1.ViewKind kind = 1;
+   */
+  kind: ViewKind;
+
+  /**
+   * Battle map, image, video, ... depending on the view
+   *
+   * @generated from field: optional screens.v1.Asset asset = 2;
+   */
+  asset?: Asset | undefined;
+
+  /**
+   * Client component name, for VIEW_KIND_CUSTOM
+   *
+   * @generated from field: optional string component = 3;
+   */
+  component?: string | undefined;
+
+  /**
+   * View specific options
+   *
+   * @generated from field: map<string, string> params = 4;
+   */
+  params: { [key: string]: string };
+
+  /**
+   * Widgets drawn on top of the view, in order
+   *
+   * @generated from field: repeated screens.v1.Overlay overlay = 5;
+   */
+  overlay: Overlay[];
+};
+
+/**
+ * Describes the message screens.v1.View.
+ * Use `create(ViewSchema)` to create a new message.
+ */
+export const ViewSchema: GenMessage<View> = /*@__PURE__*/
+  messageDesc(file_screens_v1_state, 3);
+
+/**
+ * @generated from message screens.v1.Overlay
+ */
+export type Overlay = Message<"screens.v1.Overlay"> & {
+  /**
+   * @generated from field: screens.v1.OverlayKind kind = 1;
+   */
+  kind: OverlayKind;
+
+  /**
+   * Client component name, for OVERLAY_KIND_CUSTOM
+   *
+   * @generated from field: optional string component = 2;
+   */
+  component?: string | undefined;
+
+  /**
+   * Overlay specific options (position, size, ...)
+   *
+   * @generated from field: map<string, string> params = 3;
+   */
+  params: { [key: string]: string };
+};
+
+/**
+ * Describes the message screens.v1.Overlay.
+ * Use `create(OverlaySchema)` to create a new message.
+ */
+export const OverlaySchema: GenMessage<Overlay> = /*@__PURE__*/
+  messageDesc(file_screens_v1_state, 4);
+
+/**
+ * Camera is the part of the view that is visible on the screen.
+ *
+ * @generated from message screens.v1.Camera
+ */
+export type Camera = Message<"screens.v1.Camera"> & {
+  /**
+   * Center of the screen, in grid units
+   *
+   * @generated from field: screens.v1.Vector2 center = 1;
+   */
+  center?: Vector2 | undefined;
+
+  /**
+   * Scale factor, 1.0 is the default size
+   *
+   * @generated from field: double zoom = 2;
+   */
+  zoom: number;
+};
+
+/**
+ * Describes the message screens.v1.Camera.
+ * Use `create(CameraSchema)` to create a new message.
+ */
+export const CameraSchema: GenMessage<Camera> = /*@__PURE__*/
+  messageDesc(file_screens_v1_state, 5);
+
+/**
  * @generated from message screens.v1.Layer
  */
 export type Layer = Message<"screens.v1.Layer"> & {
@@ -115,6 +273,13 @@ export type Layer = Message<"screens.v1.Layer"> & {
    * @generated from field: repeated screens.v1.Entity entity = 1;
    */
   entity: Entity[];
+
+  /**
+   * Unique identifier for the layer within the screen
+   *
+   * @generated from field: string id = 2;
+   */
+  id: string;
 };
 
 /**
@@ -122,36 +287,65 @@ export type Layer = Message<"screens.v1.Layer"> & {
  * Use `create(LayerSchema)` to create a new message.
  */
 export const LayerSchema: GenMessage<Layer> = /*@__PURE__*/
-  messageDesc(file_screens_v1_state, 3);
+  messageDesc(file_screens_v1_state, 6);
 
 /**
  * @generated from message screens.v1.Entity
  */
 export type Entity = Message<"screens.v1.Entity"> & {
   /**
+   * Unique identifier for the entity
+   *
    * @generated from field: string id = 1;
    */
   id: string;
 
   /**
+   * Token / image to render
+   *
    * @generated from field: screens.v1.Asset asset = 2;
    */
   asset?: Asset | undefined;
 
   /**
+   * Position in grid units
+   *
    * @generated from field: screens.v1.Vector2 position = 3;
    */
   position?: Vector2 | undefined;
 
   /**
-   * @generated from field: screens.v1.Vector2 scale = 4;
+   * Size in grid units
+   *
+   * @generated from field: screens.v1.Vector2 size = 4;
    */
-  scale?: Vector2 | undefined;
+  size?: Vector2 | undefined;
 
   /**
+   * Rotation in degrees
+   *
    * @generated from field: double rotation = 5;
    */
   rotation: number;
+
+  /**
+   * Display name
+   *
+   * @generated from field: string name = 6;
+   */
+  name: string;
+
+  /**
+   * @generated from field: screens.v1.EntityKind kind = 7;
+   */
+  kind: EntityKind;
+
+  /**
+   * Hidden from players, only sent to screens allowed to see hidden entities
+   *
+   * @generated from field: bool hidden = 8;
+   */
+  hidden: boolean;
 };
 
 /**
@@ -159,21 +353,39 @@ export type Entity = Message<"screens.v1.Entity"> & {
  * Use `create(EntitySchema)` to create a new message.
  */
 export const EntitySchema: GenMessage<Entity> = /*@__PURE__*/
-  messageDesc(file_screens_v1_state, 4);
+  messageDesc(file_screens_v1_state, 7);
 
 /**
  * @generated from message screens.v1.Asset
  */
 export type Asset = Message<"screens.v1.Asset"> & {
   /**
+   * Display name of the asset
+   *
    * @generated from field: string name = 1;
    */
   name: string;
 
   /**
+   * Where the client loads the asset from
+   *
    * @generated from field: string url = 2;
    */
   url: string;
+
+  /**
+   * Unique identifier for the asset
+   *
+   * @generated from field: string id = 3;
+   */
+  id: string;
+
+  /**
+   * MIME type, e.g. "image/png" or "video/mp4", empty when unknown
+   *
+   * @generated from field: string media_type = 4;
+   */
+  mediaType: string;
 };
 
 /**
@@ -181,7 +393,7 @@ export type Asset = Message<"screens.v1.Asset"> & {
  * Use `create(AssetSchema)` to create a new message.
  */
 export const AssetSchema: GenMessage<Asset> = /*@__PURE__*/
-  messageDesc(file_screens_v1_state, 5);
+  messageDesc(file_screens_v1_state, 8);
 
 /**
  * @generated from message screens.v1.Vector2
@@ -203,5 +415,142 @@ export type Vector2 = Message<"screens.v1.Vector2"> & {
  * Use `create(Vector2Schema)` to create a new message.
  */
 export const Vector2Schema: GenMessage<Vector2> = /*@__PURE__*/
-  messageDesc(file_screens_v1_state, 6);
+  messageDesc(file_screens_v1_state, 9);
+
+/**
+ * ViewKind is the type of view a screen shows.
+ *
+ * @generated from enum screens.v1.ViewKind
+ */
+export enum ViewKind {
+  /**
+   * @generated from enum value: VIEW_KIND_UNSPECIFIED = 0;
+   */
+  UNSPECIFIED = 0,
+
+  /**
+   * Tactical grid map with entities
+   *
+   * @generated from enum value: VIEW_KIND_BATTLEMAP = 1;
+   */
+  BATTLEMAP = 1,
+
+  /**
+   * Image / video backdrop
+   *
+   * @generated from enum value: VIEW_KIND_SCENERY = 2;
+   */
+  SCENERY = 2,
+
+  /**
+   * Text / handouts / initiative
+   *
+   * @generated from enum value: VIEW_KIND_INFOBOARD = 3;
+   */
+  INFOBOARD = 3,
+
+  /**
+   * Client side component chosen by name
+   *
+   * @generated from enum value: VIEW_KIND_CUSTOM = 4;
+   */
+  CUSTOM = 4,
+
+  /**
+   * Title card / loading screen
+   *
+   * @generated from enum value: VIEW_KIND_SPLASH = 5;
+   */
+  SPLASH = 5,
+
+  /**
+   * Black screen
+   *
+   * @generated from enum value: VIEW_KIND_BLANK = 6;
+   */
+  BLANK = 6,
+}
+
+/**
+ * Describes the enum screens.v1.ViewKind.
+ */
+export const ViewKindSchema: GenEnum<ViewKind> = /*@__PURE__*/
+  enumDesc(file_screens_v1_state, 0);
+
+/**
+ * OverlayKind is the type of widget drawn on top of a view.
+ *
+ * @generated from enum screens.v1.OverlayKind
+ */
+export enum OverlayKind {
+  /**
+   * @generated from enum value: OVERLAY_KIND_UNSPECIFIED = 0;
+   */
+  UNSPECIFIED = 0,
+
+  /**
+   * Initiative / turn order tracker
+   *
+   * @generated from enum value: OVERLAY_KIND_INITIATIVE = 1;
+   */
+  INITIATIVE = 1,
+
+  /**
+   * Names / portraits of the visible entities
+   *
+   * @generated from enum value: OVERLAY_KIND_ENTITIES = 2;
+   */
+  ENTITIES = 2,
+
+  /**
+   * Client side component chosen by name
+   *
+   * @generated from enum value: OVERLAY_KIND_CUSTOM = 3;
+   */
+  CUSTOM = 3,
+}
+
+/**
+ * Describes the enum screens.v1.OverlayKind.
+ */
+export const OverlayKindSchema: GenEnum<OverlayKind> = /*@__PURE__*/
+  enumDesc(file_screens_v1_state, 1);
+
+/**
+ * EntityKind is the role an entity plays in a scene.
+ *
+ * @generated from enum screens.v1.EntityKind
+ */
+export enum EntityKind {
+  /**
+   * @generated from enum value: ENTITY_KIND_UNSPECIFIED = 0;
+   */
+  UNSPECIFIED = 0,
+
+  /**
+   * @generated from enum value: ENTITY_KIND_PLAYER = 1;
+   */
+  PLAYER = 1,
+
+  /**
+   * @generated from enum value: ENTITY_KIND_NPC = 2;
+   */
+  NPC = 2,
+
+  /**
+   * @generated from enum value: ENTITY_KIND_ENEMY = 3;
+   */
+  ENEMY = 3,
+
+  /**
+   * @generated from enum value: ENTITY_KIND_OBJECT = 4;
+   */
+  OBJECT = 4,
+}
+
+/**
+ * Describes the enum screens.v1.EntityKind.
+ */
+export const EntityKindSchema: GenEnum<EntityKind> = /*@__PURE__*/
+  enumDesc(file_screens_v1_state, 2);
 

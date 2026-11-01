@@ -3,6 +3,7 @@ package state
 import (
 	"time"
 
+	"github.com/DaanV2/mechanus/server/engine/scenes"
 	"github.com/DaanV2/mechanus/server/pkg/must"
 )
 
@@ -10,7 +11,9 @@ import (
 type ScreenState struct {
 	Environment  *Environment  `json:"environment"`             // Environment state
 	Grid         *GridSettings `json:"grid"`                    // Grid settings
-	Layers       []*Layer      `json:"layers"`                  // List of layers, each containing entities
+	Layers       []*Layer      `json:"layers"`                  // List of layers, each containing entities, bottom first
+	View         *View         `json:"view"`                    // What the screen shows
+	Camera       *Camera       `json:"camera"`                  // Which part of the view is visible
 	SplashScreen *SplashScreen `json:"splash_screen,omitempty"` // Optional splash screen, if nil assumed to be not shown
 }
 
@@ -23,12 +26,21 @@ func NewScreenState() *ScreenState {
 			LightIntensity:  1,
 		},
 		Grid: &GridSettings{
-			XOffset: 0,
-			YOffset: 0,
-			XRatio:  1,
-			YRatio:  1,
+			XOffset:   0,
+			YOffset:   0,
+			XRatio:    1,
+			YRatio:    1,
+			Show:      false,
+			CellSize:  1,
+			LineColor: "#000000",
 		},
-		Layers:       []*Layer{},
+		Layers: []*Layer{},
+		View: &View{
+			Kind: scenes.ViewBlank,
+		},
+		Camera: &Camera{
+			Zoom: 1,
+		},
 		SplashScreen: nil,
 	}
 }

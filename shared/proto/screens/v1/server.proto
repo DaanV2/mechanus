@@ -5,6 +5,7 @@ import "screens/v1/general.proto";
 import "screens/v1/scene_actions.proto";
 import "screens/v1/setup.proto";
 import "screens/v1/splash_screen.proto";
+import "screens/v1/state.proto";
 
 option go_package = "github.com/DaanV2/mechanus/server/proto/screens/v1;screensv1";
 
@@ -21,5 +22,21 @@ message ServerMessage {
     SceneChange scene_change = 4;
     SceneChangeCompleted scene_change_completed = 5;
     Ping ping = 6;
+    ScreenState screen_state = 7; // Full snapshot, replaces the client's state
+    EntityUpdate entity_update = 8;
+    EntityRemove entity_remove = 9;
+    Camera camera_update = 10;
   }
+}
+
+// EntityUpdate adds an entity to a layer, or replaces it when an entity with the same id exists.
+message EntityUpdate {
+  string layer_id = 1;
+  Entity entity = 2;
+}
+
+// EntityRemove removes an entity from a layer.
+message EntityRemove {
+  string layer_id = 1;
+  string entity_id = 2;
 }

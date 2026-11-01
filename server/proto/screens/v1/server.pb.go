@@ -75,6 +75,10 @@ type ServerMessage struct {
 	//	*ServerMessage_SceneChange
 	//	*ServerMessage_SceneChangeCompleted
 	//	*ServerMessage_Ping
+	//	*ServerMessage_ScreenState
+	//	*ServerMessage_EntityUpdate
+	//	*ServerMessage_EntityRemove
+	//	*ServerMessage_CameraUpdate
 	Action        isServerMessage_Action `protobuf_oneof:"action"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -169,6 +173,42 @@ func (x *ServerMessage) GetPing() *Ping {
 	return nil
 }
 
+func (x *ServerMessage) GetScreenState() *ScreenState {
+	if x != nil {
+		if x, ok := x.Action.(*ServerMessage_ScreenState); ok {
+			return x.ScreenState
+		}
+	}
+	return nil
+}
+
+func (x *ServerMessage) GetEntityUpdate() *EntityUpdate {
+	if x != nil {
+		if x, ok := x.Action.(*ServerMessage_EntityUpdate); ok {
+			return x.EntityUpdate
+		}
+	}
+	return nil
+}
+
+func (x *ServerMessage) GetEntityRemove() *EntityRemove {
+	if x != nil {
+		if x, ok := x.Action.(*ServerMessage_EntityRemove); ok {
+			return x.EntityRemove
+		}
+	}
+	return nil
+}
+
+func (x *ServerMessage) GetCameraUpdate() *Camera {
+	if x != nil {
+		if x, ok := x.Action.(*ServerMessage_CameraUpdate); ok {
+			return x.CameraUpdate
+		}
+	}
+	return nil
+}
+
 type isServerMessage_Action interface {
 	isServerMessage_Action()
 }
@@ -193,6 +233,22 @@ type ServerMessage_Ping struct {
 	Ping *Ping `protobuf:"bytes,6,opt,name=ping,proto3,oneof"`
 }
 
+type ServerMessage_ScreenState struct {
+	ScreenState *ScreenState `protobuf:"bytes,7,opt,name=screen_state,json=screenState,proto3,oneof"` // Full snapshot, replaces the client's state
+}
+
+type ServerMessage_EntityUpdate struct {
+	EntityUpdate *EntityUpdate `protobuf:"bytes,8,opt,name=entity_update,json=entityUpdate,proto3,oneof"`
+}
+
+type ServerMessage_EntityRemove struct {
+	EntityRemove *EntityRemove `protobuf:"bytes,9,opt,name=entity_remove,json=entityRemove,proto3,oneof"`
+}
+
+type ServerMessage_CameraUpdate struct {
+	CameraUpdate *Camera `protobuf:"bytes,10,opt,name=camera_update,json=cameraUpdate,proto3,oneof"`
+}
+
 func (*ServerMessage_InitialSetup) isServerMessage_Action() {}
 
 func (*ServerMessage_SplashScreenUpdate) isServerMessage_Action() {}
@@ -203,23 +259,148 @@ func (*ServerMessage_SceneChangeCompleted) isServerMessage_Action() {}
 
 func (*ServerMessage_Ping) isServerMessage_Action() {}
 
+func (*ServerMessage_ScreenState) isServerMessage_Action() {}
+
+func (*ServerMessage_EntityUpdate) isServerMessage_Action() {}
+
+func (*ServerMessage_EntityRemove) isServerMessage_Action() {}
+
+func (*ServerMessage_CameraUpdate) isServerMessage_Action() {}
+
+// EntityUpdate adds an entity to a layer, or replaces it when an entity with the same id exists.
+type EntityUpdate struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	LayerId       string                 `protobuf:"bytes,1,opt,name=layer_id,json=layerId,proto3" json:"layer_id,omitempty"`
+	Entity        *Entity                `protobuf:"bytes,2,opt,name=entity,proto3" json:"entity,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *EntityUpdate) Reset() {
+	*x = EntityUpdate{}
+	mi := &file_screens_v1_server_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *EntityUpdate) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*EntityUpdate) ProtoMessage() {}
+
+func (x *EntityUpdate) ProtoReflect() protoreflect.Message {
+	mi := &file_screens_v1_server_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use EntityUpdate.ProtoReflect.Descriptor instead.
+func (*EntityUpdate) Descriptor() ([]byte, []int) {
+	return file_screens_v1_server_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *EntityUpdate) GetLayerId() string {
+	if x != nil {
+		return x.LayerId
+	}
+	return ""
+}
+
+func (x *EntityUpdate) GetEntity() *Entity {
+	if x != nil {
+		return x.Entity
+	}
+	return nil
+}
+
+// EntityRemove removes an entity from a layer.
+type EntityRemove struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	LayerId       string                 `protobuf:"bytes,1,opt,name=layer_id,json=layerId,proto3" json:"layer_id,omitempty"`
+	EntityId      string                 `protobuf:"bytes,2,opt,name=entity_id,json=entityId,proto3" json:"entity_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *EntityRemove) Reset() {
+	*x = EntityRemove{}
+	mi := &file_screens_v1_server_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *EntityRemove) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*EntityRemove) ProtoMessage() {}
+
+func (x *EntityRemove) ProtoReflect() protoreflect.Message {
+	mi := &file_screens_v1_server_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use EntityRemove.ProtoReflect.Descriptor instead.
+func (*EntityRemove) Descriptor() ([]byte, []int) {
+	return file_screens_v1_server_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *EntityRemove) GetLayerId() string {
+	if x != nil {
+		return x.LayerId
+	}
+	return ""
+}
+
+func (x *EntityRemove) GetEntityId() string {
+	if x != nil {
+		return x.EntityId
+	}
+	return ""
+}
+
 var File_screens_v1_server_proto protoreflect.FileDescriptor
 
 const file_screens_v1_server_proto_rawDesc = "" +
 	"\n" +
 	"\x17screens/v1/server.proto\x12\n" +
-	"screens.v1\x1a\x18screens/v1/general.proto\x1a\x1escreens/v1/scene_actions.proto\x1a\x16screens/v1/setup.proto\x1a\x1escreens/v1/splash_screen.proto\"C\n" +
+	"screens.v1\x1a\x18screens/v1/general.proto\x1a\x1escreens/v1/scene_actions.proto\x1a\x16screens/v1/setup.proto\x1a\x1escreens/v1/splash_screen.proto\x1a\x16screens/v1/state.proto\"C\n" +
 	"\x0eServerMessages\x121\n" +
-	"\x06action\x18\x01 \x03(\v2\x19.screens.v1.ServerMessageR\x06action\"\x8c\x03\n" +
+	"\x06action\x18\x01 \x03(\v2\x19.screens.v1.ServerMessageR\x06action\"\x87\x05\n" +
 	"\rServerMessage\x12\x13\n" +
 	"\x02id\x18\x01 \x01(\tH\x01R\x02id\x88\x01\x01\x12G\n" +
 	"\rinitial_setup\x18\x02 \x01(\v2 .screens.v1.InitialSetupResponseH\x00R\finitialSetup\x12L\n" +
 	"\x14splash_screen_update\x18\x03 \x01(\v2\x18.screens.v1.SplashScreenH\x00R\x12splashScreenUpdate\x12<\n" +
 	"\fscene_change\x18\x04 \x01(\v2\x17.screens.v1.SceneChangeH\x00R\vsceneChange\x12X\n" +
 	"\x16scene_change_completed\x18\x05 \x01(\v2 .screens.v1.SceneChangeCompletedH\x00R\x14sceneChangeCompleted\x12&\n" +
-	"\x04ping\x18\x06 \x01(\v2\x10.screens.v1.PingH\x00R\x04pingB\b\n" +
+	"\x04ping\x18\x06 \x01(\v2\x10.screens.v1.PingH\x00R\x04ping\x12<\n" +
+	"\fscreen_state\x18\a \x01(\v2\x17.screens.v1.ScreenStateH\x00R\vscreenState\x12?\n" +
+	"\rentity_update\x18\b \x01(\v2\x18.screens.v1.EntityUpdateH\x00R\fentityUpdate\x12?\n" +
+	"\rentity_remove\x18\t \x01(\v2\x18.screens.v1.EntityRemoveH\x00R\fentityRemove\x129\n" +
+	"\rcamera_update\x18\n" +
+	" \x01(\v2\x12.screens.v1.CameraH\x00R\fcameraUpdateB\b\n" +
 	"\x06actionB\x05\n" +
-	"\x03_idB>Z<github.com/DaanV2/mechanus/server/proto/screens/v1;screensv1b\x06proto3"
+	"\x03_id\"U\n" +
+	"\fEntityUpdate\x12\x19\n" +
+	"\blayer_id\x18\x01 \x01(\tR\alayerId\x12*\n" +
+	"\x06entity\x18\x02 \x01(\v2\x12.screens.v1.EntityR\x06entity\"F\n" +
+	"\fEntityRemove\x12\x19\n" +
+	"\blayer_id\x18\x01 \x01(\tR\alayerId\x12\x1b\n" +
+	"\tentity_id\x18\x02 \x01(\tR\bentityIdB>Z<github.com/DaanV2/mechanus/server/proto/screens/v1;screensv1b\x06proto3"
 
 var (
 	file_screens_v1_server_proto_rawDescOnce sync.Once
@@ -233,28 +414,38 @@ func file_screens_v1_server_proto_rawDescGZIP() []byte {
 	return file_screens_v1_server_proto_rawDescData
 }
 
-var file_screens_v1_server_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_screens_v1_server_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_screens_v1_server_proto_goTypes = []any{
 	(*ServerMessages)(nil),       // 0: screens.v1.ServerMessages
 	(*ServerMessage)(nil),        // 1: screens.v1.ServerMessage
-	(*InitialSetupResponse)(nil), // 2: screens.v1.InitialSetupResponse
-	(*SplashScreen)(nil),         // 3: screens.v1.SplashScreen
-	(*SceneChange)(nil),          // 4: screens.v1.SceneChange
-	(*SceneChangeCompleted)(nil), // 5: screens.v1.SceneChangeCompleted
-	(*Ping)(nil),                 // 6: screens.v1.Ping
+	(*EntityUpdate)(nil),         // 2: screens.v1.EntityUpdate
+	(*EntityRemove)(nil),         // 3: screens.v1.EntityRemove
+	(*InitialSetupResponse)(nil), // 4: screens.v1.InitialSetupResponse
+	(*SplashScreen)(nil),         // 5: screens.v1.SplashScreen
+	(*SceneChange)(nil),          // 6: screens.v1.SceneChange
+	(*SceneChangeCompleted)(nil), // 7: screens.v1.SceneChangeCompleted
+	(*Ping)(nil),                 // 8: screens.v1.Ping
+	(*ScreenState)(nil),          // 9: screens.v1.ScreenState
+	(*Camera)(nil),               // 10: screens.v1.Camera
+	(*Entity)(nil),               // 11: screens.v1.Entity
 }
 var file_screens_v1_server_proto_depIdxs = []int32{
-	1, // 0: screens.v1.ServerMessages.action:type_name -> screens.v1.ServerMessage
-	2, // 1: screens.v1.ServerMessage.initial_setup:type_name -> screens.v1.InitialSetupResponse
-	3, // 2: screens.v1.ServerMessage.splash_screen_update:type_name -> screens.v1.SplashScreen
-	4, // 3: screens.v1.ServerMessage.scene_change:type_name -> screens.v1.SceneChange
-	5, // 4: screens.v1.ServerMessage.scene_change_completed:type_name -> screens.v1.SceneChangeCompleted
-	6, // 5: screens.v1.ServerMessage.ping:type_name -> screens.v1.Ping
-	6, // [6:6] is the sub-list for method output_type
-	6, // [6:6] is the sub-list for method input_type
-	6, // [6:6] is the sub-list for extension type_name
-	6, // [6:6] is the sub-list for extension extendee
-	0, // [0:6] is the sub-list for field type_name
+	1,  // 0: screens.v1.ServerMessages.action:type_name -> screens.v1.ServerMessage
+	4,  // 1: screens.v1.ServerMessage.initial_setup:type_name -> screens.v1.InitialSetupResponse
+	5,  // 2: screens.v1.ServerMessage.splash_screen_update:type_name -> screens.v1.SplashScreen
+	6,  // 3: screens.v1.ServerMessage.scene_change:type_name -> screens.v1.SceneChange
+	7,  // 4: screens.v1.ServerMessage.scene_change_completed:type_name -> screens.v1.SceneChangeCompleted
+	8,  // 5: screens.v1.ServerMessage.ping:type_name -> screens.v1.Ping
+	9,  // 6: screens.v1.ServerMessage.screen_state:type_name -> screens.v1.ScreenState
+	2,  // 7: screens.v1.ServerMessage.entity_update:type_name -> screens.v1.EntityUpdate
+	3,  // 8: screens.v1.ServerMessage.entity_remove:type_name -> screens.v1.EntityRemove
+	10, // 9: screens.v1.ServerMessage.camera_update:type_name -> screens.v1.Camera
+	11, // 10: screens.v1.EntityUpdate.entity:type_name -> screens.v1.Entity
+	11, // [11:11] is the sub-list for method output_type
+	11, // [11:11] is the sub-list for method input_type
+	11, // [11:11] is the sub-list for extension type_name
+	11, // [11:11] is the sub-list for extension extendee
+	0,  // [0:11] is the sub-list for field type_name
 }
 
 func init() { file_screens_v1_server_proto_init() }
@@ -266,12 +457,17 @@ func file_screens_v1_server_proto_init() {
 	file_screens_v1_scene_actions_proto_init()
 	file_screens_v1_setup_proto_init()
 	file_screens_v1_splash_screen_proto_init()
+	file_screens_v1_state_proto_init()
 	file_screens_v1_server_proto_msgTypes[1].OneofWrappers = []any{
 		(*ServerMessage_InitialSetup)(nil),
 		(*ServerMessage_SplashScreenUpdate)(nil),
 		(*ServerMessage_SceneChange)(nil),
 		(*ServerMessage_SceneChangeCompleted)(nil),
 		(*ServerMessage_Ping)(nil),
+		(*ServerMessage_ScreenState)(nil),
+		(*ServerMessage_EntityUpdate)(nil),
+		(*ServerMessage_EntityRemove)(nil),
+		(*ServerMessage_CameraUpdate)(nil),
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -279,7 +475,7 @@ func file_screens_v1_server_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_screens_v1_server_proto_rawDesc), len(file_screens_v1_server_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   4,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

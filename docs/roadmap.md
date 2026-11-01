@@ -100,6 +100,7 @@ What exists: login (`LoginService.Login`) issues an RS512 JWT (1 h, `grant` / `s
 **Server**
 
 - [ ] Wire `SceneService` + `scenestore` into `components` (room ID config flag, `Exit` on `BeforeShutdown`)
+- [x] Screen state proto: `ScreenState` (view, overlays, layers, entities, grid, camera) is sent on initial setup and via `ScreenHandler.SetState`; entity / camera delta messages defined
 - [ ] Screen driver: turn a `ScreenInstruction` + scene entities into screen state and push it over the WebSocket
 - [ ] Route screen WebSocket connections by device ID (one screen per screen device)
 - [ ] Device registration: a device identifies itself, gets a stable ID, and can be bound to a target

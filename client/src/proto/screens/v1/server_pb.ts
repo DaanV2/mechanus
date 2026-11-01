@@ -12,13 +12,15 @@ import type { InitialSetupResponse } from "./setup_pb";
 import { file_screens_v1_setup } from "./setup_pb";
 import type { SplashScreen } from "./splash_screen_pb";
 import { file_screens_v1_splash_screen } from "./splash_screen_pb";
+import type { Camera, Entity, ScreenState } from "./state_pb";
+import { file_screens_v1_state } from "./state_pb";
 import type { Message } from "@bufbuild/protobuf";
 
 /**
  * Describes the file screens/v1/server.proto.
  */
 export const file_screens_v1_server: GenFile = /*@__PURE__*/
-  fileDesc("ChdzY3JlZW5zL3YxL3NlcnZlci5wcm90bxIKc2NyZWVucy52MSI7Cg5TZXJ2ZXJNZXNzYWdlcxIpCgZhY3Rpb24YASADKAsyGS5zY3JlZW5zLnYxLlNlcnZlck1lc3NhZ2UivQIKDVNlcnZlck1lc3NhZ2USDwoCaWQYASABKAlIAYgBARI5Cg1pbml0aWFsX3NldHVwGAIgASgLMiAuc2NyZWVucy52MS5Jbml0aWFsU2V0dXBSZXNwb25zZUgAEjgKFHNwbGFzaF9zY3JlZW5fdXBkYXRlGAMgASgLMhguc2NyZWVucy52MS5TcGxhc2hTY3JlZW5IABIvCgxzY2VuZV9jaGFuZ2UYBCABKAsyFy5zY3JlZW5zLnYxLlNjZW5lQ2hhbmdlSAASQgoWc2NlbmVfY2hhbmdlX2NvbXBsZXRlZBgFIAEoCzIgLnNjcmVlbnMudjEuU2NlbmVDaGFuZ2VDb21wbGV0ZWRIABIgCgRwaW5nGAYgASgLMhAuc2NyZWVucy52MS5QaW5nSABCCAoGYWN0aW9uQgUKA19pZEI+WjxnaXRodWIuY29tL0RhYW5WMi9tZWNoYW51cy9zZXJ2ZXIvcHJvdG8vc2NyZWVucy92MTtzY3JlZW5zdjFiBnByb3RvMw", [file_screens_v1_general, file_screens_v1_scene_actions, file_screens_v1_setup, file_screens_v1_splash_screen]);
+  fileDesc("ChdzY3JlZW5zL3YxL3NlcnZlci5wcm90bxIKc2NyZWVucy52MSI7Cg5TZXJ2ZXJNZXNzYWdlcxIpCgZhY3Rpb24YASADKAsyGS5zY3JlZW5zLnYxLlNlcnZlck1lc3NhZ2UigQQKDVNlcnZlck1lc3NhZ2USDwoCaWQYASABKAlIAYgBARI5Cg1pbml0aWFsX3NldHVwGAIgASgLMiAuc2NyZWVucy52MS5Jbml0aWFsU2V0dXBSZXNwb25zZUgAEjgKFHNwbGFzaF9zY3JlZW5fdXBkYXRlGAMgASgLMhguc2NyZWVucy52MS5TcGxhc2hTY3JlZW5IABIvCgxzY2VuZV9jaGFuZ2UYBCABKAsyFy5zY3JlZW5zLnYxLlNjZW5lQ2hhbmdlSAASQgoWc2NlbmVfY2hhbmdlX2NvbXBsZXRlZBgFIAEoCzIgLnNjcmVlbnMudjEuU2NlbmVDaGFuZ2VDb21wbGV0ZWRIABIgCgRwaW5nGAYgASgLMhAuc2NyZWVucy52MS5QaW5nSAASLwoMc2NyZWVuX3N0YXRlGAcgASgLMhcuc2NyZWVucy52MS5TY3JlZW5TdGF0ZUgAEjEKDWVudGl0eV91cGRhdGUYCCABKAsyGC5zY3JlZW5zLnYxLkVudGl0eVVwZGF0ZUgAEjEKDWVudGl0eV9yZW1vdmUYCSABKAsyGC5zY3JlZW5zLnYxLkVudGl0eVJlbW92ZUgAEisKDWNhbWVyYV91cGRhdGUYCiABKAsyEi5zY3JlZW5zLnYxLkNhbWVyYUgAQggKBmFjdGlvbkIFCgNfaWQiRAoMRW50aXR5VXBkYXRlEhAKCGxheWVyX2lkGAEgASgJEiIKBmVudGl0eRgCIAEoCzISLnNjcmVlbnMudjEuRW50aXR5IjMKDEVudGl0eVJlbW92ZRIQCghsYXllcl9pZBgBIAEoCRIRCgllbnRpdHlfaWQYAiABKAlCPlo8Z2l0aHViLmNvbS9EYWFuVjIvbWVjaGFudXMvc2VydmVyL3Byb3RvL3NjcmVlbnMvdjE7c2NyZWVuc3YxYgZwcm90bzM", [file_screens_v1_general, file_screens_v1_scene_actions, file_screens_v1_setup, file_screens_v1_splash_screen, file_screens_v1_state]);
 
 /**
  * @generated from message screens.v1.ServerMessages
@@ -81,6 +83,32 @@ export type ServerMessage = Message<"screens.v1.ServerMessage"> & {
      */
     value: Ping;
     case: "ping";
+  } | {
+    /**
+     * Full snapshot, replaces the client's state
+     *
+     * @generated from field: screens.v1.ScreenState screen_state = 7;
+     */
+    value: ScreenState;
+    case: "screenState";
+  } | {
+    /**
+     * @generated from field: screens.v1.EntityUpdate entity_update = 8;
+     */
+    value: EntityUpdate;
+    case: "entityUpdate";
+  } | {
+    /**
+     * @generated from field: screens.v1.EntityRemove entity_remove = 9;
+     */
+    value: EntityRemove;
+    case: "entityRemove";
+  } | {
+    /**
+     * @generated from field: screens.v1.Camera camera_update = 10;
+     */
+    value: Camera;
+    case: "cameraUpdate";
   } | { case: undefined; value?: undefined };
 };
 
@@ -90,4 +118,52 @@ export type ServerMessage = Message<"screens.v1.ServerMessage"> & {
  */
 export const ServerMessageSchema: GenMessage<ServerMessage> = /*@__PURE__*/
   messageDesc(file_screens_v1_server, 1);
+
+/**
+ * EntityUpdate adds an entity to a layer, or replaces it when an entity with the same id exists.
+ *
+ * @generated from message screens.v1.EntityUpdate
+ */
+export type EntityUpdate = Message<"screens.v1.EntityUpdate"> & {
+  /**
+   * @generated from field: string layer_id = 1;
+   */
+  layerId: string;
+
+  /**
+   * @generated from field: screens.v1.Entity entity = 2;
+   */
+  entity?: Entity | undefined;
+};
+
+/**
+ * Describes the message screens.v1.EntityUpdate.
+ * Use `create(EntityUpdateSchema)` to create a new message.
+ */
+export const EntityUpdateSchema: GenMessage<EntityUpdate> = /*@__PURE__*/
+  messageDesc(file_screens_v1_server, 2);
+
+/**
+ * EntityRemove removes an entity from a layer.
+ *
+ * @generated from message screens.v1.EntityRemove
+ */
+export type EntityRemove = Message<"screens.v1.EntityRemove"> & {
+  /**
+   * @generated from field: string layer_id = 1;
+   */
+  layerId: string;
+
+  /**
+   * @generated from field: string entity_id = 2;
+   */
+  entityId: string;
+};
+
+/**
+ * Describes the message screens.v1.EntityRemove.
+ * Use `create(EntityRemoveSchema)` to create a new message.
+ */
+export const EntityRemoveSchema: GenMessage<EntityRemove> = /*@__PURE__*/
+  messageDesc(file_screens_v1_server, 3);
 
