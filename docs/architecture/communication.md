@@ -42,7 +42,7 @@ Authentication is optional when connecting and enforced per route: the handler r
 
 | Client type      | Credential                                                           |
 | ---------------- | -------------------------------------------------------------------- |
-| Player / GM      | User JWT, `Authorization: Bearer <token>`                            |
+| Player / GM      | User JWT, `Authorization: Bearer <token>` (browsers: see below)      |
 | Paired device    | Device token from pairing, `Authorization: Device <token>` — planned |
 | Anonymous device | None; only allowed on `anonymous` routes such as pairing — planned   |
 
@@ -54,12 +54,22 @@ Browsers cannot set headers on `new WebSocket(...)`, so every header that a brow
 
 | Header            | Query fallback | Description                                                                                |
 | ----------------- | -------------- | ------------------------------------------------------------------------------------------ |
-| `Authorization`   | TBD            | `Bearer <jwt>` (user) or `Device <token>` (paired device); only `Bearer` is read today     |
+| `Authorization`   | see below      | `Bearer <jwt>` (user) or `Device <token>` (paired device); only `Bearer` is read today     |
 | `X-Device-ID`     | `deviceId`     | Planned: stable device ID, stored in the connection's session info                         |
 | `X-Device-Type`   | `deviceType`   | Planned: kind of client (`screen`, `tablet`, ...), stored in the connection's session info |
 | `X-Connection-ID` | —              | Planned: a UUID for tracking/telemetry per connection — not yet read by the handler        |
 
-How a browser passes its credential (cookie, `Sec-WebSocket-Protocol`, or a first-message token) is still open — see [roadmap](../roadmap.md#auth--tokens).
+#### Browser credentials
+
+A browser can't send `Authorization`, so a user JWT is also read from two browser-friendly places. `authentication.BearerFromHeaders` checks, in order:
+
+1. `Authorization: Bearer <jwt>`
+2. A `Sec-WebSocket-Protocol` entry `mechanus.bearer.<jwt>`. The client's `WebsocketHandler` opens the socket with `new WebSocket(url, ["mechanus.v1", "mechanus.bearer.<jwt>"])`; the server always selects `mechanus.v1`, so the token is never echoed back.
+3. The `access-token` cookie, holding the URL-encoded `Bearer <jwt>` the client stores after login. Browsers send it on the upgrade request automatically.
+
+A query parameter is deliberately not supported: URLs end up in logs and history. Cookie-based auth is safe from cross-site WebSocket hijacking only because `coder/websocket` rejects an `Origin` that doesn't match the `Host` by default — keep that check if `acceptOptions` ever sets `OriginPatterns`.
+
+The handler authenticates before it looks up the screen, so unauthenticated requests can't find out which screens exist.
 
 ### Message framing
 
