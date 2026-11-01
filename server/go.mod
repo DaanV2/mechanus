@@ -46,7 +46,7 @@ require (
 	golang.org/x/crypto v0.58.0
 	golang.org/x/net v0.62.0
 	golang.org/x/text v0.43.0
-	google.golang.org/protobuf v1.36.13-0.20261016172727-e9ee2a76ab8e
+	google.golang.org/protobuf v1.37.0-rc.1
 	gopkg.in/yaml.v3 v3.0.1
 	gorm.io/driver/mysql v1.6.0
 	gorm.io/driver/postgres v1.6.3
