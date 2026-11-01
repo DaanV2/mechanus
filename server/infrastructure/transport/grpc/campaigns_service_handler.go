@@ -135,16 +135,7 @@ func (c *CampaignServiceHandler) List(ctx context.Context, _ *connect.Request[ca
 
 // requireRole returns the jwt of the request, or a connect error if the request is not authenticated with the given role.
 func (c *CampaignServiceHandler) requireRole(ctx context.Context, role roles.Role) (authentication.JWTContext, error) {
-	jwt, err := authentication.JWTFromContext(ctx)
-	if err != nil {
-		return jwt, connect.NewError(connect.CodeUnauthenticated, err)
-	}
-
-	if !jwt.IsAuthenicatedWithRole(role) {
-		return jwt, connect.NewError(connect.CodePermissionDenied, errors.New("expecting atleast a "+role.String()+" role"))
-	}
-
-	return jwt, nil
+	return requireRole(ctx, role)
 }
 
 func isMember(campaign *models.Campaign, userId string) bool {

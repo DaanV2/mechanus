@@ -1,0 +1,68 @@
+syntax = "proto3";
+package scenes.v1;
+
+option go_package = "github.com/DaanV2/mechanus/server/proto/scenes/v1;scenesv1";
+
+// A service for the GM to control which scene the room plays
+service SceneService {
+  // List the scenes that can be activated
+  rpc List(ListScenesRequest) returns (ListScenesResponse) {}
+  // Activate a scene (or switch variant when the scene is already active); the room's devices follow
+  rpc Activate(ActivateSceneRequest) returns (ActivateSceneResponse) {}
+  // Switch the variant of the active scene
+  rpc SetVariant(SetVariantRequest) returns (SetVariantResponse) {}
+  // Get the active scene, if any
+  rpc GetActive(GetActiveSceneRequest) returns (GetActiveSceneResponse) {}
+}
+
+message ListScenesRequest {}
+
+message ListScenesResponse {
+  repeated Scene scenes = 1;
+}
+
+message ActivateSceneRequest {
+  string scene_id = 1; // The scene to activate
+  string variant_id = 2; // Optional variant to switch to, empty for the saved or default variant
+}
+
+message ActivateSceneResponse {
+  ActiveScene active = 1;
+  repeated string device_errors = 2; // Devices that could not be instructed; the scene is active regardless
+}
+
+message SetVariantRequest {
+  string variant_id = 1; // The variant to switch to, empty for the scene's default
+}
+
+message SetVariantResponse {
+  ActiveScene active = 1;
+  repeated string device_errors = 2; // Devices that could not be instructed; the variant is active regardless
+}
+
+message GetActiveSceneRequest {}
+
+message GetActiveSceneResponse {
+  optional ActiveScene active = 1; // Not set when no scene is active
+}
+
+// A scene as configured by the GM
+message Scene {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  repeated Variant variants = 4;
+  string default_variant = 5; // Empty when the scene's base instructions are the default
+}
+
+// An alternative state of a scene (night, rain, combat, ...)
+message Variant {
+  string id = 1;
+  string name = 2;
+  map<string, string> tags = 3; // Free form classification, e.g. time_of_day: night
+}
+
+message ActiveScene {
+  Scene scene = 1;
+  string variant_id = 2; // Empty when the base instructions are active
+}

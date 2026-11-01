@@ -1,8 +1,11 @@
 package application_test
 
 import (
+	"cmp"
 	"context"
 	"errors"
+	"maps"
+	"slices"
 
 	"github.com/DaanV2/mechanus/server/application"
 	"github.com/DaanV2/mechanus/server/engine/devices"
@@ -19,6 +22,10 @@ func (c configStore) GetSceneConfig(_ context.Context, id string) (*scenes.Confi
 	}
 
 	return nil, errors.New("not found")
+}
+
+func (c configStore) ListSceneConfigs(context.Context) ([]*scenes.Config, error) {
+	return slices.SortedFunc(maps.Values(c), func(a, b *scenes.Config) int { return cmp.Compare(a.ID, b.ID) }), nil
 }
 
 type stateStore struct {
@@ -57,7 +64,7 @@ type recordingDriver struct {
 
 func (d *recordingDriver) Integration() string { return d.integration }
 
-func (d *recordingDriver) Apply(_ context.Context, device *devices.Device, ins scenes.Instruction) error {
+func (d *recordingDriver) Apply(_ context.Context, _ scenes.Ref, device *devices.Device, ins scenes.Instruction) error {
 	d.applied = append(d.applied, applied{device.ID, ins})
 
 	return nil

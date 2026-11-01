@@ -19,15 +19,22 @@ func (s *ScreenHandler) HandlePingRequest(ctx context.Context, msg *screensv1.Cl
 
 // HandleInitialSetupRequest processes an initial setup request from a client.
 func (s *ScreenHandler) HandleInitialSetupRequest(ctx context.Context, msg *screensv1.ClientMessage_InitialSetupRequest) ([]*screensv1.ServerMessage, error) {
-	return []*screensv1.ServerMessage{
-		{
-			Action: &screensv1.ServerMessage_InitialSetup{
-				InitialSetup: &screensv1.InitialSetupResponse{
-					State: s.State(),
-				},
+	st := s.State()
+	response := make([]*screensv1.ServerMessage, 0, 2)
+	response = append(response, &screensv1.ServerMessage{
+		Action: &screensv1.ServerMessage_InitialSetup{
+			InitialSetup: &screensv1.InitialSetupResponse{
+				State: st,
 			},
 		},
-		{
+	})
+	// The splash screen is only shown while no scene has instructed this screen yet
+	if st.GetView().GetKind() != screensv1.ViewKind_VIEW_KIND_BLANK {
+		return response, nil
+	}
+
+	return append(response,
+		&screensv1.ServerMessage{
 			// TODO add splash screen data to the splashscreen update
 			Action: &screensv1.ServerMessage_SplashScreenUpdate{
 				SplashScreenUpdate: &screensv1.SplashScreen{
@@ -38,5 +45,5 @@ func (s *ScreenHandler) HandleInitialSetupRequest(ctx context.Context, msg *scre
 				},
 			},
 		},
-	}, nil
+	), nil
 }

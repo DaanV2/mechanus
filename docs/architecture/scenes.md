@@ -135,7 +135,7 @@ The config lists the entities present when the scene starts (`Entity.Hidden` = s
 | `SceneConfigStore` | file storage | `GetSceneConfig(sceneID)`                         |
 | `RoomConfigStore`  | file storage | `CurrentRoom()` — devices and target bindings     |
 | `SceneStateStore`  | database     | `LoadSceneState` / `SaveSceneState`               |
-| `OutputDriver`     | integrations | `Apply(device, instruction)`, one per integration |
+| `OutputDriver`     | integrations | `Apply(scene, device, instruction)`, one per integration |
 
 | Method                         | Effect                                                                  |
 | ------------------------------ | ----------------------------------------------------------------------- |
@@ -188,7 +188,7 @@ Any view can carry `Overlays`: widgets drawn on top of it. This lets a scenery s
 
 Overlays are part of the screen instruction, so a variant (e.g. `combat`) can add the initiative tracker to the wall screen by overriding that target's instruction, and only that screen is re-instructed.
 
-The existing `engine/screens` package (`ScreenHandler`, `ScreenManager`, `state.ScreenState`) is the transport for the `screen` integration: a screen driver will translate a `ScreenInstruction` plus the scene's entities into `ScreenState` / proto messages and broadcast it to the screen's listeners. The intended mapping is one `ScreenHandler` per screen device, so the WebSocket `screenId` becomes the device ID and routing by role or device is answered by the room's bindings.
+The `engine/screens` package (`ScreenHandler`, `ScreenManager`, `state.ScreenState`) is the transport for the `screen` integration: the screen driver (`infrastructure/outputs/screen`) translates a `ScreenInstruction` into `ScreenState` and broadcasts it to the screen's listeners. There is one `ScreenHandler` per screen device, so the WebSocket `screenId` is the device ID and routing by role or device is answered by the room's bindings. Entities are not sent yet; they need the battle map format for positions.
 
 ### Lights
 
@@ -218,25 +218,25 @@ server/
 ├── application/
 │   └── scene_service.go    SceneService + ports: SceneConfigStore, RoomConfigStore, SceneStateStore, OutputDriver
 └── infrastructure/
+    ├── assets/             Resolves scene / shared asset references to hashed URLs, serves /assets/
+    ├── outputs/screen/     Screen driver: ScreenInstruction → ScreenState on the device's screen
     ├── scenestore/         ConfigStore (file storage), StateStore (database)
     └── storage/            Generic file / database storage providers
 ```
 
 ## Status
 
-**Implemented**: the domain model above with the config / state split, variant resolution, live overrides, entity status tracking, transition change detection, `SceneService` with load / exit persistence, `scenestore` adapters for file storage and the database, and tests for each.
+**Implemented**: the domain model above with the config / state split, variant resolution, live overrides, entity status tracking, transition change detection, `SceneService` with load / exit persistence, `scenestore` adapters for file storage and the database, and tests for each. `SceneService` is wired in `components` with the instance's single room (`rooms/room.dat`, `scenestore.RoomID`; a missing room file is an empty room) and saves the active scene on `BeforeShutdown`. The screen driver (`infrastructure/outputs/screen`) turns a `ScreenInstruction` into screen state (view, asset URL, grid shown for battle maps) and pushes it to the device's screen; screens are keyed by device ID. `scenes/v1.SceneService` (ConnectRPC) lists scenes, activates them, switches variant and returns the active scene. Scene and shared assets are served under `/assets/` with a content hash (`infrastructure/assets`).
 
 **Not implemented yet**:
 
-- The battle map format itself.
+- The battle map format itself (the screen driver sends no layers, grid settings or entities yet).
 - Authoring: no tooling or API to create / edit scene and room configs (files have to be written by hand).
-- `SceneService` and `scenestore` are not wired in `components` (needs the instance's single room — one instance serves one game table — and `Exit` hooked into `BeforeShutdown`).
 - Remembering which scene was active across a server restart.
-- No drivers: screen (to `engine/screens`), Hue, Matter, Home Assistant, Spotify, iTunes, MQTT.
-- No proto / ConnectRPC service for GM scene control (activate, switch variant, adjust, reveal / spawn entities).
-- Screen routing by device: `WebsocketHandler` still takes a raw `screenId`.
+- No drivers other than the screen driver: Hue, Matter, Home Assistant, Spotify, iTunes, MQTT.
+- The scene control API has no `Adjust` or entity (reveal / spawn) calls yet.
 - Handling of `Transition.Released`.
-- Device registration, per-route auth policies, device identity headers and pairing (designed in [authentication.md](./authentication.md#device-authentication)).
+- Device registration, per-route auth policies and pairing (designed in [authentication.md](./authentication.md#device-authentication)).
 
 ## Extending
 

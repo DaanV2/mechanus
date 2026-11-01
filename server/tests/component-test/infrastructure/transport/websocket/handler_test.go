@@ -39,7 +39,7 @@ var _ = Describe("WebsocketHandler authentication", func() {
 		return token
 	}
 
-	// Requests an unknown screen: a request that passes authentication gets a 404, one that fails it a 401
+	// Sends a plain (non-upgrade) request: one that passes authentication gets to the upgrade and fails it with a 426, one that fails authentication gets a 401
 	call := func(ctx context.Context, setHeaders func(h http.Header)) int {
 		req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/v1/screen/unknown/conn", nil)
 		setHeaders(req.Header)
@@ -65,12 +65,12 @@ var _ = Describe("WebsocketHandler authentication", func() {
 	}
 
 	It("lets a connection without credentials through as a device", func(ctx SpecContext) {
-		Expect(call(ctx, func(http.Header) {})).To(Equal(http.StatusNotFound))
+		Expect(call(ctx, func(http.Header) {})).To(Equal(http.StatusUpgradeRequired))
 	})
 
 	DescribeTable("authenticates a valid user token",
 		func(ctx SpecContext, via func(string) func(http.Header)) {
-			Expect(call(ctx, via(createToken(ctx, authentication.ScopeAll)))).To(Equal(http.StatusNotFound))
+			Expect(call(ctx, via(createToken(ctx, authentication.ScopeAll)))).To(Equal(http.StatusUpgradeRequired))
 		},
 		Entry("from the Authorization header", viaAuthorization),
 		Entry("from the subprotocol", viaSubprotocol),

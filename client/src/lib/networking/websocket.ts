@@ -20,12 +20,18 @@ export class WebsocketHandler {
   readonly socket: WebSocket;
   readonly events: ServerEventHandler;
 
-  constructor(screenid: string, id: string, token?: string) {
+  /**
+   * @param query extra query parameters, e.g. the device identity (`deviceId`, `deviceType`) a browser can't send as headers
+   */
+  constructor(screenid: string, id: string, token?: string, query?: Record<string, string>) {
     this.events = new ServerEventHandler();
     this.screenid = screenid;
     this.id = id;
     this.token = token;
-    const url = server_websocket_url() + `/api/v1/screen/${this.screenid}/${this.id}`;
+    let url =
+      server_websocket_url() +
+      `/api/v1/screen/${encodeURIComponent(this.screenid)}/${encodeURIComponent(this.id)}`;
+    if (query && Object.keys(query).length > 0) url += '?' + new URLSearchParams(query).toString();
     this.socket = new WebSocket(url, this.subprotocols());
     console.log('opening websocket on', url);
     this.socket.addEventListener('message', this._received.bind(this));

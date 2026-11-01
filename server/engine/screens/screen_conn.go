@@ -36,16 +36,18 @@ func NewScreenConn(id, screenid string, connctx context.Context, conn *websocket
 		conn:     conn,
 		info:     info,
 		logger: logging.Enriched{}.
-			With("conn_id", id, "screen", screenid),
+			With("conn_id", id, "screen", screenid, "device_id", info.DeviceID, "device_type", info.Hardware),
 	}
 }
 
 // ConnectionInfo contains authentication and identification information for a connection.
 type ConnectionInfo struct {
-	Token string
-	ID    string
-	Roles []string
-	Type  devices.DeviceType
+	Token    string
+	ID       string
+	Roles    []string
+	Type     devices.DeviceType
+	DeviceID string               // Stable device ID reported by the client (X-Device-ID), empty when not given
+	Hardware devices.HardwareType // Hardware reported by the client (X-Device-Type), metadata only
 }
 
 // Context returns the connection's context.

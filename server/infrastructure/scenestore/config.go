@@ -1,10 +1,12 @@
 package scenestore
 
 import (
+	"cmp"
 	"context"
 	"errors"
 	"fmt"
 	"io/fs"
+	"slices"
 
 	"github.com/DaanV2/mechanus/server/engine/devices"
 	"github.com/DaanV2/mechanus/server/engine/scenes"
@@ -12,11 +14,13 @@ import (
 	"github.com/DaanV2/mechanus/server/infrastructure/storage"
 )
 
+// RoomID is the ID of the room config file. A running instance serves exactly one game table, so there
+// is exactly one room: <app config dir>/rooms/room.dat.
+const RoomID = "room"
+
 var (
 	// ErrInvalidID is returned for IDs that cannot safely be used as a storage key / file name.
 	ErrInvalidID = errors.New("invalid id")
-	// ErrRoomNotFound is returned when the configured room does not exist.
-	ErrRoomNotFound = errors.New("room not found")
 )
 
 // ConfigStore reads authored scene and room configuration. It never writes: configuration is
@@ -67,15 +71,35 @@ func (c *ConfigStore) GetSceneConfig(ctx context.Context, sceneID string) (*scen
 	return cfg, nil
 }
 
+// ListSceneConfigs implements application.SceneConfigStore. Files that cannot be read are skipped, so
+// one broken scene does not hide the others; their errors are joined and returned with the result.
+func (c *ConfigStore) ListSceneConfigs(ctx context.Context) ([]*scenes.Config, error) {
+	var result []*scenes.Config
+	var errs error
+	for id := range c.scenes.Keys(ctx) {
+		cfg, err := c.GetSceneConfig(ctx, id)
+		if err != nil {
+			errs = errors.Join(errs, err)
+
+			continue
+		}
+		result = append(result, cfg)
+	}
+	slices.SortFunc(result, func(a, b *scenes.Config) int { return cmp.Compare(a.ID, b.ID) })
+
+	return result, errs
+}
+
 // CurrentRoom implements application.RoomConfigStore.
 func (c *ConfigStore) CurrentRoom(ctx context.Context) (*devices.Room, error) {
 	if err := validateID(c.roomID); err != nil {
 		return nil, err
 	}
 
+	// A room that is not set up yet has no devices: scenes can still be activated, nothing is instructed.
 	room, err := c.rooms.Get(ctx, c.roomID)
 	if isNotFound(err) {
-		return nil, fmt.Errorf("%q: %w", c.roomID, ErrRoomNotFound)
+		return devices.NewRoom(c.roomID, ""), nil
 	}
 
 	return room, err

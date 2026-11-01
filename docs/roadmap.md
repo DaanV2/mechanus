@@ -42,7 +42,7 @@ Conventions:
 - [x] Database backends (SQLite, Postgres, MySQL, in-memory) with migrations
 - [x] mDNS announcement of the server on the LAN
 - [x] SvelteKit client shell with login / signup / profile and placeholder GM / player / device views
-- [~] Scene model: config vs. state, variants, targets, rooms, transitions, `SceneService`, `scenestore` (code + tests, not wired)
+- [x] Scene model: config vs. state, variants, targets, rooms, transitions, `SceneService`, `scenestore` (wired in `components` as part of M1)
 
 ### Auth & tokens
 
@@ -101,25 +101,25 @@ What exists: login (`LoginService.Login`) issues an RS512 JWT (1 h, `grant` / `s
 
 **Server**
 
-- [ ] Wire `SceneService` + `scenestore` into `components` (the instance's single room, `Exit` on `BeforeShutdown`)
+- [x] Wire `SceneService` + `scenestore` into `components` (the instance's single room, `Exit` on `BeforeShutdown`) — room file is `rooms/room.dat`; a missing room is an empty room
 - [x] Screen state proto: `ScreenState` (view, overlays, layers, entities, grid, camera) is sent on initial setup and via `ScreenHandler.SetState`; entity / camera delta messages defined
-- [ ] Screen driver: turn a `ScreenInstruction` + scene entities into screen state and push it over the WebSocket
-- [ ] Route screen WebSocket connections by device ID (one screen per screen device)
+- [~] Screen driver: turn a `ScreenInstruction` + scene entities into screen state and push it over the WebSocket — view, overlays and asset URL are pushed (`infrastructure/outputs/screen`); entities, grid settings and layers wait on the battle map format
+- [x] Route screen WebSocket connections by device ID (one screen per screen device, created on first connection or instruction)
 - [ ] Per-route auth policies (`anonymous`, `device`, `user`, `role:<role>`): authentication is optional at connect, enforced by the route; invalid credentials are rejected instead of treated as anonymous — see [authentication.md](./architecture/authentication.md#device-authentication)
-- [ ] Device identity: read `X-Device-ID` / `X-Device-Type` (query fallback `deviceId` / `deviceType` for browsers) and store them in the connection's session info (`screens.ConnectionInfo`, logger / trace attributes)
+- [x] Device identity: read `X-Device-ID` / `X-Device-Type` (query fallback `deviceId` / `deviceType` for browsers) and store them in the connection's session info (`screens.ConnectionInfo`, logger / trace attributes) — stored and logged; not yet added as trace span attributes
 - [ ] Device registration: a device identifies itself, gets a stable ID, and can be bound to a target
 - [ ] Device pairing: `DeviceService.Pair` server stream pushes a 4-digit single-use code (valid while the stream is open, max 5 min, auto-renewed), confirmed by an admin, rate-limited; issues a revocable device JWT backed by a JTI (`Authorization: Device <token>`, 8 h) plus a device refresh token (30 days) the device uses to renew itself — currently any non-JWT connection is accepted
-- [ ] Scene control API (`scenes/v1` proto): list scenes, activate, switch variant, get active state
-- [ ] Asset serving for scene assets (maps, images, video): resolve scene-folder-relative and `shared:/` paths, serve with a content hash in the URL so screens can cache
+- [x] Scene control API (`scenes/v1` proto): list scenes, activate, switch variant, get active state — any logged-in user may control scenes until a GM role exists
+- [x] Asset serving for scene assets (maps, images, video): resolve scene-folder-relative and `shared:/` paths, serve with a content hash in the URL so screens can cache — `/assets/scenes/<scene id>/...` and `/assets/shared/...` (`infrastructure/assets`)
 - [ ] Battle map format v0 — grid settings + ordered layers: image layers and entity layers with instance groups (one asset, many positions); new layer kinds (walls, lights, sound) are added with the feature that needs them
 
 **Client**
 
-- [ ] Device / TV view: fullscreen Pixi.js renderer driven by server screen state
+- [x] Device / TV view: fullscreen Pixi.js renderer driven by server screen state (`/views/devices/`, reconnects on its own; `?device=` / `?type=` override the device ID / hardware type)
 - [ ] Layer system in `src/lib/2d` (image layers, grid, entities, overlays) and the render loop; instance groups rendered with Pixi instancing (shared texture, many positions)
-- [ ] Views: `battlemap` (background + grid), `scenery`, `splash`, `blank`
-- [ ] GM view v0: list scenes, activate one, switch variant
-- [ ] Device pairing page (`/devices/pair`): generates and persists the device ID, shows the 4-digit pairing code full screen, renews it on expiry, stores the device token once paired
+- [x] Views: `battlemap` (background + grid), `scenery` (image or video), `splash`, `blank` — `src/lib/2d/screen-renderer.ts`
+- [x] GM view v0: list scenes, activate one, switch variant (`/views/game-master/`)
+- [~] Device pairing page (`/devices/pair`): generates and persists the device ID (done, in `$lib/devices/identity.ts`, used by the device view), shows the 4-digit pairing code full screen, renews it on expiry, stores the device token once paired
 - [ ] Devices admin page (`/devices`): type in a pairing code + device name, list paired and connected devices (ID, type, name), revoke a device
 
 **Unknowns**

@@ -76,7 +76,7 @@ func (s *Slice[T]) RangeErrorCollect(callfn func(item T) error) error {
 	var err error
 
 	for _, d := range s.items {
-		err = errors.Join(callfn(d))
+		err = errors.Join(err, callfn(d))
 
 	}
 

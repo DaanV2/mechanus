@@ -1,4 +1,4 @@
-type localStorageKeys = 'access-token' | 'refresh-token';
+type localStorageKeys = 'access-token' | 'refresh-token' | 'device-id';
 
 export namespace LocalStorage {
   export function get(key: localStorageKeys): string | null {

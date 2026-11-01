@@ -8,6 +8,7 @@ import (
 	"connectrpc.com/grpchealth"
 	"connectrpc.com/grpcreflect"
 	"github.com/DaanV2/mechanus/server/application"
+	"github.com/DaanV2/mechanus/server/infrastructure/assets"
 	"github.com/DaanV2/mechanus/server/infrastructure/health"
 	"github.com/DaanV2/mechanus/server/infrastructure/lifecycle"
 	"github.com/DaanV2/mechanus/server/infrastructure/logging"
@@ -21,6 +22,7 @@ import (
 	"github.com/DaanV2/mechanus/server/infrastructure/transport/websocket"
 	"github.com/DaanV2/mechanus/server/mechanus"
 	"github.com/DaanV2/mechanus/server/proto/campaigns/v1/campaignsv1connect"
+	"github.com/DaanV2/mechanus/server/proto/scenes/v1/scenesv1connect"
 	"github.com/DaanV2/mechanus/server/proto/users/v1/usersv1connect"
 )
 
@@ -43,12 +45,14 @@ type RouterSetup struct {
 	Interceptors     []connect.Interceptor
 	ReadyChecker     health.ReadyCheck
 	WebsocketHandler *websocket.WebsocketHandler
+	Assets           gohttp.Handler // Serves scene and shared assets under assets.RoutePrefix
 }
 
 // RouterRPCS contains the gRPC service handlers for the router.
 type RouterRPCS struct {
 	Campaign campaignsv1connect.CampaignServiceHandler
 	Login    usersv1connect.LoginServiceHandler
+	Scene    scenesv1connect.SceneServiceHandler
 	User     usersv1connect.UserServiceHandler
 }
 
@@ -60,7 +64,7 @@ type RouterConfig struct {
 }
 
 // CreateRouter creates an HTTP handler with all routes, middleware, and services configured.
-func CreateRouter(setup RouterSetup, rpcs RouterRPCS, cfgs RouterConfig) (gohttp.Handler, error) {
+func CreateRouter(setup *RouterSetup, rpcs RouterRPCS, cfgs RouterConfig) (gohttp.Handler, error) {
 	healthServ := health.NewHealthService(setup.HealthChecker)
 	readyServ := health.NewReadyService(setup.ReadyChecker)
 
@@ -71,6 +75,7 @@ func CreateRouter(setup RouterSetup, rpcs RouterRPCS, cfgs RouterConfig) (gohttp
 	reflecter := grpcreflect.NewStaticReflector(
 		campaignsv1connect.CampaignServiceName,
 		usersv1connect.LoginServiceName,
+		scenesv1connect.SceneServiceName,
 		usersv1connect.UserServiceName,
 		grpchealth.HealthV1ServiceName,
 	)
@@ -80,6 +85,7 @@ func CreateRouter(setup RouterSetup, rpcs RouterRPCS, cfgs RouterConfig) (gohttp
 		// gRPC
 		routers.WithGrpcRoute(campaignsv1connect.NewCampaignServiceHandler, rpcs.Campaign, grpcOpts),
 		routers.WithGrpcRoute(usersv1connect.NewLoginServiceHandler, rpcs.Login, grpcOpts),
+		routers.WithGrpcRoute(scenesv1connect.NewSceneServiceHandler, rpcs.Scene, grpcOpts),
 		routers.WithGrpcRoute(usersv1connect.NewUserServiceHandler, rpcs.User, grpcOpts),
 		// gRPC utils
 		routers.WithGrpcRoute(grpcreflect.NewHandlerV1, reflecter, grpcOpts),
@@ -88,6 +94,7 @@ func CreateRouter(setup RouterSetup, rpcs RouterRPCS, cfgs RouterConfig) (gohttp
 
 		// http
 		routers.WithHandle("/", gohttp.FileServer(gohttp.Dir(cfgs.Server.StaticFolder))),
+		routers.WithHandle(assets.RoutePrefix, setup.Assets),
 		// http utils
 		routers.WithHandle("/health", healthServ),
 		routers.WithHandle("/healthz", healthServ),
