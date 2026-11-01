@@ -52,7 +52,7 @@ State only records what differs from or adds to the configuration. That keeps th
 ## Concepts
 
 ```ascii
-                     configuration, per campaign                      configuration, per room
+                     configuration, shared by campaigns               configuration, per room
  ┌──────────────────────────────────────────────────────┐      ┌──────────────────────────────┐
  │ Scene config "tavern"                                │      │ Room "living room"           │
  │   entities: barkeep (npc), spy (enemy, hidden), ...  │      │                              │
@@ -80,7 +80,7 @@ State only records what differs from or adds to the configuration. That keeps th
 
 | Concept          | Kind   | What it is                                                                                                                                        | Code                              |
 | ---------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------- |
-| **Scene config** | config | A place or moment in the game. Starting entities, base instructions, variants, default variant. Belongs to a campaign.                            | `engine/scenes.Config`            |
+| **Scene config** | config | A place or moment in the game. Starting entities, base instructions, variants, default variant. Not tied to a campaign: any campaign can use it, state is kept per campaign. | `engine/scenes.Config`            |
 | **Entity**       | config | Something present in the scene: `player`, `npc`, `enemy`, `object`. Can start hidden. Optionally links to a persisted character.                  | `engine/scenes.Entity`            |
 | **Variant**      | config | An alternative state of a scene (night, rain, combat). Overrides base instructions per target. Has free-form tags (`time_of_day: night`).         | `engine/scenes.Variant`           |
 | **Instructions** | config | What every output should do, keyed by **target** per device kind (`Screens`, `Lights`, `Music`, `Custom`).                                        | `engine/scenes.Instructions`      |
@@ -174,7 +174,7 @@ A `ScreenInstruction` selects a view; the client renders it. Screens are browser
 | `splash`    | Title card / loading screen                                    | image                           |
 | `blank`     | Black screen                                                   | —                               |
 
-**Battle maps** use a custom, Mechanus-specific format rather than an existing VTT format, so the map can carry everything the battle map view needs (grid, walls, lighting, fog, token positions). The format itself is not defined yet. Importers for other formats (e.g. the Universal VTT parser in `infrastructure/vttrpg`) would convert into it rather than being rendered directly. The map is configuration; anything that moves during play (token positions, revealed fog) belongs in state.
+**Battle maps** use a custom, Mechanus-specific format rather than an existing VTT format, so the map can carry everything the battle map view needs. A battle map is grid settings plus an ordered list of typed layers: v0 has image layers and entity layers (including instance groups — one asset drawn at many positions); walls, lights, sound and other layer kinds are added when the feature that uses them lands. Importers for other formats (e.g. the Universal VTT parser in `infrastructure/vttrpg`) would convert into it rather than being rendered directly. The map is configuration; anything that moves during play (token positions, revealed fog) belongs in state.
 
 #### Overlays
 
@@ -200,7 +200,7 @@ The existing `engine/screens` package (`ScreenHandler`, `ScreenManager`, `state.
 
 ### Custom devices
 
-`CustomInstruction`: `Topic` + opaque JSON `Payload`, passed through untouched. Intended for MQTT first (fog machines, rumble packs, Arduino props), but any event bus can implement a driver.
+`CustomInstruction`: `Topic` + opaque JSON `Payload`, passed through untouched. Planned: scenes only carry the payload per target; the topic comes from the device config (default `mechanus/devices/<device-id>/set`) and the payload is wrapped in an envelope `{scene, variant, target, payload}` (see [roadmap M4](../roadmap.md#m4--the-room-comes-alive)). Intended for MQTT first (fog machines, rumble packs, Arduino props), but any event bus can implement a driver.
 
 ## Code map
 
@@ -230,7 +230,7 @@ server/
 
 - The battle map format itself.
 - Authoring: no tooling or API to create / edit scene and room configs (files have to be written by hand).
-- `SceneService` and `scenestore` are not wired in `components` (needs a config flag for the room ID, and `Exit` hooked into `BeforeShutdown`).
+- `SceneService` and `scenestore` are not wired in `components` (needs the instance's single room — one instance serves one game table — and `Exit` hooked into `BeforeShutdown`).
 - Remembering which scene was active across a server restart.
 - No drivers: screen (to `engine/screens`), Hue, Matter, Home Assistant, Spotify, iTunes, MQTT.
 - No proto / ConnectRPC service for GM scene control (activate, switch variant, adjust, reveal / spawn entities).

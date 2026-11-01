@@ -62,6 +62,7 @@ What exists: login (`LoginService.Login`) issues an RS512 JWT (1 h, `grant` / `s
 
 **Missing**
 
+- [ ] Account creation: invites (GM generates a link / QR code with expiry, player picks their own credentials), admin-created accounts, and an open sign-up config flag (default off) gating the unauthenticated `UserService.Create`
 - [ ] Logout: server endpoint that revokes the JTI, plus the client flow (`UserHandler.logout` is a `TODO`)
 - [ ] Proper refresh flow: login returns an access token + a `scope: "refresh"` token; the client refreshes before expiry and on `Unauthenticated`
 - [ ] Client checks `exp` — `userHandler.current` reports logged-in for an expired token, and the cookie has no `Max-Age`
@@ -73,7 +74,8 @@ What exists: login (`LoginService.Login`) issues an RS512 JWT (1 h, `grant` / `s
 - [ ] Login hardening: rate limiting / lockout, and constant-time behaviour when the username doesn't exist (today an unknown user returns before hashing, which leaks which usernames exist)
 - [ ] Signing key rotation (new key on a schedule, retire old keys after the max token lifetime)
 - [ ] Configurable token lifetime (`JWTOptions.TokenDuration` is hard-coded to 1 h) via a config set
-- [ ] Cookie hardening: today the token lives in a JS-readable `SameSite=Lax` cookie with no `Secure` — revisit once HTTPS on the LAN is decided
+- [ ] Cookie hardening: the token stays in a JS-readable `SameSite=Lax` cookie; add `Max-Age` matching the token expiry and set `Secure` when the request arrived over HTTPS
+- [ ] Optional TLS: `SERVER_TLS_CERT` / `SERVER_TLS_KEY` config, and honour `X-Forwarded-Proto` behind a reverse proxy
 
 **Tests**
 
@@ -87,10 +89,9 @@ What exists: login (`LoginService.Login`) issues an RS512 JWT (1 h, `grant` / `s
 
 **Unknowns**
 
-- Is open sign-up (`UserService.Create` is unauthenticated) intended, or should accounts be invite / admin-created only? — TBD
-- Where tokens live on the client: JS-readable cookie, `HttpOnly` cookie set by the server, or memory + refresh cookie — TBD
-- HTTPS on a LAN server (self-signed, mDNS name, none)? Affects `Secure` cookies and WebSocket auth options — TBD
-- TBD
+- ~~Is open sign-up intended?~~ Decided: accounts come from GM invites (link / QR) or admin creation; open sign-up only behind a config flag, off by default
+- ~~Where tokens live on the client?~~ Decided: keep the JS-readable cookie; fix the encoding, logging and `Max-Age` bugs rather than moving to `HttpOnly` / in-memory storage. Same-origin cookies are still sent on the WebSocket upgrade, so the server can read the cookie for WebSocket auth
+- ~~HTTPS on a LAN server?~~ Decided: plain HTTP by default; optional TLS via config (cert / key paths) and reverse-proxy support (`X-Forwarded-Proto`). Cookies get `Secure` only when the request arrived over HTTPS. Screens need a wake-lock fallback since the Screen Wake Lock API requires a secure context
 
 ---
 
@@ -100,22 +101,22 @@ What exists: login (`LoginService.Login`) issues an RS512 JWT (1 h, `grant` / `s
 
 **Server**
 
-- [ ] Wire `SceneService` + `scenestore` into `components` (room ID config flag, `Exit` on `BeforeShutdown`)
+- [ ] Wire `SceneService` + `scenestore` into `components` (the instance's single room, `Exit` on `BeforeShutdown`)
 - [x] Screen state proto: `ScreenState` (view, overlays, layers, entities, grid, camera) is sent on initial setup and via `ScreenHandler.SetState`; entity / camera delta messages defined
 - [ ] Screen driver: turn a `ScreenInstruction` + scene entities into screen state and push it over the WebSocket
 - [ ] Route screen WebSocket connections by device ID (one screen per screen device)
 - [ ] Per-route auth policies (`anonymous`, `device`, `user`, `role:<role>`): authentication is optional at connect, enforced by the route; invalid credentials are rejected instead of treated as anonymous — see [authentication.md](./architecture/authentication.md#device-authentication)
 - [ ] Device identity: read `X-Device-ID` / `X-Device-Type` (query fallback `deviceId` / `deviceType` for browsers) and store them in the connection's session info (`screens.ConnectionInfo`, logger / trace attributes)
 - [ ] Device registration: a device identifies itself, gets a stable ID, and can be bound to a target
-- [ ] Device pairing: 4-digit single-use code requested by the device, confirmed by an admin, rate-limited; issues a revocable device token (`Authorization: Device <token>`) — currently any non-JWT connection is accepted
+- [ ] Device pairing: `DeviceService.Pair` server stream pushes a 4-digit single-use code (valid while the stream is open, max 5 min, auto-renewed), confirmed by an admin, rate-limited; issues a revocable device JWT backed by a JTI (`Authorization: Device <token>`, 8 h) plus a device refresh token (30 days) the device uses to renew itself — currently any non-JWT connection is accepted
 - [ ] Scene control API (`scenes/v1` proto): list scenes, activate, switch variant, get active state
-- [ ] Asset serving for scene assets (maps, images, video)
-- [ ] Battle map format v0 — just enough to render a background and grid
+- [ ] Asset serving for scene assets (maps, images, video): resolve scene-folder-relative and `shared:/` paths, serve with a content hash in the URL so screens can cache
+- [ ] Battle map format v0 — grid settings + ordered layers: image layers and entity layers with instance groups (one asset, many positions); new layer kinds (walls, lights, sound) are added with the feature that needs them
 
 **Client**
 
 - [ ] Device / TV view: fullscreen Pixi.js renderer driven by server screen state
-- [ ] Layer system in `src/lib/2d` (background, grid, entities, overlays) and the render loop
+- [ ] Layer system in `src/lib/2d` (image layers, grid, entities, overlays) and the render loop; instance groups rendered with Pixi instancing (shared texture, many positions)
 - [ ] Views: `battlemap` (background + grid), `scenery`, `splash`, `blank`
 - [ ] GM view v0: list scenes, activate one, switch variant
 - [ ] Device pairing page (`/devices/pair`): generates and persists the device ID, shows the 4-digit pairing code full screen, renews it on expiry, stores the device token once paired
@@ -123,13 +124,13 @@ What exists: login (`LoginService.Login`) issues an RS512 JWT (1 h, `grant` / `s
 
 **Unknowns**
 
-- Battle map format: what goes in v0 (grid, walls, lighting, fog?) and how it is stored — TBD
-- Where assets live (file storage folder per campaign? content-addressed?) and how they are referenced from configs — TBD
+- ~~Battle map format v0?~~ Decided: a battle map is a layered document — grid settings + an ordered list of typed layers. v0 has image layers (background and other images) and entity layers, including instance groups (one asset drawn at many positions, rendered via Pixi instancing for performance). The format grows with features: walls, lights, sound, ... are added as new layer kinds when the feature that uses them lands, not designed up front. Storage format follows the M2 config file format decision
+- ~~Where assets live?~~ Decided: each scene is a folder holding its config and its own assets; shared folders (any depth of subfolders, user-organized) hold assets reused across scenes. Configs reference scene assets by path relative to the scene folder (`maps/cave.webp`) and shared assets with a prefix (`shared:/monsters/goblins/goblin.png` — exact syntax to confirm when implemented). The server serves them over HTTP with a content hash in the URL for caching
 - ~~Device pairing UX~~ — decided: the device shows a 4-digit code, an admin types it in on the devices page
-- Device pairing transport (ConnectRPC server stream vs. WebSocket on an `anonymous` route), code lifetime, and device token format (JWT vs. opaque hashed token) — TBD
-- Allowed `X-Device-Type` values — TBD
-- Which room is active when there's more than one — TBD
-- TBD
+- ~~Device pairing transport, code lifetime, token format?~~ Decided: a ConnectRPC server stream (`DeviceService.Pair`, `anonymous` route) streams pairing codes and ends with the device token. A code is valid only while the stream is open, for at most 5 minutes, and is renewed automatically; confirm attempts are rate-limited. The device token is a JWT backed by a JTI row (reusing the user token / key infrastructure, revoked via the JTI)
+- ~~Device token lifetime and refresh?~~ Decided: pairing issues a device access token (8 h) and a device refresh token (30 days); the device refreshes on its own before expiry. A device unused for more than 30 days has to pair again
+- ~~Allowed `X-Device-Type` values?~~ Decided: `screen`, `table`, `tablet`, `phone`, `desktop`, `other`; unknown values are stored as `other`, never rejected. Metadata only, not used for authorization
+- ~~Which room is active when there's more than one?~~ Decided: a running instance serves exactly one game table, so there is exactly one room (the table's devices and target bindings); no room selection and no room ID flag
 
 ---
 
@@ -137,19 +138,20 @@ What exists: login (`LoginService.Login`) issues an RS512 JWT (1 h, `grant` / `s
 
 **Goal**: a GM can create and edit scenes, variants and the room setup from the app, and import existing maps, without touching JSON files.
 
-- [ ] Config schema with versioning (proto `scenes/v1` as file + API schema, or a `version` field with migrations)
+- [ ] Config files in YAML or JSON (by extension) with a `version` field and migrations on load; file models translated to `scenes/v1` proto messages for the API / screens
 - [ ] Scene editor: entities, base instructions per target, variants
 - [ ] Room editor: devices, target bindings
 - [ ] Asset upload and management
 - [ ] Map import: Universal VTT (`.dd2vtt`) and Dungeondraft into the Mechanus battle map format (`mechanus maps import` is a stub today)
 - [ ] Preview a scene / variant without activating it on the room
+- [ ] Scene state keyed by campaign + scene, so the same scene config keeps separate state in each campaign
+- [ ] Live reload of hand-edited config / asset files: watch the folders, reload changed configs, re-instruct devices when the active scene changes, report invalid files in the GM view and keep the last good version
 
 **Unknowns**
 
-- In-app editor only, or also support editing config files directly (and reload on change)? — TBD
-- File format for configs: JSON, YAML, proto JSON? — TBD
-- Are scenes shareable between campaigns (templates / library)? — TBD
-- TBD
+- ~~In-app editor only, or also edit config files directly?~~ Decided: both. The in-app editor is the primary tool; config and asset files stay hand-editable, the server watches the folders and reloads on change (re-instructing devices if the active scene changed). An invalid file is reported in the GM view and the last good version stays in use
+- ~~File format for configs?~~ Decided: YAML and JSON are both supported (picked by file extension). Every file carries a `version` field and old versions are migrated on load. The file models are translated to proto messages for network communication; the proto is the wire contract, not the file schema
+- ~~Are scenes shareable between campaigns?~~ Decided: scenes are campaign-independent configuration — a camp site or tavern can be used by any campaign. Scene state is saved per campaign (keyed by campaign + scene)
 
 ---
 
@@ -160,19 +162,21 @@ What exists: login (`LoginService.Login`) issues an RS512 JWT (1 h, `grant` / `s
 - [ ] Entity tokens on the battle map, positions stored in scene state
 - [ ] Screen WebSocket messages for pan, zoom, token moves
 - [ ] GM controls: reveal / hide / spawn / remove entities
+- [ ] Token control: `controlled_by` users per entity (default: the player's own character), GM assigns / shares control, live movement lock for players
 - [ ] Fog of war and reveal, stored in scene state
 - [ ] Overlays: `initiative` tracker, `entities` portraits
+- [ ] Generic game primitives: campaign-defined resource bars on tokens (with visibility), condition tags with icons and round counters, hand-entered initiative order with turn / round tracking, free-form entity stats
 - [ ] Info board view (handouts, initiative order, quest log)
-- [ ] Player view with limited visibility
+- [ ] Player view with limited visibility: derived per user from battle map state (hidden / fogged entities stripped server-side, camera on their character), overridable by a scene's `players` target
 - [ ] Reset a scene's state back to its config
+- [ ] Touch input on screens: per-device `touch` mode (`none` / `view` / `control` acting as a configured role or user), live GM touch lock
 
 **Unknowns**
 
-- Player views: a target per player, or one role-based view derived from the battle map? — TBD
-- Who may move tokens: GM only, or players for their own character? — TBD
-- How much rules knowledge (HP, conditions, initiative rolls) belongs in Mechanus vs. stays system-agnostic — TBD
-- Touch input on a table-mounted TV — TBD
-- TBD
+- ~~Player views: a target per player, or one derived view?~~ Decided: hybrid. By default every player gets a view derived server-side from the battle map state, filtered per user (hidden / fogged entities are never sent), camera on their own character. Scenes can optionally instruct a `players` target to override what player screens show (handouts, custom views) for special moments
+- ~~Who may move tokens?~~ Decided: per-entity controllers. Each entity has a `controlled_by` list of users (a player's character defaults to that player); the GM can always move everything, can assign or share control (summons, companions, mounts), and can toggle a live movement lock that freezes player movement
+- ~~How much rules knowledge belongs in Mechanus?~~ Decided: generic primitives, no rules engine and no dice. Campaign-defined resource bars (HP, mana, ...; current / max, visibility everyone / owner / GM), user-defined condition tags with icons and an optional round counter, an initiative order whose values are entered by hand (GM sorts and advances turns / rounds), and free-form key/value stats on entities
+- ~~Touch input on a table-mounted TV?~~ Decided: a per-device `touch` setting in the room config — `none`, `view` (pan, zoom, ping, measure; never changes game state; the default) or `control` (moves tokens, acting as a configured role or user). The GM can lock touch input live
 
 ---
 
@@ -183,38 +187,39 @@ What exists: login (`LoginService.Login`) issues an RS512 JWT (1 h, `grant` / `s
 - [ ] Driver framework: integration config sets (credentials, bridge / broker addresses), health / connection status per device
 - [ ] Lights: Philips Hue
 - [ ] Lights: Home Assistant
-- [ ] Lights: Matter
+- [ ] Lights: Matter (native Go controller: commissioning, fabric management)
 - [ ] Music: Spotify
 - [ ] Music: iTunes / Apple Music
-- [ ] Custom devices: MQTT
+- [ ] Custom devices: MQTT — topic from device config (default `mechanus/devices/<device-id>/set`), retained JSON envelope `{scene, variant, target, payload}`, scene events on `mechanus/events/scene`, availability on `mechanus/status`
+- [ ] Third-party event API (JSON WebSocket, scoped API tokens created by an admin): external software subscribes to scene events (scene activated, variant changed, entity changes, instructions for its targets) and sends events back into Mechanus
 - [ ] Handle released targets (`Transition.Released`) — reset, stop, or keep
 - [ ] GM live controls: adjust lights / volume mid-scene (`SceneService.Adjust`)
 
 **Unknowns**
 
-- Which integration first — TBD
-- Auth flows that expect a public callback URL (Spotify OAuth) on a LAN-only server — TBD
-- Is Home Assistant enough to cover Hue / Matter (one integration instead of three)? — TBD
-- Custom device payload conventions (topic naming, schemas) — TBD
-- TBD
+- ~~Which integration first?~~ Decided: no fixed order, all integrations are equally important; the driver framework comes first since every integration builds on it. A third-party event API (WebSocket / gRPC) joins them, so external software can integrate without a dedicated driver
+- Auth flows that expect a public callback URL (Spotify OAuth) on a LAN-only server. Options considered: project-hosted static HTTPS relay page that bounces the code to the LAN server (PKCE, user's own client ID), loopback redirect + paste the URL back, delegate to Home Assistant, or require configured TLS — TBD
+- ~~Is Home Assistant enough to cover Hue / Matter?~~ Decided: no — Home Assistant, Philips Hue and Matter are three separate native integrations. Matter means implementing a controller in Go (commissioning, fabric management), with no mature Go library to lean on today
+- ~~Custom device payload conventions?~~ Decided: scenes only hold the opaque payload per target; the topic comes from the device config (default `mechanus/devices/<device-id>/set`). Mechanus wraps it in a JSON envelope `{scene, variant, target, payload}` and publishes it retained. Scene events go to `mechanus/events/scene` and availability to `mechanus/status` (last will). The envelope and event schema are shared with the third-party event API
+- ~~Third-party event API transport and auth?~~ Decided: a JSON WebSocket only (no ConnectRPC variant), using the event schema shared with MQTT. Third-party software authenticates with admin-created, revocable, scoped API tokens (JWT + JTI)
+- Third-party event API scopes: what incoming events may do (candidates: `events:read` subscribe, `events:write` custom events shown in the GM view, `scenes:control` activate scenes / switch variants / adjust) — TBD
 
 ---
 
 ## M5 — Sessions & campaigns
 
-**Goal**: campaigns, players and play sessions are managed in the app, and a session can be stopped and resumed exactly where it left off.
+**Goal**: campaigns, players and play sessions are managed in the app, and a campaign's session continues exactly where it left off — across server restarts and campaign switches.
 
 - [x] Campaign overview and detail pages: users see the campaigns they are in, admins see all; users can create a campaign
 - [ ] Campaign management UI: edit, delete campaigns; invite / manage players
 - [ ] Characters linked to scene entities (`Entity.CharacterID`)
 - [ ] Remember the active scene across server restarts
-- [ ] Session concept: start / end a session, which scenes were played
+- [ ] Session object: one continuous, never-ending session per campaign holding the active scene and play state; switching campaign switches session
 
 **Unknowns**
 
-- Is a "session" a first-class object, or just the active campaign + scene? — TBD
-- Should scene state be kept per session (history) or only the latest? — TBD
-- TBD
+- ~~Is a "session" a first-class object?~~ Decided: yes, but it never stops — a session is the continuous, ongoing game (one per campaign), holding the active scene and play state. There is no start / end lifecycle; switching campaigns switches session and returning resumes where it left off
+- ~~Should scene state keep history?~~ Decided: latest only — one saved state per campaign + scene, overwritten on exit; no snapshots or event log
 
 ---
 
@@ -223,15 +228,14 @@ What exists: login (`LoginService.Login`) issues an RS512 JWT (1 h, `grant` / `s
 **Goal**: someone else can install Mechanus on a home network and use it.
 
 - [ ] Client discovers the server via mDNS (server side already announces)
-- [ ] Packaging: single binary releases, Docker image, setup docs
+- [ ] Packaging: single binary releases for Linux, Windows and macOS (amd64 + arm64), multi-arch Docker image (amd64 + arm64), setup docs; all platforms tested in CI
 - [ ] About page content and licenses (`client/src/routes/about`)
 - [ ] macOS configuration paths documented (`docs/configuration/config-file.md`)
 - [ ] User-facing documentation: setting up a room, writing scenes
 
 **Unknowns**
 
-- Target platforms (Raspberry Pi? NAS? desktop?) — TBD
-- TBD
+- ~~Target platforms?~~ Decided: Linux, Windows and macOS (amd64 + arm64) and a multi-arch Docker image are all fully supported and tested — covers Raspberry Pi, NAS, mini PC and a GM's laptop. Cross-compiling is easy since SQLite is pure Go (no cgo)
 
 ---
 
