@@ -50,14 +50,19 @@ var _ = Describe("scenestore", func() {
 	})
 
 	Describe("ConfigStore", func() {
-		var store *scenestore.ConfigStore
+		var (
+			store        *scenestore.ConfigStore
+			sceneStorage storage.Storage[*scenes.Config]
+			roomStorage  storage.Storage[*devices.Room]
+		)
 
 		// The adapter logic is storage agnostic; the database stands in for files to avoid touching the user's config dir.
 		BeforeEach(func() {
 			db := util_test.CreateDatabase(ctx)
-			sceneStorage, err := storage.NamedDBStorage[*scenes.Config](db, "scenes").AppStorage()
+			var err error
+			sceneStorage, err = storage.NamedDBStorage[*scenes.Config](db, "scenes").AppStorage()
 			Expect(err).ToNot(HaveOccurred())
-			roomStorage, err := storage.NamedDBStorage[*devices.Room](db, "rooms").AppStorage()
+			roomStorage, err = storage.NamedDBStorage[*devices.Room](db, "rooms").AppStorage()
 			Expect(err).ToNot(HaveOccurred())
 
 			Expect(sceneStorage.Set(ctx, &scenes.Config{ID: "cave", Name: "Cave"})).To(Succeed())
@@ -85,6 +90,23 @@ var _ = Describe("scenestore", func() {
 			room, err := store.CurrentRoom(ctx)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(room.Name).To(Equal("Living room"))
+		})
+
+		It("lists scene configs sorted by id", func() {
+			Expect(sceneStorage.Set(ctx, &scenes.Config{ID: "attic", Name: "Attic"})).To(Succeed())
+
+			cfgs, err := store.ListSceneConfigs(ctx)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(cfgs).To(HaveLen(2))
+			Expect(cfgs[0].ID).To(Equal("attic"))
+			Expect(cfgs[1].ID).To(Equal("cave"))
+		})
+
+		It("treats a room that is not set up as an empty room", func() {
+			room, err := scenestore.NewConfigStore(sceneStorage, roomStorage, "attic").CurrentRoom(ctx)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(room.ID).To(Equal("attic"))
+			Expect(room.Devices).To(BeEmpty())
 		})
 	})
 })

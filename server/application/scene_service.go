@@ -20,6 +20,8 @@ var (
 // SceneConfigStore reads authored scene configuration. Backed by file storage.
 type SceneConfigStore interface {
 	GetSceneConfig(ctx context.Context, sceneID string) (*scenes.Config, error)
+	// ListSceneConfigs returns all configured scenes, sorted by ID.
+	ListSceneConfigs(ctx context.Context) ([]*scenes.Config, error)
 }
 
 // RoomConfigStore reads the configured room (devices and target bindings). Backed by file storage.
@@ -39,8 +41,9 @@ type SceneStateStore interface {
 type OutputDriver interface {
 	// Integration returns the integration identifier this driver handles, see devices.Integration*.
 	Integration() string
-	// Apply instructs a single device. The instruction kind always matches the device kind.
-	Apply(ctx context.Context, device *devices.Device, instruction scenes.Instruction) error
+	// Apply instructs a single device. The instruction kind always matches the device kind. scene is the
+	// scene the instruction comes from, e.g. to resolve scene relative asset paths.
+	Apply(ctx context.Context, scene scenes.Ref, device *devices.Device, instruction scenes.Instruction) error
 }
 
 // SceneService loads, switches and exits scenes and instructs the devices in the room.
@@ -141,6 +144,29 @@ func (s *SceneService) Adjust(ctx context.Context, overrides scenes.Instructions
 	})
 }
 
+// Scenes returns the configuration of every scene that can be activated.
+func (s *SceneService) Scenes(ctx context.Context) ([]*scenes.Config, error) {
+	return s.configs.ListSceneConfigs(ctx)
+}
+
+// ActiveConfig returns the configuration and the reference of the active scene, nil when no scene is
+// active. The configuration is shared and must not be modified.
+func (s *SceneService) ActiveConfig() (*scenes.Config, scenes.Ref) {
+	s.lock.Lock()
+	defer s.lock.Unlock()
+
+	if s.active == nil {
+		return nil, scenes.Ref{}
+	}
+
+	return s.active.Config, s.active.Ref()
+}
+
+// BeforeShutdown implements lifecycle.BeforeShutdown: saves the state of the active scene.
+func (s *SceneService) BeforeShutdown(ctx context.Context) error {
+	return s.Exit(ctx)
+}
+
 // Exit saves the state of the active scene and deactivates it. Call before shutdown.
 func (s *SceneService) Exit(ctx context.Context) error {
 	s.lock.Lock()
@@ -211,10 +237,10 @@ func (s *SceneService) transition(ctx context.Context, from scenes.Ref, prev sce
 	s.active = next
 
 	// TODO: handle t.Released, e.g. blank screens / stop music for targets the new scene no longer uses.
-	return t, s.dispatch(ctx, room, t.Changes)
+	return t, s.dispatch(ctx, room, t.To, t.Changes)
 }
 
-func (s *SceneService) dispatch(ctx context.Context, room *devices.Room, ins scenes.Instructions) error {
+func (s *SceneService) dispatch(ctx context.Context, room *devices.Room, scene scenes.Ref, ins scenes.Instructions) error {
 	var err error
 	for _, ti := range ins.All() {
 		for _, device := range room.DevicesFor(ti.Target, ti.Instruction.Kind()) {
@@ -224,7 +250,7 @@ func (s *SceneService) dispatch(ctx context.Context, room *devices.Room, ins sce
 
 				continue
 			}
-			if e := driver.Apply(ctx, device, ti.Instruction); e != nil {
+			if e := driver.Apply(ctx, scene, device, ti.Instruction); e != nil {
 				err = errors.Join(err, fmt.Errorf("device %q: %w", device.ID, e))
 			}
 		}

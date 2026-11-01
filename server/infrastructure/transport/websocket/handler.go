@@ -58,25 +58,19 @@ func (handler *WebsocketHandler) ServeHTTP(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
+	deviceID, hardware := deviceIdentity(r)
 	logger, connCtx := handler.logger.
-		With("id", id, "screen", screenid).
+		With("id", id, "screen", screenid, "device_id", deviceID, "device_type", hardware).
 		FromUpdate(r.Context())
 	r = r.WithContext(connCtx)
 
-	// Authenticate before looking up the screen, so unauthenticated requests can't probe which screens exist
 	auth, err := handler.authenticate(r)
 	if err != nil {
 		http.Error(w, "Could not authenticate: "+err.Error(), http.StatusUnauthorized)
 
 		return
 	}
-
-	screenHandler, ok := handler.screenManager.Get(screenid)
-	if !ok {
-		http.Error(w, "Screen not found", http.StatusNotFound)
-
-		return
-	}
+	auth.DeviceID, auth.Hardware = deviceID, hardware
 
 	//TODO: check that screenHandler is allowed to be access by this requester
 
@@ -87,6 +81,9 @@ func (handler *WebsocketHandler) ServeHTTP(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
+	// One screen per screen device: the screen ID is the device ID. Only created once the connection is
+	// accepted, so failed or unauthenticated requests don't leave screens behind.
+	screenHandler := handler.screenManager.GetOrCreate(screenid)
 	h := screens.NewScreenConn(id, screenid, connCtx, conn, auth)
 	screenHandler.AddListener(connCtx, h)
 	if auth.Type == devices.DeviceTypeUser {
@@ -176,4 +173,26 @@ func (handler *WebsocketHandler) authenticate(r *http.Request) (*screens.Connect
 		Roles: []string{roles.Device.String()},
 		Type:  devices.DeviceTypeDevice,
 	}, nil
+}
+
+// Device identity headers, with query parameter fallbacks for browsers (which can't set headers on a WebSocket).
+const (
+	DeviceIDHeader   = "X-Device-Id"
+	DeviceTypeHeader = "X-Device-Type"
+	DeviceIDQuery    = "deviceId"
+	DeviceTypeQuery  = "deviceType"
+)
+
+// deviceIdentity reads the device ID and hardware type a client reports. Both are optional.
+func deviceIdentity(r *http.Request) (string, devices.HardwareType) {
+	id := r.Header.Get(DeviceIDHeader)
+	if id == "" {
+		id = r.URL.Query().Get(DeviceIDQuery)
+	}
+	hardware := r.Header.Get(DeviceTypeHeader)
+	if hardware == "" {
+		hardware = r.URL.Query().Get(DeviceTypeQuery)
+	}
+
+	return id, devices.ParseHardwareType(hardware)
 }
