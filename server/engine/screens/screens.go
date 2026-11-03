@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net"
 	"sync"
+	"time"
 
 	"github.com/DaanV2/mechanus/server/engine/screens/state"
 	"github.com/DaanV2/mechanus/server/infrastructure/logging"
@@ -12,6 +13,9 @@ import (
 	screensv1 "github.com/DaanV2/mechanus/server/proto/screens/v1"
 	"github.com/coder/websocket"
 )
+
+// broadcastTimeout limits how long a listener that stopped reading can hold up a broadcast to it.
+const broadcastTimeout = 10 * time.Second
 
 // ScreenHandler manages connections and messages for a single screen.
 type ScreenHandler struct {
@@ -69,7 +73,12 @@ func (s *ScreenHandler) Broadcast(ctx context.Context, msg ...*screensv1.ServerM
 	}
 }
 
+// broadcast outlives the caller, which is often a request that ends before the write happens: its
+// cancellation would silently drop the message, leaving the screen on an old state.
 func (s *ScreenHandler) broadcast(ctx context.Context, msg *screensv1.ServerMessages, listener *ScreenConn) {
+	ctx, cancel := context.WithTimeout(context.WithoutCancel(ctx), broadcastTimeout)
+	defer cancel()
+
 	err := listener.Send(ctx, msg)
 	if isClosed(err) {
 		s.RemoveListener(listener.id)

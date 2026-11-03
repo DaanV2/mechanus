@@ -50,14 +50,28 @@ function cell(x: number, y: number): [number, number] {
   return [(x + 0.5) * CELL, (y + 0.5) * CELL];
 }
 
-async function expectColor(page: Page, point: [number, number], hex: string, what: string) {
+/**
+ * Expects each named point to have its colour. All points are read from one screenshot, as a screenshot
+ * takes seconds where the browser renders in software, such as on CI.
+ */
+async function expectColors(page: Page, expected: Record<string, [[number, number], string]>) {
+  const names = Object.keys(expected);
+
   await expect
-    .poll(async () => isColor((await colorsAt(page, [point]))[0], hex), { message: what, timeout: 15000 })
-    .toBe(true);
+    .poll(
+      async () => {
+        const colors = await colorsAt(page, names.map((name) => expected[name][0]));
+
+        return names.filter((name, i) => !isColor(colors[i], expected[name][1]));
+      },
+      { message: "points with the wrong colour", timeout: 15000 },
+    )
+    .toEqual([]);
 }
 
 test.describe("battle map on a TV", { tag: ["@scenes", "@battlemap"] }, () => {
   test("shows the layers, grid and entities of the active scene", async ({ page, request }) => {
+    test.setTimeout(60000);
     let token = "";
 
     await test.step("by activating the example scene", async () => {
@@ -72,8 +86,10 @@ test.describe("battle map on a TV", { tag: ["@scenes", "@battlemap"] }, () => {
     });
 
     await test.step("image layers are drawn in order", async () => {
-      await expectColor(page, cell(3, 6), FLOOR, "the floor image");
-      await expectColor(page, cell(7, 4), RUG, "the rug image, on top of the floor");
+      await expectColors(page, {
+        "the floor image": [cell(3, 6), FLOOR],
+        "the rug image, on top of the floor": [cell(7, 4), RUG],
+      });
     });
 
     await test.step("grid lines are drawn", async () => {
@@ -84,23 +100,29 @@ test.describe("battle map on a TV", { tag: ["@scenes", "@battlemap"] }, () => {
     });
 
     await test.step("instance groups draw one asset at every position", async () => {
-      await expectColor(page, cell(1, 1), BARREL, "the first barrel");
-      await expectColor(page, cell(2, 1), BARREL, "the second barrel");
-      await expectColor(page, cell(14, 7), BARREL, "the third barrel");
+      await expectColors(page, {
+        "the first barrel": [cell(1, 1), BARREL],
+        "the second barrel": [cell(2, 1), BARREL],
+        "the third barrel": [cell(14, 7), BARREL],
+      });
     });
 
     await test.step("entities are drawn, and hidden ones aren't", async () => {
       const [x, y] = cell(4, 4);
 
-      await expectColor(page, cell(11, 2), BARKEEP, "the barkeep's token");
-      await expectColor(page, [x - 28, y], HERO, "the hero's placeholder token");
-      await expectColor(page, cell(5, 7), FLOOR, "the floor, where the hidden spy stands");
+      await expectColors(page, {
+        "the barkeep's token": [cell(11, 2), BARKEEP],
+        "the hero's placeholder token": [[x - 28, y], HERO],
+        "the floor, where the hidden spy stands": [cell(5, 7), FLOOR],
+      });
     });
 
     await test.step("switching variant updates the TV", async () => {
       await callRPC(request, "scenes.v1.SceneService/SetVariant", { variantId: "night" }, token);
-      await expectColor(page, cell(3, 6), FLOOR_NIGHT, "the night floor");
-      await expectColor(page, cell(11, 2), BARKEEP, "the barkeep's token at night");
+      await expectColors(page, {
+        "the night floor": [cell(3, 6), FLOOR_NIGHT],
+        "the barkeep's token at night": [cell(11, 2), BARKEEP],
+      });
     });
   });
 
