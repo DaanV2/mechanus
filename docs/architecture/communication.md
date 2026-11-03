@@ -22,7 +22,7 @@ ConnectRPC is called from the browser using either the Connect protocol or gRPC-
 
 **Client:** `client/src/lib/api/client.ts` sets up the transport; service-specific files (`users_v1.ts`, `campaigns_v1.ts`, etc.) wrap the generated stubs.
 
-**Server:** `infrastructure/transport/routers` assembles the route table. gRPC interceptors (logging, auth, telemetry) are wired in `infrastructure/transport/grpc`.
+**Server:** `infrastructure/transport/routers` assembles the route table. gRPC interceptors (logging, auth, telemetry) are wired in `infrastructure/transport/grpc`. Security policies belong in the message handler rather than an interceptor, see [authentication.md](./authentication.md#where-security-checks-go).
 
 ## WebSocket — screen protocol
 

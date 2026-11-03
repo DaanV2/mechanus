@@ -98,9 +98,36 @@ Long-lived screen WebSocket connections of a user or paired device are closed (s
 
 On startup `JWTService.Cleanup` deletes revoked JTIs and JTIs not refreshed within the longest token lifetime.
 
+## Where security checks go
+
+Security policies are enforced in the message handler, not in an interceptor. Preferably the exported entry function does the checks (who may call, is the message valid), and a private variant of the same name does the actual work:
+
+```go
+// Create checks who may call and whether the message is valid.
+func (u *UserServiceHandler) Create(ctx context.Context, req *connect.Request[usersv1.CreateAccountRequest]) (*connect.Response[usersv1.CreateAccountResponse], error) {
+	if !u.options.SignupEnabled {
+		if _, err := requireRole(ctx, roles.Admin); err != nil {
+			return nil, err
+		}
+	}
+
+	username, password := req.Msg.GetUsername(), req.Msg.GetPassword()
+	if username == "" || password == "" {
+		return nil, connect.NewError(connect.CodeInvalidArgument, ErrInvalidUserPassword)
+	}
+
+	return u.create(ctx, username, password)
+}
+
+// create makes the account, the caller has done the checks.
+func (u *UserServiceHandler) create(ctx context.Context, username, password string) (*connect.Response[usersv1.CreateAccountResponse], error) {
+```
+
+Interceptors can put who is calling on the context, but don't decide whether the call may proceed. `grpc.PolicyInterceptor` on `DeviceService` doesn't follow this yet and is to be replaced, see the [roadmap](../roadmap.md#auth).
+
 ## Device authentication
 
-> **Status**: implemented, on the screen WebSocket and `DeviceService`. The other ConnectRPC services still enforce per handler (`grpc.requireRole`), and the `Authenticator` interceptor in front of them keeps treating an invalid token as no token, see "Error codes" above: login and refresh have to work with a stale token around.
+> **Status**: implemented, on the screen WebSocket and `DeviceService`. The other ConnectRPC services enforce per handler (`grpc.requireRole`), as described in "Where security checks go" above, and the `Authenticator` interceptor in front of them keeps treating an invalid token as no token, see "Error codes" above: login and refresh have to work with a stale token around.
 
 ### Optional authentication, enforced per route
 
@@ -114,7 +141,7 @@ Authentication on the WebSocket (and on device-facing ConnectRPC routes) is **op
 
 A credential that is present but invalid (bad signature, expired, revoked, an unknown `Authorization` scheme) is **rejected** with `401`, never downgraded to anonymous, on every route including `anonymous` ones — otherwise the client cannot tell "log in / pair again" from "not allowed". The scope keeps the two kinds of token apart: a device token doesn't pass as a user, a user JWT doesn't pass as a device, and refresh tokens pass as neither.
 
-Each route registers a policy alongside its handler: `http.RequirePolicy` for plain HTTP routes such as the WebSocket (`websocket.NewWebsocketRouter`), `grpc.PolicyInterceptor` with a policy per procedure for a ConnectRPC service (`grpc.DeviceServicePolicies`, a procedure without a policy is denied). ConnectRPC answers `Unauthenticated` for `401` and `PermissionDenied` for `403`.
+Each route registers a policy alongside its handler: `http.RequirePolicy` for plain HTTP routes such as the WebSocket (`websocket.NewWebsocketRouter`), `grpc.PolicyInterceptor` with a policy per procedure for a ConnectRPC service (`grpc.DeviceServicePolicies`, a procedure without a policy is denied; to be moved into the handlers, see "Where security checks go"). ConnectRPC answers `Unauthenticated` for `401` and `PermissionDenied` for `403`.
 
 | Policy        | Accepts                                   | Example                                    |
 | ------------- | ----------------------------------------- | ------------------------------------------ |

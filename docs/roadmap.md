@@ -56,9 +56,11 @@ Done: per-login sessions (one JTI each) with an RS512 access token (1 h) and a `
 - [x] Honour `X-Forwarded-Proto` / `-Host` / `-For` behind a reverse proxy (`server.trust-proxy-headers`)
 - [x] Tests: WebSocket 401 / 403, device ID / type from header and query, close on expiry / revocation
 - [x] Playwright: logout, session survives token expiry via refresh, revoked session is logged out, WebSocket connects as the logged-in user, change password, invites, admin account / role management
+- [ ] Move security policies into the message handlers: `DeviceService` off `grpc.PolicyInterceptor`, and split handlers that mix checks and work into an entry function and a private variant. Whether the screen WebSocket's `http.RequirePolicy` moves too — TBD
 
 **Decisions**
 
+- Security policies are enforced in the message handler, not in an interceptor. Preferably the entry function (`Create(ctx)`) handles the validations and a private variant (`create(ctx)`) does the actual creation of data, see [authentication.md](./architecture/authentication.md#where-security-checks-go)
 - Accounts come from GM invites or admin creation; open sign-up only behind a config flag, off by default. Until a GM role exists, invites need the admin role
 - Invites are single use, expire after a chosen duration (default 7 days, at most 30) and give the `user` role; the invite ID is the secret in the link
 - Tokens stay in JS-readable `SameSite=Lax` cookies (not `HttpOnly` / in-memory); same-origin cookies also authenticate the WebSocket upgrade
