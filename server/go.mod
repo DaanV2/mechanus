@@ -31,7 +31,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/lib/pq v1.12.3
 	github.com/mochi-mqtt/server/v2 v2.7.9
-	github.com/onsi/ginkgo/v2 v2.33.1
+	github.com/onsi/ginkgo/v2 v2.34.0
 	github.com/onsi/gomega v1.44.0
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/pflag v1.0.10
@@ -210,7 +210,7 @@ require (
 	github.com/google/cel-go v0.29.0 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/google/go-containerregistry v0.22.1 // indirect
-	github.com/google/pprof v0.0.0-20261026192309-dbd0ed30aa88 // indirect
+	github.com/google/pprof v0.0.0-20261103193413-97e8293de3c4 // indirect
 	github.com/gordonklaus/ineffassign v0.2.0 // indirect
 	github.com/gorilla/websocket v1.5.3 // indirect
 	github.com/gostaticanalysis/analysisutil v0.7.1 // indirect
@@ -390,7 +390,7 @@ require (
 	google.golang.org/grpc v1.85.0 // indirect
 	gorm.io/driver/clickhouse v0.7.0 // indirect
 	honnef.co/go/tools v0.8.2 // indirect
-	modernc.org/libc v1.79.1 // indirect
+	modernc.org/libc v1.80.0 // indirect
 	modernc.org/mathutil v1.7.1 // indirect
 	modernc.org/memory v1.12.1 // indirect
 	modernc.org/sqlite v1.61.1 // indirect
