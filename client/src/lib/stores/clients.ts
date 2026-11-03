@@ -1,4 +1,5 @@
 import * as campaigns from '$lib/api/campaigns_v1';
+import * as devices from '$lib/api/devices_v1';
 import * as scenes from '$lib/api/scenes_v1';
 import { createClient } from '$lib/api/client';
 import * as users from '$lib/api/users_v1';
@@ -16,3 +17,4 @@ export const createLoginClient = () => users.createLoginClient(grpcTransport());
 export const createInviteClient = () => users.createInviteClient(grpcTransport());
 export const createCampaignClient = () => campaigns.createCampaignClient(grpcTransport());
 export const createSceneClient = () => scenes.createSceneClient(grpcTransport());
+export const createDeviceClient = () => devices.createDeviceClient(grpcTransport());

@@ -51,6 +51,7 @@
           <DropdownItem href="/users/login">Profile</DropdownItem>
           {#if userData.user.roles?.includes('admin')}
             <DropdownItem href="/users">Users</DropdownItem>
+            <DropdownItem href="/devices">Devices</DropdownItem>
           {/if}
         </DropdownGroup>
         <DropdownHeader onclick={logout}>Sign out</DropdownHeader>

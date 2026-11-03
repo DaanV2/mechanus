@@ -133,7 +133,7 @@ The config lists the entities present when the scene starts (`Entity.Hidden` = s
 | Port               | Backed by    | Used for                                          |
 | ------------------ | ------------ | ------------------------------------------------- |
 | `SceneConfigStore` | file storage | `GetSceneConfig(sceneID)`                         |
-| `RoomConfigStore`  | file storage | `CurrentRoom()` — devices and target bindings     |
+| `RoomConfigStore`  | file storage, plus the bindings of paired devices (`DeviceService.Room`) | `CurrentRoom()` — devices and target bindings     |
 | `SceneStateStore`  | database     | `LoadSceneState` / `SaveSceneState`               |
 | `OutputDriver`     | integrations | `Apply(scene, device, instruction)`, one per integration |
 
@@ -226,7 +226,7 @@ server/
 
 ## Status
 
-**Implemented**: the domain model above with the config / state split, variant resolution, live overrides, entity status tracking, transition change detection, `SceneService` with load / exit persistence, `scenestore` adapters for file storage and the database, and tests for each. `SceneService` is wired in `components` with the instance's single room (`rooms/room.dat`, `scenestore.RoomID`; a missing room file is an empty room) and saves the active scene on `BeforeShutdown`. The screen driver (`infrastructure/outputs/screen`) turns a `ScreenInstruction` into screen state (view, asset URL, grid shown for battle maps) and pushes it to the device's screen; screens are keyed by device ID. `scenes/v1.SceneService` (ConnectRPC) lists scenes, activates them, switches variant and returns the active scene. Scene and shared assets are served under `/assets/` with a content hash (`infrastructure/assets`).
+**Implemented**: the domain model above with the config / state split, variant resolution, live overrides, entity status tracking, transition change detection, `SceneService` with load / exit persistence, `scenestore` adapters for file storage and the database, and tests for each. `SceneService` is wired in `components` with the instance's single room (`rooms/room.dat`, `scenestore.RoomID`; a missing room file is an empty room) and saves the active scene on `BeforeShutdown`. Paired devices (`application.DeviceService`) are registered in the database and can be bound to a target, those bindings are merged into the room when it is read. The screen driver (`infrastructure/outputs/screen`) turns a `ScreenInstruction` into screen state (view, asset URL, grid shown for battle maps) and pushes it to the device's screen; screens are keyed by device ID. `scenes/v1.SceneService` (ConnectRPC) lists scenes, activates them, switches variant and returns the active scene. Scene and shared assets are served under `/assets/` with a content hash (`infrastructure/assets`).
 
 **Not implemented yet**:
 
@@ -236,7 +236,6 @@ server/
 - No drivers other than the screen driver: Hue, Matter, Home Assistant, Spotify, iTunes, MQTT.
 - The scene control API has no `Adjust` or entity (reveal / spawn) calls yet.
 - Handling of `Transition.Released`.
-- Device registration, per-route auth policies and pairing (designed in [authentication.md](./authentication.md#device-authentication)).
 
 ## Extending
 

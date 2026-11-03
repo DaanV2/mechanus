@@ -3,6 +3,7 @@ package components
 import (
 	"context"
 	gohttp "net/http"
+	"slices"
 
 	"connectrpc.com/connect"
 	"connectrpc.com/grpchealth"
@@ -22,6 +23,7 @@ import (
 	"github.com/DaanV2/mechanus/server/infrastructure/transport/websocket"
 	"github.com/DaanV2/mechanus/server/mechanus"
 	"github.com/DaanV2/mechanus/server/proto/campaigns/v1/campaignsv1connect"
+	"github.com/DaanV2/mechanus/server/proto/devices/v1/devicesv1connect"
 	"github.com/DaanV2/mechanus/server/proto/scenes/v1/scenesv1connect"
 	"github.com/DaanV2/mechanus/server/proto/users/v1/usersv1connect"
 )
@@ -45,7 +47,8 @@ type RouterSetup struct {
 	Interceptors     []connect.Interceptor
 	ReadyChecker     health.ReadyCheck
 	WebsocketHandler *websocket.WebsocketHandler
-	Assets           gohttp.Handler // Serves scene and shared assets under assets.RoutePrefix
+	DevicePolicies   connect.Interceptor // Enforces the route policies of the device service
+	Assets           gohttp.Handler      // Serves scene and shared assets under assets.RoutePrefix
 }
 
 // RouterRPCS contains the gRPC service handlers for the router.
@@ -55,6 +58,7 @@ type RouterRPCS struct {
 	Scene    scenesv1connect.SceneServiceHandler
 	User     usersv1connect.UserServiceHandler
 	Invite   usersv1connect.InviteServiceHandler
+	Device   devicesv1connect.DeviceServiceHandler
 }
 
 // RouterConfig contains the configuration for creating a router.
@@ -73,12 +77,15 @@ func CreateRouter(setup *RouterSetup, rpcs *RouterRPCS, cfgs RouterConfig) (goht
 		connect.WithInterceptors(setup.Interceptors...),
 	}
 
+	deviceOpts := append(slices.Clone(grpcOpts), connect.WithInterceptors(setup.DevicePolicies))
+
 	reflecter := grpcreflect.NewStaticReflector(
 		campaignsv1connect.CampaignServiceName,
 		usersv1connect.LoginServiceName,
 		scenesv1connect.SceneServiceName,
 		usersv1connect.UserServiceName,
 		usersv1connect.InviteServiceName,
+		devicesv1connect.DeviceServiceName,
 		grpchealth.HealthV1ServiceName,
 	)
 
@@ -90,6 +97,7 @@ func CreateRouter(setup *RouterSetup, rpcs *RouterRPCS, cfgs RouterConfig) (goht
 		routers.WithGrpcRoute(scenesv1connect.NewSceneServiceHandler, rpcs.Scene, grpcOpts),
 		routers.WithGrpcRoute(usersv1connect.NewUserServiceHandler, rpcs.User, grpcOpts),
 		routers.WithGrpcRoute(usersv1connect.NewInviteServiceHandler, rpcs.Invite, grpcOpts),
+		routers.WithGrpcRoute(devicesv1connect.NewDeviceServiceHandler, rpcs.Device, deviceOpts),
 		// gRPC utils
 		routers.WithGrpcRoute(grpcreflect.NewHandlerV1, reflecter, grpcOpts),
 		routers.WithGrpcRoute(grpcreflect.NewHandlerV1Alpha, reflecter, grpcOpts),

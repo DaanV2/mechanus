@@ -8,12 +8,14 @@ import (
 
 var (
 	// AuthConfigSet is the configuration set for authentication settings.
-	AuthConfigSet            = config.New("auth")
-	AccessTokenDurationFlag  = AuthConfigSet.Duration("auth.access-token-duration", time.Hour, "How long an access token is valid for")
-	RefreshTokenDurationFlag = AuthConfigSet.Duration("auth.refresh-token-duration", time.Hour*24*7, "How long a refresh token is valid for, a session that isn't refreshed within this time has to log in again")
-	KeyRotationFlag          = AuthConfigSet.Duration("auth.key-rotation", time.Hour*24*30, "How often a new jwt signing key is generated, old keys are removed once every token they signed has expired. 0 disables rotation")
-	SignupEnabledFlag        = AuthConfigSet.Bool("auth.signup-enabled", false, "Whenever or not anyone can create an account, when disabled only admins can create accounts")
-	InviteDurationFlag       = AuthConfigSet.Duration("auth.invite-duration", time.Hour*24*7, "How long an invite link stays valid when no duration is given, at most 30 days")
+	AuthConfigSet             = config.New("auth")
+	AccessTokenDurationFlag   = AuthConfigSet.Duration("auth.access-token-duration", time.Hour, "How long an access token is valid for")
+	RefreshTokenDurationFlag  = AuthConfigSet.Duration("auth.refresh-token-duration", time.Hour*24*7, "How long a refresh token is valid for, a session that isn't refreshed within this time has to log in again")
+	DeviceTokenDurationFlag   = AuthConfigSet.Duration("auth.device-token-duration", time.Hour*8, "How long a device access token is valid for")
+	DeviceRefreshDurationFlag = AuthConfigSet.Duration("auth.device-refresh-token-duration", time.Hour*24*30, "How long a device refresh token is valid for, a device that isn't used within this time has to pair again")
+	KeyRotationFlag           = AuthConfigSet.Duration("auth.key-rotation", time.Hour*24*30, "How often a new jwt signing key is generated, old keys are removed once every token they signed has expired. 0 disables rotation")
+	SignupEnabledFlag         = AuthConfigSet.Bool("auth.signup-enabled", false, "Whenever or not anyone can create an account, when disabled only admins can create accounts")
+	InviteDurationFlag        = AuthConfigSet.Duration("auth.invite-duration", time.Hour*24*7, "How long an invite link stays valid when no duration is given, at most 30 days")
 )
 
 // AuthConfig contains the authentication configuration.
@@ -29,8 +31,10 @@ type AuthConfig struct {
 func GetAuthConfig() AuthConfig {
 	return AuthConfig{
 		JWT: JWTOptions{
-			TokenDuration:        AccessTokenDurationFlag.Value(),
-			RefreshTokenDuration: RefreshTokenDurationFlag.Value(),
+			TokenDuration:              AccessTokenDurationFlag.Value(),
+			RefreshTokenDuration:       RefreshTokenDurationFlag.Value(),
+			DeviceTokenDuration:        DeviceTokenDurationFlag.Value(),
+			DeviceRefreshTokenDuration: DeviceRefreshDurationFlag.Value(),
 		},
 		KeyRotation:    KeyRotationFlag.Value(),
 		SignupEnabled:  SignupEnabledFlag.Value(),

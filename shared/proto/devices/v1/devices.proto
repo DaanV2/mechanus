@@ -1,0 +1,93 @@
+syntax = "proto3";
+package devices.v1;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/DaanV2/mechanus/server/proto/devices/v1;devicesv1";
+
+// Devices (TVs, tablets, other screens) get their credential by pairing: the device shows a short code, an admin types it in
+service DeviceService {
+  // Starts pairing, needs no login. The device identifies itself with the X-Device-ID and X-Device-Type headers.
+  // Streams the code to show, a new one whenever it expires, and ends with the device tokens.
+  // A code is only valid while this stream is open
+  rpc Pair(PairRequest) returns (stream PairResponse) {}
+  // Exchanges a device refresh token for new device tokens, needs no login
+  rpc Refresh(RefreshDeviceRequest) returns (RefreshDeviceResponse) {}
+  // Confirms the code a device shows and names the device, requires the admin role
+  rpc Confirm(ConfirmPairingRequest) returns (ConfirmPairingResponse) {}
+  // Lists the paired and connected devices, requires the admin role
+  rpc List(ListDevicesRequest) returns (ListDevicesResponse) {}
+  // Un-pairs a device, revoking its tokens right away, requires the admin role
+  rpc Revoke(RevokeDeviceRequest) returns (RevokeDeviceResponse) {}
+  // Binds a paired device to a target of the room, requires the admin role
+  rpc Bind(BindDeviceRequest) returns (BindDeviceResponse) {}
+}
+
+message PairRequest {}
+
+message PairResponse {
+  oneof event {
+    PairingCode code = 1; // The code to show, replaces any earlier code
+    DeviceTokens tokens = 2; // The device got paired, always the last message
+  }
+}
+
+message PairingCode {
+  string code = 1; // The 4 digits to show
+  google.protobuf.Timestamp expires_at = 2; // When the server replaces the code
+}
+
+message DeviceTokens {
+  string token = 1; // The access token, without prefix
+  string type = 2; // The prefix of the access token: Device
+  string refresh_token = 3; // The refresh token, without prefix
+}
+
+message RefreshDeviceRequest {
+  string token = 1; // The refresh token
+}
+
+message RefreshDeviceResponse {
+  DeviceTokens tokens = 1;
+}
+
+message ConfirmPairingRequest {
+  string code = 1; // The code the device shows
+  string name = 2; // The name of the device, eg: Table TV
+}
+
+message ConfirmPairingResponse {
+  Device device = 1;
+}
+
+message ListDevicesRequest {}
+
+message ListDevicesResponse {
+  repeated Device devices = 1;
+}
+
+message RevokeDeviceRequest {
+  string id = 1; // The device to un-pair
+}
+
+message RevokeDeviceResponse {}
+
+message BindDeviceRequest {
+  string id = 1; // The device to bind
+  string target = 2; // The target of the room, eg: table. Empty removes the binding
+}
+
+message BindDeviceResponse {
+  Device device = 1;
+}
+
+message Device {
+  string id = 1; // The stable device ID
+  string name = 2; // The name given when pairing, empty when the device isn't paired
+  string hardware = 3; // What the device reports to run on: screen, table, tablet, phone, desktop or other
+  string target = 4; // The target of the room the device is bound to, if any
+  bool paired = 5; // Whenever the device holds a device token
+  bool connected = 6; // Whenever the device has a screen connection right now
+  google.protobuf.Timestamp paired_at = 7; // Only set when paired
+  google.protobuf.Timestamp last_seen_at = 8; // When the device last paired or refreshed its tokens, only set when paired
+}

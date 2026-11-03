@@ -35,6 +35,25 @@ func (sm *ScreenManager) GetOrCreate(id string) *ScreenHandler {
 	return h
 }
 
+// Connections returns the connection info of every connection on every screen.
+func (sm *ScreenManager) Connections() []*ConnectionInfo {
+	var result []*ConnectionInfo
+	for _, h := range sm.screens.Items() {
+		result = append(result, h.Connections()...)
+	}
+
+	return result
+}
+
+// CloseDevice closes the connections a device opened as itself, on every screen.
+func (sm *ScreenManager) CloseDevice(deviceID, reason string) {
+	wg := sync.WaitGroup{}
+	for _, h := range sm.screens.Items() {
+		wg.Go(func() { h.CloseDevice(deviceID, reason) })
+	}
+	wg.Wait()
+}
+
 // BeforeShutdown implements lifecycle.BeforeShutdown, closing all screen connections.
 func (sm *ScreenManager) BeforeShutdown(_ context.Context) error {
 	wg := sync.WaitGroup{}
