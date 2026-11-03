@@ -1,0 +1,15 @@
+{
+  "id": "room",
+  "name": "Development room",
+  "devices": {
+    "example-tv": {
+      "id": "example-tv",
+      "name": "Table TV",
+      "kind": "screen",
+      "integration": "screen"
+    }
+  },
+  "bindings": {
+    "table": ["example-tv"]
+  }
+}

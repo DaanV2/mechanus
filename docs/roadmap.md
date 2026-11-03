@@ -74,7 +74,7 @@ Done: per-login sessions (one JTI each) with an RS512 access token (1 h) and a `
 
 - [x] `SceneService` + `scenestore` wired into `components` (single room in `rooms/room.dat`, `Exit` on `BeforeShutdown`)
 - [x] Screen state proto (`ScreenState`: view, overlays, layers, entities, grid, camera) sent on initial setup and via `ScreenHandler.SetState`; entity / camera delta messages defined
-- [~] Screen driver (`infrastructure/outputs/screen`): view, overlays and asset URL are pushed; entities, grid and layers wait on the battle map format
+- [x] Screen driver (`infrastructure/outputs/screen`): view, overlays, grid settings, layers and visible entities are pushed; asset paths resolve through `infrastructure/assets`
 - [x] Screen WebSocket connections routed by device ID
 - [x] Device identity from `X-Device-ID` / `X-Device-Type` (query fallback `deviceId` / `deviceType`) stored in `screens.ConnectionInfo`, logs and the connection's trace span (`device.id`, `device.type`, `screen.id`)
 - [x] Scene control API (`scenes/v1`): list, activate, switch variant, get active state — any logged-in user until a GM role exists
@@ -82,20 +82,22 @@ Done: per-login sessions (one JTI each) with an RS512 access token (1 h) and a `
 - [ ] Per-route auth policies (`anonymous`, `device`, `user`, `role:<role>`): auth optional at connect, enforced by the route; invalid credentials rejected instead of treated as anonymous — see [authentication.md](./architecture/authentication.md#device-authentication)
 - [ ] Device registration: stable ID, bindable to a target
 - [ ] Device pairing (`DeviceService.Pair`) issuing a revocable device token — today any non-JWT connection is accepted
-- [ ] Battle map format v0: grid settings + ordered image and entity layers, with instance groups
+- [x] Battle map format v0: grid settings + ordered image and entity layers, with instance groups (`*.map.json`, see [battle-maps.md](./configuration/battle-maps.md))
+- [x] Example battle map scene for development (`docs/examples/battlemap`, mounted by the compose files)
 
 **Client**
 
 - [x] Device / TV view (`/views/devices/`): fullscreen Pixi.js renderer driven by screen state, auto-reconnect, `?device=` / `?type=` overrides
-- [x] Views: `battlemap` (background + grid), `scenery` (image or video), `splash`, `blank`
+- [x] Views: `battlemap` (layers + grid), `scenery` (image or video), `splash`, `blank`
 - [x] GM view v0 (`/views/game-master/`): list scenes, activate one, switch variant
-- [ ] Layer system in `src/lib/2d` (image layers, grid, entities, overlays) and render loop; instance groups via Pixi instancing
+- [x] Layer system in `src/lib/2d/layers` (image layers, grid, entities, overlays) and render loop; instance groups via a Pixi `ParticleContainer` per group
 - [~] Device pairing page (`/devices/pair`): device ID generation done (`$lib/devices/identity.ts`); still to do: show the 4-digit code full screen, renew it, store the device token
 - [ ] Devices admin page (`/devices`): enter a pairing code + name, list paired / connected devices, revoke
 
 **Decisions**
 
 - A battle map is grid settings + an ordered list of typed layers. v0 has image and entity layers (including instance groups: one asset at many positions). Walls, lights, sound, ... are added as layer kinds with the feature that needs them
+- A battle map is its own file in the scene's folder (`maps/cave.map.json`), named by the screen instruction's `asset`, so variants can swap maps. The server reads it and sends screens only what they may see, so map files are not served under `/assets/`
 - Each scene is a folder with its config and assets; shared folders hold reused assets. Paths are scene-relative (`maps/cave.webp`) or prefixed (`shared:/monsters/goblin.png`)
 - Pairing: the device shows a 4-digit code, an admin types it in. Codes are streamed by `DeviceService.Pair` (`anonymous` route), valid only while the stream is open (max 5 min, auto-renewed), confirm attempts rate-limited
 - Device tokens: JWT backed by a JTI (`Authorization: Device <token>`), 8 h access + 30-day refresh; a device unused for 30 days has to pair again
@@ -129,12 +131,12 @@ Done: per-login sessions (one JTI each) with an RS512 access token (1 h) and a `
 
 **Goal**: a full combat encounter can be run on the table: tokens move, fog is revealed, initiative is tracked, and players see only what they should.
 
-- [ ] Entity tokens on the battle map, positions stored in scene state
+- [~] Entity tokens on the battle map: tokens are drawn at the position from the map file; still to do: positions stored in scene state
 - [ ] Screen WebSocket messages for pan, zoom, token moves
 - [ ] GM controls: reveal / hide / spawn / remove entities
 - [ ] Token control: `controlled_by` users per entity, GM assigns / shares control, live movement lock
 - [ ] Fog of war and reveal, stored in scene state
-- [ ] Overlays: `initiative` tracker, `entities` portraits
+- [~] Overlays: `entities` lists names on battle maps; still to do: portraits, the same on other views, and the `initiative` tracker
 - [ ] Game primitives: resource bars, condition tags with round counters, initiative order with turn / round tracking, free-form entity stats
 - [ ] Info board view (handouts, initiative order, quest log)
 - [ ] Player view with limited visibility, overridable by a scene's `players` target

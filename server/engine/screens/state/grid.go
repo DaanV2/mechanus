@@ -9,4 +9,6 @@ type GridSettings struct {
 	Show      bool    `json:"show"`       // Whether the grid lines are drawn
 	CellSize  float64 `json:"cell_size"`  // Size of one grid cell in pixels of the view's asset
 	LineColor string  `json:"line_color"` // Hex color code of the grid lines
+	Columns   int     `json:"columns"`    // Width of the map in grid cells, 0 when the images on the map decide its size
+	Rows      int     `json:"rows"`       // Height of the map in grid cells, 0 when the images on the map decide its size
 }

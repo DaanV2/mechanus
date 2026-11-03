@@ -1,0 +1,41 @@
+{
+  "version": 0,
+  "name": "Tavern at night",
+  "background_color": "#101010",
+  "grid": {
+    "cell_size": 70,
+    "columns": 16,
+    "rows": 9,
+    "line_color": "#000000"
+  },
+  "layers": [
+    { "id": "floor", "kind": "image", "asset": "images/floor-night.svg" },
+    {
+      "id": "rug",
+      "kind": "image",
+      "asset": "images/rug.svg",
+      "position": { "x": 6, "y": 3 },
+      "size": { "x": 4, "y": 3 }
+    },
+    {
+      "id": "tokens",
+      "kind": "entities",
+      "instance_groups": [
+        {
+          "id": "barrels",
+          "asset": "shared:/props/barrel.svg",
+          "instances": [
+            { "x": 1, "y": 1 },
+            { "x": 2, "y": 1, "rotation": 45 },
+            { "x": 14, "y": 7 }
+          ]
+        }
+      ],
+      "entities": [
+        { "entity": "barkeep", "asset": "tokens/barkeep.svg", "position": { "x": 11, "y": 2 } },
+        { "entity": "hero", "position": { "x": 4, "y": 4 } },
+        { "entity": "spy", "asset": "tokens/spy.svg", "position": { "x": 5, "y": 7 } }
+      ]
+    }
+  ]
+}

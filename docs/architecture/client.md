@@ -20,7 +20,7 @@ View assignment: when a client connects over WebSocket it sends an `InitialSetup
 
 Every page is prerendered (`adapter-static`), so dynamic route segments like `/campaigns/[id]` are not available. Detail pages take their id as a query parameter instead and read it client side in `onMount`, e.g. `/campaigns/view/?id=<uuid>`.
 
-**Pixi.js** for the device/TV view and any canvas-based 2D rendering. The entry point is `lib/2d/application.ts`. A composable layer system (background map, grid, tokens, fog of war, UI overlay) is planned under `lib/2d/components/`.
+**Pixi.js** for the device/TV view and any canvas-based 2D rendering. Screens are drawn by `lib/2d/screen-renderer.ts`: every frame its Pixi ticker applies a new state or resize, loading the new state's textures while the old one stays on screen. `lib/2d/layers/` holds what it draws: the battle map's image layers, grid and entity layers (each instance group is a `ParticleContainer`), scenery backdrops and overlays. Fog of war is added as a layer in [M3](../roadmap.md#m3--live-play-on-the-battle-map).
 
 ## Server communication
 

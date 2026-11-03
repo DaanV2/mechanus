@@ -16,6 +16,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/DaanV2/mechanus/server/engine/scenes"
 	"github.com/DaanV2/mechanus/server/pkg/paths"
 )
 
@@ -96,6 +97,21 @@ func (s *Store) Resolve(sceneID, ref string) (*Resolved, error) {
 	return &Resolved{URL: u.String(), MediaType: mediaType(p)}, nil
 }
 
+// Open opens the file an asset reference of the given scene points to, for files the server reads
+// itself such as battle maps. Absolute URLs are not supported.
+func (s *Store) Open(sceneID, ref string) (fs.File, error) {
+	p, err := filePath(sceneID, ref)
+	if err != nil {
+		return nil, err
+	}
+	f, err := s.root.Open(p)
+	if err != nil {
+		return nil, fmt.Errorf("asset %q of scene %q: %w", ref, sceneID, err)
+	}
+
+	return f, nil
+}
+
 // filePath maps a reference to a path in the asset file system.
 func filePath(sceneID, ref string) (string, error) {
 	var p string
@@ -169,8 +185,9 @@ func (s *Store) hash(p string) (string, error) {
 // ServeHTTP serves asset files below [RoutePrefix]. Requests carrying a version hash are cacheable
 // forever, as a changed file gets a new hash.
 func (s *Store) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	// Battle map files are read by the server, they name where hidden entities are
 	p, ok := strings.CutPrefix(r.URL.Path, RoutePrefix)
-	if !ok || !servable(p) {
+	if !ok || !servable(p) || strings.HasSuffix(strings.ToLower(p), scenes.BattleMapExtension) {
 		http.NotFound(w, r)
 
 		return

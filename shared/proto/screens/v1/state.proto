@@ -31,6 +31,8 @@ message GridSettings {
   bool show = 5; // Whether the grid lines are drawn
   double cell_size = 6; // Size of one grid cell in pixels of the view's asset
   string line_color = 7; // Hex color code of the grid lines
+  int32 columns = 8; // Width of the map in grid cells, 0 when the images on the map decide its size
+  int32 rows = 9; // Height of the map in grid cells, 0 when the images on the map decide its size
 }
 
 // ViewKind is the type of view a screen shows.
@@ -73,9 +75,37 @@ message Camera {
   double zoom = 2; // Scale factor, 1.0 is the default size
 }
 
+// LayerKind is the type of a layer, it decides which fields of the layer apply.
+enum LayerKind {
+  LAYER_KIND_UNSPECIFIED = 0;
+  LAYER_KIND_IMAGE = 1; // A single image
+  LAYER_KIND_ENTITIES = 2; // Entity tokens and instance groups
+}
+
 message Layer {
-  repeated Entity entity = 1;
+  repeated Entity entity = 1; // LAYER_KIND_ENTITIES: tokens
   string id = 2; // Unique identifier for the layer within the screen
+  LayerKind kind = 3;
+  optional Asset asset = 4; // LAYER_KIND_IMAGE: the image
+  Vector2 position = 5; // LAYER_KIND_IMAGE: top left corner in grid units, from the map's origin
+  optional Vector2 size = 6; // LAYER_KIND_IMAGE: size in grid units, unset for the image's natural size
+  double opacity = 7; // LAYER_KIND_IMAGE: value between 0.0 (invisible) and 1.0 (opaque)
+  repeated InstanceGroup instance_group = 8; // LAYER_KIND_ENTITIES: scenery
+}
+
+// InstanceGroup is one asset drawn at many positions.
+message InstanceGroup {
+  string id = 1; // Unique identifier for the group within the layer
+  Asset asset = 2; // Image of every instance
+  Vector2 size = 3; // Size of every instance in grid units
+  repeated Instance instance = 4;
+}
+
+// Instance is one position of an instance group.
+message Instance {
+  double x = 1; // Left in grid units
+  double y = 2; // Top in grid units
+  double rotation = 3; // Rotation in degrees, around the center
 }
 
 // EntityKind is the role an entity plays in a scene.

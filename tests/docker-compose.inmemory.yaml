@@ -19,6 +19,11 @@ services:
       # Tests sign up their own users
       AUTH_SIGNUP_ENABLED: "true"
     command: ./mechanus server --log.level debug --log.format text --log.report-caller
+    volumes:
+      # The example battle map scene, see docs/configuration/battle-maps.md
+      - ../docs/examples/battlemap/scenes:/app/.config/scenes:ro
+      - ../docs/examples/battlemap/rooms:/app/.config/rooms:ro
+      - ../docs/examples/battlemap/shared:/app/.config/shared:ro
     ports:
       - "8080:8080"
       - "8443:8443"

@@ -137,6 +137,56 @@ func (OverlayKind) EnumDescriptor() ([]byte, []int) {
 	return file_screens_v1_state_proto_rawDescGZIP(), []int{1}
 }
 
+// LayerKind is the type of a layer, it decides which fields of the layer apply.
+type LayerKind int32
+
+const (
+	LayerKind_LAYER_KIND_UNSPECIFIED LayerKind = 0
+	LayerKind_LAYER_KIND_IMAGE       LayerKind = 1 // A single image
+	LayerKind_LAYER_KIND_ENTITIES    LayerKind = 2 // Entity tokens and instance groups
+)
+
+// Enum value maps for LayerKind.
+var (
+	LayerKind_name = map[int32]string{
+		0: "LAYER_KIND_UNSPECIFIED",
+		1: "LAYER_KIND_IMAGE",
+		2: "LAYER_KIND_ENTITIES",
+	}
+	LayerKind_value = map[string]int32{
+		"LAYER_KIND_UNSPECIFIED": 0,
+		"LAYER_KIND_IMAGE":       1,
+		"LAYER_KIND_ENTITIES":    2,
+	}
+)
+
+func (x LayerKind) Enum() *LayerKind {
+	p := new(LayerKind)
+	*p = x
+	return p
+}
+
+func (x LayerKind) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (LayerKind) Descriptor() protoreflect.EnumDescriptor {
+	return file_screens_v1_state_proto_enumTypes[2].Descriptor()
+}
+
+func (LayerKind) Type() protoreflect.EnumType {
+	return &file_screens_v1_state_proto_enumTypes[2]
+}
+
+func (x LayerKind) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use LayerKind.Descriptor instead.
+func (LayerKind) EnumDescriptor() ([]byte, []int) {
+	return file_screens_v1_state_proto_rawDescGZIP(), []int{2}
+}
+
 // EntityKind is the role an entity plays in a scene.
 type EntityKind int32
 
@@ -177,11 +227,11 @@ func (x EntityKind) String() string {
 }
 
 func (EntityKind) Descriptor() protoreflect.EnumDescriptor {
-	return file_screens_v1_state_proto_enumTypes[2].Descriptor()
+	return file_screens_v1_state_proto_enumTypes[3].Descriptor()
 }
 
 func (EntityKind) Type() protoreflect.EnumType {
-	return &file_screens_v1_state_proto_enumTypes[2]
+	return &file_screens_v1_state_proto_enumTypes[3]
 }
 
 func (x EntityKind) Number() protoreflect.EnumNumber {
@@ -190,7 +240,7 @@ func (x EntityKind) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use EntityKind.Descriptor instead.
 func (EntityKind) EnumDescriptor() ([]byte, []int) {
-	return file_screens_v1_state_proto_rawDescGZIP(), []int{2}
+	return file_screens_v1_state_proto_rawDescGZIP(), []int{3}
 }
 
 // ScreenState is everything a screen renders. It is sent as a full snapshot that replaces whatever
@@ -348,6 +398,8 @@ type GridSettings struct {
 	Show          bool                   `protobuf:"varint,5,opt,name=show,proto3" json:"show,omitempty"`                           // Whether the grid lines are drawn
 	CellSize      float64                `protobuf:"fixed64,6,opt,name=cell_size,json=cellSize,proto3" json:"cell_size,omitempty"`  // Size of one grid cell in pixels of the view's asset
 	LineColor     string                 `protobuf:"bytes,7,opt,name=line_color,json=lineColor,proto3" json:"line_color,omitempty"` // Hex color code of the grid lines
+	Columns       int32                  `protobuf:"varint,8,opt,name=columns,proto3" json:"columns,omitempty"`                     // Width of the map in grid cells, 0 when the images on the map decide its size
+	Rows          int32                  `protobuf:"varint,9,opt,name=rows,proto3" json:"rows,omitempty"`                           // Height of the map in grid cells, 0 when the images on the map decide its size
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -429,6 +481,20 @@ func (x *GridSettings) GetLineColor() string {
 		return x.LineColor
 	}
 	return ""
+}
+
+func (x *GridSettings) GetColumns() int32 {
+	if x != nil {
+		return x.Columns
+	}
+	return 0
+}
+
+func (x *GridSettings) GetRows() int32 {
+	if x != nil {
+		return x.Rows
+	}
+	return 0
 }
 
 // View is the view a screen shows, with the overlays drawn on top of it.
@@ -623,8 +689,14 @@ func (x *Camera) GetZoom() float64 {
 
 type Layer struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Entity        []*Entity              `protobuf:"bytes,1,rep,name=entity,proto3" json:"entity,omitempty"`
-	Id            string                 `protobuf:"bytes,2,opt,name=id,proto3" json:"id,omitempty"` // Unique identifier for the layer within the screen
+	Entity        []*Entity              `protobuf:"bytes,1,rep,name=entity,proto3" json:"entity,omitempty"` // LAYER_KIND_ENTITIES: tokens
+	Id            string                 `protobuf:"bytes,2,opt,name=id,proto3" json:"id,omitempty"`         // Unique identifier for the layer within the screen
+	Kind          LayerKind              `protobuf:"varint,3,opt,name=kind,proto3,enum=screens.v1.LayerKind" json:"kind,omitempty"`
+	Asset         *Asset                 `protobuf:"bytes,4,opt,name=asset,proto3,oneof" json:"asset,omitempty"`                                // LAYER_KIND_IMAGE: the image
+	Position      *Vector2               `protobuf:"bytes,5,opt,name=position,proto3" json:"position,omitempty"`                                // LAYER_KIND_IMAGE: top left corner in grid units, from the map's origin
+	Size          *Vector2               `protobuf:"bytes,6,opt,name=size,proto3,oneof" json:"size,omitempty"`                                  // LAYER_KIND_IMAGE: size in grid units, unset for the image's natural size
+	Opacity       float64                `protobuf:"fixed64,7,opt,name=opacity,proto3" json:"opacity,omitempty"`                                // LAYER_KIND_IMAGE: value between 0.0 (invisible) and 1.0 (opaque)
+	InstanceGroup []*InstanceGroup       `protobuf:"bytes,8,rep,name=instance_group,json=instanceGroup,proto3" json:"instance_group,omitempty"` // LAYER_KIND_ENTITIES: scenery
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -673,6 +745,178 @@ func (x *Layer) GetId() string {
 	return ""
 }
 
+func (x *Layer) GetKind() LayerKind {
+	if x != nil {
+		return x.Kind
+	}
+	return LayerKind_LAYER_KIND_UNSPECIFIED
+}
+
+func (x *Layer) GetAsset() *Asset {
+	if x != nil {
+		return x.Asset
+	}
+	return nil
+}
+
+func (x *Layer) GetPosition() *Vector2 {
+	if x != nil {
+		return x.Position
+	}
+	return nil
+}
+
+func (x *Layer) GetSize() *Vector2 {
+	if x != nil {
+		return x.Size
+	}
+	return nil
+}
+
+func (x *Layer) GetOpacity() float64 {
+	if x != nil {
+		return x.Opacity
+	}
+	return 0
+}
+
+func (x *Layer) GetInstanceGroup() []*InstanceGroup {
+	if x != nil {
+		return x.InstanceGroup
+	}
+	return nil
+}
+
+// InstanceGroup is one asset drawn at many positions.
+type InstanceGroup struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`       // Unique identifier for the group within the layer
+	Asset         *Asset                 `protobuf:"bytes,2,opt,name=asset,proto3" json:"asset,omitempty"` // Image of every instance
+	Size          *Vector2               `protobuf:"bytes,3,opt,name=size,proto3" json:"size,omitempty"`   // Size of every instance in grid units
+	Instance      []*Instance            `protobuf:"bytes,4,rep,name=instance,proto3" json:"instance,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *InstanceGroup) Reset() {
+	*x = InstanceGroup{}
+	mi := &file_screens_v1_state_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *InstanceGroup) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*InstanceGroup) ProtoMessage() {}
+
+func (x *InstanceGroup) ProtoReflect() protoreflect.Message {
+	mi := &file_screens_v1_state_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use InstanceGroup.ProtoReflect.Descriptor instead.
+func (*InstanceGroup) Descriptor() ([]byte, []int) {
+	return file_screens_v1_state_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *InstanceGroup) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *InstanceGroup) GetAsset() *Asset {
+	if x != nil {
+		return x.Asset
+	}
+	return nil
+}
+
+func (x *InstanceGroup) GetSize() *Vector2 {
+	if x != nil {
+		return x.Size
+	}
+	return nil
+}
+
+func (x *InstanceGroup) GetInstance() []*Instance {
+	if x != nil {
+		return x.Instance
+	}
+	return nil
+}
+
+// Instance is one position of an instance group.
+type Instance struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	X             float64                `protobuf:"fixed64,1,opt,name=x,proto3" json:"x,omitempty"`               // Left in grid units
+	Y             float64                `protobuf:"fixed64,2,opt,name=y,proto3" json:"y,omitempty"`               // Top in grid units
+	Rotation      float64                `protobuf:"fixed64,3,opt,name=rotation,proto3" json:"rotation,omitempty"` // Rotation in degrees, around the center
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Instance) Reset() {
+	*x = Instance{}
+	mi := &file_screens_v1_state_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Instance) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Instance) ProtoMessage() {}
+
+func (x *Instance) ProtoReflect() protoreflect.Message {
+	mi := &file_screens_v1_state_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Instance.ProtoReflect.Descriptor instead.
+func (*Instance) Descriptor() ([]byte, []int) {
+	return file_screens_v1_state_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *Instance) GetX() float64 {
+	if x != nil {
+		return x.X
+	}
+	return 0
+}
+
+func (x *Instance) GetY() float64 {
+	if x != nil {
+		return x.Y
+	}
+	return 0
+}
+
+func (x *Instance) GetRotation() float64 {
+	if x != nil {
+		return x.Rotation
+	}
+	return 0
+}
+
 type Entity struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`               // Unique identifier for the entity
@@ -689,7 +933,7 @@ type Entity struct {
 
 func (x *Entity) Reset() {
 	*x = Entity{}
-	mi := &file_screens_v1_state_proto_msgTypes[7]
+	mi := &file_screens_v1_state_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -701,7 +945,7 @@ func (x *Entity) String() string {
 func (*Entity) ProtoMessage() {}
 
 func (x *Entity) ProtoReflect() protoreflect.Message {
-	mi := &file_screens_v1_state_proto_msgTypes[7]
+	mi := &file_screens_v1_state_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -714,7 +958,7 @@ func (x *Entity) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Entity.ProtoReflect.Descriptor instead.
 func (*Entity) Descriptor() ([]byte, []int) {
-	return file_screens_v1_state_proto_rawDescGZIP(), []int{7}
+	return file_screens_v1_state_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *Entity) GetId() string {
@@ -785,7 +1029,7 @@ type Asset struct {
 
 func (x *Asset) Reset() {
 	*x = Asset{}
-	mi := &file_screens_v1_state_proto_msgTypes[8]
+	mi := &file_screens_v1_state_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -797,7 +1041,7 @@ func (x *Asset) String() string {
 func (*Asset) ProtoMessage() {}
 
 func (x *Asset) ProtoReflect() protoreflect.Message {
-	mi := &file_screens_v1_state_proto_msgTypes[8]
+	mi := &file_screens_v1_state_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -810,7 +1054,7 @@ func (x *Asset) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Asset.ProtoReflect.Descriptor instead.
 func (*Asset) Descriptor() ([]byte, []int) {
-	return file_screens_v1_state_proto_rawDescGZIP(), []int{8}
+	return file_screens_v1_state_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *Asset) GetName() string {
@@ -851,7 +1095,7 @@ type Vector2 struct {
 
 func (x *Vector2) Reset() {
 	*x = Vector2{}
-	mi := &file_screens_v1_state_proto_msgTypes[9]
+	mi := &file_screens_v1_state_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -863,7 +1107,7 @@ func (x *Vector2) String() string {
 func (*Vector2) ProtoMessage() {}
 
 func (x *Vector2) ProtoReflect() protoreflect.Message {
-	mi := &file_screens_v1_state_proto_msgTypes[9]
+	mi := &file_screens_v1_state_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -876,7 +1120,7 @@ func (x *Vector2) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Vector2.ProtoReflect.Descriptor instead.
 func (*Vector2) Descriptor() ([]byte, []int) {
-	return file_screens_v1_state_proto_rawDescGZIP(), []int{9}
+	return file_screens_v1_state_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *Vector2) GetX() float64 {
@@ -910,7 +1154,7 @@ const file_screens_v1_state_proto_rawDesc = "" +
 	"\vEnvironment\x12=\n" +
 	"\fcurrent_time\x18\x01 \x01(\v2\x1a.google.protobuf.TimestampR\vcurrentTime\x12)\n" +
 	"\x10background_color\x18\x02 \x01(\tR\x0fbackgroundColor\x12'\n" +
-	"\x0flight_intensity\x18\x03 \x01(\x01R\x0elightIntensity\"\xc6\x01\n" +
+	"\x0flight_intensity\x18\x03 \x01(\x01R\x0elightIntensity\"\xf4\x01\n" +
 	"\fGridSettings\x12\x19\n" +
 	"\bx_offset\x18\x01 \x01(\x05R\axOffset\x12\x19\n" +
 	"\by_offset\x18\x02 \x01(\x05R\ayOffset\x12\x17\n" +
@@ -919,7 +1163,9 @@ const file_screens_v1_state_proto_rawDesc = "" +
 	"\x04show\x18\x05 \x01(\bR\x04show\x12\x1b\n" +
 	"\tcell_size\x18\x06 \x01(\x01R\bcellSize\x12\x1d\n" +
 	"\n" +
-	"line_color\x18\a \x01(\tR\tlineColor\"\xb9\x02\n" +
+	"line_color\x18\a \x01(\tR\tlineColor\x12\x18\n" +
+	"\acolumns\x18\b \x01(\x05R\acolumns\x12\x12\n" +
+	"\x04rows\x18\t \x01(\x05R\x04rows\"\xb9\x02\n" +
 	"\x04View\x12(\n" +
 	"\x04kind\x18\x01 \x01(\x0e2\x14.screens.v1.ViewKindR\x04kind\x12,\n" +
 	"\x05asset\x18\x02 \x01(\v2\x11.screens.v1.AssetH\x00R\x05asset\x88\x01\x01\x12!\n" +
@@ -943,10 +1189,27 @@ const file_screens_v1_state_proto_rawDesc = "" +
 	"_component\"I\n" +
 	"\x06Camera\x12+\n" +
 	"\x06center\x18\x01 \x01(\v2\x13.screens.v1.Vector2R\x06center\x12\x12\n" +
-	"\x04zoom\x18\x02 \x01(\x01R\x04zoom\"C\n" +
+	"\x04zoom\x18\x02 \x01(\x01R\x04zoom\"\xea\x02\n" +
 	"\x05Layer\x12*\n" +
 	"\x06entity\x18\x01 \x03(\v2\x12.screens.v1.EntityR\x06entity\x12\x0e\n" +
-	"\x02id\x18\x02 \x01(\tR\x02id\"\x8f\x02\n" +
+	"\x02id\x18\x02 \x01(\tR\x02id\x12)\n" +
+	"\x04kind\x18\x03 \x01(\x0e2\x15.screens.v1.LayerKindR\x04kind\x12,\n" +
+	"\x05asset\x18\x04 \x01(\v2\x11.screens.v1.AssetH\x00R\x05asset\x88\x01\x01\x12/\n" +
+	"\bposition\x18\x05 \x01(\v2\x13.screens.v1.Vector2R\bposition\x12,\n" +
+	"\x04size\x18\x06 \x01(\v2\x13.screens.v1.Vector2H\x01R\x04size\x88\x01\x01\x12\x18\n" +
+	"\aopacity\x18\a \x01(\x01R\aopacity\x12@\n" +
+	"\x0einstance_group\x18\b \x03(\v2\x19.screens.v1.InstanceGroupR\rinstanceGroupB\b\n" +
+	"\x06_assetB\a\n" +
+	"\x05_size\"\xa3\x01\n" +
+	"\rInstanceGroup\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12'\n" +
+	"\x05asset\x18\x02 \x01(\v2\x11.screens.v1.AssetR\x05asset\x12'\n" +
+	"\x04size\x18\x03 \x01(\v2\x13.screens.v1.Vector2R\x04size\x120\n" +
+	"\binstance\x18\x04 \x03(\v2\x14.screens.v1.InstanceR\binstance\"B\n" +
+	"\bInstance\x12\f\n" +
+	"\x01x\x18\x01 \x01(\x01R\x01x\x12\f\n" +
+	"\x01y\x18\x02 \x01(\x01R\x01y\x12\x1a\n" +
+	"\brotation\x18\x03 \x01(\x01R\brotation\"\x8f\x02\n" +
 	"\x06Entity\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12'\n" +
 	"\x05asset\x18\x02 \x01(\v2\x11.screens.v1.AssetR\x05asset\x12/\n" +
@@ -977,7 +1240,11 @@ const file_screens_v1_state_proto_rawDesc = "" +
 	"\x18OVERLAY_KIND_UNSPECIFIED\x10\x00\x12\x1b\n" +
 	"\x17OVERLAY_KIND_INITIATIVE\x10\x01\x12\x19\n" +
 	"\x15OVERLAY_KIND_ENTITIES\x10\x02\x12\x17\n" +
-	"\x13OVERLAY_KIND_CUSTOM\x10\x03*\x85\x01\n" +
+	"\x13OVERLAY_KIND_CUSTOM\x10\x03*V\n" +
+	"\tLayerKind\x12\x1a\n" +
+	"\x16LAYER_KIND_UNSPECIFIED\x10\x00\x12\x14\n" +
+	"\x10LAYER_KIND_IMAGE\x10\x01\x12\x17\n" +
+	"\x13LAYER_KIND_ENTITIES\x10\x02*\x85\x01\n" +
 	"\n" +
 	"EntityKind\x12\x1b\n" +
 	"\x17ENTITY_KIND_UNSPECIFIED\x10\x00\x12\x16\n" +
@@ -998,52 +1265,63 @@ func file_screens_v1_state_proto_rawDescGZIP() []byte {
 	return file_screens_v1_state_proto_rawDescData
 }
 
-var file_screens_v1_state_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
-var file_screens_v1_state_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
+var file_screens_v1_state_proto_enumTypes = make([]protoimpl.EnumInfo, 4)
+var file_screens_v1_state_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
 var file_screens_v1_state_proto_goTypes = []any{
 	(ViewKind)(0),                 // 0: screens.v1.ViewKind
 	(OverlayKind)(0),              // 1: screens.v1.OverlayKind
-	(EntityKind)(0),               // 2: screens.v1.EntityKind
-	(*ScreenState)(nil),           // 3: screens.v1.ScreenState
-	(*Environment)(nil),           // 4: screens.v1.Environment
-	(*GridSettings)(nil),          // 5: screens.v1.GridSettings
-	(*View)(nil),                  // 6: screens.v1.View
-	(*Overlay)(nil),               // 7: screens.v1.Overlay
-	(*Camera)(nil),                // 8: screens.v1.Camera
-	(*Layer)(nil),                 // 9: screens.v1.Layer
-	(*Entity)(nil),                // 10: screens.v1.Entity
-	(*Asset)(nil),                 // 11: screens.v1.Asset
-	(*Vector2)(nil),               // 12: screens.v1.Vector2
-	nil,                           // 13: screens.v1.View.ParamsEntry
-	nil,                           // 14: screens.v1.Overlay.ParamsEntry
-	(*SplashScreen)(nil),          // 15: screens.v1.SplashScreen
-	(*timestamppb.Timestamp)(nil), // 16: google.protobuf.Timestamp
+	(LayerKind)(0),                // 2: screens.v1.LayerKind
+	(EntityKind)(0),               // 3: screens.v1.EntityKind
+	(*ScreenState)(nil),           // 4: screens.v1.ScreenState
+	(*Environment)(nil),           // 5: screens.v1.Environment
+	(*GridSettings)(nil),          // 6: screens.v1.GridSettings
+	(*View)(nil),                  // 7: screens.v1.View
+	(*Overlay)(nil),               // 8: screens.v1.Overlay
+	(*Camera)(nil),                // 9: screens.v1.Camera
+	(*Layer)(nil),                 // 10: screens.v1.Layer
+	(*InstanceGroup)(nil),         // 11: screens.v1.InstanceGroup
+	(*Instance)(nil),              // 12: screens.v1.Instance
+	(*Entity)(nil),                // 13: screens.v1.Entity
+	(*Asset)(nil),                 // 14: screens.v1.Asset
+	(*Vector2)(nil),               // 15: screens.v1.Vector2
+	nil,                           // 16: screens.v1.View.ParamsEntry
+	nil,                           // 17: screens.v1.Overlay.ParamsEntry
+	(*SplashScreen)(nil),          // 18: screens.v1.SplashScreen
+	(*timestamppb.Timestamp)(nil), // 19: google.protobuf.Timestamp
 }
 var file_screens_v1_state_proto_depIdxs = []int32{
-	4,  // 0: screens.v1.ScreenState.environment:type_name -> screens.v1.Environment
-	5,  // 1: screens.v1.ScreenState.grid:type_name -> screens.v1.GridSettings
-	9,  // 2: screens.v1.ScreenState.layer:type_name -> screens.v1.Layer
-	6,  // 3: screens.v1.ScreenState.view:type_name -> screens.v1.View
-	8,  // 4: screens.v1.ScreenState.camera:type_name -> screens.v1.Camera
-	15, // 5: screens.v1.ScreenState.splash_screen:type_name -> screens.v1.SplashScreen
-	16, // 6: screens.v1.Environment.current_time:type_name -> google.protobuf.Timestamp
+	5,  // 0: screens.v1.ScreenState.environment:type_name -> screens.v1.Environment
+	6,  // 1: screens.v1.ScreenState.grid:type_name -> screens.v1.GridSettings
+	10, // 2: screens.v1.ScreenState.layer:type_name -> screens.v1.Layer
+	7,  // 3: screens.v1.ScreenState.view:type_name -> screens.v1.View
+	9,  // 4: screens.v1.ScreenState.camera:type_name -> screens.v1.Camera
+	18, // 5: screens.v1.ScreenState.splash_screen:type_name -> screens.v1.SplashScreen
+	19, // 6: screens.v1.Environment.current_time:type_name -> google.protobuf.Timestamp
 	0,  // 7: screens.v1.View.kind:type_name -> screens.v1.ViewKind
-	11, // 8: screens.v1.View.asset:type_name -> screens.v1.Asset
-	13, // 9: screens.v1.View.params:type_name -> screens.v1.View.ParamsEntry
-	7,  // 10: screens.v1.View.overlay:type_name -> screens.v1.Overlay
+	14, // 8: screens.v1.View.asset:type_name -> screens.v1.Asset
+	16, // 9: screens.v1.View.params:type_name -> screens.v1.View.ParamsEntry
+	8,  // 10: screens.v1.View.overlay:type_name -> screens.v1.Overlay
 	1,  // 11: screens.v1.Overlay.kind:type_name -> screens.v1.OverlayKind
-	14, // 12: screens.v1.Overlay.params:type_name -> screens.v1.Overlay.ParamsEntry
-	12, // 13: screens.v1.Camera.center:type_name -> screens.v1.Vector2
-	10, // 14: screens.v1.Layer.entity:type_name -> screens.v1.Entity
-	11, // 15: screens.v1.Entity.asset:type_name -> screens.v1.Asset
-	12, // 16: screens.v1.Entity.position:type_name -> screens.v1.Vector2
-	12, // 17: screens.v1.Entity.size:type_name -> screens.v1.Vector2
-	2,  // 18: screens.v1.Entity.kind:type_name -> screens.v1.EntityKind
-	19, // [19:19] is the sub-list for method output_type
-	19, // [19:19] is the sub-list for method input_type
-	19, // [19:19] is the sub-list for extension type_name
-	19, // [19:19] is the sub-list for extension extendee
-	0,  // [0:19] is the sub-list for field type_name
+	17, // 12: screens.v1.Overlay.params:type_name -> screens.v1.Overlay.ParamsEntry
+	15, // 13: screens.v1.Camera.center:type_name -> screens.v1.Vector2
+	13, // 14: screens.v1.Layer.entity:type_name -> screens.v1.Entity
+	2,  // 15: screens.v1.Layer.kind:type_name -> screens.v1.LayerKind
+	14, // 16: screens.v1.Layer.asset:type_name -> screens.v1.Asset
+	15, // 17: screens.v1.Layer.position:type_name -> screens.v1.Vector2
+	15, // 18: screens.v1.Layer.size:type_name -> screens.v1.Vector2
+	11, // 19: screens.v1.Layer.instance_group:type_name -> screens.v1.InstanceGroup
+	14, // 20: screens.v1.InstanceGroup.asset:type_name -> screens.v1.Asset
+	15, // 21: screens.v1.InstanceGroup.size:type_name -> screens.v1.Vector2
+	12, // 22: screens.v1.InstanceGroup.instance:type_name -> screens.v1.Instance
+	14, // 23: screens.v1.Entity.asset:type_name -> screens.v1.Asset
+	15, // 24: screens.v1.Entity.position:type_name -> screens.v1.Vector2
+	15, // 25: screens.v1.Entity.size:type_name -> screens.v1.Vector2
+	3,  // 26: screens.v1.Entity.kind:type_name -> screens.v1.EntityKind
+	27, // [27:27] is the sub-list for method output_type
+	27, // [27:27] is the sub-list for method input_type
+	27, // [27:27] is the sub-list for extension type_name
+	27, // [27:27] is the sub-list for extension extendee
+	0,  // [0:27] is the sub-list for field type_name
 }
 
 func init() { file_screens_v1_state_proto_init() }
@@ -1055,13 +1333,14 @@ func file_screens_v1_state_proto_init() {
 	file_screens_v1_state_proto_msgTypes[0].OneofWrappers = []any{}
 	file_screens_v1_state_proto_msgTypes[3].OneofWrappers = []any{}
 	file_screens_v1_state_proto_msgTypes[4].OneofWrappers = []any{}
+	file_screens_v1_state_proto_msgTypes[6].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_screens_v1_state_proto_rawDesc), len(file_screens_v1_state_proto_rawDesc)),
-			NumEnums:      3,
-			NumMessages:   12,
+			NumEnums:      4,
+			NumMessages:   14,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

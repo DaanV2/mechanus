@@ -1,6 +1,7 @@
 package assets_test
 
 import (
+	"io/fs"
 	"net/http"
 	"net/http/httptest"
 	"testing/fstest"
@@ -20,6 +21,7 @@ var _ = Describe("Store", func() {
 		files = fstest.MapFS{
 			"scenes/cave.dat":                      {Data: []byte(`{"id":"cave"}`)},
 			"scenes/cave/maps/cave.png":            {Data: []byte("cave map")},
+			"scenes/cave/maps/cave.map.json":       {Data: []byte(`{"version":0}`)},
 			"shared/monsters/goblins/goblin.png":   {Data: []byte("goblin")},
 			"keys/secret.dat":                      {Data: []byte("secret")},
 			"scenes/cave/maps/folder/.placeholder": {Data: []byte("")},
@@ -72,6 +74,28 @@ var _ = Describe("Store", func() {
 		)
 	})
 
+	Describe("Open", func() {
+		It("opens scene and shared files", func() {
+			f, err := store.Open("cave", "maps/cave.png")
+			Expect(err).ToNot(HaveOccurred())
+			Expect(f.Close()).To(Succeed())
+
+			f, err = store.Open("cave", "shared:/monsters/goblins/goblin.png")
+			Expect(err).ToNot(HaveOccurred())
+			Expect(f.Close()).To(Succeed())
+		})
+
+		It("rejects references outside the asset folders", func() {
+			_, err := store.Open("cave", "../../keys/secret.dat")
+			Expect(err).To(MatchError(assets.ErrInvalidAsset))
+		})
+
+		It("fails on a missing file", func() {
+			_, err := store.Open("cave", "maps/gone.map.json")
+			Expect(err).To(MatchError(fs.ErrNotExist))
+		})
+	})
+
 	Describe("ServeHTTP", func() {
 		get := func(target string) *httptest.ResponseRecorder {
 			rec := httptest.NewRecorder()
@@ -99,6 +123,8 @@ var _ = Describe("Store", func() {
 			},
 			Entry("scene config", "/assets/scenes/cave.dat"),
 			Entry("other config folders", "/assets/keys/secret.dat"),
+			Entry("battle map file", "/assets/scenes/cave/maps/cave.map.json"),
+			Entry("battle map file, in another case", "/assets/scenes/cave/maps/cave.MAP.JSON"),
 			Entry("folder", "/assets/scenes/cave/maps"),
 			Entry("missing file", "/assets/shared/missing.png"),
 		)

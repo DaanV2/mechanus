@@ -105,13 +105,13 @@ _(Additional messages for pan, zoom, token moves, etc. are not implemented yet.)
 | Field           | Content                                                                                                                                                   |
 | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `view`          | `ViewKind` (battlemap, scenery, infoboard, custom, splash, blank), its `Asset`, `component`, `params` and `overlay`s — mirrors `scenes.ScreenInstruction` |
-| `layer`         | Ordered layers (bottom first) of `Entity`: id, name, `EntityKind`, asset, position / size in grid units, rotation, hidden                                 |
+| `layer`         | Ordered layers (bottom first), by `LayerKind`. Image: asset, position, size, opacity. Entities: `Entity` (id, name, `EntityKind`, asset, position / size in grid units, rotation, hidden) and `InstanceGroup` (one asset at many positions) |
 | `grid`          | Offset, cell size (in pixels of the view's asset), whether lines are shown and their colour                                                               |
 | `camera`        | Center (grid units) and zoom                                                                                                                              |
 | `environment`   | In-game time, background colour, light intensity                                                                                                          |
 | `splash_screen` | Optional title card                                                                                                                                       |
 
-The server-side model is `engine/screens/state`; `ScreenState.ToProto()` converts it. Delta messages (`EntityUpdate`, `EntityRemove`, `camera_update`) are defined but nothing sends them yet. Fog of war and walls are not in the model — they wait on the battle map format (see [scenes.md](./scenes.md#screens--views)).
+The server-side model is `engine/screens/state`; `ScreenState.ToProto()` converts it. Delta messages (`EntityUpdate`, `EntityRemove`, `camera_update`) are defined but nothing sends them yet. Fog of war and walls are not in the model yet; they are added as battle map layer kinds with the feature that needs them (see [scenes.md](./scenes.md#screens--views)).
 
 ### Server-side flow
 
@@ -121,7 +121,7 @@ The handler authenticates the connection (resolving its identity and checking th
 
 ### Scene assets
 
-Scene assets (maps, images, video) are served by `infrastructure/assets.Store` under `/assets/`: scene assets from `<app config dir>/scenes/<scene id>/...` (referenced relative to the scene folder, `maps/cave.webp`), shared assets from `<app config dir>/shared/...` (referenced as `shared:/monsters/goblin.png`). The screen driver resolves references to URLs with a content hash (`?v=<hash>`); versioned requests are served `Cache-Control: immutable`. Only files inside a scene folder or the shared folder are served, never scene configs (`scenes/<id>.dat`) or other config files.
+Scene assets (maps, images, video) are served by `infrastructure/assets.Store` under `/assets/`: scene assets from `<app config dir>/scenes/<scene id>/...` (referenced relative to the scene folder, `maps/cave.webp`), shared assets from `<app config dir>/shared/...` (referenced as `shared:/monsters/goblin.png`). The screen driver resolves references to URLs with a content hash (`?v=<hash>`); versioned requests are served `Cache-Control: immutable`. Only files inside a scene folder or the shared folder are served, never scene configs (`scenes/<id>.dat`), battle map files (`*.map.json`, which the server reads itself) or other config files.
 
 ## Static file serving
 

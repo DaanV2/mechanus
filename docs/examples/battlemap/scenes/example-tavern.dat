@@ -1,0 +1,36 @@
+{
+  "id": "example-tavern",
+  "campaign_id": "",
+  "name": "Example tavern",
+  "description": "A small battle map to develop against, see docs/configuration/battle-maps.md",
+  "entities": [
+    { "id": "barkeep", "kind": "npc", "name": "Barkeep", "hidden": false },
+    { "id": "hero", "kind": "player", "name": "Hero", "hidden": false },
+    { "id": "spy", "kind": "enemy", "name": "Spy", "hidden": true }
+  ],
+  "instructions": {
+    "screens": {
+      "table": {
+        "view": "battlemap",
+        "asset": "maps/tavern.map.json",
+        "overlays": [{ "kind": "entities" }]
+      }
+    }
+  },
+  "variants": [
+    {
+      "id": "night",
+      "name": "Night",
+      "tags": { "time_of_day": "night" },
+      "instructions": {
+        "screens": {
+          "table": {
+            "view": "battlemap",
+            "asset": "maps/tavern-night.map.json",
+            "overlays": [{ "kind": "entities" }]
+          }
+        }
+      }
+    }
+  ]
+}

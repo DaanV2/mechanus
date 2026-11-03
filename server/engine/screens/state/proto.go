@@ -32,6 +32,11 @@ var entityKinds = map[scenes.EntityKind]screensv1.EntityKind{
 	scenes.EntityObject: screensv1.EntityKind_ENTITY_KIND_OBJECT,
 }
 
+var layerKinds = map[scenes.MapLayerKind]screensv1.LayerKind{
+	scenes.MapLayerImage:    screensv1.LayerKind_LAYER_KIND_IMAGE,
+	scenes.MapLayerEntities: screensv1.LayerKind_LAYER_KIND_ENTITIES,
+}
+
 // ToProto converts the screen state into the message sent to screen clients.
 func (s *ScreenState) ToProto() *screensv1.ScreenState {
 	if s == nil {
@@ -82,6 +87,8 @@ func (g *GridSettings) ToProto() *screensv1.GridSettings {
 		Show:      g.Show,
 		CellSize:  g.CellSize,
 		LineColor: g.LineColor,
+		Columns:   int32(g.Columns), //nolint:gosec // G115 map sizes fit in an int32
+		Rows:      int32(g.Rows),    //nolint:gosec // G115 map sizes fit in an int32
 	}
 }
 
@@ -98,9 +105,45 @@ func (l *Layer) ToProto() *screensv1.Layer {
 		}
 	}
 
-	return &screensv1.Layer{
-		Id:     l.ID,
-		Entity: entities,
+	groups := make([]*screensv1.InstanceGroup, 0, len(l.InstanceGroups))
+	for _, g := range l.InstanceGroups {
+		if g != nil {
+			groups = append(groups, g.ToProto())
+		}
+	}
+
+	msg := &screensv1.Layer{
+		Id:            l.ID,
+		Kind:          layerKinds[l.Kind],
+		Entity:        entities,
+		Asset:         l.Asset.ToProto(),
+		Position:      vectorToProto(l.Position),
+		Opacity:       l.Opacity,
+		InstanceGroup: groups,
+	}
+	if l.Size != nil {
+		msg.Size = vectorToProto(*l.Size)
+	}
+
+	return msg
+}
+
+// ToProto converts the instance group into its proto message.
+func (g *InstanceGroup) ToProto() *screensv1.InstanceGroup {
+	if g == nil {
+		return nil
+	}
+
+	instances := make([]*screensv1.Instance, 0, len(g.Instances))
+	for _, i := range g.Instances {
+		instances = append(instances, &screensv1.Instance{X: i.X, Y: i.Y, Rotation: i.Rotation})
+	}
+
+	return &screensv1.InstanceGroup{
+		Id:       g.ID,
+		Asset:    g.Asset.ToProto(),
+		Size:     vectorToProto(g.Size),
+		Instance: instances,
 	}
 }
 
