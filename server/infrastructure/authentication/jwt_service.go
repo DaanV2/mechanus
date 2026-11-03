@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/DaanV2/mechanus/server/engine/authentication/roles"
 	"github.com/DaanV2/mechanus/server/infrastructure/lifecycle"
 	"github.com/DaanV2/mechanus/server/infrastructure/logging"
 	"github.com/DaanV2/mechanus/server/infrastructure/persistence/models"
@@ -31,6 +32,10 @@ type (
 		TokenDuration time.Duration
 		// How long a refresh token ([ScopeRefresh]) is valid for.
 		RefreshTokenDuration time.Duration
+		// How long a device access token ([ScopeDevice]) is valid for.
+		DeviceTokenDuration time.Duration
+		// How long a device refresh token ([ScopeDeviceRefresh]) is valid for.
+		DeviceRefreshTokenDuration time.Duration
 	}
 
 	// JWTService manages JWT token creation and validation.
@@ -44,14 +49,18 @@ type (
 	TokenPair struct {
 		Access  string
 		Refresh string
+		// The session (JTI) the tokens belong to
+		JTI string
 	}
 )
 
 // DefaultJWTOptions returns the default token lifetimes.
 func DefaultJWTOptions() JWTOptions {
 	return JWTOptions{
-		TokenDuration:        time.Hour,
-		RefreshTokenDuration: time.Hour * 24 * 7,
+		TokenDuration:              time.Hour,
+		RefreshTokenDuration:       time.Hour * 24 * 7,
+		DeviceTokenDuration:        time.Hour * 8,
+		DeviceRefreshTokenDuration: time.Hour * 24 * 30,
 	}
 }
 
@@ -88,7 +97,7 @@ func (s *JWTService) Cleanup(ctx context.Context) error {
 
 // MaxTokenLifetime returns the longest time any token issued by this service stays valid.
 func (s *JWTService) MaxTokenLifetime() time.Duration {
-	return max(s.options.TokenDuration, s.options.RefreshTokenDuration) + JWT_LEEWAY
+	return max(s.options.TokenDuration, s.options.RefreshTokenDuration, s.options.DeviceTokenDuration, s.options.DeviceRefreshTokenDuration) + JWT_LEEWAY
 }
 
 // Create creates a new JWT token for the given user with the specified grant and scope, in a new session.
@@ -120,6 +129,26 @@ func (s *JWTService) RefreshSession(ctx context.Context, user *models.User, jti 
 	}
 
 	return s.signPair(ctx, jti, user, GrantRefresh)
+}
+
+// CreateDeviceSession starts a new session (JTI) for a device and returns its access and refresh token.
+// The subject of the tokens is the device ID.
+func (s *JWTService) CreateDeviceSession(ctx context.Context, deviceID, name string) (*TokenPair, error) {
+	jti, err := s.jtiService.Create(ctx, deviceID)
+	if err != nil {
+		return nil, err
+	}
+
+	return s.signDevicePair(ctx, jti.ID, deviceID, name, GrantPairing)
+}
+
+// RefreshDeviceSession issues a new access and refresh token for an existing device session.
+func (s *JWTService) RefreshDeviceSession(ctx context.Context, deviceID, name, jti string) (*TokenPair, error) {
+	if err := s.jtiService.Touch(ctx, jti); err != nil {
+		return nil, fmt.Errorf("error updating the session: %w", err)
+	}
+
+	return s.signDevicePair(ctx, jti, deviceID, name, GrantRefresh)
 }
 
 // Options returns the JWT service configuration options.
@@ -203,18 +232,52 @@ func (s *JWTService) signPair(ctx context.Context, jti string, user *models.User
 		return nil, err
 	}
 
-	return &TokenPair{Access: access, Refresh: refresh}, nil
+	return &TokenPair{Access: access, Refresh: refresh, JTI: jti}, nil
+}
+
+func newDeviceClaims(deviceID, name, grant, scope string) *JWTClaims {
+	return &JWTClaims{
+		User: JWTUser{
+			ID:    deviceID,
+			Name:  name,
+			Roles: []string{roles.Device.String()},
+		},
+		Grant: grant,
+		Scope: scope,
+	}
+}
+
+func (s *JWTService) signDevicePair(ctx context.Context, jti, deviceID, name, grant string) (*TokenPair, error) {
+	access, err := s.sign(ctx, jti, newDeviceClaims(deviceID, name, grant, ScopeDevice))
+	if err != nil {
+		return nil, err
+	}
+
+	refresh, err := s.sign(ctx, jti, newDeviceClaims(deviceID, name, grant, ScopeDeviceRefresh))
+	if err != nil {
+		return nil, err
+	}
+
+	return &TokenPair{Access: access, Refresh: refresh, JTI: jti}, nil
+}
+
+func (s *JWTService) tokenDuration(scope string) time.Duration {
+	switch scope {
+	case ScopeRefresh:
+		return s.options.RefreshTokenDuration
+	case ScopeDevice:
+		return s.options.DeviceTokenDuration
+	case ScopeDeviceRefresh:
+		return s.options.DeviceRefreshTokenDuration
+	}
+
+	return s.options.TokenDuration
 }
 
 func (s *JWTService) sign(ctx context.Context, jti string, claims *JWTClaims) (string, error) {
 	now := time.Now()
 
-	duration := s.options.TokenDuration
-	if claims.Scope == ScopeRefresh {
-		duration = s.options.RefreshTokenDuration
-	}
-
-	expirationTime := now.Add(duration)
+	expirationTime := now.Add(s.tokenDuration(claims.Scope))
 	claims.RegisteredClaims = jwt.RegisteredClaims{
 		ExpiresAt: jwt.NewNumericDate(expirationTime),
 		ID:        jti,

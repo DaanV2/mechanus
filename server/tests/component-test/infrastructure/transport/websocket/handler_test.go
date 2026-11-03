@@ -54,6 +54,21 @@ var _ = Describe("WebsocketHandler", func() {
 		return token
 	}
 
+	createDeviceTokens := func(ctx context.Context, deviceID string) *authentication.TokenPair {
+		tokens, err := jwtService.CreateDeviceSession(ctx, deviceID, "Table TV")
+		Expect(err).ShouldNot(HaveOccurred())
+
+		return tokens
+	}
+
+	viaDeviceAuthorization := func(token string) func(h http.Header) {
+		return func(h http.Header) { h.Set("Authorization", authentication.DeviceTokenType+" "+token) }
+	}
+	viaDeviceSubprotocol := func(token string) func(h http.Header) {
+		return func(h http.Header) {
+			h.Set("Sec-WebSocket-Protocol", authentication.WebsocketSubprotocol+", "+authentication.WebsocketDeviceSubprotocolPrefix+token)
+		}
+	}
 	viaAuthorization := func(token string) func(h http.Header) {
 		return func(h http.Header) { h.Set("Authorization", "Bearer "+token) }
 	}
@@ -81,8 +96,57 @@ var _ = Describe("WebsocketHandler", func() {
 			return rec.Code
 		}
 
-		It("lets a connection without credentials through as a device, to its own screen", func(ctx SpecContext) {
-			Expect(call(ctx, "/api/v1/screen/tv-1/conn?deviceId=tv-1", func(http.Header) {})).To(Equal(http.StatusUpgradeRequired))
+		It("answers a 401 to a connection without credentials, as the route needs an identity", func(ctx SpecContext) {
+			Expect(call(ctx, "/api/v1/screen/tv-1/conn?deviceId=tv-1", func(http.Header) {})).To(Equal(http.StatusUnauthorized))
+		})
+
+		DescribeTable("authenticates a paired device, to its own screen",
+			func(ctx SpecContext, via func(string) func(http.Header)) {
+				Expect(call(ctx, "/api/v1/screen/tv-1/conn?deviceId=tv-1", via(createDeviceTokens(ctx, "tv-1").Access))).To(Equal(http.StatusUpgradeRequired))
+			},
+			Entry("from the Authorization header", viaDeviceAuthorization),
+			Entry("from the subprotocol", viaDeviceSubprotocol),
+		)
+
+		It("takes the device ID from the device token when the device reports none", func(ctx SpecContext) {
+			Expect(call(ctx, "/api/v1/screen/tv-1/conn", viaDeviceAuthorization(createDeviceTokens(ctx, "tv-1").Access))).To(Equal(http.StatusUpgradeRequired))
+		})
+
+		It("rejects a device reporting another ID than its token", func(ctx SpecContext) {
+			Expect(call(ctx, "/api/v1/screen/tv-1/conn?deviceId=tv-2", viaDeviceAuthorization(createDeviceTokens(ctx, "tv-1").Access))).To(Equal(http.StatusUnauthorized))
+		})
+
+		DescribeTable("rejects an invalid device token",
+			func(ctx SpecContext, via func(string) func(http.Header)) {
+				Expect(call(ctx, "/api/v1/screen/tv-1/conn?deviceId=tv-1", via("not.a.jwt"))).To(Equal(http.StatusUnauthorized))
+			},
+			Entry("from the Authorization header", viaDeviceAuthorization),
+			Entry("from the subprotocol", viaDeviceSubprotocol),
+		)
+
+		It("rejects a revoked device token instead of treating it as anonymous", func(ctx SpecContext) {
+			tokens := createDeviceTokens(ctx, "tv-1")
+			revoked, err := jtiService.Revoke(ctx, tokens.JTI)
+			Expect(err).ShouldNot(HaveOccurred())
+			Expect(revoked).To(BeTrue())
+
+			Expect(call(ctx, "/api/v1/screen/tv-1/conn", viaDeviceAuthorization(tokens.Access))).To(Equal(http.StatusUnauthorized))
+		})
+
+		It("rejects a device refresh token", func(ctx SpecContext) {
+			Expect(call(ctx, "/api/v1/screen/tv-1/conn", viaDeviceAuthorization(createDeviceTokens(ctx, "tv-1").Refresh))).To(Equal(http.StatusUnauthorized))
+		})
+
+		It("rejects a device token passed as a user token", func(ctx SpecContext) {
+			Expect(call(ctx, "/api/v1/screen/tv-1/conn", viaAuthorization(createDeviceTokens(ctx, "tv-1").Access))).To(Equal(http.StatusUnauthorized))
+		})
+
+		It("rejects a user token passed as a device token", func(ctx SpecContext) {
+			Expect(call(ctx, "/api/v1/screen/tv-1/conn", viaDeviceAuthorization(createToken(ctx, authentication.ScopeAll)))).To(Equal(http.StatusUnauthorized))
+		})
+
+		It("rejects an unknown authorization scheme", func(ctx SpecContext) {
+			Expect(call(ctx, "/api/v1/screen/tv-1/conn", func(h http.Header) { h.Set("Authorization", "Basic abc") })).To(Equal(http.StatusUnauthorized))
 		})
 
 		DescribeTable("authenticates a valid user token",
@@ -115,20 +179,16 @@ var _ = Describe("WebsocketHandler", func() {
 			Expect(call(ctx, "/api/v1/screen/tv-1/conn?deviceId=tv-1", viaAuthorization(tokens.Access))).To(Equal(http.StatusUnauthorized))
 		})
 
-		DescribeTable("forbids a device to open another screen",
-			func(ctx SpecContext, path string) {
-				Expect(call(ctx, path, func(http.Header) {})).To(Equal(http.StatusForbidden))
-			},
-			Entry("without a device ID", "/api/v1/screen/tv-1/conn"),
-			Entry("with another device ID", "/api/v1/screen/tv-1/conn?deviceId=tv-2"),
-		)
+		It("forbids a device to open another screen", func(ctx SpecContext) {
+			Expect(call(ctx, "/api/v1/screen/tv-1/conn", viaDeviceAuthorization(createDeviceTokens(ctx, "tv-2").Access))).To(Equal(http.StatusForbidden))
+		})
 
 		It("lets a user open any screen", func(ctx SpecContext) {
 			Expect(call(ctx, "/api/v1/screen/tv-1/conn?deviceId=tv-2", viaAuthorization(createToken(ctx, authentication.ScopeAll)))).To(Equal(http.StatusUpgradeRequired))
 		})
 
 		It("requires a screen and connection ID", func(ctx SpecContext) {
-			Expect(call(ctx, "/api/v1/screen/tv-1/", func(http.Header) {})).To(Equal(http.StatusNotFound))
+			Expect(call(ctx, "/api/v1/screen/tv-1/", viaAuthorization(createToken(ctx, authentication.ScopeAll)))).To(Equal(http.StatusNotFound))
 		})
 	})
 
@@ -176,6 +236,7 @@ var _ = Describe("WebsocketHandler", func() {
 		DescribeTable("stores the device identity the client reports",
 			func(ctx SpecContext, path string, headers map[string]string) {
 				_, err := dial(ctx, path, func(h http.Header) {
+					viaDeviceAuthorization(createDeviceTokens(ctx, "tv-1").Access)(h)
 					for k, v := range headers {
 						h.Set(k, v)
 					}
@@ -198,7 +259,7 @@ var _ = Describe("WebsocketHandler", func() {
 		)
 
 		It("stays open for a device", func(ctx SpecContext) {
-			conn, err := dial(ctx, "/api/v1/screen/tv-1/conn?deviceId=tv-1", func(http.Header) {})
+			conn, err := dial(ctx, "/api/v1/screen/tv-1/conn?deviceId=tv-1", viaDeviceAuthorization(createDeviceTokens(ctx, "tv-1").Access))
 			Expect(err).ShouldNot(HaveOccurred())
 
 			readCtx, cancel := context.WithTimeout(ctx, 500*time.Millisecond)
@@ -209,7 +270,7 @@ var _ = Describe("WebsocketHandler", func() {
 		})
 
 		It("answers every message on the connection", func(ctx SpecContext) {
-			conn, err := dial(ctx, "/api/v1/screen/tv-1/conn?deviceId=tv-1", func(http.Header) {})
+			conn, err := dial(ctx, "/api/v1/screen/tv-1/conn?deviceId=tv-1", viaDeviceAuthorization(createDeviceTokens(ctx, "tv-1").Access))
 			Expect(err).ShouldNot(HaveOccurred())
 
 			request, err := proto.Marshal(&screensv1.ClientMessages{Action: []*screensv1.ClientMessage{{
@@ -229,10 +290,58 @@ var _ = Describe("WebsocketHandler", func() {
 		}, SpecTimeout(10*time.Second))
 
 		It("answers a 403 to a device opening another screen", func(ctx SpecContext) {
-			_, err := dial(ctx, "/api/v1/screen/tv-1/conn?deviceId=tv-2", func(http.Header) {})
+			_, err := dial(ctx, "/api/v1/screen/tv-1/conn?deviceId=tv-2", viaDeviceAuthorization(createDeviceTokens(ctx, "tv-2").Access))
 			Expect(err).To(MatchError(ContainSubstring("403")))
 			Expect(connectionsOf("tv-1")()).To(BeEmpty())
 		})
+
+		It("answers a 401 to a connection without credentials, leaving no screen behind", func(ctx SpecContext) {
+			_, err := dial(ctx, "/api/v1/screen/tv-1/conn?deviceId=tv-1", func(http.Header) {})
+			Expect(err).To(MatchError(ContainSubstring("401")))
+
+			_, ok := screenManager.Get("tv-1")
+			Expect(ok).To(BeFalse())
+		})
+
+		It("closes a device connection once it gets revoked", func(ctx SpecContext) {
+			config.SessionCheckInterval = 50 * time.Millisecond
+			setup()
+			server.Config.Handler = router
+
+			tokens := createDeviceTokens(ctx, "tv-1")
+			conn, err := dial(ctx, "/api/v1/screen/tv-1/conn", viaDeviceAuthorization(tokens.Access))
+			Expect(err).ShouldNot(HaveOccurred())
+			Eventually(connectionsOf("tv-1")).Should(HaveLen(1))
+
+			_, err = jtiService.Revoke(ctx, tokens.JTI)
+			Expect(err).ShouldNot(HaveOccurred())
+
+			Expect(closeStatus(ctx, conn)).To(Equal(cwebsocket.StatusPolicyViolation))
+		}, SpecTimeout(10*time.Second))
+
+		It("closes the connections of a device on request, leaving users on its screen connected", func(ctx SpecContext) {
+			deviceConn, err := dial(ctx, "/api/v1/screen/tv-1/device", viaDeviceAuthorization(createDeviceTokens(ctx, "tv-1").Access))
+			Expect(err).ShouldNot(HaveOccurred())
+			_, err = dial(ctx, "/api/v1/screen/tv-1/user", viaAuthorization(createToken(ctx, authentication.ScopeAll)))
+			Expect(err).ShouldNot(HaveOccurred())
+			Eventually(connectionsOf("tv-1")).Should(HaveLen(2))
+
+			screenManager.CloseDevice("tv-1", "device revoked")
+
+			Expect(closeStatus(ctx, deviceConn)).To(Equal(cwebsocket.StatusPolicyViolation))
+			Eventually(connectionsOf("tv-1")).Should(ConsistOf(HaveField("Type", devices.DeviceTypeUser)))
+		}, SpecTimeout(10*time.Second))
+
+		It("closes a device connection once its token expires", func(ctx SpecContext) {
+			jwtService = jwtService.WithOptions(authentication.JWTOptions{DeviceTokenDuration: time.Second, DeviceRefreshTokenDuration: time.Hour})
+			setup()
+			server.Config.Handler = router
+
+			conn, err := dial(ctx, "/api/v1/screen/tv-1/conn", viaDeviceAuthorization(createDeviceTokens(ctx, "tv-1").Access))
+			Expect(err).ShouldNot(HaveOccurred())
+
+			Expect(closeStatus(ctx, conn)).To(Equal(cwebsocket.StatusPolicyViolation))
+		}, SpecTimeout(10*time.Second))
 
 		It("closes a user connection once its token expires", func(ctx SpecContext) {
 			jwtService = jwtService.WithOptions(authentication.JWTOptions{TokenDuration: time.Second, RefreshTokenDuration: time.Hour})

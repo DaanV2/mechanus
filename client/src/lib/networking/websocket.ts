@@ -1,5 +1,6 @@
 import { server_websocket_url } from '$lib/config';
 import { Session } from '$lib/authentication/session';
+import { DeviceCredentials } from '$lib/devices/credentials';
 import { create, fromBinary, toBinary } from '@bufbuild/protobuf';
 import {
   ClientMessageSchema,
@@ -12,22 +13,32 @@ import { ServerEventHandler } from './server-events';
 // Subprotocols negotiated with the screen WebSocket, must match the server's authentication package.
 const SUBPROTOCOL = 'mechanus.v1';
 const BEARER_SUBPROTOCOL_PREFIX = 'mechanus.bearer.';
+const DEVICE_SUBPROTOCOL_PREFIX = 'mechanus.device.';
 
 export class WebsocketHandler {
   readonly screenid: string;
   readonly id: string;
   readonly token?: string;
+  readonly deviceToken?: string;
   readonly socket: WebSocket;
   readonly events: ServerEventHandler;
 
   /**
    * @param query extra query parameters, e.g. the device identity (`deviceId`, `deviceType`) a browser can't send as headers
+   * @param deviceToken connect as a paired device with this token, instead of as the logged in user
    */
-  constructor(screenid: string, id: string, token?: string, query?: Record<string, string>) {
+  constructor(
+    screenid: string,
+    id: string,
+    token?: string,
+    query?: Record<string, string>,
+    deviceToken?: string
+  ) {
     this.events = new ServerEventHandler();
     this.screenid = screenid;
     this.id = id;
     this.token = token;
+    this.deviceToken = deviceToken;
     let url =
       server_websocket_url() +
       `/api/v1/screen/${encodeURIComponent(this.screenid)}/${encodeURIComponent(this.id)}`;
@@ -52,15 +63,37 @@ export class WebsocketHandler {
     return new WebsocketHandler(screenid, id, undefined, query);
   }
 
+  /**
+   * Opens a connection as the paired device this browser is, refreshing the device token first when it expired or is
+   * about to.
+   */
+  static async openAsDevice(
+    screenid: string,
+    id: string,
+    query?: Record<string, string>
+  ): Promise<WebsocketHandler> {
+    await DeviceCredentials.ensureFresh();
+
+    return new WebsocketHandler(
+      screenid,
+      id,
+      undefined,
+      query,
+      DeviceCredentials.accessToken() ?? undefined
+    );
+  }
+
   getToken() {
     return this.token ?? Session.accessToken();
   }
 
   /**
-   * Browsers can't set an Authorization header on `new WebSocket(...)`, so the bearer token is passed as a
+   * Browsers can't set an Authorization header on `new WebSocket(...)`, so the bearer or device token is passed as a
    * subprotocol instead. The server always selects {@link SUBPROTOCOL}, never echoing the token back.
    */
   private subprotocols(): string[] | undefined {
+    if (this.deviceToken) return [SUBPROTOCOL, DEVICE_SUBPROTOCOL_PREFIX + this.deviceToken];
+
     const token = this.getToken()?.replace(/^Bearer /, '');
     if (!token) return undefined;
 

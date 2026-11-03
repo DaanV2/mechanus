@@ -1,6 +1,6 @@
 # Authentication
 
-Mechanus uses JWT (JSON Web Tokens) for user authentication. Tokens are signed with server-managed RSA-2048 keys using the RS512 algorithm (RSA + SHA-512). Devices (TVs, tablets, other screen clients) authenticate with a device token obtained by pairing — see "Device authentication" below; that path is designed but not implemented yet.
+Mechanus uses JWT (JSON Web Tokens) for user authentication. Tokens are signed with server-managed RSA-2048 keys using the RS512 algorithm (RSA + SHA-512). Devices (TVs, tablets, other screen clients) authenticate with a device token obtained by pairing — see "Device authentication" below.
 
 ## JWT flow
 
@@ -48,8 +48,8 @@ Every token contains:
 | `user.name`         | Username                                                                                      |
 | `user.roles`        | Array of role strings — role changes reach the token on the next refresh                      |
 | `user.campaigns`    | Array of campaign IDs the user has access to                                                  |
-| `grant`             | How the token was obtained: `"password"` (login) or `"refresh"`                               |
-| `scope`             | What the token may be used for: `"*"` (everything) or `"refresh"` (only `Refresh` / `Logout`) |
+| `grant`             | How the token was obtained: `"password"` (login), `"pairing"` (device) or `"refresh"`         |
+| `scope`             | What the token may be used for: `"*"` (everything) or `"refresh"` (only `Refresh` / `Logout`). Device tokens have `"device"` or `"device-refresh"`, see "Device authentication" |
 
 ## Configuration
 
@@ -57,6 +57,8 @@ Every token contains:
 | -------------------------------------------------------------- | ------- | ------------------------------------------------------------------------ |
 | `auth.access-token-duration` / `AUTH_ACCESS_TOKEN_DURATION`    | `1h`    | Lifetime of an access token                                              |
 | `auth.refresh-token-duration` / `AUTH_REFRESH_TOKEN_DURATION`  | `168h`  | Lifetime of a refresh token; a session not refreshed in this time ends   |
+| `auth.device-token-duration` / `AUTH_DEVICE_TOKEN_DURATION`    | `8h`    | Lifetime of a device access token                                        |
+| `auth.device-refresh-token-duration` / `AUTH_DEVICE_REFRESH_TOKEN_DURATION` | `720h` | Lifetime of a device refresh token; a device unused for this long has to pair again |
 | `auth.key-rotation` / `AUTH_KEY_ROTATION`                      | `720h`  | How often a new signing key is generated, `0` disables rotation          |
 | `auth.signup-enabled` / `AUTH_SIGNUP_ENABLED`                  | `false` | Let anyone call `UserService.Create`; otherwise only admins can          |
 | `auth.invite-duration` / `AUTH_INVITE_DURATION`                  | `168h`  | How long an invite link stays valid when the admin picks no duration, at most 30 days |
@@ -92,27 +94,27 @@ Every token is tied to a `JTI` database record (`infrastructure/persistence/mode
 
 On validation, after the signature and time checks pass, the server fetches the JTI record and rejects the token if it belongs to another user or `Revoked = true`. Revoking a JTI signs out that one session (both its access and refresh tokens) right away; `JTIService.RevokeUser` signs out all sessions of a user.
 
-Long-lived screen WebSocket connections of a user are closed (status 1008) when their access token expires, and when a periodic check (`server.websocket.session-check-interval`, default 1 minute) finds the session revoked. The browser client refreshes its access token before every (re)connect (`WebsocketHandler.open`), so a screen reconnects as the same user after such a close. A refresh that fails because of the network (or because the page was left) keeps the tokens; only a refresh the server refuses logs the user out.
+Long-lived screen WebSocket connections of a user or paired device are closed (status 1008) when their access token expires, and when a periodic check (`server.websocket.session-check-interval`, default 1 minute) finds the session revoked. The browser client refreshes its access token before every (re)connect (`WebsocketHandler.open`), so a screen reconnects as the same user after such a close. A refresh that fails because of the network (or because the page was left) keeps the tokens; only a refresh the server refuses logs the user out.
 
 On startup `JWTService.Cleanup` deletes revoked JTIs and JTIs not refreshed within the longest token lifetime.
 
 ## Device authentication
 
-> **Status**: design only. Today `infrastructure/transport/websocket.WebsocketHandler.authenticate` accepts any connection without a user JWT (from the `Authorization` header, the `mechanus.bearer.<jwt>` subprotocol or the `access-token` cookie) as an unauthenticated device with the `Device` role, without checking a device token: it may only open the screen named after the device ID it reports (see the `// TODO: check token for device and device id.` in that function). Everything below describes the intended behaviour; [roadmap M1](../roadmap.md#m1--first-scene-on-the-table) tracks the work.
+> **Status**: implemented, on the screen WebSocket and `DeviceService`. The other ConnectRPC services still enforce per handler (`grpc.requireRole`), and the `Authenticator` interceptor in front of them keeps treating an invalid token as no token, see "Error codes" above: login and refresh have to work with a stale token around.
 
 ### Optional authentication, enforced per route
 
-Authentication on the WebSocket (and on device-facing ConnectRPC routes) is **optional at connect time and enforced per route**. Every connection is first resolved to an identity, then the route's policy decides whether that identity may proceed:
+Authentication on the WebSocket (and on device-facing ConnectRPC routes) is **optional at connect time and enforced per route**. Every connection is first resolved to an identity (`authentication.IdentityResolver`), then the route's policy (`authentication.Policy`) decides whether that identity may proceed:
 
 | Identity         | Resolved from                                              | Roles            |
 | ---------------- | ---------------------------------------------------------- | ---------------- |
 | User             | `Authorization: Bearer <jwt>` (user JWT, `scope: "*"`); browsers use the `mechanus.bearer.<jwt>` subprotocol or the `access-token` cookie, see [communication.md](./communication.md#browser-credentials) | the user's roles |
-| Paired device    | `Authorization: Device <device token>` (issued by pairing) | `device`         |
+| Paired device    | `Authorization: Device <device token>` (issued by pairing); browsers use the `mechanus.device.<jwt>` subprotocol. Takes precedence over a user JWT | `device`         |
 | Anonymous device | no credential, only the device identity headers            | none             |
 
-A credential that is present but invalid (bad signature, expired, revoked) is **rejected** with `401`, never downgraded to anonymous — otherwise the client cannot tell "log in / pair again" from "not allowed".
+A credential that is present but invalid (bad signature, expired, revoked, an unknown `Authorization` scheme) is **rejected** with `401`, never downgraded to anonymous, on every route including `anonymous` ones — otherwise the client cannot tell "log in / pair again" from "not allowed". The scope keeps the two kinds of token apart: a device token doesn't pass as a user, a user JWT doesn't pass as a device, and refresh tokens pass as neither.
 
-Each route registers a policy alongside its handler:
+Each route registers a policy alongside its handler: `http.RequirePolicy` for plain HTTP routes such as the WebSocket (`websocket.NewWebsocketRouter`), `grpc.PolicyInterceptor` with a policy per procedure for a ConnectRPC service (`grpc.DeviceServicePolicies`, a procedure without a policy is denied). ConnectRPC answers `Unauthenticated` for `401` and `PermissionDenied` for `403`.
 
 | Policy        | Accepts                                   | Example                                    |
 | ------------- | ----------------------------------------- | ------------------------------------------ |
@@ -121,7 +123,7 @@ Each route registers a policy alongside its handler:
 | `user`        | users only                                | GM / player screens                        |
 | `role:<role>` | users holding that role                   | admin actions such as confirming a pairing |
 
-No identity on a route that needs one → `401 Unauthorized`; identity present but not allowed → `403 Forbidden`. The per-screen access check (`screens.ConnectionInfo.CanAccess`) runs after the route policy. Until screens have owners it lets users open every screen and a device only its own screen (screen ID = device ID); anything else gets `403 Forbidden`.
+No identity on a route that needs one → `401 Unauthorized`; identity present but not allowed → `403 Forbidden`. The per-screen access check (`screens.ConnectionInfo.CanAccess`) runs after the route policy. Until screens have owners it lets users open every screen and a device only its own screen (screen ID = device ID); anything else gets `403 Forbidden`. The screen WebSocket has the `device` policy, so a device has to be paired before it can show anything: the device view (`/views/devices/`) sends a browser without credentials to the pairing page.
 
 ### Device identity headers
 
@@ -132,7 +134,7 @@ Every device connection identifies itself, authenticated or not:
 | `X-Device-ID`   | `deviceId`     | Stable device identifier, generated by the device on first start and persisted locally (UUID) |
 | `X-Device-Type` | `deviceType`   | Kind of client: `screen`, `table`, `tablet`, `phone`, `desktop`, `other`; unknown values are stored as `other`          |
 
-Browsers cannot set custom headers on `new WebSocket(...)`, so browser clients send the query parameters instead; the server reads the header first and falls back to the query parameter. For a paired device the device ID inside the token is authoritative: a mismatching `X-Device-ID` is rejected.
+Browsers cannot set custom headers on `new WebSocket(...)`, so browser clients send the query parameters instead; the server reads the header first and falls back to the query parameter. For a paired device the device ID inside the token is authoritative: a mismatching `X-Device-ID` is rejected with `401`.
 
 The device ID and type are kept in the connection's session info (`screens.ConnectionInfo`, next to the user ID, roles and connection type), added to the connection's logger / trace attributes, and used to list connected devices on the devices page. `X-Device-Type` is client-reported metadata, separate from `devices.DeviceType` (which only says whether a connection is a user or a device).
 
@@ -157,11 +159,16 @@ Device (/devices/pair)              Server                          Admin (/devi
   │  Authorization: Device <token>    │                                    │
 ```
 
-- The code is 4 digits, single use, bound to the device ID that requested it, and only valid while the device's pairing stream is open, for at most 5 minutes; the server pushes a new code over the stream when it expires.
-- With only 10 000 possible codes, confirm attempts are rate limited and a code is invalidated after a few wrong guesses.
+- The code is 4 digits, single use, bound to the device ID that requested it, and only valid while the device's pairing stream is open, for at most 5 minutes; the server pushes a new code over the stream when it expires. A device starting over ends its old stream (`Aborted`).
+- With only 10 000 possible codes, confirm attempts are rate limited: a wrong code can't be tied to one device, so 5 wrong codes by an admin within a minute replace every open code and refuse further attempts by that admin until the minute is over (`ResourceExhausted`). At most 64 devices can pair at once, as the route needs no login and every open code makes a guess more likely to hit.
 - Confirming requires an admin (later possibly a GM); the admin names the device, and that name is shown on the devices page and when binding the device to a room target.
-- Transport: the device side is a ConnectRPC server stream (`DeviceService.Pair`, `anonymous` route) that streams codes and ends with the device tokens.
-- Tokens: pairing issues a device access token (JWT with `sub` = device ID, backed by a JTI, 8 h) and a device refresh token (30 days); the device refreshes on its own. Revoking the JTI on the devices page un-pairs the device, which drops back to the pairing page; a device unused for more than 30 days has to pair again.
+- Transport: the device side is a ConnectRPC server stream (`DeviceService.Pair`, `anonymous` route, device identity from the headers above) that streams codes and ends with the device tokens. The browser sends no cookies on it, so a stale login on the same browser doesn't get pairing rejected.
+- Tokens: pairing issues a device access token (JWT with `sub` = device ID, scope `device`, backed by a JTI, 8 h) and a device refresh token (scope `device-refresh`, 30 days); the device refreshes on its own with `DeviceService.Refresh` (`anonymous` route, the token is in the request). The browser keeps them in `localStorage` (`$lib/devices/credentials.ts`), apart from the login of any user on that browser.
+- Revoking on the devices page (`DeviceService.Revoke`) revokes the JTI, forgets the device and closes its connections with status 1008; the device's refresh gets refused, so it forgets its tokens and drops back to the pairing page. A device unused for more than 30 days has to pair again. Pairing a device that is already paired revokes its old session and keeps its target.
+
+### Registration
+
+Pairing registers the device in the database (`models.Device`) under the stable ID it generated itself. `DeviceService.Bind` binds it to a target of the room; `DeviceService.Room` wraps the authored room store and merges these bindings into the room when it is read, adding the device as a `screen` device if the room file doesn't list it. The room file itself stays read only. A new binding applies the next time a scene instructs its devices. `DeviceService.List` shows the paired devices and, from the screen connections, which are connected; a device connected through a logged in user without being paired is listed as not paired.
 
 ## Token validation summary
 
@@ -170,7 +177,7 @@ Device (/devices/pair)              Server                          Admin (/devi
 3. Verify signature, only RS512 is accepted
 4. Check `exp` (required), `nbf`, `iat`, `iss`, `aud`, with a 5-minute leeway on the time claims (`JWT_LEEWAY`)
 5. Fetch `JTI` record; confirm `UserID` matches and `Revoked = false`
-6. The caller checks the `scope`: the API and WebSocket only accept `"*"`, `Refresh` only `"refresh"`
+6. The caller checks the `scope`: the API and WebSocket only accept `"*"` for a user and `"device"` for a device, `LoginService.Refresh` only `"refresh"`, `DeviceService.Refresh` only `"device-refresh"`
 
 ## Reverse proxy
 

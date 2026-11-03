@@ -12,11 +12,17 @@ const (
 	GrantPassword = "password"
 	// GrantRefresh marks a token obtained by refreshing an existing token.
 	GrantRefresh = "refresh"
+	// GrantPairing marks a device token obtained by pairing the device.
+	GrantPairing = "pairing"
 
 	// ScopeAll allows the token to be used for everything the user's roles allow.
 	ScopeAll = "*"
 	// ScopeRefresh only allows the token to be used to request a new token.
 	ScopeRefresh = "refresh"
+	// ScopeDevice marks an access token of a paired device. It doesn't pass as a user token.
+	ScopeDevice = "device"
+	// ScopeDeviceRefresh only allows the token to be used to request new device tokens.
+	ScopeDeviceRefresh = "device-refresh"
 )
 
 type (
