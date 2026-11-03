@@ -219,4 +219,4 @@ Done: per-login sessions (one JTI each) with an RS512 access token (1 h) and a `
 
 Ideas that don't belong to a milestone yet.
 
-- _Nothing yet._
+- Keep screen state in order per connection: `ScreenHandler.Broadcast` writes each message in its own goroutine, so two quick changes (a GM switching variant twice) can arrive out of order. Each `ScreenState` replaces everything on the client, so the TV would stay on the older one until the next change or reconnect. Initial setup replies (`HandleMessages`) can overtake a newer state the same way. Seen in the code, not yet in practice
