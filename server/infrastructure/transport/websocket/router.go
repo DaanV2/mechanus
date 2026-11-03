@@ -1,10 +1,15 @@
 package websocket
 
-import "net/http"
+import (
+	"net/http"
+
+	"github.com/DaanV2/mechanus/server/infrastructure/authentication"
+)
 
 func NewWebsocketRouter(handler *WebsocketHandler) *http.ServeMux {
 	router := http.NewServeMux()
-	router.Handle("/api/v1/screen/{screenid}/{id}", handler) // Placeholder, will be handled by websocket handler.
+	// Room devices and users, the per-screen access check runs after this policy
+	router.Handle("/api/v1/screen/{screenid}/{id}", handler.Route(authentication.PolicyDevice))
 
 	return router
 }

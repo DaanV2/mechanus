@@ -14,6 +14,7 @@ import (
 	"github.com/DaanV2/mechanus/server/engine/screens"
 	"github.com/DaanV2/mechanus/server/infrastructure/authentication"
 	"github.com/DaanV2/mechanus/server/infrastructure/logging"
+	mhttp "github.com/DaanV2/mechanus/server/infrastructure/transport/http"
 )
 
 var (
@@ -31,6 +32,7 @@ type WebsocketHandler struct {
 
 	screenManager     *screens.ScreenManager
 	jwt_authenticator *authentication.JWTService
+	identities        *authentication.IdentityResolver
 }
 
 func NewWebsocketHandler(handler *screens.ScreenManager, jwt_authenticator *authentication.JWTService, config WebsocketConfig) *WebsocketHandler {
@@ -39,7 +41,13 @@ func NewWebsocketHandler(handler *screens.ScreenManager, jwt_authenticator *auth
 		config:            config,
 		screenManager:     handler,
 		jwt_authenticator: jwt_authenticator,
+		identities:        authentication.NewIdentityResolver(jwt_authenticator),
 	}
+}
+
+// Route returns the handler guarded by the policy, the route's identity ends up on the request's context.
+func (handler *WebsocketHandler) Route(policy authentication.Policy) http.Handler {
+	return mhttp.RequirePolicy(handler.identities, policy, handler)
 }
 
 func (handler *WebsocketHandler) acceptOptions() *cwebsocket.AcceptOptions {
@@ -60,7 +68,18 @@ func (handler *WebsocketHandler) ServeHTTP(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
+	identity := authentication.IdentityFromContext(r.Context())
 	deviceID, hardware := deviceIdentity(r)
+	// For a paired device the ID in its token is authoritative
+	if identity.Kind == authentication.IdentityDevice {
+		if deviceID != "" && deviceID != identity.ID {
+			http.Error(w, "Device ID doesn't match the device token", http.StatusUnauthorized)
+
+			return
+		}
+		deviceID = identity.ID
+	}
+
 	// The span comes from the HTTP tracing middleware and lasts as long as the connection.
 	trace.SpanFromContext(r.Context()).SetAttributes(
 		attribute.String("device.id", deviceID),
@@ -72,12 +91,7 @@ func (handler *WebsocketHandler) ServeHTTP(w http.ResponseWriter, r *http.Reques
 		FromUpdate(r.Context())
 	r = r.WithContext(connCtx)
 
-	auth, err := handler.authenticate(r)
-	if err != nil {
-		http.Error(w, "Could not authenticate: "+err.Error(), http.StatusUnauthorized)
-
-		return
-	}
+	auth := connectionInfo(identity)
 	auth.DeviceID, auth.Hardware = deviceID, hardware
 
 	if !auth.CanAccess(screenid) {
@@ -99,7 +113,7 @@ func (handler *WebsocketHandler) ServeHTTP(w http.ResponseWriter, r *http.Reques
 	screenHandler := handler.screenManager.GetOrCreate(screenid)
 	h := screens.NewScreenConn(id, screenid, connCtx, conn, auth)
 	screenHandler.AddListener(connCtx, h)
-	if auth.Type == devices.DeviceTypeUser {
+	if auth.Token != "" {
 		go handler.watchSession(h, auth)
 	}
 
@@ -107,7 +121,7 @@ func (handler *WebsocketHandler) ServeHTTP(w http.ResponseWriter, r *http.Reques
 	<-h.Context().Done()
 }
 
-// watchSession closes a user connection once its token expires, or its session (JTI) gets revoked,
+// watchSession closes a connection once its token expires, or its session (JTI) gets revoked,
 // so a long lived connection doesn't outlive the credential it was opened with.
 func (handler *WebsocketHandler) watchSession(h *screens.ScreenConn, auth *screens.ConnectionInfo) {
 	ctx := h.Context()
@@ -145,53 +159,32 @@ func (handler *WebsocketHandler) watchSession(h *screens.ScreenConn, auth *scree
 	}
 }
 
-func (handler *WebsocketHandler) authenticate(r *http.Request) (*screens.ConnectionInfo, error) {
-	// Bearer token are only supported for users for now.
-	// Browsers can't set the Authorization header, so they pass it as a subprotocol or cookie instead.
-	if token := authentication.BearerFromHeaders(r.Header); token != "" {
-		t, err := handler.jwt_authenticator.Validate(r.Context(), token)
-		if err != nil {
-			handler.logger.From(r.Context()).Error("Could not validate JWT", "error", err)
-
-			return nil, err
-		}
-		c, ok := authentication.GetClaims(t.Claims)
-		if !ok {
-			handler.logger.From(r.Context()).Error("Could not get claims from JWT")
-
-			return nil, errors.New("could not get claims from JWT")
-		}
-		if !c.HasScope(authentication.ScopeAll) {
-			handler.logger.From(r.Context()).Error("JWT scope does not allow screen access", "scope", c.Scope)
-
-			return nil, errors.New("JWT scope does not allow screen access")
-		}
-
-		info := &screens.ConnectionInfo{
-			Token: token,
-			ID:    c.User.ID,
-			Roles: c.User.Roles,
-			Type:  devices.DeviceTypeUser,
-		}
-		if c.ExpiresAt != nil {
-			info.ExpiresAt = c.ExpiresAt.Time
-		}
-
-		return info, nil
+// connectionInfo describes the connection of the identity.
+func connectionInfo(identity *authentication.Identity) *screens.ConnectionInfo {
+	info := &screens.ConnectionInfo{
+		Token:     identity.Token,
+		ID:        identity.ID,
+		ExpiresAt: identity.ExpiresAt,
 	}
 
-	return &screens.ConnectionInfo{
-		Token: r.Header.Get("Authorization"), // TODO: check token for device and device id.
-		ID:    r.PathValue("id"),
-		Roles: []string{roles.Device.String()},
-		Type:  devices.DeviceTypeDevice,
-	}, nil
+	switch identity.Kind {
+	case authentication.IdentityUser:
+		info.Type = devices.DeviceTypeUser
+		info.Roles = identity.Claims.User.Roles
+	case authentication.IdentityDevice:
+		info.Type = devices.DeviceTypeDevice
+		info.Roles = []string{roles.Device.String()}
+	case authentication.IdentityAnonymous:
+		info.Type = devices.DeviceTypeUnknown
+	}
+
+	return info
 }
 
 // Device identity headers, with query parameter fallbacks for browsers (which can't set headers on a WebSocket).
 const (
-	DeviceIDHeader   = "X-Device-Id"
-	DeviceTypeHeader = "X-Device-Type"
+	DeviceIDHeader   = authentication.DeviceIDHeader
+	DeviceTypeHeader = authentication.DeviceTypeHeader
 	DeviceIDQuery    = "deviceId"
 	DeviceTypeQuery  = "deviceType"
 )

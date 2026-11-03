@@ -1,6 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
-import { callRPC, login } from "../../lib/api/client";
+import { callRPC, login as apiLogin } from "../../lib/api/client";
 import { User } from "../../lib/users/create";
+import { login } from "../../lib/users/login";
 
 // The example scene from docs/examples/battlemap: 16 x 9 cells, so at the default 1280 x 720 viewport
 // one grid cell is 80 screen pixels.
@@ -75,12 +76,13 @@ test.describe("battle map on a TV", { tag: ["@scenes", "@battlemap"] }, () => {
     let token = "";
 
     await test.step("by activating the example scene", async () => {
-      token = await login(request, User.createAdmin());
+      token = await apiLogin(request, User.createAdmin());
       await callRPC(request, "scenes.v1.SceneService/Activate", { sceneId: SCENE }, token);
       await callRPC(request, "scenes.v1.SceneService/SetVariant", {}, token);
     });
 
-    await test.step("by opening the screen of the device", async () => {
+    await test.step("by opening the screen of the device, which takes a logged in user", async () => {
+      await login(page, User.createAdmin());
       await page.goto(`/views/devices/?device=${DEVICE}`);
       await expect(page.locator("canvas")).toBeVisible();
     });

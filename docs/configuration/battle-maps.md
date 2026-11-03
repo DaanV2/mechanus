@@ -142,6 +142,8 @@ just server start-server
 
 Then:
 
-1. Open the TV view at `/views/devices/?device=example-tv`.
-2. Log in and open the GM view at `/views/game-master/`.
+1. Log in, and open the TV view at `/views/devices/?device=example-tv`. Looking at a device's screen takes a logged in user. A screen without credentials goes to the pairing page instead.
+2. In another tab, open the GM view at `/views/game-master/`.
 3. Activate **Example tavern**, and switch to **Night**.
+
+To use a real screen, pair it at `/devices` and bind it to the `table` target.

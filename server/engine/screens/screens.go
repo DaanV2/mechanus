@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/DaanV2/mechanus/server/engine/devices"
 	"github.com/DaanV2/mechanus/server/engine/screens/state"
 	"github.com/DaanV2/mechanus/server/infrastructure/logging"
 	"github.com/DaanV2/mechanus/server/pkg/extensions/xsync"
@@ -182,6 +183,15 @@ func (s *ScreenHandler) Close() {
 	}
 
 	wg.Wait()
+}
+
+// CloseDevice closes the connections a device opened as itself. Users looking at the screen of the device stay connected.
+func (s *ScreenHandler) CloseDevice(deviceID, reason string) {
+	for _, list := range s.listeners.Items() {
+		if list.info.Type == devices.DeviceTypeDevice && list.info.DeviceID == deviceID {
+			list.CloseWith(websocket.StatusPolicyViolation, reason)
+		}
+	}
 }
 
 func isClosed(err error) bool {

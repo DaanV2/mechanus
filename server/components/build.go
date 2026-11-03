@@ -64,6 +64,7 @@ func BuildServer(setupCtx context.Context) (*ServerComponents, error) {
 	campaignService := application.NewCampaignService(campaignRepo)
 	inviteService := application.NewInviteService(repositories.NewInviteRepository(db), userService, authCfg.InviteDuration)
 	screenManager := screens.NewScreenManager()
+	deviceService := application.NewDeviceService(repositories.NewDeviceRepository(db), jwtService, jtiService, screenManager)
 
 	// Scenes: configuration from files, state in the database, devices instructed through drivers
 	assetStore, err := assets.NewAppStore()
@@ -78,7 +79,7 @@ func BuildServer(setupCtx context.Context) (*ServerComponents, error) {
 	if err != nil {
 		return nil, err
 	}
-	sceneService, deviceMonitor, err := createSceneService(lfManager, sceneConfigs, sceneStates, sceneConfigs,
+	sceneService, deviceMonitor, err := createSceneService(lfManager, sceneConfigs, sceneStates, deviceService.Room(sceneConfigs),
 		screen.NewDriver(screenManager, assetStore),
 	)
 	if err != nil {
@@ -88,8 +89,14 @@ func BuildServer(setupCtx context.Context) (*ServerComponents, error) {
 	// Servers
 	websocketHandler := websocket.NewWebsocketHandler(screenManager, jwtService, websocketCfg)
 
-	router, err := CreateRouter(&RouterSetup{
+	routerConfig := RouterConfig{
+		CORS:    corsCfg,
+		Server:  serverCfg,
+		Tracing: tracingCfg,
+	}
+	routerSetup := &RouterSetup{
 		WebsocketHandler: websocketHandler,
+		DevicePolicies:   grpc.NewPolicyInterceptor(authentication.NewIdentityResolver(jwtService), grpc.DeviceServicePolicies()),
 		Assets:           assetStore,
 		HealthChecker:    lfManager,
 		ReadyChecker:     lfManager,
@@ -98,18 +105,17 @@ func BuildServer(setupCtx context.Context) (*ServerComponents, error) {
 			&grpc.LoggingInterceptor{},
 			grpc.NewAuthenticator(jwtService),
 		},
-	}, &RouterRPCS{
+	}
+	routerRpcs := &RouterRPCS{
 		Campaign: grpc.NewCampaignServiceHandler(campaignService, userService),
 		Login:    grpc.NewLoginServiceHandler(userService, jwtService, jtiService),
 		Scene:    grpc.NewSceneServiceHandler(sceneService),
 		User:     grpc.NewUserServiceHandler(userService, jtiService, grpc.UserServiceOptions{SignupEnabled: authCfg.SignupEnabled}),
 		Invite:   grpc.NewInviteServiceHandler(inviteService),
-	},
-		RouterConfig{
-			CORS:    corsCfg,
-			Server:  serverCfg,
-			Tracing: tracingCfg,
-		})
+		Device:   grpc.NewDeviceServiceHandler(deviceService),
+	}
+
+	router, err := CreateRouter(routerSetup, routerRpcs, routerConfig)
 	if err != nil {
 		return nil, err
 	}
@@ -122,7 +128,7 @@ func BuildServer(setupCtx context.Context) (*ServerComponents, error) {
 		Components: lfManager,
 	}
 	// sceneService before screenManager: the active scene is saved while screens are still connected
-	lfManager.Add(sceneService, screenManager, keyManager, jwtService, db, otelmanager, server.Server)
+	lfManager.Add(sceneService, deviceService, screenManager, keyManager, jwtService, db, otelmanager, server.Server)
 
 	return server, nil
 }

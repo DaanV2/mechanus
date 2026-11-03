@@ -51,7 +51,7 @@ Done: per-login sessions (one JTI each) with an RS512 access token (1 h) and a `
 
 - [x] Invites (`InviteService`, `/users/invites`): admin generates a single use link / QR code with expiry, player picks their own credentials on `/users/signup?invite=<id>`
 - [x] Admin UI to create accounts and manage roles (`/users`)
-- [~] Screen access check (`ConnectionInfo.CanAccess`, `403` when denied): users open every screen, a device only its own. Per-screen ownership waits on the screen / room ownership model
+- [~] Screen access check (`ConnectionInfo.CanAccess`, `403` when denied, after the route policy): users open every screen, a paired device only its own. Per-screen ownership waits on the screen / room ownership model
 - [x] Client reconnects the WebSocket with a refreshed token after the server closes it on expiry; a refresh that fails on the network no longer logs the user out
 - [x] Honour `X-Forwarded-Proto` / `-Host` / `-For` behind a reverse proxy (`server.trust-proxy-headers`)
 - [x] Tests: WebSocket 401 / 403, device ID / type from header and query, close on expiry / revocation
@@ -79,9 +79,9 @@ Done: per-login sessions (one JTI each) with an RS512 access token (1 h) and a `
 - [x] Device identity from `X-Device-ID` / `X-Device-Type` (query fallback `deviceId` / `deviceType`) stored in `screens.ConnectionInfo`, logs and the connection's trace span (`device.id`, `device.type`, `screen.id`)
 - [x] Scene control API (`scenes/v1`): list, activate, switch variant, get active state — any logged-in user until a GM role exists
 - [x] Scene asset serving with content-hashed URLs (`/assets/scenes/<scene id>/...`, `/assets/shared/...`)
-- [ ] Per-route auth policies (`anonymous`, `device`, `user`, `role:<role>`): auth optional at connect, enforced by the route; invalid credentials rejected instead of treated as anonymous — see [authentication.md](./architecture/authentication.md#device-authentication)
-- [ ] Device registration: stable ID, bindable to a target
-- [ ] Device pairing (`DeviceService.Pair`) issuing a revocable device token — today any non-JWT connection is accepted
+- [x] Per-route auth policies (`anonymous`, `device`, `user`, `role:<role>`): auth optional at connect, enforced by the route; invalid credentials rejected instead of treated as anonymous — on the screen WebSocket and `DeviceService`, see [authentication.md](./architecture/authentication.md#device-authentication)
+- [x] Device registration: stable ID, bindable to a target (`DeviceService.Bind`, merged into the room's bindings)
+- [x] Device pairing (`DeviceService.Pair`) issuing a revocable device token — the screen WebSocket no longer accepts connections without a credential
 - [x] Battle map format v0: grid settings + ordered image and entity layers, with instance groups (`*.map.json`, see [battle-maps.md](./configuration/battle-maps.md))
 - [x] Example battle map scene for development (`docs/examples/battlemap`, mounted by the compose files)
 
@@ -91,15 +91,16 @@ Done: per-login sessions (one JTI each) with an RS512 access token (1 h) and a `
 - [x] Views: `battlemap` (layers + grid), `scenery` (image or video), `splash`, `blank`
 - [x] GM view v0 (`/views/game-master/`): list scenes, activate one, switch variant
 - [x] Layer system in `src/lib/2d/layers` (image layers, grid, entities, overlays) and render loop; instance groups via a Pixi `ParticleContainer` per group
-- [~] Device pairing page (`/devices/pair`): device ID generation done (`$lib/devices/identity.ts`); still to do: show the 4-digit code full screen, renew it, store the device token
-- [ ] Devices admin page (`/devices`): enter a pairing code + name, list paired / connected devices, revoke
+- [x] Device pairing page (`/devices/pair`): shows the 4-digit code full screen, renews it, stores the device token; the device view sends a device without credentials here, and back here once revoked
+- [x] Devices admin page (`/devices`): enter a pairing code + name, list paired / connected devices, bind to a target, revoke
 
 **Decisions**
 
 - A battle map is grid settings + an ordered list of typed layers. v0 has image and entity layers (including instance groups: one asset at many positions). Walls, lights, sound, ... are added as layer kinds with the feature that needs them
 - A battle map is its own file in the scene's folder (`maps/cave.map.json`), named by the screen instruction's `asset`, so variants can swap maps. The server reads it and sends screens only what they may see, so map files are not served under `/assets/`
 - Each scene is a folder with its config and assets; shared folders hold reused assets. Paths are scene-relative (`maps/cave.webp`) or prefixed (`shared:/monsters/goblin.png`)
-- Pairing: the device shows a 4-digit code, an admin types it in. Codes are streamed by `DeviceService.Pair` (`anonymous` route), valid only while the stream is open (max 5 min, auto-renewed), confirm attempts rate-limited
+- Pairing: the device shows a 4-digit code, an admin types it in. Codes are streamed by `DeviceService.Pair` (`anonymous` route), valid only while the stream is open (max 5 min, auto-renewed), confirm attempts rate-limited: 5 wrong codes within a minute replace every open code and block that admin for the rest of the minute
+- A device's target binding is state of the registration (database), not authored room config: it is merged into the room when the room is read, the room file stays read only. It applies from the next instruction of a scene, and a revoked device loses it
 - Device tokens: JWT backed by a JTI (`Authorization: Device <token>`), 8 h access + 30-day refresh; a device unused for 30 days has to pair again
 - `X-Device-Type` values: `screen`, `table`, `tablet`, `phone`, `desktop`, `other`; unknown values become `other`. Metadata only, not used for authorization
 - One running instance serves one game table, so there is exactly one room — no room selection

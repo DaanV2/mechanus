@@ -133,7 +133,7 @@ The config lists the entities present when the scene starts (`Entity.Hidden` = s
 | Port               | Backed by    | Used for                                          |
 | ------------------ | ------------ | ------------------------------------------------- |
 | `SceneConfigStore` | file storage | `GetSceneConfig(sceneID)`                         |
-| `RoomConfigStore`  | file storage | `CurrentRoom()` — devices and target bindings     |
+| `RoomConfigStore`  | file storage, plus the bindings of paired devices (`DeviceService.Room`) | `CurrentRoom()` — devices and target bindings     |
 | `SceneStateStore`  | database     | `LoadSceneState` / `SaveSceneState`               |
 | `OutputDriver`     | integrations | `Apply(scene, target, device, instruction)`, one per integration |
 | `SceneListener`    | integrations | `SceneChanged(transition)`, told about scene and variant switches (optional) |
@@ -270,7 +270,7 @@ server/
 
 ## Status
 
-**Implemented**: the domain model above with the config / state split, variant resolution, live overrides, entity status tracking, transition change detection, `SceneService` with load / exit persistence, `scenestore` adapters for file storage and the database, and tests for each. `SceneService` is wired in `components` with the instance's single room (`rooms/room.dat`, `scenestore.RoomID`; a missing room file is an empty room) and saves the active scene on `BeforeShutdown`. Battle map format v0 (`scenes.BattleMap`, [battle-maps.md](../configuration/battle-maps.md)) with an example scene in `docs/examples/battlemap`. The screen driver (`infrastructure/outputs/screen`) turns a `ScreenInstruction` into screen state (view, asset URL, and for battle maps the grid settings, layers, visible entities and instance groups) and pushes it to the device's screen; screens are keyed by device ID. The client draws it with the layer system in `client/src/lib/2d/layers`. `scenes/v1.SceneService` (ConnectRPC) lists scenes, activates them, switches variant and returns the active scene. Scene and shared assets are served under `/assets/` with a content hash (`infrastructure/assets`). The [driver framework](#driver-framework) is in place with integration config sets and `DeviceMonitor`, and the MQTT driver (`infrastructure/outputs/mqtt`) delivers custom instructions, scene events and availability.
+**Implemented**: the domain model above with the config / state split, variant resolution, live overrides, entity status tracking, transition change detection, `SceneService` with load / exit persistence, `scenestore` adapters for file storage and the database, and tests for each. `SceneService` is wired in `components` with the instance's single room (`rooms/room.dat`, `scenestore.RoomID`; a missing room file is an empty room) and saves the active scene on `BeforeShutdown`. Paired devices (`application.DeviceService`) are registered in the database and can be bound to a target, those bindings are merged into the room when it is read. Battle map format v0 (`scenes.BattleMap`, [battle-maps.md](../configuration/battle-maps.md)) with an example scene in `docs/examples/battlemap`. The screen driver (`infrastructure/outputs/screen`) turns a `ScreenInstruction` into screen state (view, asset URL, and for battle maps the grid settings, layers, visible entities and instance groups) and pushes it to the device's screen; screens are keyed by device ID. The client draws it with the layer system in `client/src/lib/2d/layers`. `scenes/v1.SceneService` (ConnectRPC) lists scenes, activates them, switches variant and returns the active scene. Scene and shared assets are served under `/assets/` with a content hash (`infrastructure/assets`). The [driver framework](#driver-framework) is in place with integration config sets and `DeviceMonitor`, and the MQTT driver (`infrastructure/outputs/mqtt`) delivers custom instructions, scene events and availability.
 
 **Not implemented yet**:
 
@@ -282,7 +282,6 @@ server/
 - `DeviceMonitor.Statuses` has no API or GM view yet; the screen driver does not implement `DeviceChecker`, so a screen is `online` once instructed whether or not anything is connected to it.
 - The scene control API has no `Adjust` or entity (reveal / spawn) calls yet.
 - Handling of `Transition.Released`.
-- Device registration, per-route auth policies and pairing (designed in [authentication.md](./authentication.md#device-authentication)).
 
 ## Extending
 
