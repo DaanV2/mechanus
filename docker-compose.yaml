@@ -27,6 +27,11 @@ services:
       OTEL_ENABLED: "true"
       OTEL_ENDPOINT: "otel-lgtm:4318"
       OTEL_INSECURE: "true"
+    volumes:
+      # The example battle map scene, see docs/configuration/battle-maps.md
+      - ./docs/examples/battlemap/scenes:/app/.config/scenes:ro
+      - ./docs/examples/battlemap/rooms:/app/.config/rooms:ro
+      - ./docs/examples/battlemap/shared:/app/.config/shared:ro
     restart: unless-stopped
     networks:
       - mechanus-dev

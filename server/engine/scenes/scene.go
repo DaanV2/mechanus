@@ -62,7 +62,15 @@ func (s *Scene) Instructions() (Instructions, error) {
 		return Instructions{}, err
 	}
 
-	return ins.Merge(s.State.Overrides), nil
+	ins = ins.Merge(s.State.Overrides)
+	for target, screen := range ins.Screens {
+		if screen.View == ViewBattleMap {
+			screen.Entities = s.VisibleEntities()
+			ins.Screens[target] = screen
+		}
+	}
+
+	return ins, nil
 }
 
 // SetVariant switches the active variant (empty for the default). Live overrides are cleared, as

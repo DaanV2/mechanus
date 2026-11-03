@@ -3,6 +3,7 @@
 - [architecture](./architecture/README.md) — system design, layer overview, protocols
 - [api/webserver](./api/webserver.md) — HTTP/ConnectRPC entry point
 - [api/websocket](./api/websocket.md) — screen WebSocket protocol reference
+- [configuration/battle-maps](./configuration/battle-maps.md)
 - [configuration/config-file](./configuration/config-file.md)
 - [configuration/database](./configuration/database.md)
 - [configuration/integrations](./configuration/integrations.md)

@@ -52,6 +52,10 @@ type ScreenInstruction struct {
 	Component string            `json:"component,omitempty"` // Client component name, for [ViewCustom]
 	Params    map[string]string `json:"params,omitempty"`    // View specific options
 	Overlays  []Overlay         `json:"overlays,omitempty"`  // Widgets drawn on top of the view, in order
+
+	// Entities are the scene's visible entities, for views that draw them. Filled in by
+	// [Scene.Instructions], never stored: a change in them is a change in the instruction.
+	Entities []Entity `json:"-"`
 }
 
 // Kind implements [Instruction].

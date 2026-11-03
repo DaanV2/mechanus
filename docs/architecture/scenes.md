@@ -19,7 +19,7 @@ Everything in this model is either **configuration** or **state**, and the two a
 |            | Configuration                                                                        | State                                                                                         |
 | ---------- | ------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------- |
 | What       | What the GM prepared: scenes, variants, starting entities, rooms, devices            | What happened during play: active variant, revealed / removed / spawned entities, live tweaks |
-| Types      | `scenes.Config`, `scenes.Variant`, `scenes.Entity`, `devices.Room`, `devices.Device` | `scenes.State`, `scenes.EntityState`                                                          |
+| Types      | `scenes.Config`, `scenes.Variant`, `scenes.Entity`, `scenes.BattleMap`, `devices.Room`, `devices.Device` | `scenes.State`, `scenes.EntityState`                                                          |
 | Stored in  | **File storage** (app config folder)                                                 | **Database** (key-value table)                                                                |
 | Written by | The GM / tooling, outside of play. The server only reads it.                         | The server, when a scene is loaded and when it is exited                                      |
 | Adapter    | `infrastructure/scenestore.ConfigStore`                                              | `infrastructure/scenestore.StateStore`                                                        |
@@ -182,6 +182,7 @@ Not covered by the framework: the Spotify OAuth flow on a LAN-only server is sti
 | ------------- | -------------------------------------------- | ----------------------------------------- |
 | Scene configs | `NamedFileStorage[*scenes.Config]("scenes")` | `<app config dir>/scenes/<scene id>.dat`  |
 | Rooms         | `NamedFileStorage[*devices.Room]("rooms")`   | `<app config dir>/rooms/<room id>.dat`    |
+| Battle maps   | `assets.Store.Open`, read by the screen driver | `<app config dir>/scenes/<scene id>/.../*.map.json` |
 | Scene states  | `NamedDBStorage[*scenes.State](db, "scene")` | `key_values` row `state/scene/<scene id>` |
 
 Files and rows contain JSON. Scene and room IDs are used as file names, so `ConfigStore` only accepts `[A-Za-z0-9_-]` IDs and checks that a file's `id` matches its name.
@@ -203,6 +204,8 @@ A `ScreenInstruction` selects a view; the client renders it. Screens are browser
 
 **Battle maps** use a custom, Mechanus-specific format rather than an existing VTT format, so the map can carry everything the battle map view needs. A battle map is grid settings plus an ordered list of typed layers: v0 has image layers and entity layers (including instance groups — one asset drawn at many positions); walls, lights, sound and other layer kinds are added when the feature that uses them lands. Importers for other formats (e.g. the Universal VTT parser in `infrastructure/vttrpg`) would convert into it rather than being rendered directly. The map is configuration; anything that moves during play (token positions, revealed fog) belongs in state.
 
+A map is its own file in the scene's folder, named by the instruction's `Asset` (`maps/cave.map.json`) and described in [battle-maps.md](../configuration/battle-maps.md). Any other `Asset` is shown as one image under a default grid. Entity layers place the scene's entities by ID: `Scene.Instructions()` fills `ScreenInstruction.Entities` with the visible entities of a battle map view, and the screen driver only sends placements of those, so hidden entities never reach a screen. This makes revealing an entity an ordinary transition that re-instructs only the battle map screens. `Entities` is derived and never stored.
+
 #### Overlays
 
 Any view can carry `Overlays`: widgets drawn on top of it. This lets a scenery screen also show the initiative tracker, or portraits of the entities in the scene, without needing a dedicated view per combination.
@@ -215,7 +218,7 @@ Any view can carry `Overlays`: widgets drawn on top of it. This lets a scenery s
 
 Overlays are part of the screen instruction, so a variant (e.g. `combat`) can add the initiative tracker to the wall screen by overriding that target's instruction, and only that screen is re-instructed.
 
-The `engine/screens` package (`ScreenHandler`, `ScreenManager`, `state.ScreenState`) is the transport for the `screen` integration: the screen driver (`infrastructure/outputs/screen`) translates a `ScreenInstruction` into `ScreenState` and broadcasts it to the screen's listeners. There is one `ScreenHandler` per screen device, so the WebSocket `screenId` is the device ID and routing by role or device is answered by the room's bindings. Entities are not sent yet; they need the battle map format for positions.
+The `engine/screens` package (`ScreenHandler`, `ScreenManager`, `state.ScreenState`) is the transport for the `screen` integration: the screen driver (`infrastructure/outputs/screen`) translates a `ScreenInstruction` into `ScreenState` and broadcasts it to the screen's listeners. There is one `ScreenHandler` per screen device, so the WebSocket `screenId` is the device ID and routing by role or device is answered by the room's bindings.
 
 ### Lights
 
@@ -247,6 +250,7 @@ server/
 │   ├── devices/            Device, Kind, Room (target → device bindings), integration identifiers   [config]
 │   ├── scenes/
 │   │   ├── config.go       Config, Entity, Variant                                                    [config]
+│   │   ├── battlemap.go    BattleMap: grid + ordered image / entity layers, parsing, validation       [config]
 │   │   ├── state.go        State, EntityState                                                         [state]
 │   │   ├── scene.go        Scene = Config + State, Load                                               [both]
 │   │   ├── instructions.go Instructions and the per-kind instruction types
@@ -266,11 +270,12 @@ server/
 
 ## Status
 
-**Implemented**: the domain model above with the config / state split, variant resolution, live overrides, entity status tracking, transition change detection, `SceneService` with load / exit persistence, `scenestore` adapters for file storage and the database, and tests for each. `SceneService` is wired in `components` with the instance's single room (`rooms/room.dat`, `scenestore.RoomID`; a missing room file is an empty room) and saves the active scene on `BeforeShutdown`. Paired devices (`application.DeviceService`) are registered in the database and can be bound to a target, those bindings are merged into the room when it is read. The screen driver (`infrastructure/outputs/screen`) turns a `ScreenInstruction` into screen state (view, asset URL, grid shown for battle maps) and pushes it to the device's screen; screens are keyed by device ID. `scenes/v1.SceneService` (ConnectRPC) lists scenes, activates them, switches variant and returns the active scene. Scene and shared assets are served under `/assets/` with a content hash (`infrastructure/assets`). The [driver framework](#driver-framework) is in place with integration config sets and `DeviceMonitor`, and the MQTT driver (`infrastructure/outputs/mqtt`) delivers custom instructions, scene events and availability.
+**Implemented**: the domain model above with the config / state split, variant resolution, live overrides, entity status tracking, transition change detection, `SceneService` with load / exit persistence, `scenestore` adapters for file storage and the database, and tests for each. `SceneService` is wired in `components` with the instance's single room (`rooms/room.dat`, `scenestore.RoomID`; a missing room file is an empty room) and saves the active scene on `BeforeShutdown`. Paired devices (`application.DeviceService`) are registered in the database and can be bound to a target, those bindings are merged into the room when it is read. Battle map format v0 (`scenes.BattleMap`, [battle-maps.md](../configuration/battle-maps.md)) with an example scene in `docs/examples/battlemap`. The screen driver (`infrastructure/outputs/screen`) turns a `ScreenInstruction` into screen state (view, asset URL, and for battle maps the grid settings, layers, visible entities and instance groups) and pushes it to the device's screen; screens are keyed by device ID. The client draws it with the layer system in `client/src/lib/2d/layers`. `scenes/v1.SceneService` (ConnectRPC) lists scenes, activates them, switches variant and returns the active scene. Scene and shared assets are served under `/assets/` with a content hash (`infrastructure/assets`). The [driver framework](#driver-framework) is in place with integration config sets and `DeviceMonitor`, and the MQTT driver (`infrastructure/outputs/mqtt`) delivers custom instructions, scene events and availability.
 
 **Not implemented yet**:
 
-- The battle map format itself (the screen driver sends no layers, grid settings or entities yet).
+- Battle map play: token positions in state, fog of war, walls and other layer kinds ([M3](../roadmap.md#m3--live-play-on-the-battle-map)). Tokens stay at the position from the map file, and spawned entities have no position so aren't drawn.
+- The `initiative` and `custom` overlays, and the `entities` overlay on views other than the battle map.
 - Authoring: no tooling or API to create / edit scene and room configs (files have to be written by hand).
 - Remembering which scene was active across a server restart.
 - No drivers other than the screen and MQTT drivers: Hue, Matter, Home Assistant, Spotify, iTunes.

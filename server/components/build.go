@@ -113,12 +113,6 @@ func BuildServer(setupCtx context.Context) (*ServerComponents, error) {
 		User:     grpc.NewUserServiceHandler(userService, jtiService, grpc.UserServiceOptions{SignupEnabled: authCfg.SignupEnabled}),
 		Invite:   grpc.NewInviteServiceHandler(inviteService),
 		Device:   grpc.NewDeviceServiceHandler(deviceService),
-	},
-		RouterConfig{
-			CORS:    corsCfg,
-			Server:  serverCfg,
-			Tracing: tracingCfg,
-		})
 	}
 
 	router, err := CreateRouter(routerSetup, routerRpcs, routerConfig)

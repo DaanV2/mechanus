@@ -74,7 +74,7 @@ Done: per-login sessions (one JTI each) with an RS512 access token (1 h) and a `
 
 - [x] `SceneService` + `scenestore` wired into `components` (single room in `rooms/room.dat`, `Exit` on `BeforeShutdown`)
 - [x] Screen state proto (`ScreenState`: view, overlays, layers, entities, grid, camera) sent on initial setup and via `ScreenHandler.SetState`; entity / camera delta messages defined
-- [~] Screen driver (`infrastructure/outputs/screen`): view, overlays and asset URL are pushed; entities, grid and layers wait on the battle map format
+- [x] Screen driver (`infrastructure/outputs/screen`): view, overlays, grid settings, layers and visible entities are pushed; asset paths resolve through `infrastructure/assets`
 - [x] Screen WebSocket connections routed by device ID
 - [x] Device identity from `X-Device-ID` / `X-Device-Type` (query fallback `deviceId` / `deviceType`) stored in `screens.ConnectionInfo`, logs and the connection's trace span (`device.id`, `device.type`, `screen.id`)
 - [x] Scene control API (`scenes/v1`): list, activate, switch variant, get active state — any logged-in user until a GM role exists
@@ -82,20 +82,22 @@ Done: per-login sessions (one JTI each) with an RS512 access token (1 h) and a `
 - [x] Per-route auth policies (`anonymous`, `device`, `user`, `role:<role>`): auth optional at connect, enforced by the route; invalid credentials rejected instead of treated as anonymous — on the screen WebSocket and `DeviceService`, see [authentication.md](./architecture/authentication.md#device-authentication)
 - [x] Device registration: stable ID, bindable to a target (`DeviceService.Bind`, merged into the room's bindings)
 - [x] Device pairing (`DeviceService.Pair`) issuing a revocable device token — the screen WebSocket no longer accepts connections without a credential
-- [ ] Battle map format v0: grid settings + ordered image and entity layers, with instance groups
+- [x] Battle map format v0: grid settings + ordered image and entity layers, with instance groups (`*.map.json`, see [battle-maps.md](./configuration/battle-maps.md))
+- [x] Example battle map scene for development (`docs/examples/battlemap`, mounted by the compose files)
 
 **Client**
 
 - [x] Device / TV view (`/views/devices/`): fullscreen Pixi.js renderer driven by screen state, auto-reconnect, `?device=` / `?type=` overrides
-- [x] Views: `battlemap` (background + grid), `scenery` (image or video), `splash`, `blank`
+- [x] Views: `battlemap` (layers + grid), `scenery` (image or video), `splash`, `blank`
 - [x] GM view v0 (`/views/game-master/`): list scenes, activate one, switch variant
-- [ ] Layer system in `src/lib/2d` (image layers, grid, entities, overlays) and render loop; instance groups via Pixi instancing
+- [x] Layer system in `src/lib/2d/layers` (image layers, grid, entities, overlays) and render loop; instance groups via a Pixi `ParticleContainer` per group
 - [x] Device pairing page (`/devices/pair`): shows the 4-digit code full screen, renews it, stores the device token; the device view sends a device without credentials here, and back here once revoked
 - [x] Devices admin page (`/devices`): enter a pairing code + name, list paired / connected devices, bind to a target, revoke
 
 **Decisions**
 
 - A battle map is grid settings + an ordered list of typed layers. v0 has image and entity layers (including instance groups: one asset at many positions). Walls, lights, sound, ... are added as layer kinds with the feature that needs them
+- A battle map is its own file in the scene's folder (`maps/cave.map.json`), named by the screen instruction's `asset`, so variants can swap maps. The server reads it and sends screens only what they may see, so map files are not served under `/assets/`
 - Each scene is a folder with its config and assets; shared folders hold reused assets. Paths are scene-relative (`maps/cave.webp`) or prefixed (`shared:/monsters/goblin.png`)
 - Pairing: the device shows a 4-digit code, an admin types it in. Codes are streamed by `DeviceService.Pair` (`anonymous` route), valid only while the stream is open (max 5 min, auto-renewed), confirm attempts rate-limited: 5 wrong codes within a minute replace every open code and block that admin for the rest of the minute
 - A device's target binding is state of the registration (database), not authored room config: it is merged into the room when the room is read, the room file stays read only. It applies from the next instruction of a scene, and a revoked device loses it
@@ -130,12 +132,12 @@ Done: per-login sessions (one JTI each) with an RS512 access token (1 h) and a `
 
 **Goal**: a full combat encounter can be run on the table: tokens move, fog is revealed, initiative is tracked, and players see only what they should.
 
-- [ ] Entity tokens on the battle map, positions stored in scene state
+- [~] Entity tokens on the battle map: tokens are drawn at the position from the map file; still to do: positions stored in scene state
 - [ ] Screen WebSocket messages for pan, zoom, token moves
 - [ ] GM controls: reveal / hide / spawn / remove entities
 - [ ] Token control: `controlled_by` users per entity, GM assigns / shares control, live movement lock
 - [ ] Fog of war and reveal, stored in scene state
-- [ ] Overlays: `initiative` tracker, `entities` portraits
+- [~] Overlays: `entities` lists names on battle maps; still to do: portraits, the same on other views, and the `initiative` tracker
 - [ ] Game primitives: resource bars, condition tags with round counters, initiative order with turn / round tracking, free-form entity stats
 - [ ] Info board view (handouts, initiative order, quest log)
 - [ ] Player view with limited visibility, overridable by a scene's `players` target
@@ -218,4 +220,4 @@ Done: per-login sessions (one JTI each) with an RS512 access token (1 h) and a `
 
 Ideas that don't belong to a milestone yet.
 
-- _Nothing yet._
+- Keep screen state in order per connection: `ScreenHandler.Broadcast` writes each message in its own goroutine, so two quick changes (a GM switching variant twice) can arrive out of order. Each `ScreenState` replaces everything on the client, so the TV would stay on the older one until the next change or reconnect. Initial setup replies (`HandleMessages`) can overtake a newer state the same way. Seen in the code, not yet in practice

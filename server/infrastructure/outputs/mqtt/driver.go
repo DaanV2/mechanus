@@ -38,6 +38,9 @@ const (
 	qosAtLeastOnce = byte(1)
 	// publishTimeout limits how long a publish waits for the broker's acknowledgement.
 	publishTimeout = time.Second * 5
+	// connectTimeout limits how long a connection attempt waits for the broker to answer. Retries only
+	// happen after it, so a broker that accepts a connection but never answers holds up reconnecting.
+	connectTimeout = time.Second * 5
 	// disconnectQuiesce is how long, in milliseconds, in flight messages get when disconnecting.
 	disconnectQuiesce = 250
 )
@@ -108,6 +111,7 @@ func NewDriver(cfg *Config) (*Driver, error) {
 		SetAutoReconnect(true).
 		SetConnectRetry(true).
 		SetConnectRetryInterval(time.Second * 5).
+		SetConnectTimeout(connectTimeout).
 		SetMaxReconnectInterval(time.Second * 30).
 		SetOnConnectHandler(d.onConnect).
 		SetConnectionNotificationHandler(d.onConnectionNotification)

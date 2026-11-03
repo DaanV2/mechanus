@@ -14,7 +14,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file screens/v1/state.proto.
  */
 export const file_screens_v1_state: GenFile = /*@__PURE__*/
-  fileDesc("ChZzY3JlZW5zL3YxL3N0YXRlLnByb3RvEgpzY3JlZW5zLnYxIpECCgtTY3JlZW5TdGF0ZRIsCgtlbnZpcm9ubWVudBgBIAEoCzIXLnNjcmVlbnMudjEuRW52aXJvbm1lbnQSJgoEZ3JpZBgCIAEoCzIYLnNjcmVlbnMudjEuR3JpZFNldHRpbmdzEiAKBWxheWVyGAMgAygLMhEuc2NyZWVucy52MS5MYXllchIeCgR2aWV3GAQgASgLMhAuc2NyZWVucy52MS5WaWV3EiIKBmNhbWVyYRgFIAEoCzISLnNjcmVlbnMudjEuQ2FtZXJhEjQKDXNwbGFzaF9zY3JlZW4YFCABKAsyGC5zY3JlZW5zLnYxLlNwbGFzaFNjcmVlbkgAiAEBQhAKDl9zcGxhc2hfc2NyZWVuInIKC0Vudmlyb25tZW50EjAKDGN1cnJlbnRfdGltZRgBIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASGAoQYmFja2dyb3VuZF9jb2xvchgCIAEoCRIXCg9saWdodF9pbnRlbnNpdHkYAyABKAEiiQEKDEdyaWRTZXR0aW5ncxIQCgh4X29mZnNldBgBIAEoBRIQCgh5X29mZnNldBgCIAEoBRIPCgd4X3JhdGlvGAMgASgFEg8KB3lfcmF0aW8YBCABKAUSDAoEc2hvdxgFIAEoCBIRCgljZWxsX3NpemUYBiABKAESEgoKbGluZV9jb2xvchgHIAEoCSKEAgoEVmlldxIiCgRraW5kGAEgASgOMhQuc2NyZWVucy52MS5WaWV3S2luZBIlCgVhc3NldBgCIAEoCzIRLnNjcmVlbnMudjEuQXNzZXRIAIgBARIWCgljb21wb25lbnQYAyABKAlIAYgBARIsCgZwYXJhbXMYBCADKAsyHC5zY3JlZW5zLnYxLlZpZXcuUGFyYW1zRW50cnkSJAoHb3ZlcmxheRgFIAMoCzITLnNjcmVlbnMudjEuT3ZlcmxheRotCgtQYXJhbXNFbnRyeRILCgNrZXkYASABKAkSDQoFdmFsdWUYAiABKAk6AjgBQggKBl9hc3NldEIMCgpfY29tcG9uZW50IrYBCgdPdmVybGF5EiUKBGtpbmQYASABKA4yFy5zY3JlZW5zLnYxLk92ZXJsYXlLaW5kEhYKCWNvbXBvbmVudBgCIAEoCUgAiAEBEi8KBnBhcmFtcxgDIAMoCzIfLnNjcmVlbnMudjEuT3ZlcmxheS5QYXJhbXNFbnRyeRotCgtQYXJhbXNFbnRyeRILCgNrZXkYASABKAkSDQoFdmFsdWUYAiABKAk6AjgBQgwKCl9jb21wb25lbnQiOwoGQ2FtZXJhEiMKBmNlbnRlchgBIAEoCzITLnNjcmVlbnMudjEuVmVjdG9yMhIMCgR6b29tGAIgASgBIjcKBUxheWVyEiIKBmVudGl0eRgBIAMoCzISLnNjcmVlbnMudjEuRW50aXR5EgoKAmlkGAIgASgJItYBCgZFbnRpdHkSCgoCaWQYASABKAkSIAoFYXNzZXQYAiABKAsyES5zY3JlZW5zLnYxLkFzc2V0EiUKCHBvc2l0aW9uGAMgASgLMhMuc2NyZWVucy52MS5WZWN0b3IyEiEKBHNpemUYBCABKAsyEy5zY3JlZW5zLnYxLlZlY3RvcjISEAoIcm90YXRpb24YBSABKAESDAoEbmFtZRgGIAEoCRIkCgRraW5kGAcgASgOMhYuc2NyZWVucy52MS5FbnRpdHlLaW5kEg4KBmhpZGRlbhgIIAEoCCJCCgVBc3NldBIMCgRuYW1lGAEgASgJEgsKA3VybBgCIAEoCRIKCgJpZBgDIAEoCRISCgptZWRpYV90eXBlGAQgASgJIh8KB1ZlY3RvcjISCQoBeBgBIAEoARIJCgF5GAIgASgBKq8BCghWaWV3S2luZBIZChVWSUVXX0tJTkRfVU5TUEVDSUZJRUQQABIXChNWSUVXX0tJTkRfQkFUVExFTUFQEAESFQoRVklFV19LSU5EX1NDRU5FUlkQAhIXChNWSUVXX0tJTkRfSU5GT0JPQVJEEAMSFAoQVklFV19LSU5EX0NVU1RPTRAEEhQKEFZJRVdfS0lORF9TUExBU0gQBRITCg9WSUVXX0tJTkRfQkxBTksQBip8CgtPdmVybGF5S2luZBIcChhPVkVSTEFZX0tJTkRfVU5TUEVDSUZJRUQQABIbChdPVkVSTEFZX0tJTkRfSU5JVElBVElWRRABEhkKFU9WRVJMQVlfS0lORF9FTlRJVElFUxACEhcKE09WRVJMQVlfS0lORF9DVVNUT00QAyqFAQoKRW50aXR5S2luZBIbChdFTlRJVFlfS0lORF9VTlNQRUNJRklFRBAAEhYKEkVOVElUWV9LSU5EX1BMQVlFUhABEhMKD0VOVElUWV9LSU5EX05QQxACEhUKEUVOVElUWV9LSU5EX0VORU1ZEAMSFgoSRU5USVRZX0tJTkRfT0JKRUNUEARCPlo8Z2l0aHViLmNvbS9EYWFuVjIvbWVjaGFudXMvc2VydmVyL3Byb3RvL3NjcmVlbnMvdjE7c2NyZWVuc3YxYgZwcm90bzM", [file_google_protobuf_timestamp, file_screens_v1_splash_screen]);
+  fileDesc("ChZzY3JlZW5zL3YxL3N0YXRlLnByb3RvEgpzY3JlZW5zLnYxIpECCgtTY3JlZW5TdGF0ZRIsCgtlbnZpcm9ubWVudBgBIAEoCzIXLnNjcmVlbnMudjEuRW52aXJvbm1lbnQSJgoEZ3JpZBgCIAEoCzIYLnNjcmVlbnMudjEuR3JpZFNldHRpbmdzEiAKBWxheWVyGAMgAygLMhEuc2NyZWVucy52MS5MYXllchIeCgR2aWV3GAQgASgLMhAuc2NyZWVucy52MS5WaWV3EiIKBmNhbWVyYRgFIAEoCzISLnNjcmVlbnMudjEuQ2FtZXJhEjQKDXNwbGFzaF9zY3JlZW4YFCABKAsyGC5zY3JlZW5zLnYxLlNwbGFzaFNjcmVlbkgAiAEBQhAKDl9zcGxhc2hfc2NyZWVuInIKC0Vudmlyb25tZW50EjAKDGN1cnJlbnRfdGltZRgBIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASGAoQYmFja2dyb3VuZF9jb2xvchgCIAEoCRIXCg9saWdodF9pbnRlbnNpdHkYAyABKAEiqAEKDEdyaWRTZXR0aW5ncxIQCgh4X29mZnNldBgBIAEoBRIQCgh5X29mZnNldBgCIAEoBRIPCgd4X3JhdGlvGAMgASgFEg8KB3lfcmF0aW8YBCABKAUSDAoEc2hvdxgFIAEoCBIRCgljZWxsX3NpemUYBiABKAESEgoKbGluZV9jb2xvchgHIAEoCRIPCgdjb2x1bW5zGAggASgFEgwKBHJvd3MYCSABKAUihAIKBFZpZXcSIgoEa2luZBgBIAEoDjIULnNjcmVlbnMudjEuVmlld0tpbmQSJQoFYXNzZXQYAiABKAsyES5zY3JlZW5zLnYxLkFzc2V0SACIAQESFgoJY29tcG9uZW50GAMgASgJSAGIAQESLAoGcGFyYW1zGAQgAygLMhwuc2NyZWVucy52MS5WaWV3LlBhcmFtc0VudHJ5EiQKB292ZXJsYXkYBSADKAsyEy5zY3JlZW5zLnYxLk92ZXJsYXkaLQoLUGFyYW1zRW50cnkSCwoDa2V5GAEgASgJEg0KBXZhbHVlGAIgASgJOgI4AUIICgZfYXNzZXRCDAoKX2NvbXBvbmVudCK2AQoHT3ZlcmxheRIlCgRraW5kGAEgASgOMhcuc2NyZWVucy52MS5PdmVybGF5S2luZBIWCgljb21wb25lbnQYAiABKAlIAIgBARIvCgZwYXJhbXMYAyADKAsyHy5zY3JlZW5zLnYxLk92ZXJsYXkuUGFyYW1zRW50cnkaLQoLUGFyYW1zRW50cnkSCwoDa2V5GAEgASgJEg0KBXZhbHVlGAIgASgJOgI4AUIMCgpfY29tcG9uZW50IjsKBkNhbWVyYRIjCgZjZW50ZXIYASABKAsyEy5zY3JlZW5zLnYxLlZlY3RvcjISDAoEem9vbRgCIAEoASKpAgoFTGF5ZXISIgoGZW50aXR5GAEgAygLMhIuc2NyZWVucy52MS5FbnRpdHkSCgoCaWQYAiABKAkSIwoEa2luZBgDIAEoDjIVLnNjcmVlbnMudjEuTGF5ZXJLaW5kEiUKBWFzc2V0GAQgASgLMhEuc2NyZWVucy52MS5Bc3NldEgAiAEBEiUKCHBvc2l0aW9uGAUgASgLMhMuc2NyZWVucy52MS5WZWN0b3IyEiYKBHNpemUYBiABKAsyEy5zY3JlZW5zLnYxLlZlY3RvcjJIAYgBARIPCgdvcGFjaXR5GAcgASgBEjEKDmluc3RhbmNlX2dyb3VwGAggAygLMhkuc2NyZWVucy52MS5JbnN0YW5jZUdyb3VwQggKBl9hc3NldEIHCgVfc2l6ZSKIAQoNSW5zdGFuY2VHcm91cBIKCgJpZBgBIAEoCRIgCgVhc3NldBgCIAEoCzIRLnNjcmVlbnMudjEuQXNzZXQSIQoEc2l6ZRgDIAEoCzITLnNjcmVlbnMudjEuVmVjdG9yMhImCghpbnN0YW5jZRgEIAMoCzIULnNjcmVlbnMudjEuSW5zdGFuY2UiMgoISW5zdGFuY2USCQoBeBgBIAEoARIJCgF5GAIgASgBEhAKCHJvdGF0aW9uGAMgASgBItYBCgZFbnRpdHkSCgoCaWQYASABKAkSIAoFYXNzZXQYAiABKAsyES5zY3JlZW5zLnYxLkFzc2V0EiUKCHBvc2l0aW9uGAMgASgLMhMuc2NyZWVucy52MS5WZWN0b3IyEiEKBHNpemUYBCABKAsyEy5zY3JlZW5zLnYxLlZlY3RvcjISEAoIcm90YXRpb24YBSABKAESDAoEbmFtZRgGIAEoCRIkCgRraW5kGAcgASgOMhYuc2NyZWVucy52MS5FbnRpdHlLaW5kEg4KBmhpZGRlbhgIIAEoCCJCCgVBc3NldBIMCgRuYW1lGAEgASgJEgsKA3VybBgCIAEoCRIKCgJpZBgDIAEoCRISCgptZWRpYV90eXBlGAQgASgJIh8KB1ZlY3RvcjISCQoBeBgBIAEoARIJCgF5GAIgASgBKq8BCghWaWV3S2luZBIZChVWSUVXX0tJTkRfVU5TUEVDSUZJRUQQABIXChNWSUVXX0tJTkRfQkFUVExFTUFQEAESFQoRVklFV19LSU5EX1NDRU5FUlkQAhIXChNWSUVXX0tJTkRfSU5GT0JPQVJEEAMSFAoQVklFV19LSU5EX0NVU1RPTRAEEhQKEFZJRVdfS0lORF9TUExBU0gQBRITCg9WSUVXX0tJTkRfQkxBTksQBip8CgtPdmVybGF5S2luZBIcChhPVkVSTEFZX0tJTkRfVU5TUEVDSUZJRUQQABIbChdPVkVSTEFZX0tJTkRfSU5JVElBVElWRRABEhkKFU9WRVJMQVlfS0lORF9FTlRJVElFUxACEhcKE09WRVJMQVlfS0lORF9DVVNUT00QAypWCglMYXllcktpbmQSGgoWTEFZRVJfS0lORF9VTlNQRUNJRklFRBAAEhQKEExBWUVSX0tJTkRfSU1BR0UQARIXChNMQVlFUl9LSU5EX0VOVElUSUVTEAIqhQEKCkVudGl0eUtpbmQSGwoXRU5USVRZX0tJTkRfVU5TUEVDSUZJRUQQABIWChJFTlRJVFlfS0lORF9QTEFZRVIQARITCg9FTlRJVFlfS0lORF9OUEMQAhIVChFFTlRJVFlfS0lORF9FTkVNWRADEhYKEkVOVElUWV9LSU5EX09CSkVDVBAEQj5aPGdpdGh1Yi5jb20vRGFhblYyL21lY2hhbnVzL3NlcnZlci9wcm90by9zY3JlZW5zL3YxO3NjcmVlbnN2MWIGcHJvdG8z", [file_google_protobuf_timestamp, file_screens_v1_splash_screen]);
 
 /**
  * ScreenState is everything a screen renders. It is sent as a full snapshot that replaces whatever
@@ -150,6 +150,20 @@ export type GridSettings = Message<"screens.v1.GridSettings"> & {
    * @generated from field: string line_color = 7;
    */
   lineColor: string;
+
+  /**
+   * Width of the map in grid cells, 0 when the images on the map decide its size
+   *
+   * @generated from field: int32 columns = 8;
+   */
+  columns: number;
+
+  /**
+   * Height of the map in grid cells, 0 when the images on the map decide its size
+   *
+   * @generated from field: int32 rows = 9;
+   */
+  rows: number;
 };
 
 /**
@@ -270,6 +284,8 @@ export const CameraSchema: GenMessage<Camera> = /*@__PURE__*/
  */
 export type Layer = Message<"screens.v1.Layer"> & {
   /**
+   * LAYER_KIND_ENTITIES: tokens
+   *
    * @generated from field: repeated screens.v1.Entity entity = 1;
    */
   entity: Entity[];
@@ -280,6 +296,46 @@ export type Layer = Message<"screens.v1.Layer"> & {
    * @generated from field: string id = 2;
    */
   id: string;
+
+  /**
+   * @generated from field: screens.v1.LayerKind kind = 3;
+   */
+  kind: LayerKind;
+
+  /**
+   * LAYER_KIND_IMAGE: the image
+   *
+   * @generated from field: optional screens.v1.Asset asset = 4;
+   */
+  asset?: Asset | undefined;
+
+  /**
+   * LAYER_KIND_IMAGE: top left corner in grid units, from the map's origin
+   *
+   * @generated from field: screens.v1.Vector2 position = 5;
+   */
+  position?: Vector2 | undefined;
+
+  /**
+   * LAYER_KIND_IMAGE: size in grid units, unset for the image's natural size
+   *
+   * @generated from field: optional screens.v1.Vector2 size = 6;
+   */
+  size?: Vector2 | undefined;
+
+  /**
+   * LAYER_KIND_IMAGE: value between 0.0 (invisible) and 1.0 (opaque)
+   *
+   * @generated from field: double opacity = 7;
+   */
+  opacity: number;
+
+  /**
+   * LAYER_KIND_ENTITIES: scenery
+   *
+   * @generated from field: repeated screens.v1.InstanceGroup instance_group = 8;
+   */
+  instanceGroup: InstanceGroup[];
 };
 
 /**
@@ -288,6 +344,81 @@ export type Layer = Message<"screens.v1.Layer"> & {
  */
 export const LayerSchema: GenMessage<Layer> = /*@__PURE__*/
   messageDesc(file_screens_v1_state, 6);
+
+/**
+ * InstanceGroup is one asset drawn at many positions.
+ *
+ * @generated from message screens.v1.InstanceGroup
+ */
+export type InstanceGroup = Message<"screens.v1.InstanceGroup"> & {
+  /**
+   * Unique identifier for the group within the layer
+   *
+   * @generated from field: string id = 1;
+   */
+  id: string;
+
+  /**
+   * Image of every instance
+   *
+   * @generated from field: screens.v1.Asset asset = 2;
+   */
+  asset?: Asset | undefined;
+
+  /**
+   * Size of every instance in grid units
+   *
+   * @generated from field: screens.v1.Vector2 size = 3;
+   */
+  size?: Vector2 | undefined;
+
+  /**
+   * @generated from field: repeated screens.v1.Instance instance = 4;
+   */
+  instance: Instance[];
+};
+
+/**
+ * Describes the message screens.v1.InstanceGroup.
+ * Use `create(InstanceGroupSchema)` to create a new message.
+ */
+export const InstanceGroupSchema: GenMessage<InstanceGroup> = /*@__PURE__*/
+  messageDesc(file_screens_v1_state, 7);
+
+/**
+ * Instance is one position of an instance group.
+ *
+ * @generated from message screens.v1.Instance
+ */
+export type Instance = Message<"screens.v1.Instance"> & {
+  /**
+   * Left in grid units
+   *
+   * @generated from field: double x = 1;
+   */
+  x: number;
+
+  /**
+   * Top in grid units
+   *
+   * @generated from field: double y = 2;
+   */
+  y: number;
+
+  /**
+   * Rotation in degrees, around the center
+   *
+   * @generated from field: double rotation = 3;
+   */
+  rotation: number;
+};
+
+/**
+ * Describes the message screens.v1.Instance.
+ * Use `create(InstanceSchema)` to create a new message.
+ */
+export const InstanceSchema: GenMessage<Instance> = /*@__PURE__*/
+  messageDesc(file_screens_v1_state, 8);
 
 /**
  * @generated from message screens.v1.Entity
@@ -353,7 +484,7 @@ export type Entity = Message<"screens.v1.Entity"> & {
  * Use `create(EntitySchema)` to create a new message.
  */
 export const EntitySchema: GenMessage<Entity> = /*@__PURE__*/
-  messageDesc(file_screens_v1_state, 7);
+  messageDesc(file_screens_v1_state, 9);
 
 /**
  * @generated from message screens.v1.Asset
@@ -393,7 +524,7 @@ export type Asset = Message<"screens.v1.Asset"> & {
  * Use `create(AssetSchema)` to create a new message.
  */
 export const AssetSchema: GenMessage<Asset> = /*@__PURE__*/
-  messageDesc(file_screens_v1_state, 8);
+  messageDesc(file_screens_v1_state, 10);
 
 /**
  * @generated from message screens.v1.Vector2
@@ -415,7 +546,7 @@ export type Vector2 = Message<"screens.v1.Vector2"> & {
  * Use `create(Vector2Schema)` to create a new message.
  */
 export const Vector2Schema: GenMessage<Vector2> = /*@__PURE__*/
-  messageDesc(file_screens_v1_state, 9);
+  messageDesc(file_screens_v1_state, 11);
 
 /**
  * ViewKind is the type of view a screen shows.
@@ -517,6 +648,38 @@ export const OverlayKindSchema: GenEnum<OverlayKind> = /*@__PURE__*/
   enumDesc(file_screens_v1_state, 1);
 
 /**
+ * LayerKind is the type of a layer, it decides which fields of the layer apply.
+ *
+ * @generated from enum screens.v1.LayerKind
+ */
+export enum LayerKind {
+  /**
+   * @generated from enum value: LAYER_KIND_UNSPECIFIED = 0;
+   */
+  UNSPECIFIED = 0,
+
+  /**
+   * A single image
+   *
+   * @generated from enum value: LAYER_KIND_IMAGE = 1;
+   */
+  IMAGE = 1,
+
+  /**
+   * Entity tokens and instance groups
+   *
+   * @generated from enum value: LAYER_KIND_ENTITIES = 2;
+   */
+  ENTITIES = 2,
+}
+
+/**
+ * Describes the enum screens.v1.LayerKind.
+ */
+export const LayerKindSchema: GenEnum<LayerKind> = /*@__PURE__*/
+  enumDesc(file_screens_v1_state, 2);
+
+/**
  * EntityKind is the role an entity plays in a scene.
  *
  * @generated from enum screens.v1.EntityKind
@@ -552,5 +715,5 @@ export enum EntityKind {
  * Describes the enum screens.v1.EntityKind.
  */
 export const EntityKindSchema: GenEnum<EntityKind> = /*@__PURE__*/
-  enumDesc(file_screens_v1_state, 2);
+  enumDesc(file_screens_v1_state, 3);
 

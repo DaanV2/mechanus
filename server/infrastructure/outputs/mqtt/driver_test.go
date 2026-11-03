@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
+	"net"
 	"sync"
 	"time"
 
@@ -24,7 +25,7 @@ import (
 
 const driverClientID = "mechanus-test"
 
-// reconnectWait covers the client's retry and backoff intervals.
+// reconnectWait covers the client's connect timeout, retry and backoff intervals.
 const reconnectWait = time.Second * 15
 
 // startBroker runs a real broker in the test process, returns it and the address it listens on.
@@ -313,6 +314,37 @@ var _ = Describe("Driver", func() {
 			Expect(err).To(MatchError(mqtt.ErrNotConnected))
 			Expect(time.Since(start)).To(BeNumerically("<", time.Second))
 			Expect(driver.CheckDevice(ctx, fog)).To(MatchError(mqtt.ErrNotConnected))
+		})
+
+		It("does not wait long on a broker that accepts a connection but never answers", func() {
+			stopBroker()
+
+			var silent net.Listener
+			Eventually(func() (err error) {
+				silent, err = net.Listen("tcp", address)
+
+				return err
+			}, "5s", "100ms").Should(Succeed())
+
+			accepted := make(chan net.Conn, 1)
+			go func() {
+				if conn, err := silent.Accept(); err == nil {
+					accepted <- conn
+				}
+			}()
+
+			Expect(driver.AfterInitialize(ctx)).To(Succeed())
+
+			var conn net.Conn
+			Eventually(accepted, "5s").Should(Receive(&conn))
+			DeferCleanup(func() { _ = conn.Close() })
+			Expect(silent.Close()).To(Succeed())
+
+			restarted, _, err := startBroker(address)
+			Expect(err).ToNot(HaveOccurred())
+			DeferCleanup(func() { _ = restarted.Close() })
+
+			Eventually(func() error { return driver.CheckDevice(ctx, fog) }, reconnectWait).Should(Succeed())
 		})
 
 		It("delivers the latest instruction per topic once it is back", func() {
