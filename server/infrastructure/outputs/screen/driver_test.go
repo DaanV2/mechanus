@@ -193,7 +193,7 @@ var _ = Describe("Driver", func() {
 	)
 
 	It("pushes the state to the device's screen", func(ctx SpecContext) {
-		err := driver.Apply(ctx, ref, &devices.Device{ID: "tv"}, scenes.ScreenInstruction{
+		err := driver.Apply(ctx, ref, "table", &devices.Device{ID: "tv"}, scenes.ScreenInstruction{
 			View:     scenes.ViewBattleMap,
 			Asset:    "maps/tavern.map.json",
 			Entities: present,
@@ -207,7 +207,7 @@ var _ = Describe("Driver", func() {
 	})
 
 	It("ignores instructions of other kinds", func(ctx SpecContext) {
-		err := driver.Apply(ctx, ref, &devices.Device{ID: "tv"}, scenes.LightInstruction{On: true})
+		err := driver.Apply(ctx, ref, "table", &devices.Device{ID: "tv"}, scenes.LightInstruction{On: true})
 		Expect(err).ToNot(HaveOccurred())
 
 		_, ok := manager.Get("tv")

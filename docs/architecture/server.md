@@ -29,7 +29,8 @@ Orchestrates flows by combining engine rules with infrastructure ports:
 
 - `UserService` — user CRUD, password handling
 - `CampaignService` — campaign CRUD
-- `SceneService` — loads / exits scenes (restoring and saving their state), switches variants, and dispatches instructions to `OutputDriver`s _(not wired in `components` yet)_
+- `SceneService` — loads / exits scenes (restoring and saving their state), switches variants, and dispatches instructions to `OutputDriver`s
+- `DeviceMonitor` — tracks the health / connection status of every device, limits how long an instruction can take
 - `Manager` — top-level coordinator _(stub)_
 
 ### infrastructure — adapters

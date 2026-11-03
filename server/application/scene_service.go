@@ -42,8 +42,16 @@ type OutputDriver interface {
 	// Integration returns the integration identifier this driver handles, see devices.Integration*.
 	Integration() string
 	// Apply instructs a single device. The instruction kind always matches the device kind. scene is the
-	// scene the instruction comes from, e.g. to resolve scene relative asset paths.
-	Apply(ctx context.Context, scene scenes.Ref, device *devices.Device, instruction scenes.Instruction) error
+	// scene the instruction comes from, e.g. to resolve scene relative asset paths, target the name it was
+	// addressed to. Devices are instructed concurrently, one instruction at a time per device, so Apply
+	// must be safe for concurrent use and return when ctx is done.
+	Apply(ctx context.Context, scene scenes.Ref, target string, device *devices.Device, instruction scenes.Instruction) error
+}
+
+// SceneListener is told when the active scene or variant changed, after the devices were instructed.
+// A failing listener has no influence on the change, so it handles its own errors.
+type SceneListener interface {
+	SceneChanged(ctx context.Context, transition *scenes.Transition)
 }
 
 // SceneService loads, switches and exits scenes and instructs the devices in the room.
@@ -56,8 +64,9 @@ type SceneService struct {
 	rooms   RoomConfigStore
 	drivers map[string]OutputDriver
 
-	lock   sync.Mutex
-	active *scenes.Scene
+	lock      sync.Mutex
+	active    *scenes.Scene
+	listeners []SceneListener
 }
 
 // NewSceneService creates a new SceneService with the given drivers.
@@ -73,6 +82,14 @@ func NewSceneService(configs SceneConfigStore, states SceneStateStore, rooms Roo
 	}
 
 	return s
+}
+
+// AddListener registers a listener for scene and variant changes.
+func (s *SceneService) AddListener(listener SceneListener) {
+	s.lock.Lock()
+	defer s.lock.Unlock()
+
+	s.listeners = append(s.listeners, listener)
 }
 
 // Active returns the active scene and variant, zero when no scene is active.
@@ -114,6 +131,10 @@ func (s *SceneService) Activate(ctx context.Context, sceneID, variantID string) 
 			return nil, err
 		}
 	}
+	var from scenes.Ref
+	if s.active != nil {
+		from = s.active.Ref()
+	}
 	if err := s.exit(ctx); err != nil {
 		return nil, err
 	}
@@ -121,7 +142,8 @@ func (s *SceneService) Activate(ctx context.Context, sceneID, variantID string) 
 		return nil, fmt.Errorf("saving state of scene %q: %w", sceneID, err)
 	}
 
-	return s.transition(ctx, scenes.Ref{}, scenes.Instructions{}, next)
+	// No previous instructions: a new scene instructs every device, even where nothing would change.
+	return s.transition(ctx, from, scenes.Instructions{}, next)
 }
 
 // SetVariant switches the variant of the active scene (empty for the default).
@@ -237,24 +259,68 @@ func (s *SceneService) transition(ctx context.Context, from scenes.Ref, prev sce
 	s.active = next
 
 	// TODO: handle t.Released, e.g. blank screens / stop music for targets the new scene no longer uses.
-	return t, s.dispatch(ctx, room, t.To, t.Changes)
-}
-
-func (s *SceneService) dispatch(ctx context.Context, room *devices.Room, scene scenes.Ref, ins scenes.Instructions) error {
-	var err error
-	for _, ti := range ins.All() {
-		for _, device := range room.DevicesFor(ti.Target, ti.Instruction.Kind()) {
-			driver, ok := s.drivers[device.Integration]
-			if !ok {
-				err = errors.Join(err, fmt.Errorf("device %q (%s): %w", device.ID, device.Integration, ErrNoDriver))
-
-				continue
-			}
-			if e := driver.Apply(ctx, scene, device, ti.Instruction); e != nil {
-				err = errors.Join(err, fmt.Errorf("device %q: %w", device.ID, e))
-			}
+	err = s.dispatch(ctx, room, t.To, t.Changes)
+	if t.From != t.To {
+		for _, l := range s.listeners {
+			l.SceneChanged(ctx, t)
 		}
 	}
 
-	return err
+	return t, err
+}
+
+// dispatch instructs every device concurrently, so a slow or unreachable device does not hold up the
+// others. A device gets its instructions in order, one at a time.
+func (s *SceneService) dispatch(ctx context.Context, room *devices.Room, scene scenes.Ref, ins scenes.Instructions) error {
+	queues := deviceQueues(room, ins)
+	errs := make([]error, len(queues))
+
+	var wg sync.WaitGroup
+	for i, queue := range queues {
+		wg.Go(func() { errs[i] = s.applyQueue(ctx, scene, queue) })
+	}
+	wg.Wait()
+
+	return errors.Join(errs...)
+}
+
+func (s *SceneService) applyQueue(ctx context.Context, scene scenes.Ref, queue deviceQueue) error {
+	driver, ok := s.drivers[queue.device.Integration]
+	if !ok {
+		return fmt.Errorf("device %q (%s): %w", queue.device.ID, queue.device.Integration, ErrNoDriver)
+	}
+
+	var errs []error
+	for _, ti := range queue.instructions {
+		if err := driver.Apply(ctx, scene, ti.Target, queue.device, ti.Instruction); err != nil {
+			errs = append(errs, fmt.Errorf("device %q: %w", queue.device.ID, err))
+		}
+	}
+
+	return errors.Join(errs...)
+}
+
+// deviceQueue holds the instructions for a single device.
+type deviceQueue struct {
+	device       *devices.Device
+	instructions []scenes.TargetedInstruction
+}
+
+// deviceQueues groups instructions by the device they are for, keeping the order of [scenes.Instructions.All].
+func deviceQueues(room *devices.Room, ins scenes.Instructions) []deviceQueue {
+	var queues []deviceQueue
+	index := map[string]int{}
+	for _, ti := range ins.All() {
+		for _, device := range room.DevicesFor(ti.Target, ti.Instruction.Kind()) {
+			i, ok := index[device.ID]
+			if !ok {
+				i = len(queues)
+				index[device.ID] = i
+				queues = append(queues, deviceQueue{device: device})
+			}
+			queues[i].instructions = append(queues[i].instructions, ti)
+		}
+	}
+
+	return queues
 }

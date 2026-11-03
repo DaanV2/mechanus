@@ -135,7 +135,8 @@ The config lists the entities present when the scene starts (`Entity.Hidden` = s
 | `SceneConfigStore` | file storage | `GetSceneConfig(sceneID)`                         |
 | `RoomConfigStore`  | file storage | `CurrentRoom()` — devices and target bindings     |
 | `SceneStateStore`  | database     | `LoadSceneState` / `SaveSceneState`               |
-| `OutputDriver`     | integrations | `Apply(scene, device, instruction)`, one per integration |
+| `OutputDriver`     | integrations | `Apply(scene, target, device, instruction)`, one per integration |
+| `SceneListener`    | integrations | `SceneChanged(transition)`, told about scene and variant switches (optional) |
 
 | Method                         | Effect                                                                  |
 | ------------------------------ | ----------------------------------------------------------------------- |
@@ -145,7 +146,33 @@ The config lists the entities present when the scene starts (`Entity.Hidden` = s
 | `Exit()`                       | Save state, deactivate. Intended for `BeforeShutdown`.                  |
 | `Active()`                     | Active scene + variant.                                                 |
 
-Each change computes a transition and dispatches `Changes`: for every changed instruction, find the devices bound to its target with the matching kind and hand each to the driver registered for `device.Integration`. Device errors (including `ErrNoDriver`) are joined and returned; other devices are still instructed.
+Each change computes a transition and dispatches `Changes`: for every changed instruction, find the devices bound to its target with the matching kind and hand each to the driver registered for `device.Integration`. Devices are instructed concurrently, each device getting its instructions in order, so a slow or unreachable device does not hold up the others. Device errors (including `ErrNoDriver`) are joined and returned; the scene is active regardless.
+
+### Driver framework
+
+Everything an integration needs is the same for screens, lights, music and custom devices:
+
+| Need                        | How                                                                                                                                                  | Code                                        |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
+| Deliver an instruction      | `OutputDriver.Apply`: type-switch on the instruction, must be safe for concurrent use and return when `ctx` is done                                   | `application.OutputDriver`                  |
+| Per-device settings         | `Device.Config` from the room file (light ID, entity ID, topic, speaker, ...)                                                                        | `devices.Device`                            |
+| Global settings and secrets | A Viper config set `integrations.<integration>` next to the driver, an empty address / credential disables the integration                          | `infrastructure/outputs/<integration>`      |
+| A shared connection         | Optional `lifecycle` hooks on the driver: connect in `AfterInitialize` without waiting for it, close in `AfterShutDown`                              | `infrastructure/lifecycle`                  |
+| Health per device           | `DeviceMonitor.Track` records the outcome of every instruction. A driver that knows better implements `DeviceChecker`, whose answer is authoritative | `application.DeviceMonitor`, `devices.Status` |
+| A time limit                | `DeviceMonitor.Track` gives every instruction at most `integrations.apply-timeout`                                                                   | `application.DeviceMonitor`                 |
+| Reacting to scene changes   | Optional `SceneListener`, added with `SceneService.AddListener`                                                                                      | `application.SceneListener`                 |
+
+`DeviceMonitor.Statuses` returns `unknown`, `online` or `offline` with a reason for every device in the room. A device whose integration is not configured is `offline` with `ErrNoDriver`. Status is runtime information and is not stored.
+
+How the planned integrations fit, none of them built yet (`DeviceMonitor`'s tests run fake light and music drivers through the real `SceneService` to prove this):
+
+| Integration    | Instruction        | `Device.Config`    | Config set                 | `CheckDevice`                  |
+| -------------- | ------------------ | ------------------ | -------------------------- | ------------------------------ |
+| Philips Hue    | `LightInstruction` | light / group ID   | `integrations.hue`         | bridge up, light reachable     |
+| Home Assistant | `LightInstruction` | entity ID          | `integrations.homeassistant` | connected, entity available  |
+| Spotify        | `MusicInstruction` | speaker ID         | `integrations.spotify`     | token valid, speaker available |
+
+Not covered by the framework: the Spotify OAuth flow on a LAN-only server is still an open question (see [roadmap M4](../roadmap.md#m4--the-room-comes-alive)), and Matter commissioning would need its own setup flow.
 
 ## Storage layout
 
@@ -203,7 +230,17 @@ The `engine/screens` package (`ScreenHandler`, `ScreenManager`, `state.ScreenSta
 
 ### Custom devices
 
-`CustomInstruction`: `Topic` + opaque JSON `Payload`, passed through untouched. Planned: scenes only carry the payload per target; the topic comes from the device config (default `mechanus/devices/<device-id>/set`) and the payload is wrapped in an envelope `{scene, variant, target, payload}` (see [roadmap M4](../roadmap.md#m4--the-room-comes-alive)). Intended for MQTT first (fog machines, rumble packs, Arduino props), but any event bus can implement a driver.
+`CustomInstruction`: an opaque JSON `Payload` per target, passed through untouched. Intended for MQTT first (fog machines, rumble packs, Arduino props), but any event bus can implement a driver.
+
+The MQTT driver (`infrastructure/outputs/mqtt`, set up in [configuration/integrations.md](../configuration/integrations.md)) uses these topics:
+
+| Topic                              | Retained | Content                                                                                       |
+| ---------------------------------- | -------- | --------------------------------------------------------------------------------------------- |
+| `mechanus/devices/<device-id>/set` | yes      | `{scene, variant, target, payload}`. The device config key `topic` replaces the default topic |
+| `mechanus/events/scene`            | no       | `{scene, variant, from: {scene, variant}}` on a scene or variant switch, no `from` for the first scene |
+| `mechanus/status`                  | yes      | `online` / `offline`. `offline` is also the last will, so the broker publishes it if the server disappears |
+
+Everything is published with QoS 1. Retained messages mean a device that (re)connects finds the current instruction. A broker that is down does not stop the server: it keeps reconnecting, instructions fail right away and show up as device errors, and the latest undelivered instruction per topic is published once the broker is back. Scene events are not kept for later. The retained message of a released target stays on the broker until `Transition.Released` is handled.
 
 ## Code map
 
@@ -220,17 +257,20 @@ server/
 │   │   └── transition.go   Ref, Transition, NewTransition
 │   └── screens/            Screen WebSocket fan-out — the transport for the "screen" integration
 ├── application/
-│   └── scene_service.go    SceneService + ports: SceneConfigStore, RoomConfigStore, SceneStateStore, OutputDriver
+│   ├── scene_service.go    SceneService + ports: SceneConfigStore, RoomConfigStore, SceneStateStore, OutputDriver, SceneListener
+│   └── device_monitor.go   DeviceMonitor (status per device, instruction timeout) + port: DeviceChecker
 └── infrastructure/
     ├── assets/             Resolves scene / shared asset references to hashed URLs, serves /assets/
+    ├── outputs/            Settings shared by all integrations
     ├── outputs/screen/     Screen driver: ScreenInstruction → ScreenState on the device's screen
+    ├── outputs/mqtt/       MQTT driver: CustomInstruction → retained envelope on the device's topic
     ├── scenestore/         ConfigStore (file storage), StateStore (database)
     └── storage/            Generic file / database storage providers
 ```
 
 ## Status
 
-**Implemented**: the domain model above with the config / state split, variant resolution, live overrides, entity status tracking, transition change detection, `SceneService` with load / exit persistence, `scenestore` adapters for file storage and the database, and tests for each. `SceneService` is wired in `components` with the instance's single room (`rooms/room.dat`, `scenestore.RoomID`; a missing room file is an empty room) and saves the active scene on `BeforeShutdown`. Battle map format v0 (`scenes.BattleMap`, [battle-maps.md](../configuration/battle-maps.md)) with an example scene in `docs/examples/battlemap`. The screen driver (`infrastructure/outputs/screen`) turns a `ScreenInstruction` into screen state (view, asset URL, and for battle maps the grid settings, layers, visible entities and instance groups) and pushes it to the device's screen; screens are keyed by device ID. The client draws it with the layer system in `client/src/lib/2d/layers`. `scenes/v1.SceneService` (ConnectRPC) lists scenes, activates them, switches variant and returns the active scene. Scene and shared assets are served under `/assets/` with a content hash (`infrastructure/assets`).
+**Implemented**: the domain model above with the config / state split, variant resolution, live overrides, entity status tracking, transition change detection, `SceneService` with load / exit persistence, `scenestore` adapters for file storage and the database, and tests for each. `SceneService` is wired in `components` with the instance's single room (`rooms/room.dat`, `scenestore.RoomID`; a missing room file is an empty room) and saves the active scene on `BeforeShutdown`. Battle map format v0 (`scenes.BattleMap`, [battle-maps.md](../configuration/battle-maps.md)) with an example scene in `docs/examples/battlemap`. The screen driver (`infrastructure/outputs/screen`) turns a `ScreenInstruction` into screen state (view, asset URL, and for battle maps the grid settings, layers, visible entities and instance groups) and pushes it to the device's screen; screens are keyed by device ID. The client draws it with the layer system in `client/src/lib/2d/layers`. `scenes/v1.SceneService` (ConnectRPC) lists scenes, activates them, switches variant and returns the active scene. Scene and shared assets are served under `/assets/` with a content hash (`infrastructure/assets`). The [driver framework](#driver-framework) is in place with integration config sets and `DeviceMonitor`, and the MQTT driver (`infrastructure/outputs/mqtt`) delivers custom instructions, scene events and availability.
 
 **Not implemented yet**:
 
@@ -238,7 +278,8 @@ server/
 - The `initiative` and `custom` overlays, and the `entities` overlay on views other than the battle map.
 - Authoring: no tooling or API to create / edit scene and room configs (files have to be written by hand).
 - Remembering which scene was active across a server restart.
-- No drivers other than the screen driver: Hue, Matter, Home Assistant, Spotify, iTunes, MQTT.
+- No drivers other than the screen and MQTT drivers: Hue, Matter, Home Assistant, Spotify, iTunes.
+- `DeviceMonitor.Statuses` has no API or GM view yet; the screen driver does not implement `DeviceChecker`, so a screen is `online` once instructed whether or not anything is connected to it.
 - The scene control API has no `Adjust` or entity (reveal / spawn) calls yet.
 - Handling of `Transition.Released`.
 - Device registration, per-route auth policies and pairing (designed in [authentication.md](./authentication.md#device-authentication)).
@@ -249,10 +290,11 @@ server/
 
 **Adding an integration driver**
 
-1. Implement `application.OutputDriver` in `server/infrastructure/outputs/<integration>/` (type-switch on the `scenes.Instruction`; ignore kinds you do not handle).
-2. Read integration specific settings from `Device.Config` (bridge address, entity ID, MQTT topic, ...). Global settings (credentials, broker URL) go in a Viper config set.
+1. Implement `application.OutputDriver` in `server/infrastructure/outputs/<integration>/` (type-switch on the `scenes.Instruction`; ignore kinds you do not handle). See [Driver framework](#driver-framework) for the optional parts, `infrastructure/outputs/mqtt` is the example.
+2. Read device specific settings from `Device.Config` (light ID, entity ID, MQTT topic, ...). Global settings (credentials, bridge / broker address) go in a Viper config set named `integrations.<integration>`, registered in `cmd/server.go`.
 3. Add an identifier constant in `engine/devices/kind.go` if it is new.
-4. Register the driver when constructing `SceneService` in `components`.
+4. Register the driver in `createSceneService` in `components/outputs.go`, wrapped by `DeviceMonitor.Track`.
+5. Document the settings in `docs/configuration/integrations.md` and run `just server documentation`.
 
 **Adding a view kind**: add a `ViewKind` constant in `engine/scenes/instructions.go`, then teach the screen driver and the client renderer about it. Prefer `ViewCustom` + `Component` for one-off views.
 

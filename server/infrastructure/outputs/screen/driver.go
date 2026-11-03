@@ -44,7 +44,7 @@ func (d *Driver) Integration() string {
 }
 
 // Apply implements application.OutputDriver. Instructions of other kinds are ignored.
-func (d *Driver) Apply(ctx context.Context, scene scenes.Ref, device *devices.Device, instruction scenes.Instruction) error {
+func (d *Driver) Apply(ctx context.Context, scene scenes.Ref, _ string, device *devices.Device, instruction scenes.Instruction) error {
 	ins, ok := instruction.(scenes.ScreenInstruction)
 	if !ok {
 		return nil
