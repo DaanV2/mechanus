@@ -5,6 +5,7 @@
 - [api/websocket](./api/websocket.md) — screen WebSocket protocol reference
 - [configuration/config-file](./configuration/config-file.md)
 - [configuration/database](./configuration/database.md)
+- [configuration/integrations](./configuration/integrations.md)
 - [configuration/opentelemetry](./configuration/opentelemetry.md)
 - [contributing](./contributing.md)
 - [development](./development.md)

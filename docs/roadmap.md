@@ -155,13 +155,14 @@ Done: per-login sessions (one JTI each) with an RS512 access token (1 h) and a `
 
 **Goal**: activating or switching a scene also sets the lights, starts the right music, and triggers custom devices.
 
-- [ ] Driver framework: integration config sets (credentials, bridge / broker addresses), health / connection status per device
+- [x] Driver framework: integration config sets (credentials, bridge / broker addresses), health / connection status per device (`DeviceMonitor`), per-instruction timeout, devices instructed concurrently — see [scenes.md](./architecture/scenes.md#driver-framework)
+- [ ] Show device status to the GM: API and GM view on top of `DeviceMonitor.Statuses`
 - [ ] Lights: Philips Hue
 - [ ] Lights: Home Assistant
 - [ ] Lights: Matter (native Go controller: commissioning, fabric management)
 - [ ] Music: Spotify
 - [ ] Music: iTunes / Apple Music
-- [ ] Custom devices: MQTT
+- [x] Custom devices: MQTT (`infrastructure/outputs/mqtt`), set up in [configuration/integrations.md](./configuration/integrations.md)
 - [ ] Third-party event API: external software subscribes to scene events and sends events back
 - [ ] Handle released targets (`Transition.Released`) — reset, stop, or keep
 - [ ] GM live controls: adjust lights / volume mid-scene (`SceneService.Adjust`)
@@ -170,7 +171,7 @@ Done: per-login sessions (one JTI each) with an RS512 access token (1 h) and a `
 
 - No fixed integration order; the driver framework comes first since everything builds on it
 - Home Assistant, Philips Hue and Matter are three separate native integrations. Matter means writing a Go controller, with no mature library to lean on
-- MQTT: scenes hold an opaque payload per target; the topic comes from the device config (default `mechanus/devices/<device-id>/set`). Published retained, wrapped in `{scene, variant, target, payload}`. Scene events go to `mechanus/events/scene`, availability to `mechanus/status` (last will)
+- MQTT: scenes hold an opaque payload per target; the topic comes from the device config (default `mechanus/devices/<device-id>/set`). Published retained, wrapped in `{scene, variant, target, payload}`. Scene events go to `mechanus/events/scene` (not retained), availability to `mechanus/status` as `online` / `offline` (retained, last will)
 - Third-party event API: JSON WebSocket only, same event schema as MQTT, authenticated with admin-created, revocable, scoped API tokens (JWT + JTI)
 
 **Open questions**

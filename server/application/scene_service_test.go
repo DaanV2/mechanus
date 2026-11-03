@@ -6,6 +6,7 @@ import (
 	"errors"
 	"maps"
 	"slices"
+	"sync"
 
 	"github.com/DaanV2/mechanus/server/application"
 	"github.com/DaanV2/mechanus/server/engine/devices"
@@ -54,18 +55,23 @@ func (r staticRoom) CurrentRoom(context.Context) (*devices.Room, error) { return
 
 type applied struct {
 	device      string
+	target      string
 	instruction scenes.Instruction
 }
 
 type recordingDriver struct {
 	integration string
+	lock        sync.Mutex
 	applied     []applied
 }
 
 func (d *recordingDriver) Integration() string { return d.integration }
 
-func (d *recordingDriver) Apply(_ context.Context, _ scenes.Ref, device *devices.Device, ins scenes.Instruction) error {
-	d.applied = append(d.applied, applied{device.ID, ins})
+func (d *recordingDriver) Apply(_ context.Context, _ scenes.Ref, target string, device *devices.Device, ins scenes.Instruction) error {
+	d.lock.Lock()
+	defer d.lock.Unlock()
+
+	d.applied = append(d.applied, applied{device.ID, target, ins})
 
 	return nil
 }

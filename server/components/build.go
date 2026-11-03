@@ -79,9 +79,12 @@ func BuildServer(setupCtx context.Context) (*ServerComponents, error) {
 	if err != nil {
 		return nil, err
 	}
-	sceneService := application.NewSceneService(sceneConfigs, sceneStates, deviceService.Room(sceneConfigs),
+	sceneService, deviceMonitor, err := createSceneService(lfManager, sceneConfigs, sceneStates, deviceService.Room(sceneConfigs),
 		screen.NewDriver(screenManager, assetStore),
 	)
+	if err != nil {
+		return nil, err
+	}
 
 	// Servers
 	websocketHandler := websocket.NewWebsocketHandler(screenManager, jwtService, websocketCfg)
@@ -117,6 +120,7 @@ func BuildServer(setupCtx context.Context) (*ServerComponents, error) {
 	server := &ServerComponents{
 		Server:     CreateServer(router, serverCfg.Config),
 		Users:      userService,
+		Devices:    deviceMonitor,
 		DB:         db,
 		Components: lfManager,
 	}

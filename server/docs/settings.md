@@ -6,6 +6,7 @@
 | auth | object | see: [auth](#auth) |  |  |
 | database | object | see: [database](#database) |  |  |
 | initialize | object | see: [initialize](#initialize) |  |  |
+| integrations | object | see: [integrations](#integrations) |  |  |
 | log | object | see: [log](#log) |  |  |
 | mdns | object | see: [mdns](#mdns) |  |  |
 | otel | object | see: [otel](#otel) |  |  |
@@ -43,6 +44,22 @@
 |------|------|-------------|---------|-----|
 | password | string | The admin password to use when initializing |  | INITIALIZE_ADMIN_PASSWORD |
 | username | string | The admin username to use when initializing |  | INITIALIZE_ADMIN_USERNAME |
+
+## Integrations
+
+| Name | Type | Description | Default | Env |
+|------|------|-------------|---------|-----|
+| apply-timeout | duration | How long a device gets to process an instruction before it counts as failed. 0 means no limit | 5s | INTEGRATIONS_APPLY_TIMEOUT |
+| mqtt | object | see: [mqtt](#mqtt) |  |  |
+
+### Mqtt
+
+| Name | Type | Description | Default | Env |
+|------|------|-------------|---------|-----|
+| broker | string | Address of the MQTT broker, e.g. tcp://192.168.1.10:1883. Empty disables the MQTT integration |  | INTEGRATIONS_MQTT_BROKER |
+| client-id | string | Client ID on the MQTT broker, has to be unique per broker | mechanus | INTEGRATIONS_MQTT_CLIENT_ID |
+| password | string | Password for the MQTT broker |  | INTEGRATIONS_MQTT_PASSWORD |
+| username | string | Username for the MQTT broker |  | INTEGRATIONS_MQTT_USERNAME |
 
 ## Log
 
