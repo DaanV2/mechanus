@@ -9,30 +9,32 @@ import (
 	"github.com/DaanV2/mechanus/server/infrastructure/persistence/models"
 )
 
+const (
+	DeviceLogger logging.Prefixed = "devices"
+)
+
 // DeviceRepository provides database operations for paired devices.
 type DeviceRepository struct {
-	db     *persistence.DB
-	logger logging.Enriched
+	db *persistence.DB
 }
 
 // NewDeviceRepository creates a new device repository with the provided database.
 func NewDeviceRepository(db *persistence.DB) *DeviceRepository {
 	return &DeviceRepository{
-		db:     db,
-		logger: logging.Enriched{}.WithPrefix("devices"),
+		db: db,
 	}
 }
 
 // Save creates the device, or updates it when a device with its ID exists.
 func (repo *DeviceRepository) Save(ctx context.Context, device *models.Device) error {
-	repo.logger.With("deviceId", device.ID).From(ctx).Debug("saving device")
+	DeviceLogger.From(ctx, "deviceId", device.ID).Debug("saving device")
 
 	return repo.db.WithContext(ctx).Save(device).Error
 }
 
 // Get looks up the device by the given id.
 func (repo *DeviceRepository) Get(ctx context.Context, id string) (*models.Device, error) {
-	repo.logger.With("deviceId", id).From(ctx).Debug("getting device")
+	DeviceLogger.From(ctx, "deviceId", id).Debug("getting device")
 
 	var device models.Device
 	tx := repo.db.WithContext(ctx).First(&device, "id = ?", id)
@@ -45,7 +47,7 @@ func (repo *DeviceRepository) Get(ctx context.Context, id string) (*models.Devic
 
 // ListSeenSince returns the devices that paired or refreshed their tokens after the given time, oldest pairing first.
 func (repo *DeviceRepository) ListSeenSince(ctx context.Context, since time.Time) ([]*models.Device, error) {
-	repo.logger.From(ctx).Debug("listing devices")
+	DeviceLogger.From(ctx).Debug("listing devices")
 
 	var devices []*models.Device
 	tx := repo.db.WithContext(ctx).
@@ -66,7 +68,7 @@ func (repo *DeviceRepository) SetLastSeen(ctx context.Context, id string, at tim
 
 // SetTarget binds the device to the target, returns false when there is no such device.
 func (repo *DeviceRepository) SetTarget(ctx context.Context, id, target string) (bool, error) {
-	repo.logger.With("deviceId", id, "target", target).From(ctx).Debug("binding device")
+	DeviceLogger.From(ctx, "deviceId", id, "target", target).Debug("binding device")
 
 	tx := repo.db.WithContext(ctx).
 		Model(&models.Device{}).
@@ -78,7 +80,7 @@ func (repo *DeviceRepository) SetTarget(ctx context.Context, id, target string) 
 
 // Delete permanently removes the device, so it can pair again with the same ID.
 func (repo *DeviceRepository) Delete(ctx context.Context, id string) error {
-	repo.logger.With("deviceId", id).From(ctx).Debug("deleting device")
+	DeviceLogger.From(ctx, "deviceId", id).Debug("deleting device")
 
 	return repo.db.WithContext(ctx).Unscoped().Delete(&models.Device{}, "id = ?", id).Error
 }

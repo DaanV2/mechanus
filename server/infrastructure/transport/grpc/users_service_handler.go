@@ -29,6 +29,10 @@ var (
 	ErrRemoveOwnAdmin = errors.New("you can't remove your own admin role")
 )
 
+const (
+	UserLogger logging.Prefixed = "grpc-users"
+)
+
 // UserServiceOptions contains the configuration of the [UserServiceHandler].
 type UserServiceOptions struct {
 	// Whenever or not anyone can create an account, when false only admins can create accounts.
@@ -39,7 +43,6 @@ type UserServiceHandler struct {
 	users   *application.UserService
 	jtis    *authentication.JTIService
 	options UserServiceOptions
-	logger  logging.Enriched
 }
 
 func NewUserServiceHandler(users *application.UserService, jtis *authentication.JTIService, options UserServiceOptions) *UserServiceHandler {
@@ -47,7 +50,6 @@ func NewUserServiceHandler(users *application.UserService, jtis *authentication.
 		users:   users,
 		jtis:    jtis,
 		options: options,
-		logger:  logging.Enriched{}.WithPrefix("grpc-users"),
 	}
 }
 
@@ -90,7 +92,7 @@ func (u *UserServiceHandler) Get(ctx context.Context, req *connect.Request[users
 	}
 
 	id := req.Msg.GetId()
-	logger := u.logger.With("userId", id)
+	logger := UserLogger.With("userId", id)
 
 	jwt, err := requireRole(ctx, roles.Viewer)
 	if err != nil {
@@ -127,7 +129,7 @@ func (u *UserServiceHandler) List(ctx context.Context, _ *connect.Request[usersv
 
 	users, err := u.users.Find(ctx, &models.User{})
 	if err != nil {
-		u.logger.From(ctx).Error("error during listing of users", "error", err)
+		UserLogger.From(ctx).Error("error during listing of users", "error", err)
 
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
@@ -154,7 +156,7 @@ func (u *UserServiceHandler) ResetPassword(ctx context.Context, req *connect.Req
 		return nil, connect.NewError(connect.CodeInvalidArgument, application.ErrEmptyPassword)
 	}
 
-	logger := u.logger.With("userId", id)
+	logger := UserLogger.With("userId", id)
 
 	err := u.users.UpdatePassword(ctx, id, []byte(password))
 	if err != nil {
@@ -192,7 +194,7 @@ func (u *UserServiceHandler) ChangePassword(ctx context.Context, req *connect.Re
 	}
 
 	id := jwt.Claims.User.ID
-	logger := u.logger.With("userId", id)
+	logger := UserLogger.With("userId", id)
 
 	user, err := u.users.Get(ctx, id)
 	if err != nil {
@@ -254,7 +256,7 @@ func (u *UserServiceHandler) SetRoles(ctx context.Context, req *connect.Request[
 		return nil, connect.NewError(connect.CodeFailedPrecondition, ErrRemoveOwnAdmin)
 	}
 
-	logger := u.logger.With("userId", id)
+	logger := UserLogger.With("userId", id)
 
 	if _, err := u.users.Get(ctx, id); err != nil {
 		if persistence.IsNotExist(err) {

@@ -25,11 +25,14 @@ var (
 	ErrInvalidCampaignName = errors.New("campaign name cannot be empty")
 )
 
+const (
+	CampaignLogger logging.Prefixed = "grpc-campaigns"
+)
+
 // CampaignServiceHandler implements the campaigns gRPC service.
 type CampaignServiceHandler struct {
 	campaigns *application.CampaignService
 	users     *application.UserService
-	logger    logging.Enriched
 }
 
 // NewCampaignServiceHandler creates a new CampaignServiceHandler.
@@ -37,7 +40,6 @@ func NewCampaignServiceHandler(campaigns *application.CampaignService, users *ap
 	return &CampaignServiceHandler{
 		campaigns: campaigns,
 		users:     users,
-		logger:    logging.Enriched{}.WithPrefix("grpc-campaigns"),
 	}
 }
 
@@ -53,7 +55,7 @@ func (c *CampaignServiceHandler) Create(ctx context.Context, req *connect.Reques
 		return nil, connect.NewError(connect.CodeInvalidArgument, ErrInvalidCampaignName)
 	}
 
-	logger := c.logger.With("userId", jwt.Claims.User.ID, "campaignName", name).From(ctx)
+	logger := CampaignLogger.From(ctx, "userId", jwt.Claims.User.ID, "campaignName", name)
 
 	user, err := c.users.Get(ctx, jwt.Claims.User.ID)
 	if err != nil {
@@ -85,7 +87,7 @@ func (c *CampaignServiceHandler) Get(ctx context.Context, req *connect.Request[c
 		return nil, connect.NewError(connect.CodeInvalidArgument, xerrors.ErrNotExist)
 	}
 
-	logger := c.logger.With("campaignId", id, "userId", jwt.Claims.User.ID).From(ctx)
+	logger := CampaignLogger.From(ctx, "campaignId", id, "userId", jwt.Claims.User.ID)
 
 	campaign, err := c.campaigns.Get(ctx, id)
 	if err != nil {
@@ -119,7 +121,7 @@ func (c *CampaignServiceHandler) List(ctx context.Context, _ *connect.Request[ca
 		campaigns, err = c.campaigns.ListForUser(ctx, jwt.Claims.User.ID)
 	}
 	if err != nil {
-		c.logger.With("userId", jwt.Claims.User.ID).From(ctx).Error("error during listing of campaigns", "error", err)
+		CampaignLogger.From(ctx, "userId", jwt.Claims.User.ID).Error("error during listing of campaigns", "error", err)
 
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}

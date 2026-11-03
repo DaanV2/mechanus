@@ -12,17 +12,19 @@ import (
 
 var _ logger.Interface = &GormLogger{}
 
+const (
+	DBLogger logging.Prefixed = "db"
+)
+
 // GormLogger is a GORM logger implementation that uses the logging.Enriched logger.
 type GormLogger struct {
-	level  log.Level
-	logger logging.Enriched
+	level log.Level
 }
 
 // NewGormlogger creates a new GormLogger with the "db" prefix.
 func NewGormlogger() *GormLogger {
 	result := &GormLogger{
-		logger: logging.Enriched{}.WithPrefix("db"),
-		level:  log.GetLevel(),
+		level: log.GetLevel(),
 	}
 
 	return result
@@ -34,7 +36,7 @@ func (g *GormLogger) Error(ctx context.Context, msg string, args ...any) {
 		return
 	}
 
-	g.logger.From(ctx).Errorf(msg, args...)
+	DBLogger.From(ctx).Errorf(msg, args...)
 }
 
 // Info implements logger.Interface.
@@ -43,7 +45,7 @@ func (g *GormLogger) Info(ctx context.Context, msg string, args ...any) {
 		return
 	}
 
-	g.logger.From(ctx).Infof(msg, args...)
+	DBLogger.From(ctx).Infof(msg, args...)
 }
 
 // Warn implements logger.Interface.
@@ -52,7 +54,7 @@ func (g *GormLogger) Warn(ctx context.Context, msg string, args ...any) {
 		return
 	}
 
-	g.logger.From(ctx).Warnf(msg, args...)
+	DBLogger.From(ctx).Warnf(msg, args...)
 }
 
 // LogMode implements logger.Interface.
@@ -90,7 +92,7 @@ func (g *GormLogger) Trace(ctx context.Context, begin time.Time, fc func() (sql 
 		msg = "[" + str + "]"
 	}
 
-	writer := g.logger.From(ctx).With("rows", rows, "duration", time.Since(begin))
+	writer := DBLogger.From(ctx, "rows", rows, "duration", time.Since(begin))
 	if err != nil {
 		writer = writer.With("err", err)
 	}

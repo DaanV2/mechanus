@@ -11,17 +11,19 @@ import (
 	"github.com/DaanV2/mechanus/server/infrastructure/persistence/models"
 )
 
+const (
+	JTILogger logging.Prefixed = "jti_service"
+)
+
 // JTIService manages JWT IDs (JTI) in the system.
 type JTIService struct {
-	db     *persistence.DB
-	logger logging.Enriched
+	db *persistence.DB
 }
 
 // NewJTIService creates a new JTI service with the provided database.
 func NewJTIService(db *persistence.DB) *JTIService {
 	return &JTIService{
-		db:     db,
-		logger: logging.Enriched{}.WithPrefix("jti_service"),
+		db: db,
 	}
 }
 
@@ -31,7 +33,7 @@ func (s *JTIService) GetByUser(ctx context.Context, userId string) ([]models.JTI
 		return nil, errors.New("string is empty: userId")
 	}
 
-	logger := s.logger.From(ctx).With("userId", userId)
+	logger := JTILogger.From(ctx, "userId", userId)
 	logger.Debug("getting jti")
 
 	var result []models.JTI
@@ -50,7 +52,7 @@ func (s *JTIService) GetActive(ctx context.Context, userId string) ([]models.JTI
 		return nil, errors.New("string is empty: userId")
 	}
 
-	logger := s.logger.From(ctx).With("userId", userId)
+	logger := JTILogger.From(ctx, "userId", userId)
 	logger.Debug("getting active jti's")
 
 	var result []models.JTI
@@ -70,7 +72,7 @@ func (s *JTIService) Get(ctx context.Context, jti string) (*models.JTI, error) {
 		return nil, errors.New("string is empty: jti")
 	}
 
-	logger := s.logger.From(ctx).With("jti", jti)
+	logger := JTILogger.From(ctx, "jti", jti)
 	logger.Debug("getting jti")
 
 	var result models.JTI
@@ -89,7 +91,7 @@ func (s *JTIService) Create(ctx context.Context, userId string) (*models.JTI, er
 		return nil, errors.New("string is empty: userId")
 	}
 
-	logger := s.logger.From(ctx).With("userId", userId)
+	logger := JTILogger.From(ctx, "userId", userId)
 	logger.Debug("creating jti")
 
 	result := models.JTI{
@@ -122,7 +124,7 @@ func (s *JTIService) Revoke(ctx context.Context, jti string) (bool, error) {
 		return false, errors.New("string is empty: jti")
 	}
 
-	logger := s.logger.From(ctx).With("jti", jti)
+	logger := JTILogger.From(ctx, "jti", jti)
 	logger.Debug("revoking jti")
 
 	tx := s.db.WithContext(ctx).Model(&models.JTI{}).Where("id = ?", jti).Update("revoked", true)
@@ -144,7 +146,7 @@ func (s *JTIService) RevokeUser(ctx context.Context, userId string, except ...st
 		return 0, errors.New("string is empty: userId")
 	}
 
-	logger := s.logger.From(ctx).With("userId", userId)
+	logger := JTILogger.From(ctx, "userId", userId)
 	logger.Debug("revoking all jti's of user")
 
 	tx := s.db.WithContext(ctx).Model(&models.JTI{}).Where("user_id = ? AND revoked = ?", userId, false)
@@ -174,7 +176,7 @@ func (s *JTIService) Touch(ctx context.Context, jti string) error {
 // Cleanup permanently deletes revoked JTIs, and JTIs that haven't been used for longer than maxAge.
 // It returns the amount of deleted JTIs.
 func (s *JTIService) Cleanup(ctx context.Context, maxAge time.Duration) (int64, error) {
-	logger := s.logger.From(ctx)
+	logger := JTILogger.From(ctx)
 
 	cutoff := time.Now().Add(-maxAge)
 	tx := s.db.WithContext(ctx).Unscoped().Where("revoked = ? OR updated_at < ?", true, cutoff).Delete(&models.JTI{})

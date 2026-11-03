@@ -18,6 +18,10 @@ import (
 // broadcastTimeout limits how long a listener that stopped reading can hold up a broadcast to it.
 const broadcastTimeout = 10 * time.Second
 
+const (
+	ScreenLogger logging.Prefixed = "screen"
+)
+
 // ScreenHandler manages connections and messages for a single screen.
 type ScreenHandler struct {
 	id        string
@@ -33,7 +37,7 @@ func NewScreenHandler(id string) *ScreenHandler {
 	return &ScreenHandler{
 		id:        id,
 		listeners: xsync.NewMap[string, *ScreenConn](),
-		logger:    logging.Enriched{}.WithPrefix("screen").With("screen_id", id),
+		logger:    ScreenLogger.With("screen_id", id),
 		state:     state.NewScreenState(),
 	}
 }

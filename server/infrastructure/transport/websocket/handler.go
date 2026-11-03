@@ -26,8 +26,11 @@ var (
 	_ http.Handler = &WebsocketHandler{}
 )
 
+const (
+	WebsocketLogger logging.Prefixed = "websocket"
+)
+
 type WebsocketHandler struct {
-	logger logging.Enriched
 	config WebsocketConfig
 
 	screenManager     *screens.ScreenManager
@@ -37,7 +40,6 @@ type WebsocketHandler struct {
 
 func NewWebsocketHandler(handler *screens.ScreenManager, jwt_authenticator *authentication.JWTService, config WebsocketConfig) *WebsocketHandler {
 	return &WebsocketHandler{
-		logger:            logging.Enriched{}.WithPrefix("websocket"),
 		config:            config,
 		screenManager:     handler,
 		jwt_authenticator: jwt_authenticator,
@@ -86,7 +88,7 @@ func (handler *WebsocketHandler) ServeHTTP(w http.ResponseWriter, r *http.Reques
 		attribute.String("device.type", string(hardware)),
 		attribute.String("screen.id", screenid),
 	)
-	logger, connCtx := handler.logger.
+	logger, connCtx := WebsocketLogger.
 		With("id", id, "screen", screenid, "device_id", deviceID, "device_type", hardware).
 		FromUpdate(r.Context())
 	r = r.WithContext(connCtx)
@@ -150,7 +152,7 @@ func (handler *WebsocketHandler) watchSession(h *screens.ScreenConn, auth *scree
 			return
 		case <-check:
 			if _, err := handler.jwt_authenticator.Validate(ctx, auth.Token); err != nil {
-				handler.logger.From(ctx).Info("closing websocket, session no longer valid", "error", err)
+				WebsocketLogger.From(ctx).Info("closing websocket, session no longer valid", "error", err)
 				h.CloseWith(cwebsocket.StatusPolicyViolation, "session no longer valid")
 
 				return

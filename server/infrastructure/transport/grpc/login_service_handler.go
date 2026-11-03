@@ -23,12 +23,15 @@ var (
 	ErrTooManyLoginAttempts = errors.New("too many failed login attempts, try again later")
 )
 
+const (
+	LoginLogger logging.Prefixed = "grpc-login"
+)
+
 type LoginServiceHandler struct {
 	users   *application.UserService
 	jwts    *authentication.JWTService
 	jtis    *authentication.JTIService
 	limiter *loginLimiter
-	logger  logging.Enriched
 }
 
 func NewLoginServiceHandler(users *application.UserService, jwts *authentication.JWTService, jtis *authentication.JTIService) *LoginServiceHandler {
@@ -37,7 +40,6 @@ func NewLoginServiceHandler(users *application.UserService, jwts *authentication
 		jwts:    jwts,
 		jtis:    jtis,
 		limiter: newLoginLimiter(),
-		logger:  logging.Enriched{}.WithPrefix("grpc-login"),
 	}
 }
 
@@ -58,7 +60,7 @@ func (l *LoginServiceHandler) Login(ctx context.Context, req *connect.Request[us
 	}
 
 	if !l.limiter.Allowed(username) {
-		l.logger.From(ctx).Warn("login rejected, too many failed attempts", "username", username)
+		LoginLogger.From(ctx).Warn("login rejected, too many failed attempts", "username", username)
 
 		return nil, connect.NewError(connect.CodeResourceExhausted, ErrTooManyLoginAttempts)
 	}
@@ -150,12 +152,12 @@ func (l *LoginServiceHandler) Logout(ctx context.Context, req *connect.Request[u
 	}
 
 	if _, err := l.jtis.Revoke(ctx, claims.ID); err != nil {
-		l.logger.From(ctx).Error("error revoking session", "error", err, "jti", claims.ID)
+		LoginLogger.From(ctx).Error("error revoking session", "error", err, "jti", claims.ID)
 
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
 
-	l.logger.From(ctx).Info("user logged out", "userId", claims.User.ID)
+	LoginLogger.From(ctx).Info("user logged out", "userId", claims.User.ID)
 
 	return connect.NewResponse(&usersv1.LogoutResponse{}), nil
 }

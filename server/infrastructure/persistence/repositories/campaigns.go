@@ -8,23 +8,25 @@ import (
 	"github.com/DaanV2/mechanus/server/infrastructure/persistence/models"
 )
 
+const (
+	CampaignLogger logging.Prefixed = "campaigns"
+)
+
 // CampaignRepository provides database operations for campaigns.
 type CampaignRepository struct {
-	db     *persistence.DB
-	logger logging.Enriched
+	db *persistence.DB
 }
 
 // NewCampaignRepository creates a new campaign repository with the provided database.
 func NewCampaignRepository(db *persistence.DB) *CampaignRepository {
 	return &CampaignRepository{
-		db:     db,
-		logger: logging.Enriched{}.WithPrefix("campaigns"),
+		db: db,
 	}
 }
 
 // Get looks up the campaign by the given id, will return a [xerrors.ErrNotExist] if nothing matched.
 func (repo *CampaignRepository) Get(ctx context.Context, campaignId string) (*models.Campaign, error) {
-	logger := repo.logger.With("campaignId", campaignId).From(ctx)
+	logger := CampaignLogger.From(ctx, "campaignId", campaignId)
 	logger.Debug("Getting campaign by id")
 
 	var campaign models.Campaign
@@ -39,7 +41,7 @@ func (repo *CampaignRepository) Get(ctx context.Context, campaignId string) (*mo
 
 // List returns all the campaigns, including their users, ordered by creation date.
 func (repo *CampaignRepository) List(ctx context.Context) ([]*models.Campaign, error) {
-	logger := repo.logger.From(ctx)
+	logger := CampaignLogger.From(ctx)
 	logger.Debug("Listing all campaigns")
 
 	var campaigns []*models.Campaign
@@ -54,7 +56,7 @@ func (repo *CampaignRepository) List(ctx context.Context) ([]*models.Campaign, e
 
 // ListForUser returns all the campaigns the given user is in, including their users, ordered by creation date.
 func (repo *CampaignRepository) ListForUser(ctx context.Context, userId string) ([]*models.Campaign, error) {
-	logger := repo.logger.With("userId", userId).From(ctx)
+	logger := CampaignLogger.From(ctx, "userId", userId)
 	logger.Debug("Listing campaigns for user")
 
 	var campaigns []*models.Campaign
@@ -74,7 +76,7 @@ func (repo *CampaignRepository) ListForUser(ctx context.Context, userId string) 
 
 // Create makes a new entry in the database
 func (repo *CampaignRepository) Create(ctx context.Context, campaign *models.Campaign) error {
-	logger := repo.logger.With("campaignname", campaign.Name).From(ctx)
+	logger := CampaignLogger.From(ctx, "campaignname", campaign.Name)
 	logger.Debug("Creating campaign")
 
 	tx := repo.db.WithContext(ctx).Create(campaign)
@@ -84,7 +86,7 @@ func (repo *CampaignRepository) Create(ctx context.Context, campaign *models.Cam
 
 // Update will take the new information in the campaign and update the database entry. Note, this does not update the password or the ID
 func (repo *CampaignRepository) Update(ctx context.Context, campaign *models.Campaign) error {
-	logger := repo.logger.With("campaignId", campaign.ID).From(ctx)
+	logger := CampaignLogger.From(ctx, "campaignId", campaign.ID)
 	logger.Debug("updating campaign")
 
 	tx := repo.db.WithContext(ctx).Omit("id").Updates(campaign)
@@ -94,7 +96,7 @@ func (repo *CampaignRepository) Update(ctx context.Context, campaign *models.Cam
 
 // LinkUser associates a user with a campaign.
 func (repo *CampaignRepository) LinkUser(ctx context.Context, campaign *models.Campaign, user *models.User) error {
-	logger := repo.logger.With("campaignId", campaign.ID, "userId", user.ID).From(ctx)
+	logger := CampaignLogger.From(ctx, "campaignId", campaign.ID, "userId", user.ID)
 	logger.Debug("add user to campaign")
 
 	// Omit "Users.*" so only the join row is written: upserting the user would run its BeforeCreate hook, giving it a new ID
@@ -103,7 +105,7 @@ func (repo *CampaignRepository) LinkUser(ctx context.Context, campaign *models.C
 
 // UnlinkUser removes a user's association with a campaign.
 func (repo *CampaignRepository) UnlinkUser(ctx context.Context, campaign *models.Campaign, user *models.User) error {
-	logger := repo.logger.With("campaignId", campaign.ID, "userId", user.ID).From(ctx)
+	logger := CampaignLogger.From(ctx, "campaignId", campaign.ID, "userId", user.ID)
 	logger.Debug("removing user to campaign")
 
 	return repo.db.WithContext(ctx).Model(campaign).Association("Users").Delete(user)

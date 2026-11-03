@@ -17,17 +17,19 @@ import (
 
 var _ scenesv1connect.SceneServiceHandler = &SceneServiceHandler{}
 
+const (
+	SceneLogger logging.Prefixed = "grpc-scenes"
+)
+
 // SceneServiceHandler implements the scenes gRPC service, the GM's control over the active scene.
 type SceneServiceHandler struct {
 	scenes *application.SceneService
-	logger logging.Enriched
 }
 
 // NewSceneServiceHandler creates a new SceneServiceHandler.
 func NewSceneServiceHandler(sceneService *application.SceneService) *SceneServiceHandler {
 	return &SceneServiceHandler{
 		scenes: sceneService,
-		logger: logging.Enriched{}.WithPrefix("grpc-scenes"),
 	}
 }
 
@@ -40,7 +42,7 @@ func (s *SceneServiceHandler) List(ctx context.Context, _ *connect.Request[scene
 	cfgs, err := s.scenes.Scenes(ctx)
 	if err != nil {
 		// Broken scene files are skipped, the readable ones are still listed
-		s.logger.From(ctx).Warn("some scene configs could not be read", "error", err)
+		SceneLogger.From(ctx).Warn("some scene configs could not be read", "error", err)
 	}
 
 	result := make([]*scenesv1.Scene, 0, len(cfgs))
@@ -59,7 +61,7 @@ func (s *SceneServiceHandler) Activate(ctx context.Context, req *connect.Request
 	}
 
 	sceneID := strings.TrimSpace(req.Msg.GetSceneId())
-	logger := s.logger.With("userId", jwt.Claims.User.ID, "sceneId", sceneID, "variantId", req.Msg.GetVariantId()).From(ctx)
+	logger := SceneLogger.From(ctx, "userId", jwt.Claims.User.ID, "sceneId", sceneID, "variantId", req.Msg.GetVariantId())
 
 	t, err := s.scenes.Activate(ctx, sceneID, req.Msg.GetVariantId())
 	deviceErrs, err := splitDeviceErrors(t, err)
@@ -80,7 +82,7 @@ func (s *SceneServiceHandler) SetVariant(ctx context.Context, req *connect.Reque
 		return nil, err
 	}
 
-	logger := s.logger.With("userId", jwt.Claims.User.ID, "variantId", req.Msg.GetVariantId()).From(ctx)
+	logger := SceneLogger.From(ctx, "userId", jwt.Claims.User.ID, "variantId", req.Msg.GetVariantId())
 
 	t, err := s.scenes.SetVariant(ctx, req.Msg.GetVariantId())
 	deviceErrs, err := splitDeviceErrors(t, err)

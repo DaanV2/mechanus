@@ -7,23 +7,24 @@ import (
 	"connectrpc.com/connect"
 	"github.com/DaanV2/mechanus/server/infrastructure/authentication"
 	"github.com/DaanV2/mechanus/server/infrastructure/logging"
-	"github.com/charmbracelet/log"
 )
 
 var _ connect.Interceptor = &Authenticator{}
+
+const (
+	AuthenticatorLogger logging.Prefixed = "jwt-middleware"
+)
 
 // Authenticator checks incoming requests and validates the jwt if present
 // The result is stored on the context and can be retrieved with [authentication.JWTFromContext]
 type Authenticator struct {
 	jwtService *authentication.JWTService
-	logger     *log.Logger
 }
 
 // NewAuthenticator builds a new Authenticator Interceptor
 func NewAuthenticator(jwtService *authentication.JWTService) *Authenticator {
 	return &Authenticator{
 		jwtService: jwtService,
-		logger:     log.Default().WithPrefix("jwt middleware"),
 	}
 }
 
@@ -71,7 +72,7 @@ func (j *Authenticator) validateAndInject(ctx context.Context, headers http.Head
 
 	claims, ok := authentication.GetClaims(token.Claims)
 	if !ok {
-		j.logger.Error("somehow the claims are not expect as it should")
+		AuthenticatorLogger.From(ctx).Error("somehow the claims are not expect as it should")
 
 		return ctx
 	}

@@ -17,16 +17,18 @@ import (
 
 var _ usersv1connect.InviteServiceHandler = &InviteServiceHandler{}
 
+const (
+	InviteLogger logging.Prefixed = "grpc-invites"
+)
+
 // InviteServiceHandler lets admins hand out invite links, and new players create their account with one.
 type InviteServiceHandler struct {
 	invites *application.InviteService
-	logger  logging.Enriched
 }
 
 func NewInviteServiceHandler(invites *application.InviteService) *InviteServiceHandler {
 	return &InviteServiceHandler{
 		invites: invites,
-		logger:  logging.Enriched{}.WithPrefix("grpc-invites"),
 	}
 }
 
@@ -40,12 +42,12 @@ func (h *InviteServiceHandler) Create(ctx context.Context, req *connect.Request[
 	validFor := time.Duration(req.Msg.GetValidForSeconds()) * time.Second
 	invite, err := h.invites.Create(ctx, jwt.Claims.User.ID, validFor)
 	if err != nil {
-		h.logger.From(ctx).Error("error creating invite", "error", err)
+		InviteLogger.From(ctx).Error("error creating invite", "error", err)
 
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
 
-	h.logger.From(ctx).Info("invite created", "inviteId", invite.ID, "expiresAt", invite.ExpiresAt)
+	InviteLogger.From(ctx).Info("invite created", "inviteId", invite.ID, "expiresAt", invite.ExpiresAt)
 
 	return connect.NewResponse(&usersv1.CreateInviteResponse{Invite: toInvite(invite)}), nil
 }
@@ -58,7 +60,7 @@ func (h *InviteServiceHandler) List(ctx context.Context, _ *connect.Request[user
 
 	invites, err := h.invites.ListUsable(ctx)
 	if err != nil {
-		h.logger.From(ctx).Error("error listing invites", "error", err)
+		InviteLogger.From(ctx).Error("error listing invites", "error", err)
 
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
@@ -81,7 +83,7 @@ func (h *InviteServiceHandler) Revoke(ctx context.Context, req *connect.Request[
 		if errors.Is(err, application.ErrInviteInvalid) {
 			return nil, connect.NewError(connect.CodeNotFound, err)
 		}
-		h.logger.From(ctx).Error("error revoking invite", "error", err)
+		InviteLogger.From(ctx).Error("error revoking invite", "error", err)
 
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
@@ -96,7 +98,7 @@ func (h *InviteServiceHandler) Check(ctx context.Context, req *connect.Request[u
 		if errors.Is(err, application.ErrInviteInvalid) {
 			return connect.NewResponse(&usersv1.CheckInviteResponse{Valid: false}), nil
 		}
-		h.logger.From(ctx).Error("error checking invite", "error", err)
+		InviteLogger.From(ctx).Error("error checking invite", "error", err)
 
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
@@ -123,15 +125,15 @@ func (h *InviteServiceHandler) Accept(ctx context.Context, req *connect.Request[
 			return nil, connect.NewError(connect.CodeAlreadyExists, application.ErrUserAlreadyExists)
 		case user != nil:
 			// The account exists, only recording who used the invite failed
-			h.logger.From(ctx).Warn("account created, but invite use not recorded", "error", err)
+			InviteLogger.From(ctx).Warn("account created, but invite use not recorded", "error", err)
 		default:
-			h.logger.From(ctx).Error("error accepting invite", "error", err)
+			InviteLogger.From(ctx).Error("error accepting invite", "error", err)
 
 			return nil, connect.NewError(connect.CodeInternal, err)
 		}
 	}
 
-	h.logger.From(ctx).Info("account created with invite", "userId", user.ID)
+	InviteLogger.From(ctx).Info("account created with invite", "userId", user.ID)
 
 	return connect.NewResponse(&usersv1.AcceptInviteResponse{User: &usersv1.User{Id: user.ID, Name: user.Username}}), nil
 }

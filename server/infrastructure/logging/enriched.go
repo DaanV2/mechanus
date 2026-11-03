@@ -11,12 +11,6 @@ type Enriched struct {
 	values []any
 }
 
-func (e Enriched) WithPrefix(prefix string) Enriched {
-	e.prefix = prefix
-
-	return e
-}
-
 func (e Enriched) With(keyvalues ...any) Enriched {
 	e.values = append(e.values, keyvalues...)
 

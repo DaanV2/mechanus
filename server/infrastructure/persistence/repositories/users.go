@@ -8,23 +8,25 @@ import (
 	"github.com/DaanV2/mechanus/server/infrastructure/persistence/models"
 )
 
+const (
+	UserLogger logging.Prefixed = "users"
+)
+
 // UserRepository provides database operations for users.
 type UserRepository struct {
-	db     *persistence.DB
-	logger logging.Enriched
+	db *persistence.DB
 }
 
 // NewUserRepository creates a new user repository with the provided database.
 func NewUserRepository(db *persistence.DB) *UserRepository {
 	return &UserRepository{
-		db:     db,
-		logger: logging.Enriched{}.WithPrefix("users"),
+		db: db,
 	}
 }
 
 // Get looks up the user by the given id
 func (repo *UserRepository) Get(ctx context.Context, userId string) (*models.User, error) {
-	logger := repo.logger.With("userId", userId).From(ctx)
+	logger := UserLogger.From(ctx, "userId", userId)
 	logger.Debug("Getting user by id")
 
 	var user models.User
@@ -39,7 +41,7 @@ func (repo *UserRepository) Get(ctx context.Context, userId string) (*models.Use
 
 // FindByUsername retrieve the given user by its name, instead of id.
 func (repo *UserRepository) FindByUsername(ctx context.Context, username string) (*models.User, error) {
-	logger := repo.logger.With("username", username).From(ctx)
+	logger := UserLogger.From(ctx, "username", username)
 	logger.Debug("Getting user by username")
 
 	var user models.User
@@ -55,7 +57,7 @@ func (repo *UserRepository) FindByUsername(ctx context.Context, username string)
 // Create makes a new entry in the database, assumes the password is set in the PasswordHash field as plain bytes, will hash that field first
 // It updates the user with the new password hash and sets the ID to a new UUID
 func (repo *UserRepository) Create(ctx context.Context, user *models.User) error {
-	logger := repo.logger.With("username", user.Username).From(ctx)
+	logger := UserLogger.From(ctx, "username", user.Username)
 	logger.Debug("Creating user")
 
 	tx := repo.db.WithContext(ctx).Create(user)
@@ -65,7 +67,7 @@ func (repo *UserRepository) Create(ctx context.Context, user *models.User) error
 
 // Update updates a user in the database, omitting username, password hash, and ID.
 func (repo *UserRepository) Update(ctx context.Context, user *models.User) error {
-	logger := repo.logger.With("userId", user.ID).From(ctx)
+	logger := UserLogger.From(ctx, "userId", user.ID)
 	logger.Debug("updating user")
 
 	tx := repo.db.WithContext(ctx).
@@ -77,7 +79,7 @@ func (repo *UserRepository) Update(ctx context.Context, user *models.User) error
 
 // UpdatePassword will apply the given model to the database, but only on the password field
 func (repo *UserRepository) UpdatePassword(ctx context.Context, user *models.User) error {
-	logger := repo.logger.With("userId", user.ID).From(ctx)
+	logger := UserLogger.From(ctx, "userId", user.ID)
 	logger.Debug("updating password")
 
 	tx := repo.db.WithContext(ctx).
@@ -89,7 +91,7 @@ func (repo *UserRepository) UpdatePassword(ctx context.Context, user *models.Use
 
 // Find searches for users matching the provided query criteria.
 func (repo *UserRepository) Find(ctx context.Context, queries *models.User) ([]*models.User, error) {
-	logger := repo.logger.From(ctx)
+	logger := UserLogger.From(ctx)
 	logger.Debug("querying users")
 	var users []*models.User
 

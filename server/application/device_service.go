@@ -43,6 +43,10 @@ var (
 	ErrPairingStopped = errors.New("the server is shutting down")
 )
 
+const (
+	DeviceLogger logging.Prefixed = "devices"
+)
+
 const maxDeviceNameLength = 64
 
 var (
@@ -89,7 +93,6 @@ type (
 		jtis    *authentication.JTIService
 		screens *screens.ScreenManager
 		options PairingOptions
-		logger  logging.Enriched
 
 		lock     sync.Mutex // Guards everything below, and the fields of the sessions
 		byCode   map[string]*pairingSession
@@ -138,7 +141,6 @@ func NewDeviceService(repo *repositories.DeviceRepository, jwts *authentication.
 		jtis:     jtis,
 		screens:  screenManager,
 		options:  DefaultPairingOptions(),
-		logger:   logging.Enriched{}.WithPrefix("devices"),
 		byCode:   map[string]*pairingSession{},
 		byDevice: map[string]*pairingSession{},
 		wrong:    map[string]*wrongCodes{},
@@ -206,7 +208,7 @@ func (s *DeviceService) Pair(ctx context.Context, deviceID string, hardware devi
 
 		if err := send(PairingEvent{Tokens: tokens}); err != nil {
 			// The admin saw it succeed, but the device never got its tokens: don't leave a device listed that isn't paired
-			s.logger.From(ctx).Warn("device tokens could not be delivered, revoking", "deviceId", deviceID, "error", err)
+			DeviceLogger.From(ctx).Warn("device tokens could not be delivered, revoking", "deviceId", deviceID, "error", err)
 
 			return errors.Join(err, s.revokeDetached(ctx, deviceID))
 		}
@@ -280,7 +282,7 @@ func (s *DeviceService) closePairing(ctx context.Context, session *pairingSessio
 	select {
 	case <-session.paired:
 		if err := s.revokeDetached(ctx, session.deviceID); err != nil {
-			s.logger.From(ctx).Error("could not revoke undelivered device tokens", "deviceId", session.deviceID, "error", err)
+			DeviceLogger.From(ctx).Error("could not revoke undelivered device tokens", "deviceId", session.deviceID, "error", err)
 		}
 	default:
 	}
@@ -362,7 +364,7 @@ func (s *DeviceService) Confirm(ctx context.Context, code, name, confirmedBy str
 		return nil, ErrPairingCodeInvalid
 	}
 
-	s.logger.From(ctx).Info("device paired", "deviceId", device.ID, "name", device.Name, "pairedBy", confirmedBy)
+	DeviceLogger.From(ctx).Info("device paired", "deviceId", device.ID, "name", device.Name, "pairedBy", confirmedBy)
 
 	return device, nil
 }

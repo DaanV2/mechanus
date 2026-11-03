@@ -18,6 +18,10 @@ import (
 
 var _ devicesv1connect.DeviceServiceHandler = &DeviceServiceHandler{}
 
+const (
+	DeviceLogger logging.Prefixed = "grpc-devices"
+)
+
 // DeviceServicePolicies returns the policy of every procedure of the device service.
 func DeviceServicePolicies() map[string]authentication.Policy {
 	admin := authentication.PolicyRole(roles.Admin)
@@ -36,14 +40,12 @@ func DeviceServicePolicies() map[string]authentication.Policy {
 // Who may call what is decided by [DeviceServicePolicies].
 type DeviceServiceHandler struct {
 	devices *application.DeviceService
-	logger  logging.Enriched
 }
 
 // NewDeviceServiceHandler creates a new DeviceServiceHandler.
 func NewDeviceServiceHandler(deviceService *application.DeviceService) *DeviceServiceHandler {
 	return &DeviceServiceHandler{
 		devices: deviceService,
-		logger:  logging.Enriched{}.WithPrefix("grpc-devices"),
 	}
 }
 
@@ -114,7 +116,7 @@ func (h *DeviceServiceHandler) Revoke(ctx context.Context, req *connect.Request[
 		return nil, h.toError(ctx, err)
 	}
 
-	h.logger.From(ctx).Info("device revoked", "deviceId", req.Msg.GetId())
+	DeviceLogger.From(ctx).Info("device revoked", "deviceId", req.Msg.GetId())
 
 	return connect.NewResponse(&devicesv1.RevokeDeviceResponse{}), nil
 }
@@ -154,7 +156,7 @@ func (h *DeviceServiceHandler) toError(ctx context.Context, err error) error {
 		return connect.NewError(connect.CodeNotFound, err)
 	}
 
-	h.logger.From(ctx).Error("device service error", "error", err)
+	DeviceLogger.From(ctx).Error("device service error", "error", err)
 
 	return connect.NewError(connect.CodeInternal, err)
 }

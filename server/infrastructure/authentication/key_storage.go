@@ -15,11 +15,14 @@ import (
 
 var _ lifecycle.AfterInitialize = &KeyManager{}
 
+const (
+	KeyManagerLogger logging.Prefixed = "key_manager"
+)
+
 // KeyManager manages cryptographic keys for JWT signing and verification.
 type KeyManager struct {
 	storage storage.Storage[*KeyData]
 	keys    *xsync.Map[string, *KeyData]
-	logger  logging.Enriched
 
 	// Guards picking / generating the signing key, so concurrent requests don't each generate a key.
 	signingLock sync.Mutex
@@ -39,7 +42,6 @@ func NewKeyManager(sp storage.StorageProvider[*KeyData]) (*KeyManager, error) {
 	manager := &KeyManager{
 		storage: s,
 		keys:    xsync.NewMap[string, *KeyData](),
-		logger:  logging.Enriched{}.WithPrefix("key_manager"),
 	}
 
 	return manager, nil
@@ -76,7 +78,7 @@ func (manager *KeyManager) AfterInitialize(ctx context.Context) error {
 
 // Get retrieves a key by its ID, loading from storage if necessary.
 func (manager *KeyManager) Get(ctx context.Context, id string) (*KeyData, error) {
-	manager.logger.From(ctx).Debug("getting key: " + id)
+	KeyManagerLogger.From(ctx).Debug("getting key: " + id)
 	item, ok := manager.keys.Load(id)
 	if ok {
 		return item, nil
@@ -87,7 +89,7 @@ func (manager *KeyManager) Get(ctx context.Context, id string) (*KeyData, error)
 
 // New creates and saves a new cryptographic key.
 func (manager *KeyManager) New(ctx context.Context) (*KeyData, error) {
-	manager.logger.From(ctx).Debug("creating new key")
+	KeyManagerLogger.From(ctx).Debug("creating new key")
 	item, err := xcrypto.GenerateRSAKeys()
 	if err != nil {
 		return nil, err
@@ -114,7 +116,7 @@ func (manager *KeyManager) GetSigningKey(ctx context.Context) (*KeyData, error) 
 	}
 
 	if err := manager.retire(ctx); err != nil {
-		manager.logger.From(ctx).Error("error retiring old keys", "error", err)
+		KeyManagerLogger.From(ctx).Error("error retiring old keys", "error", err)
 	}
 
 	return key, nil
@@ -157,7 +159,7 @@ func (manager *KeyManager) retire(ctx context.Context) error {
 			continue
 		}
 
-		manager.logger.From(ctx).Info("retiring jwt signing key", "kid", id)
+		KeyManagerLogger.From(ctx).Info("retiring jwt signing key", "kid", id)
 		if _, err := manager.storage.Delete(ctx, key); err != nil {
 			return fmt.Errorf("error deleting key %s: %w", id, err)
 		}
@@ -179,7 +181,7 @@ func (manager *KeyManager) load(ctx context.Context, id string) (*KeyData, error
 }
 
 func (manager *KeyManager) save(ctx context.Context, item *KeyData) error {
-	manager.logger.From(ctx).Debug("saving key: " + item.id)
+	KeyManagerLogger.From(ctx).Debug("saving key: " + item.id)
 	manager.keys.Store(item.id, item)
 
 	return manager.storage.Set(ctx, item)
