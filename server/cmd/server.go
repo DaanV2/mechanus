@@ -9,6 +9,8 @@ import (
 	"github.com/DaanV2/mechanus/server/application/checks"
 	"github.com/DaanV2/mechanus/server/components"
 	"github.com/DaanV2/mechanus/server/infrastructure/authentication"
+	"github.com/DaanV2/mechanus/server/infrastructure/outputs"
+	"github.com/DaanV2/mechanus/server/infrastructure/outputs/mqtt"
 	"github.com/DaanV2/mechanus/server/infrastructure/persistence"
 	"github.com/DaanV2/mechanus/server/infrastructure/servers"
 	"github.com/DaanV2/mechanus/server/infrastructure/telemetry"
@@ -51,6 +53,8 @@ func init() {
 	cors.CorsConfig.AddToSet(serverCmd.Flags())
 	websocket.WebsocketConfigSet.AddToSet(serverCmd.Flags())
 	authentication.AuthConfigSet.AddToSet(serverCmd.Flags())
+	outputs.IntegrationsConfigSet.AddToSet(serverCmd.Flags())
+	mqtt.MQTTConfigSet.AddToSet(serverCmd.Flags())
 }
 
 // ServerWorkload starts and manages the server lifecycle.

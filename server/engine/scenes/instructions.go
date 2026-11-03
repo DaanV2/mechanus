@@ -92,9 +92,9 @@ type MusicInstruction struct {
 // Kind implements [Instruction].
 func (MusicInstruction) Kind() devices.Kind { return devices.KindMusic }
 
-// CustomInstruction is a raw payload for a custom device, delivered over an event bus.
+// CustomInstruction is a raw payload for a custom device, delivered over an event bus. Where it is
+// published comes from the device's configuration, scenes only know targets.
 type CustomInstruction struct {
-	Topic   string          `json:"topic"`   // Event bus topic / channel, e.g. an MQTT topic
 	Payload json.RawMessage `json:"payload"` // Opaque payload, passed through untouched
 }
 

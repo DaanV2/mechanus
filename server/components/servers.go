@@ -30,6 +30,7 @@ import (
 type ServerComponents struct {
 	Server     *servers.Server
 	Users      *application.UserService
+	Devices    *application.DeviceMonitor
 	DB         *persistence.DB
 	Components *lifecycle.Manager
 }
