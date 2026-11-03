@@ -88,7 +88,12 @@ func BuildServer(setupCtx context.Context) (*ServerComponents, error) {
 	// Servers
 	websocketHandler := websocket.NewWebsocketHandler(screenManager, jwtService, websocketCfg)
 
-	router, err := CreateRouter(&RouterSetup{
+	routerConfig := RouterConfig{
+		CORS:    corsCfg,
+		Server:  serverCfg,
+		Tracing: tracingCfg,
+	}
+	routerSetup := &RouterSetup{
 		WebsocketHandler: websocketHandler,
 		Assets:           assetStore,
 		HealthChecker:    lfManager,
@@ -98,18 +103,16 @@ func BuildServer(setupCtx context.Context) (*ServerComponents, error) {
 			&grpc.LoggingInterceptor{},
 			grpc.NewAuthenticator(jwtService),
 		},
-	}, &RouterRPCS{
+	}
+	routerRpcs := &RouterRPCS{
 		Campaign: grpc.NewCampaignServiceHandler(campaignService, userService),
 		Login:    grpc.NewLoginServiceHandler(userService, jwtService, jtiService),
 		Scene:    grpc.NewSceneServiceHandler(sceneService),
 		User:     grpc.NewUserServiceHandler(userService, jtiService, grpc.UserServiceOptions{SignupEnabled: authCfg.SignupEnabled}),
 		Invite:   grpc.NewInviteServiceHandler(inviteService),
-	},
-		RouterConfig{
-			CORS:    corsCfg,
-			Server:  serverCfg,
-			Tracing: tracingCfg,
-		})
+	}
+
+	router, err := CreateRouter(routerSetup, routerRpcs, routerConfig)
 	if err != nil {
 		return nil, err
 	}
