@@ -7,17 +7,30 @@ option go_package = "github.com/DaanV2/mechanus/server/proto/campaigns/v1;campai
 
 // A service for viewing and managing campaigns
 service CampaignService {
-  // Create a new campaign, the calling user becomes a member of it
+  // Create a new campaign, the calling user becomes its owner and a member of it
   rpc Create(CreateCampaignRequest) returns (CreateCampaignResponse) {}
   // Get a single campaign, only available to admins and members of the campaign
   rpc Get(GetCampaignRequest) returns (GetCampaignResponse) {}
   // List the campaigns, admins see all campaigns, other users only the campaigns they are in
   rpc List(ListCampaignsRequest) returns (ListCampaignsResponse) {}
+  // Update the name and description of a campaign, only available to admins and the owner of the campaign
+  rpc Update(UpdateCampaignRequest) returns (UpdateCampaignResponse) {}
+  // Delete a campaign, only available to admins and the owner of the campaign. The campaign is soft deleted
+  rpc Delete(DeleteCampaignRequest) returns (DeleteCampaignResponse) {}
+  // List the players of a campaign, only available to admins and members of the campaign
+  rpc ListPlayers(ListPlayersRequest) returns (ListPlayersResponse) {}
+  // Add an existing user to a campaign, only available to admins and the owner of the campaign
+  rpc AddPlayer(AddPlayerRequest) returns (AddPlayerResponse) {}
+  // Remove a player from a campaign, available to admins and the owner of the campaign,
+  // and to players removing themselves. The owner can't be removed
+  rpc RemovePlayer(RemovePlayerRequest) returns (RemovePlayerResponse) {}
 }
 
 message CreateCampaignRequest {
   // The name of the campaign
   string name = 1;
+  // An optional description of the campaign
+  string description = 2;
 }
 
 message CreateCampaignResponse {
@@ -38,11 +51,54 @@ message ListCampaignsResponse {
   repeated Campaign campaigns = 1;
 }
 
+message UpdateCampaignRequest {
+  string id = 1; // The campaign UUID to update
+  string name = 2; // The new name of the campaign, cannot be empty
+  string description = 3; // The new description of the campaign, can be empty
+}
+
+message UpdateCampaignResponse {
+  Campaign campaign = 1;
+}
+
+message DeleteCampaignRequest {
+  string id = 1; // The campaign UUID to delete
+}
+
+message DeleteCampaignResponse {}
+
+message ListPlayersRequest {
+  string campaign_id = 1; // The campaign UUID
+}
+
+message ListPlayersResponse {
+  repeated CampaignMember players = 1;
+}
+
+message AddPlayerRequest {
+  string campaign_id = 1; // The campaign UUID
+  string username = 2; // The username of the existing user to add
+}
+
+message AddPlayerResponse {
+  CampaignMember player = 1; // The player that was added
+}
+
+message RemovePlayerRequest {
+  string campaign_id = 1; // The campaign UUID
+  string user_id = 2; // The UUID of the user to remove
+}
+
+message RemovePlayerResponse {}
+
 message Campaign {
   string id = 1; // The campaign UUID
   string name = 2; // The campaign name
   google.protobuf.Timestamp created_at = 3; // When the campaign was created
   repeated CampaignMember members = 4; // The users in the campaign
+  string description = 5; // The campaign description
+  string owner_id = 6; // The UUID of the user who owns (created) the campaign, empty when unknown
+  bool can_manage = 7; // Whenever the calling user may edit, delete and manage the players of the campaign
 }
 
 message CampaignMember {

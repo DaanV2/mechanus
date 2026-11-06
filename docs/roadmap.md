@@ -190,7 +190,7 @@ Done: per-login sessions (one JTI each) with an RS512 access token (1 h) and a `
 **Goal**: campaigns, players and play sessions are managed in the app, and a campaign's session continues exactly where it left off — across server restarts and campaign switches.
 
 - [x] Campaign overview and detail pages: users see their campaigns, admins see all; users can create one
-- [ ] Campaign management UI: edit, delete, invite / manage players
+- [x] Campaign management UI: edit, delete, invite / manage players
 - [ ] Characters linked to scene entities (`Entity.CharacterID`)
 - [ ] Remember the active scene across server restarts
 - [ ] Session object: one continuous session per campaign holding the active scene and play state
@@ -199,6 +199,9 @@ Done: per-login sessions (one JTI each) with an RS512 access token (1 h) and a `
 
 - A session is the never-ending game of a campaign — no start / end lifecycle; switching campaign switches session, returning resumes it
 - Scene state keeps only the latest version per campaign + scene, overwritten on exit; no history
+- A campaign has an owner: the user who created it (`Campaign.OwnerID`). The owner and admins edit, delete and add / remove players; other members can only see it and leave it. The owner can't be removed. Campaigns created before owners were tracked have none and are managed by admins only. This stands in until a GM role exists
+- Deleting a campaign soft deletes it (`models.Model.DeletedAt`); its player links stay, so it could be restored from the database
+- Players are added by the username of an existing account. Inviting someone new reuses the admin invite flow (`/users/invites`, linked from the campaign page); the owner adds the new account once it exists. Invites don't carry a campaign yet — revisit once there is a GM role that can hand out invites
 
 ---
 

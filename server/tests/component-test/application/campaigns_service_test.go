@@ -125,6 +125,114 @@ var _ = Describe("Campaign Service", func() {
 			Expect(campaigns).To(BeEmpty())
 		})
 	})
+
+	Context("CreateWithUser owner", func() {
+		It("makes the user the owner of the campaign", func(ctx SpecContext) {
+			user := createUser(ctx, userRepo)
+			campaign := &models.Campaign{Name: "Fellowship"}
+			Expect(service.CreateWithUser(ctx, campaign, user)).To(Succeed())
+
+			c, err := service.Get(ctx, campaign.ID)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(c.OwnerID).To(Equal(user.ID))
+		})
+	})
+
+	Context("Update", func() {
+		It("saves the name and description, also when the description is cleared", func(ctx SpecContext) {
+			user := createUser(ctx, userRepo)
+			campaign := &models.Campaign{Name: "Fellowship", Description: "One ring"}
+			Expect(service.CreateWithUser(ctx, campaign, user)).To(Succeed())
+
+			By("changing the name")
+			campaign.Name = "Two Towers"
+			Expect(service.Update(ctx, campaign)).To(Succeed())
+			c, err := service.Get(ctx, campaign.ID)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(c.Name).To(Equal("Two Towers"))
+			Expect(c.Description).To(Equal("One ring"))
+
+			By("clearing the description")
+			campaign.Description = ""
+			Expect(service.Update(ctx, campaign)).To(Succeed())
+			c, err = service.Get(ctx, campaign.ID)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(c.Description).To(BeEmpty())
+
+			By("keeping the owner and players")
+			Expect(c.OwnerID).To(Equal(user.ID))
+			Expect(c.Users).To(HaveLen(1))
+		})
+
+		It("returns not found for unknown campaigns", func(ctx SpecContext) {
+			err := service.Update(ctx, &models.Campaign{Model: models.Model{ID: "does-not-exist"}, Name: "x"})
+			Expect(persistence.IsNotExist(err)).To(BeTrue())
+		})
+	})
+
+	Context("Delete", func() {
+		It("soft deletes the campaign", func(ctx SpecContext) {
+			user := createUser(ctx, userRepo)
+			campaign := &models.Campaign{Name: "Fellowship"}
+			Expect(service.CreateWithUser(ctx, campaign, user)).To(Succeed())
+
+			Expect(service.Delete(ctx, campaign.ID)).To(Succeed())
+
+			By("no longer finding the campaign")
+			_, err := service.Get(ctx, campaign.ID)
+			Expect(persistence.IsNotExist(err)).To(BeTrue())
+
+			campaigns, err := service.List(ctx)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(campaignIDs(campaigns)).ToNot(ContainElement(campaign.ID))
+
+			campaigns, err = service.ListForUser(ctx, user.ID)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(campaigns).To(BeEmpty())
+
+			By("keeping the row in the database")
+			var deleted models.Campaign
+			Expect(db.WithContext(ctx).Unscoped().First(&deleted, "id = ?", campaign.ID).Error).To(Succeed())
+			Expect(deleted.DeletedAt.Valid).To(BeTrue())
+		})
+
+		It("returns not found for unknown or already deleted campaigns", func(ctx SpecContext) {
+			Expect(persistence.IsNotExist(service.Delete(ctx, "does-not-exist"))).To(BeTrue())
+
+			campaign := &models.Campaign{Name: "Fellowship"}
+			Expect(service.Create(ctx, campaign)).To(Succeed())
+			Expect(service.Delete(ctx, campaign.ID)).To(Succeed())
+			Expect(persistence.IsNotExist(service.Delete(ctx, campaign.ID))).To(BeTrue())
+		})
+	})
+
+	Context("RemoveUser", func() {
+		It("removes a player from the campaign", func(ctx SpecContext) {
+			owner, player := createUser(ctx, userRepo), createUser(ctx, userRepo)
+			campaign := &models.Campaign{Name: "Fellowship"}
+			Expect(service.CreateWithUser(ctx, campaign, owner)).To(Succeed())
+			Expect(service.AddUsers(ctx, campaign, player)).To(Succeed())
+
+			Expect(service.RemoveUser(ctx, campaign, player)).To(Succeed())
+
+			c, err := service.Get(ctx, campaign.ID)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(c.Users).To(HaveLen(1))
+			Expect(c.Users[0].ID).To(Equal(owner.ID))
+		})
+
+		It("refuses to remove the owner", func(ctx SpecContext) {
+			owner := createUser(ctx, userRepo)
+			campaign := &models.Campaign{Name: "Fellowship"}
+			Expect(service.CreateWithUser(ctx, campaign, owner)).To(Succeed())
+
+			Expect(service.RemoveUser(ctx, campaign, owner)).To(MatchError(application.ErrCannotRemoveOwner))
+
+			c, err := service.Get(ctx, campaign.ID)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(c.Users).To(HaveLen(1))
+		})
+	})
 })
 
 func createUser(ctx SpecContext, repo *repositories.UserRepository) *models.User {
