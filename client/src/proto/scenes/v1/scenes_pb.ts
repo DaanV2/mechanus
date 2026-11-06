@@ -4,13 +4,15 @@
 
 import type { GenEnum, GenFile, GenMessage, GenService } from "@bufbuild/protobuf/codegenv2";
 import { enumDesc, fileDesc, messageDesc, serviceDesc } from "@bufbuild/protobuf/codegenv2";
+import type { Timestamp } from "@bufbuild/protobuf/wkt";
+import { file_google_protobuf_timestamp } from "@bufbuild/protobuf/wkt";
 import type { Message } from "@bufbuild/protobuf";
 
 /**
  * Describes the file scenes/v1/scenes.proto.
  */
 export const file_scenes_v1_scenes: GenFile = /*@__PURE__*/
-  fileDesc("ChZzY2VuZXMvdjEvc2NlbmVzLnByb3RvEglzY2VuZXMudjEiEwoRTGlzdFNjZW5lc1JlcXVlc3QiNgoSTGlzdFNjZW5lc1Jlc3BvbnNlEiAKBnNjZW5lcxgBIAMoCzIQLnNjZW5lcy52MS5TY2VuZSI8ChRBY3RpdmF0ZVNjZW5lUmVxdWVzdBIQCghzY2VuZV9pZBgBIAEoCRISCgp2YXJpYW50X2lkGAIgASgJIlYKFUFjdGl2YXRlU2NlbmVSZXNwb25zZRImCgZhY3RpdmUYASABKAsyFi5zY2VuZXMudjEuQWN0aXZlU2NlbmUSFQoNZGV2aWNlX2Vycm9ycxgCIAMoCSInChFTZXRWYXJpYW50UmVxdWVzdBISCgp2YXJpYW50X2lkGAEgASgJIlMKElNldFZhcmlhbnRSZXNwb25zZRImCgZhY3RpdmUYASABKAsyFi5zY2VuZXMudjEuQWN0aXZlU2NlbmUSFQoNZGV2aWNlX2Vycm9ycxgCIAMoCSIXChVHZXRBY3RpdmVTY2VuZVJlcXVlc3QiUAoWR2V0QWN0aXZlU2NlbmVSZXNwb25zZRIrCgZhY3RpdmUYASABKAsyFi5zY2VuZXMudjEuQWN0aXZlU2NlbmVIAIgBAUIJCgdfYWN0aXZlInUKBVNjZW5lEgoKAmlkGAEgASgJEgwKBG5hbWUYAiABKAkSEwoLZGVzY3JpcHRpb24YAyABKAkSJAoIdmFyaWFudHMYBCADKAsyEi5zY2VuZXMudjEuVmFyaWFudBIXCg9kZWZhdWx0X3ZhcmlhbnQYBSABKAkifAoHVmFyaWFudBIKCgJpZBgBIAEoCRIMCgRuYW1lGAIgASgJEioKBHRhZ3MYAyADKAsyHC5zY2VuZXMudjEuVmFyaWFudC5UYWdzRW50cnkaKwoJVGFnc0VudHJ5EgsKA2tleRgBIAEoCRINCgV2YWx1ZRgCIAEoCToCOAEiZwoLQWN0aXZlU2NlbmUSHwoFc2NlbmUYASABKAsyEC5zY2VuZXMudjEuU2NlbmUSEgoKdmFyaWFudF9pZBgCIAEoCRIjCghlbnRpdGllcxgDIAMoCzIRLnNjZW5lcy52MS5FbnRpdHkiOwoWU2V0RW50aXR5SGlkZGVuUmVxdWVzdBIRCgllbnRpdHlfaWQYASABKAkSDgoGaGlkZGVuGAIgASgIIlgKF1NldEVudGl0eUhpZGRlblJlc3BvbnNlEiYKBmFjdGl2ZRgBIAEoCzIWLnNjZW5lcy52MS5BY3RpdmVTY2VuZRIVCg1kZXZpY2VfZXJyb3JzGAIgAygJIqMBChJTcGF3bkVudGl0eVJlcXVlc3QSEQoJZW50aXR5X2lkGAEgASgJEiMKBGtpbmQYAiABKA4yFS5zY2VuZXMudjEuRW50aXR5S2luZBIMCgRuYW1lGAMgASgJEg4KBmhpZGRlbhgEIAEoCBIqCghwb3NpdGlvbhgFIAEoCzITLnNjZW5lcy52MS5Qb3NpdGlvbkgAiAEBQgsKCV9wb3NpdGlvbiJUChNTcGF3bkVudGl0eVJlc3BvbnNlEiYKBmFjdGl2ZRgBIAEoCzIWLnNjZW5lcy52MS5BY3RpdmVTY2VuZRIVCg1kZXZpY2VfZXJyb3JzGAIgAygJIigKE1JlbW92ZUVudGl0eVJlcXVlc3QSEQoJZW50aXR5X2lkGAEgASgJIlUKFFJlbW92ZUVudGl0eVJlc3BvbnNlEiYKBmFjdGl2ZRgBIAEoCzIWLnNjZW5lcy52MS5BY3RpdmVTY2VuZRIVCg1kZXZpY2VfZXJyb3JzGAIgAygJIk0KEU1vdmVFbnRpdHlSZXF1ZXN0EhEKCWVudGl0eV9pZBgBIAEoCRIlCghwb3NpdGlvbhgCIAEoCzITLnNjZW5lcy52MS5Qb3NpdGlvbiJTChJNb3ZlRW50aXR5UmVzcG9uc2USJgoGYWN0aXZlGAEgASgLMhYuc2NlbmVzLnYxLkFjdGl2ZVNjZW5lEhUKDWRldmljZV9lcnJvcnMYAiADKAkikAEKBkVudGl0eRIKCgJpZBgBIAEoCRIjCgRraW5kGAIgASgOMhUuc2NlbmVzLnYxLkVudGl0eUtpbmQSDAoEbmFtZRgDIAEoCRIOCgZoaWRkZW4YBCABKAgSKgoIcG9zaXRpb24YBSABKAsyEy5zY2VuZXMudjEuUG9zaXRpb25IAIgBAUILCglfcG9zaXRpb24iIAoIUG9zaXRpb24SCQoBeBgBIAEoARIJCgF5GAIgASgBKoUBCgpFbnRpdHlLaW5kEhsKF0VOVElUWV9LSU5EX1VOU1BFQ0lGSUVEEAASFgoSRU5USVRZX0tJTkRfUExBWUVSEAESEwoPRU5USVRZX0tJTkRfTlBDEAISFQoRRU5USVRZX0tJTkRfRU5FTVkQAxIWChJFTlRJVFlfS0lORF9PQkpFQ1QQBDKTBQoMU2NlbmVTZXJ2aWNlEkUKBExpc3QSHC5zY2VuZXMudjEuTGlzdFNjZW5lc1JlcXVlc3QaHS5zY2VuZXMudjEuTGlzdFNjZW5lc1Jlc3BvbnNlIgASTwoIQWN0aXZhdGUSHy5zY2VuZXMudjEuQWN0aXZhdGVTY2VuZVJlcXVlc3QaIC5zY2VuZXMudjEuQWN0aXZhdGVTY2VuZVJlc3BvbnNlIgASSwoKU2V0VmFyaWFudBIcLnNjZW5lcy52MS5TZXRWYXJpYW50UmVxdWVzdBodLnNjZW5lcy52MS5TZXRWYXJpYW50UmVzcG9uc2UiABJSCglHZXRBY3RpdmUSIC5zY2VuZXMudjEuR2V0QWN0aXZlU2NlbmVSZXF1ZXN0GiEuc2NlbmVzLnYxLkdldEFjdGl2ZVNjZW5lUmVzcG9uc2UiABJaCg9TZXRFbnRpdHlIaWRkZW4SIS5zY2VuZXMudjEuU2V0RW50aXR5SGlkZGVuUmVxdWVzdBoiLnNjZW5lcy52MS5TZXRFbnRpdHlIaWRkZW5SZXNwb25zZSIAEk4KC1NwYXduRW50aXR5Eh0uc2NlbmVzLnYxLlNwYXduRW50aXR5UmVxdWVzdBoeLnNjZW5lcy52MS5TcGF3bkVudGl0eVJlc3BvbnNlIgASUQoMUmVtb3ZlRW50aXR5Eh4uc2NlbmVzLnYxLlJlbW92ZUVudGl0eVJlcXVlc3QaHy5zY2VuZXMudjEuUmVtb3ZlRW50aXR5UmVzcG9uc2UiABJLCgpNb3ZlRW50aXR5Ehwuc2NlbmVzLnYxLk1vdmVFbnRpdHlSZXF1ZXN0Gh0uc2NlbmVzLnYxLk1vdmVFbnRpdHlSZXNwb25zZSIAQjxaOmdpdGh1Yi5jb20vRGFhblYyL21lY2hhbnVzL3NlcnZlci9wcm90by9zY2VuZXMvdjE7c2NlbmVzdjFiBnByb3RvMw");
+  fileDesc("ChZzY2VuZXMvdjEvc2NlbmVzLnByb3RvEglzY2VuZXMudjEiEwoRTGlzdFNjZW5lc1JlcXVlc3QiNgoSTGlzdFNjZW5lc1Jlc3BvbnNlEiAKBnNjZW5lcxgBIAMoCzIQLnNjZW5lcy52MS5TY2VuZSI8ChRBY3RpdmF0ZVNjZW5lUmVxdWVzdBIQCghzY2VuZV9pZBgBIAEoCRISCgp2YXJpYW50X2lkGAIgASgJIlYKFUFjdGl2YXRlU2NlbmVSZXNwb25zZRImCgZhY3RpdmUYASABKAsyFi5zY2VuZXMudjEuQWN0aXZlU2NlbmUSFQoNZGV2aWNlX2Vycm9ycxgCIAMoCSInChFTZXRWYXJpYW50UmVxdWVzdBISCgp2YXJpYW50X2lkGAEgASgJIlMKElNldFZhcmlhbnRSZXNwb25zZRImCgZhY3RpdmUYASABKAsyFi5zY2VuZXMudjEuQWN0aXZlU2NlbmUSFQoNZGV2aWNlX2Vycm9ycxgCIAMoCSIXChVHZXRBY3RpdmVTY2VuZVJlcXVlc3QiUAoWR2V0QWN0aXZlU2NlbmVSZXNwb25zZRIrCgZhY3RpdmUYASABKAsyFi5zY2VuZXMudjEuQWN0aXZlU2NlbmVIAIgBAUIJCgdfYWN0aXZlInUKBVNjZW5lEgoKAmlkGAEgASgJEgwKBG5hbWUYAiABKAkSEwoLZGVzY3JpcHRpb24YAyABKAkSJAoIdmFyaWFudHMYBCADKAsyEi5zY2VuZXMudjEuVmFyaWFudBIXCg9kZWZhdWx0X3ZhcmlhbnQYBSABKAkifAoHVmFyaWFudBIKCgJpZBgBIAEoCRIMCgRuYW1lGAIgASgJEioKBHRhZ3MYAyADKAsyHC5zY2VuZXMudjEuVmFyaWFudC5UYWdzRW50cnkaKwoJVGFnc0VudHJ5EgsKA2tleRgBIAEoCRINCgV2YWx1ZRgCIAEoCToCOAEiZwoLQWN0aXZlU2NlbmUSHwoFc2NlbmUYASABKAsyEC5zY2VuZXMudjEuU2NlbmUSEgoKdmFyaWFudF9pZBgCIAEoCRIjCghlbnRpdGllcxgDIAMoCzIRLnNjZW5lcy52MS5FbnRpdHkiOwoWU2V0RW50aXR5SGlkZGVuUmVxdWVzdBIRCgllbnRpdHlfaWQYASABKAkSDgoGaGlkZGVuGAIgASgIIlgKF1NldEVudGl0eUhpZGRlblJlc3BvbnNlEiYKBmFjdGl2ZRgBIAEoCzIWLnNjZW5lcy52MS5BY3RpdmVTY2VuZRIVCg1kZXZpY2VfZXJyb3JzGAIgAygJIqMBChJTcGF3bkVudGl0eVJlcXVlc3QSEQoJZW50aXR5X2lkGAEgASgJEiMKBGtpbmQYAiABKA4yFS5zY2VuZXMudjEuRW50aXR5S2luZBIMCgRuYW1lGAMgASgJEg4KBmhpZGRlbhgEIAEoCBIqCghwb3NpdGlvbhgFIAEoCzITLnNjZW5lcy52MS5Qb3NpdGlvbkgAiAEBQgsKCV9wb3NpdGlvbiJUChNTcGF3bkVudGl0eVJlc3BvbnNlEiYKBmFjdGl2ZRgBIAEoCzIWLnNjZW5lcy52MS5BY3RpdmVTY2VuZRIVCg1kZXZpY2VfZXJyb3JzGAIgAygJIigKE1JlbW92ZUVudGl0eVJlcXVlc3QSEQoJZW50aXR5X2lkGAEgASgJIlUKFFJlbW92ZUVudGl0eVJlc3BvbnNlEiYKBmFjdGl2ZRgBIAEoCzIWLnNjZW5lcy52MS5BY3RpdmVTY2VuZRIVCg1kZXZpY2VfZXJyb3JzGAIgAygJIk0KEU1vdmVFbnRpdHlSZXF1ZXN0EhEKCWVudGl0eV9pZBgBIAEoCRIlCghwb3NpdGlvbhgCIAEoCzITLnNjZW5lcy52MS5Qb3NpdGlvbiJTChJNb3ZlRW50aXR5UmVzcG9uc2USJgoGYWN0aXZlGAEgASgLMhYuc2NlbmVzLnYxLkFjdGl2ZVNjZW5lEhUKDWRldmljZV9lcnJvcnMYAiADKAkikAEKBkVudGl0eRIKCgJpZBgBIAEoCRIjCgRraW5kGAIgASgOMhUuc2NlbmVzLnYxLkVudGl0eUtpbmQSDAoEbmFtZRgDIAEoCRIOCgZoaWRkZW4YBCABKAgSKgoIcG9zaXRpb24YBSABKAsyEy5zY2VuZXMudjEuUG9zaXRpb25IAIgBAUILCglfcG9zaXRpb24iIAoIUG9zaXRpb24SCQoBeBgBIAEoARIJCgF5GAIgASgBIhsKGUxpc3REZXZpY2VTdGF0dXNlc1JlcXVlc3QiRgoaTGlzdERldmljZVN0YXR1c2VzUmVzcG9uc2USKAoHZGV2aWNlcxgBIAMoCzIXLnNjZW5lcy52MS5EZXZpY2VTdGF0dXMi4wEKDERldmljZVN0YXR1cxIRCglkZXZpY2VfaWQYASABKAkSDAoEbmFtZRgCIAEoCRIMCgRraW5kGAMgASgJEhMKC2ludGVncmF0aW9uGAQgASgJEg8KB3RhcmdldHMYBSADKAkSJQoFc3RhdGUYBiABKA4yFi5zY2VuZXMudjEuRGV2aWNlU3RhdGUSDQoFZXJyb3IYByABKAkSLgoKbGFzdF9hcHBseRgIIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASGAoQbGFzdF9hcHBseV9lcnJvchgJIAEoCSqFAQoKRW50aXR5S2luZBIbChdFTlRJVFlfS0lORF9VTlNQRUNJRklFRBAAEhYKEkVOVElUWV9LSU5EX1BMQVlFUhABEhMKD0VOVElUWV9LSU5EX05QQxACEhUKEUVOVElUWV9LSU5EX0VORU1ZEAMSFgoSRU5USVRZX0tJTkRfT0JKRUNUEAQqXgoLRGV2aWNlU3RhdGUSHAoYREVWSUNFX1NUQVRFX1VOU1BFQ0lGSUVEEAASFwoTREVWSUNFX1NUQVRFX09OTElORRABEhgKFERFVklDRV9TVEFURV9PRkZMSU5FEAIy+AUKDFNjZW5lU2VydmljZRJFCgRMaXN0Ehwuc2NlbmVzLnYxLkxpc3RTY2VuZXNSZXF1ZXN0Gh0uc2NlbmVzLnYxLkxpc3RTY2VuZXNSZXNwb25zZSIAEk8KCEFjdGl2YXRlEh8uc2NlbmVzLnYxLkFjdGl2YXRlU2NlbmVSZXF1ZXN0GiAuc2NlbmVzLnYxLkFjdGl2YXRlU2NlbmVSZXNwb25zZSIAEksKClNldFZhcmlhbnQSHC5zY2VuZXMudjEuU2V0VmFyaWFudFJlcXVlc3QaHS5zY2VuZXMudjEuU2V0VmFyaWFudFJlc3BvbnNlIgASUgoJR2V0QWN0aXZlEiAuc2NlbmVzLnYxLkdldEFjdGl2ZVNjZW5lUmVxdWVzdBohLnNjZW5lcy52MS5HZXRBY3RpdmVTY2VuZVJlc3BvbnNlIgASWgoPU2V0RW50aXR5SGlkZGVuEiEuc2NlbmVzLnYxLlNldEVudGl0eUhpZGRlblJlcXVlc3QaIi5zY2VuZXMudjEuU2V0RW50aXR5SGlkZGVuUmVzcG9uc2UiABJOCgtTcGF3bkVudGl0eRIdLnNjZW5lcy52MS5TcGF3bkVudGl0eVJlcXVlc3QaHi5zY2VuZXMudjEuU3Bhd25FbnRpdHlSZXNwb25zZSIAElEKDFJlbW92ZUVudGl0eRIeLnNjZW5lcy52MS5SZW1vdmVFbnRpdHlSZXF1ZXN0Gh8uc2NlbmVzLnYxLlJlbW92ZUVudGl0eVJlc3BvbnNlIgASSwoKTW92ZUVudGl0eRIcLnNjZW5lcy52MS5Nb3ZlRW50aXR5UmVxdWVzdBodLnNjZW5lcy52MS5Nb3ZlRW50aXR5UmVzcG9uc2UiABJjChJMaXN0RGV2aWNlU3RhdHVzZXMSJC5zY2VuZXMudjEuTGlzdERldmljZVN0YXR1c2VzUmVxdWVzdBolLnNjZW5lcy52MS5MaXN0RGV2aWNlU3RhdHVzZXNSZXNwb25zZSIAQjxaOmdpdGh1Yi5jb20vRGFhblYyL21lY2hhbnVzL3NlcnZlci9wcm90by9zY2VuZXMvdjE7c2NlbmVzdjFiBnByb3RvMw", [file_google_protobuf_timestamp]);
 
 /**
  * @generated from message scenes.v1.ListScenesRequest
@@ -540,6 +542,111 @@ export const PositionSchema: GenMessage<Position> = /*@__PURE__*/
   messageDesc(file_scenes_v1_scenes, 20);
 
 /**
+ * @generated from message scenes.v1.ListDeviceStatusesRequest
+ */
+export type ListDeviceStatusesRequest = Message<"scenes.v1.ListDeviceStatusesRequest"> & {
+};
+
+/**
+ * Describes the message scenes.v1.ListDeviceStatusesRequest.
+ * Use `create(ListDeviceStatusesRequestSchema)` to create a new message.
+ */
+export const ListDeviceStatusesRequestSchema: GenMessage<ListDeviceStatusesRequest> = /*@__PURE__*/
+  messageDesc(file_scenes_v1_scenes, 21);
+
+/**
+ * @generated from message scenes.v1.ListDeviceStatusesResponse
+ */
+export type ListDeviceStatusesResponse = Message<"scenes.v1.ListDeviceStatusesResponse"> & {
+  /**
+   * Every device of the room, sorted by ID
+   *
+   * @generated from field: repeated scenes.v1.DeviceStatus devices = 1;
+   */
+  devices: DeviceStatus[];
+};
+
+/**
+ * Describes the message scenes.v1.ListDeviceStatusesResponse.
+ * Use `create(ListDeviceStatusesResponseSchema)` to create a new message.
+ */
+export const ListDeviceStatusesResponseSchema: GenMessage<ListDeviceStatusesResponse> = /*@__PURE__*/
+  messageDesc(file_scenes_v1_scenes, 22);
+
+/**
+ * The health / connection status of a device of the room
+ *
+ * @generated from message scenes.v1.DeviceStatus
+ */
+export type DeviceStatus = Message<"scenes.v1.DeviceStatus"> & {
+  /**
+   * @generated from field: string device_id = 1;
+   */
+  deviceId: string;
+
+  /**
+   * Empty when the device has none
+   *
+   * @generated from field: string name = 2;
+   */
+  name: string;
+
+  /**
+   * What instructions the device accepts: screen, light, music or custom
+   *
+   * @generated from field: string kind = 3;
+   */
+  kind: string;
+
+  /**
+   * The integration that reaches the device, eg: screen, mqtt, hue
+   *
+   * @generated from field: string integration = 4;
+   */
+  integration: string;
+
+  /**
+   * The targets of the room the device is bound to, sorted
+   *
+   * @generated from field: repeated string targets = 5;
+   */
+  targets: string[];
+
+  /**
+   * @generated from field: scenes.v1.DeviceState state = 6;
+   */
+  state: DeviceState;
+
+  /**
+   * Why the device is offline
+   *
+   * @generated from field: string error = 7;
+   */
+  error: string;
+
+  /**
+   * When the device was last instructed, unset if never
+   *
+   * @generated from field: google.protobuf.Timestamp last_apply = 8;
+   */
+  lastApply?: Timestamp | undefined;
+
+  /**
+   * What went wrong the last time the device was instructed
+   *
+   * @generated from field: string last_apply_error = 9;
+   */
+  lastApplyError: string;
+};
+
+/**
+ * Describes the message scenes.v1.DeviceStatus.
+ * Use `create(DeviceStatusSchema)` to create a new message.
+ */
+export const DeviceStatusSchema: GenMessage<DeviceStatus> = /*@__PURE__*/
+  messageDesc(file_scenes_v1_scenes, 23);
+
+/**
  * EntityKind is the role an entity plays in a scene.
  *
  * @generated from enum scenes.v1.EntityKind
@@ -576,6 +683,38 @@ export enum EntityKind {
  */
 export const EntityKindSchema: GenEnum<EntityKind> = /*@__PURE__*/
   enumDesc(file_scenes_v1_scenes, 0);
+
+/**
+ * DeviceState says whether a device of the room can be reached
+ *
+ * @generated from enum scenes.v1.DeviceState
+ */
+export enum DeviceState {
+  /**
+   * Nothing is known yet: not instructed, and its integration cannot check it
+   *
+   * @generated from enum value: DEVICE_STATE_UNSPECIFIED = 0;
+   */
+  UNSPECIFIED = 0,
+
+  /**
+   * @generated from enum value: DEVICE_STATE_ONLINE = 1;
+   */
+  ONLINE = 1,
+
+  /**
+   * See DeviceStatus.error
+   *
+   * @generated from enum value: DEVICE_STATE_OFFLINE = 2;
+   */
+  OFFLINE = 2,
+}
+
+/**
+ * Describes the enum scenes.v1.DeviceState.
+ */
+export const DeviceStateSchema: GenEnum<DeviceState> = /*@__PURE__*/
+  enumDesc(file_scenes_v1_scenes, 1);
 
 /**
  * A service for the GM to control which scene the room plays
@@ -662,6 +801,16 @@ export const SceneService: GenService<{
     methodKind: "unary";
     input: typeof MoveEntityRequestSchema;
     output: typeof MoveEntityResponseSchema;
+  },
+  /**
+   * List the devices of the room with whether they can be reached and how their last instruction went
+   *
+   * @generated from rpc scenes.v1.SceneService.ListDeviceStatuses
+   */
+  listDeviceStatuses: {
+    methodKind: "unary";
+    input: typeof ListDeviceStatusesRequestSchema;
+    output: typeof ListDeviceStatusesResponseSchema;
   },
 }> = /*@__PURE__*/
   serviceDesc(file_scenes_v1_scenes, 0);

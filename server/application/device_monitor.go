@@ -59,7 +59,7 @@ func (m *DeviceMonitor) Track(driver OutputDriver) OutputDriver {
 	return &trackedDriver{OutputDriver: driver, monitor: m}
 }
 
-// Statuses returns the status of every device in the room, sorted by device ID. A device whose
+// Statuses returns the status of every device in the room with the targets it is bound to, sorted by device ID. A device whose
 // integration has no driver (not configured) is offline with [ErrNoDriver] as the reason.
 func (m *DeviceMonitor) Statuses(ctx context.Context) ([]devices.Status, error) {
 	room, err := m.rooms.CurrentRoom(ctx)
@@ -73,6 +73,7 @@ func (m *DeviceMonitor) Statuses(ctx context.Context) ([]devices.Status, error) 
 	for _, device := range room.Devices {
 		wg.Go(func() {
 			status := m.status(ctx, device)
+			status.Targets = room.TargetsFor(device.ID)
 
 			lock.Lock()
 			defer lock.Unlock()
@@ -92,7 +93,13 @@ func (m *DeviceMonitor) status(ctx context.Context, device *devices.Device) devi
 	last, applied := m.results[device.ID]
 	m.lock.Unlock()
 
-	status := devices.Status{DeviceID: device.ID, Integration: device.Integration, State: devices.StateUnknown}
+	status := devices.Status{
+		DeviceID:    device.ID,
+		Name:        device.Name,
+		Kind:        device.Kind,
+		Integration: device.Integration,
+		State:       devices.StateUnknown,
+	}
 	if applied {
 		status.LastApply = last.at
 		status.State = devices.StateOnline

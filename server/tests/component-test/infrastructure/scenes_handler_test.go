@@ -62,9 +62,10 @@ var _ = Describe("SceneServiceHandler", func() {
 		assetStore := assets.NewStore(fstest.MapFS{"scenes/cave/maps/cave.png": {Data: []byte("png")}})
 		screenManager = screens.NewScreenManager()
 
+		monitor := application.NewDeviceMonitor(configStore, 0)
 		handler = grpc.NewSceneServiceHandler(application.NewSceneService(configStore, stateStore, configStore,
-			screen.NewDriver(screenManager, assetStore),
-		))
+			monitor.Track(screen.NewDriver(screenManager, assetStore)),
+		), monitor)
 		userContext = withUser(util_test.CreateUser())
 	})
 
@@ -111,6 +112,25 @@ var _ = Describe("SceneServiceHandler", func() {
 		Expect(screenView().GetKind()).To(Equal(screensv1.ViewKind_VIEW_KIND_BLANK))
 	})
 
+	It("reports the status of the room's devices", func(ctx SpecContext) {
+		_, err := handler.Activate(userContext(ctx), connect.NewRequest(&scenesv1.ActivateSceneRequest{SceneId: "cave"}))
+		Expect(err).ToNot(HaveOccurred())
+
+		resp, err := handler.ListDeviceStatuses(userContext(ctx), connect.NewRequest(&scenesv1.ListDeviceStatusesRequest{}))
+		Expect(err).ToNot(HaveOccurred())
+		Expect(resp.Msg.GetDevices()).To(HaveLen(1))
+
+		tv := resp.Msg.GetDevices()[0]
+		Expect(tv.GetDeviceId()).To(Equal("tv"))
+		Expect(tv.GetKind()).To(Equal(string(devices.KindScreen)))
+		Expect(tv.GetIntegration()).To(Equal(devices.IntegrationScreen))
+		Expect(tv.GetTargets()).To(Equal([]string{"table"}))
+		Expect(tv.GetState()).To(Equal(scenesv1.DeviceState_DEVICE_STATE_OFFLINE), "instructed, but its screen isn't open")
+		Expect(tv.GetError()).To(Equal(screen.ErrNotConnected.Error()))
+		Expect(tv.GetLastApply()).ToNot(BeNil())
+		Expect(tv.GetLastApplyError()).To(BeEmpty())
+	})
+
 	DescribeTable("maps failures to connect codes",
 		func(ctx SpecContext, call func(context.Context) error, code connect.Code) {
 			Expect(connect.CodeOf(call(userContext(ctx)))).To(Equal(code))
@@ -134,6 +154,9 @@ var _ = Describe("SceneServiceHandler", func() {
 
 	It("requires an authenticated user", func(ctx SpecContext) {
 		_, err := handler.List(ctx, connect.NewRequest(&scenesv1.ListScenesRequest{}))
+		Expect(connect.CodeOf(err)).To(Equal(connect.CodeUnauthenticated))
+
+		_, err = handler.ListDeviceStatuses(ctx, connect.NewRequest(&scenesv1.ListDeviceStatusesRequest{}))
 		Expect(connect.CodeOf(err)).To(Equal(connect.CodeUnauthenticated))
 	})
 })

@@ -1,6 +1,8 @@
 syntax = "proto3";
 package scenes.v1;
 
+import "google/protobuf/timestamp.proto";
+
 option go_package = "github.com/DaanV2/mechanus/server/proto/scenes/v1;scenesv1";
 
 // A service for the GM to control which scene the room plays
@@ -21,6 +23,8 @@ service SceneService {
   rpc RemoveEntity(RemoveEntityRequest) returns (RemoveEntityResponse) {}
   // Move an entity of the active scene on the battle map
   rpc MoveEntity(MoveEntityRequest) returns (MoveEntityResponse) {}
+  // List the devices of the room with whether they can be reached and how their last instruction went
+  rpc ListDeviceStatuses(ListDeviceStatusesRequest) returns (ListDeviceStatusesResponse) {}
 }
 
 message ListScenesRequest {}
@@ -140,4 +144,30 @@ message Entity {
 message Position {
   double x = 1;
   double y = 2;
+}
+
+message ListDeviceStatusesRequest {}
+
+message ListDeviceStatusesResponse {
+  repeated DeviceStatus devices = 1; // Every device of the room, sorted by ID
+}
+
+// DeviceState says whether a device of the room can be reached
+enum DeviceState {
+  DEVICE_STATE_UNSPECIFIED = 0; // Nothing is known yet: not instructed, and its integration cannot check it
+  DEVICE_STATE_ONLINE = 1;
+  DEVICE_STATE_OFFLINE = 2; // See DeviceStatus.error
+}
+
+// The health / connection status of a device of the room
+message DeviceStatus {
+  string device_id = 1;
+  string name = 2; // Empty when the device has none
+  string kind = 3; // What instructions the device accepts: screen, light, music or custom
+  string integration = 4; // The integration that reaches the device, eg: screen, mqtt, hue
+  repeated string targets = 5; // The targets of the room the device is bound to, sorted
+  DeviceState state = 6;
+  string error = 7; // Why the device is offline
+  google.protobuf.Timestamp last_apply = 8; // When the device was last instructed, unset if never
+  string last_apply_error = 9; // What went wrong the last time the device was instructed
 }

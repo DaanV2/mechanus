@@ -23,9 +23,11 @@
     TableHead,
     TableHeadCell
   } from 'flowbite-svelte';
-  import { onMount } from 'svelte';
+  import { onDestroy, onMount } from 'svelte';
   import {
+    DeviceState,
     EntityKind,
+    type DeviceStatus,
     type ActiveScene,
     type Entity,
     type Scene
@@ -45,6 +47,25 @@
   let busy = $state(false);
   let errorObj = $state<MechanusError>(null);
 
+  // Device statuses: refreshed after every change and on a timer, since devices also drop out on their own
+  const STATUS_REFRESH_MS = 10_000;
+  const STATES: Record<DeviceState, { name: string; color: 'green' | 'red' | 'gray' }> = {
+    [DeviceState.ONLINE]: { name: 'Online', color: 'green' },
+    [DeviceState.OFFLINE]: { name: 'Offline', color: 'red' },
+    [DeviceState.UNSPECIFIED]: { name: 'Unknown', color: 'gray' }
+  };
+  let deviceStatuses = $state<DeviceStatus[] | undefined>(undefined);
+  let statusTimer: ReturnType<typeof setInterval> | undefined;
+
+  // Failing to read the statuses doesn't get in the way of scene control
+  async function loadStatuses() {
+    try {
+      deviceStatuses = (await createSceneClient().listDeviceStatuses({})).devices;
+    } catch (err) {
+      console.warn('could not read the device statuses', err);
+    }
+  }
+
   async function load() {
     const client = createSceneClient();
     const [list, current] = await Promise.all([client.list({}), client.getActive({})]);
@@ -59,6 +80,7 @@
       const resp = await action();
       active = resp.active;
       deviceErrors = resp.deviceErrors;
+      void loadStatuses();
     } catch (err) {
       errorObj = err instanceof Error ? err : new Error('An unexpected error occurred.');
     } finally {
@@ -110,7 +132,11 @@
     } catch (err) {
       errorObj = err instanceof Error ? err : new Error('An unexpected error occurred.');
     }
+    await loadStatuses();
+    statusTimer = setInterval(loadStatuses, STATUS_REFRESH_MS);
   });
+
+  onDestroy(() => clearInterval(statusTimer));
 </script>
 
 <svelte:head>
@@ -257,5 +283,46 @@
         </SimpleCard>
       {/each}
     </Fluid>
+  {/if}
+
+  {#if deviceStatuses !== undefined}
+    <div class="w-full max-w-3xl px-5 py-3">
+      <Heading tag="h3" class="py-2 text-xl">Devices</Heading>
+      <Table>
+        <TableHead>
+          <TableHeadCell>Device</TableHeadCell>
+          <TableHeadCell>Targets</TableHeadCell>
+          <TableHeadCell>Integration</TableHeadCell>
+          <TableHeadCell>Status</TableHeadCell>
+        </TableHead>
+        <TableBody>
+          {#each deviceStatuses as device (device.deviceId)}
+            {@const state = STATES[device.state] ?? STATES[DeviceState.UNSPECIFIED]}
+            <TableBodyRow data-testid={`device-${device.deviceId}`}>
+              <TableBodyCell>
+                {device.name || device.deviceId}
+                <span class="block text-xs text-gray-500">{device.kind}</span>
+              </TableBodyCell>
+              <TableBodyCell>{device.targets.join(', ') || '—'}</TableBodyCell>
+              <TableBodyCell>{device.integration}</TableBodyCell>
+              <TableBodyCell>
+                <Badge color={state.color}>{state.name}</Badge>
+                {#if device.error}
+                  <span class="block text-xs text-red-600 dark:text-red-400">{device.error}</span>
+                {:else if device.lastApplyError}
+                  <span class="block text-xs text-red-600 dark:text-red-400"
+                    >Last instruction: {device.lastApplyError}</span
+                  >
+                {/if}
+              </TableBodyCell>
+            </TableBodyRow>
+          {:else}
+            <TableBodyRow>
+              <TableBodyCell colspan={4}>No devices in the room</TableBodyCell>
+            </TableBodyRow>
+          {/each}
+        </TableBody>
+      </Table>
+    </div>
   {/if}
 </div>

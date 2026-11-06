@@ -60,7 +60,7 @@ var _ = Describe("SceneServiceHandler entity controls", func() {
 
 		sceneService = application.NewSceneService(configStore, stateStore, configStore, driver)
 		sceneService.AddBattleMapDriver(driver)
-		handler = grpc.NewSceneServiceHandler(sceneService)
+		handler = grpc.NewSceneServiceHandler(sceneService, application.NewDeviceMonitor(configStore, 0))
 		userContext = withUser(util_test.CreateUser())
 
 		_, err = handler.Activate(userContext(setupCtx), connect.NewRequest(&scenesv1.ActivateSceneRequest{SceneId: "cave"}))

@@ -113,7 +113,7 @@ func BuildServer(setupCtx context.Context) (*ServerComponents, error) {
 	routerRpcs := &RouterRPCS{
 		Campaign: grpc.NewCampaignServiceHandler(campaignService, userService),
 		Login:    grpc.NewLoginServiceHandler(userService, jwtService, jtiService),
-		Scene:    grpc.NewSceneServiceHandler(sceneService),
+		Scene:    grpc.NewSceneServiceHandler(sceneService, deviceMonitor),
 		User:     grpc.NewUserServiceHandler(userService, jtiService, grpc.UserServiceOptions{SignupEnabled: authCfg.SignupEnabled}),
 		Invite:   grpc.NewInviteServiceHandler(inviteService),
 		Device:   grpc.NewDeviceServiceHandler(deviceService),
