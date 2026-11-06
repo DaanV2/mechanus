@@ -91,6 +91,23 @@ func (s *subscriber) messages() []received {
 	return append([]received{}, s.got...)
 }
 
+// live returns what was received as it was published, leaving out retained copies. The broker sends
+// retained messages after acknowledging a subscription, so a publish right after subscribing can
+// arrive twice: live, and again as the retained message it just became.
+func (s *subscriber) live() []received {
+	s.lock.Lock()
+	defer s.lock.Unlock()
+
+	var live []received
+	for _, m := range s.got {
+		if !m.retained {
+			live = append(live, m)
+		}
+	}
+
+	return live
+}
+
 var _ = Describe("Driver", func() {
 	var (
 		ctx        context.Context
@@ -163,8 +180,8 @@ var _ = Describe("Driver", func() {
 			instruction := scenes.CustomInstruction{Payload: json.RawMessage(`{"burst":3,"keep":"as is"}`)}
 			Expect(driver.Apply(ctx, ref, "smoke", fog, instruction)).To(Succeed())
 
-			Eventually(device.messages).Should(HaveLen(1))
-			Expect(device.messages()[0].payload).To(MatchJSON(`{
+			Eventually(device.live).Should(HaveLen(1))
+			Expect(device.live()[0].payload).To(MatchJSON(`{
 				"scene": "tavern",
 				"variant": "night",
 				"target": "smoke",
@@ -189,7 +206,7 @@ var _ = Describe("Driver", func() {
 
 			Expect(driver.Apply(ctx, ref, "smoke", fog, scenes.CustomInstruction{Payload: json.RawMessage(`1`)})).To(Succeed())
 
-			Eventually(device.messages).Should(HaveLen(1))
+			Eventually(device.live).Should(HaveLen(1))
 		})
 
 		It("ignores other kinds of instructions", func() {
@@ -226,7 +243,7 @@ var _ = Describe("Driver", func() {
 			Expect(err).To(MatchError(mqtt.ErrInvalidTopic))
 			Expect(err).To(MatchError(ContainSubstring(`device "a-broken"`)))
 			Expect(transition).ToNot(BeNil(), "the scene is active regardless")
-			Eventually(device.messages).Should(HaveLen(1))
+			Eventually(device.live).Should(HaveLen(1))
 
 			statuses, err := monitor.Statuses(ctx)
 			Expect(err).ToNot(HaveOccurred())
