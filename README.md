@@ -10,6 +10,10 @@ Everything is driven by **scenes**: a scene knows which players, NPCs and enemie
 
 ![overview](./docs/assets/overview.svg)
 
+## Install
+
+Download a binary for Linux, Windows or macOS from the [releases](https://github.com/DaanV2/mechanus/releases), or run the Docker image `ghcr.io/daanv2/mechanus:latest`. See [Installation](./docs/installation.md).
+
 ## Quick Start
 
 For local development with Docker:

@@ -207,14 +207,16 @@ Done: per-login sessions (one JTI each) with an RS512 access token (1 h) and a `
 **Goal**: someone else can install Mechanus on a home network and use it.
 
 - [ ] Client discovers the server via mDNS (the server already announces)
-- [ ] Packaging: single binary for Linux, Windows and macOS (amd64 + arm64), multi-arch Docker image, all tested in CI
-- [ ] About page content and licenses (`client/src/routes/about`)
+- [x] Packaging: single binary for Linux, Windows and macOS (amd64 + arm64), multi-arch Docker image, all tested in CI. GoReleaser (`.goreleaser.yaml`) builds the archives (binary + `web/`) on release and as a snapshot in PR CI, where each archive is started on a runner of its own OS / arch; the image is built for both arches on every PR. See [installation.md](./installation.md)
+- [ ] Serve the web client without `--server.static.folder`: embed it in the binary, or default to a `web/` folder next to the executable. Which one — TBD
+- [x] About page content and licenses (`client/src/routes/about`): third-party licences are generated at build time (`server/scripts/licenses` for Go modules, `client/scripts/vite-plugin-licenses.ts` for bundled npm packages)
 - [x] macOS configuration paths documented (`docs/configuration/config-file.md`)
 - [ ] User-facing documentation: setting up a room, writing scenes
 
 **Decisions**
 
 - Linux, Windows, macOS (amd64 + arm64) and a multi-arch Docker image are all fully supported — covers Raspberry Pi, NAS, mini PC and laptops. SQLite is pure Go, so cross-compiling needs no cgo
+- Release archives ship the web client as a `web/` folder next to the binary, the way the server serves it today (`server.static.folder`)
 
 ---
 

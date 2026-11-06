@@ -37,3 +37,41 @@ jobs:
           name: docker-image
           path: /tmp/mechanus.tar.gz
           retention-days: 1
+
+  # Same build as the release (release-assets.yaml), for every platform the image is published for.
+  docker-multi-arch:
+    name: 🐳 Multi-arch build (amd64 + arm64)
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📦 Checkout Repository
+        uses: actions/checkout@v7
+
+      - name: ⚒️ Set up QEMU
+        uses: docker/setup-qemu-action@v4
+
+      - name: ⚒️ Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: 🛠️ Build
+        uses: docker/build-push-action@v7
+        with:
+          push: false
+          load: false
+          platforms: linux/amd64,linux/arm64
+          cache-from: type=gha,scope=multi-arch
+          cache-to: type=gha,mode=max,scope=multi-arch
+          tags: mechanus:multi-arch
+
+      - name: 🛠️ Load and run the arm64 image
+        uses: docker/build-push-action@v7
+        with:
+          push: false
+          load: true
+          platforms: linux/arm64
+          cache-from: type=gha,scope=multi-arch
+          tags: mechanus:arm64
+
+      - name: 🔥 Run arm64 image under QEMU
+        run: |
+          docker run --rm --platform linux/arm64 mechanus:arm64 /app/mechanus --help
+          docker image inspect mechanus:arm64 --format '{{.Architecture}}' | grep -x arm64

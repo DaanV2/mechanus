@@ -2,3 +2,6 @@
 db.sqlite
 *.test
 mechanus
+
+# GoReleaser output
+dist/

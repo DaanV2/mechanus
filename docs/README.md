@@ -8,6 +8,7 @@
 - [configuration/database](./configuration/database.md)
 - [configuration/integrations](./configuration/integrations.md)
 - [configuration/opentelemetry](./configuration/opentelemetry.md)
+- [installation](./installation.md) — run a release binary or the Docker image
 - [contributing](./contributing.md)
 - [development](./development.md)
 - [roadmap](./roadmap.md) — milestones, features still to build, open decisions (`TBD`)

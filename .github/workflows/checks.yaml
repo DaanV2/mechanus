@@ -39,6 +39,12 @@ jobs:
     name: 🐳 Docker
     uses: ./.github/workflows/docker-checks.yaml
 
+  release-checks:
+    needs:
+      - proto-checks
+    name: 📦 Release build
+    uses: ./.github/workflows/release-checks.yaml
+
   integration-tests:
     needs:
       - docker-checks

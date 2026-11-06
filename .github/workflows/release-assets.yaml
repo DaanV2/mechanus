@@ -5,9 +5,46 @@ on:
     types: [released]
 
 jobs:
+  binaries:
+    runs-on: ubuntu-latest
+    name: 📦 Build & Upload Binaries
+    permissions:
+      contents: write # Upload archives to the release
+
+    steps:
+      - name: 📦 Checkout Repository
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # GoReleaser derives the version from tags
+
+      - name: ⚒️ Setup Go
+        uses: actions/setup-go@v7
+        with:
+          go-version-file: ./server/go.mod
+          cache-dependency-path: ./server/go.sum
+
+      - name: ⚒️ Setup Node.js Environment
+        uses: actions/setup-node@v7
+        with:
+          cache: npm
+          cache-dependency-path: client/package-lock.json
+          node-version-file: client/package.json
+
+      # Builds linux / windows / darwin × amd64 / arm64 (see .goreleaser.yaml) and uploads the
+      # archives and checksums.txt to the existing release, keeping its notes.
+      - name: 🛠️ Build and upload
+        uses: goreleaser/goreleaser-action@v7
+        with:
+          distribution: goreleaser
+          version: "~> v2"
+          args: release --clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   build-and-push-docker:
     runs-on: ubuntu-latest
     name: 🐳 Build & Push Docker Image
+    needs: binaries # both edit the release; run one after the other
     permissions:
       contents: write # For updating the release
       packages: write # Required for pushing to ghcr.io
@@ -16,6 +53,9 @@ jobs:
     steps:
       - name: 📦 Checkout Repository
         uses: actions/checkout@v7
+
+      - name: ⚒️ Set up QEMU
+        uses: docker/setup-qemu-action@v4
 
       - name: ⚒️ Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
@@ -30,9 +70,7 @@ jobs:
       - name: 🏷️ Building tags
         id: repo
         run: |
-          echo "owner=$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
-          echo "repo=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
-
+          echo "image=ghcr.io/$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
 
       - name: 🛠️ Build and Push
         id: docker-build
@@ -40,12 +78,13 @@ jobs:
         with:
           context: .
           push: true
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          platforms: linux/amd64,linux/arm64
+          cache-from: type=gha,scope=multi-arch
+          cache-to: type=gha,mode=max,scope=multi-arch
           tags: |
-            ghcr.io/${{ steps.repo.outputs.repo }}:latest
-            ghcr.io/${{ steps.repo.outputs.repo }}:${{ github.sha }}
-            ghcr.io/${{ steps.repo.outputs.repo }}:${{ github.ref_name }}
+            ${{ steps.repo.outputs.image }}:latest
+            ${{ steps.repo.outputs.image }}:${{ github.sha }}
+            ${{ steps.repo.outputs.image }}:${{ github.ref_name }}
 
       - name: 📌 Update Release Notes with Docker Image
         uses: softprops/action-gh-release@v3
@@ -54,6 +93,8 @@ jobs:
           append_body: true
           body: |
             ---
-            🐳 **Docker images for this release:**
-            - `ghcr.io/${{ steps.repo.outputs.repo }}/mechanus:latest`
-            - `ghcr.io/${{ steps.repo.outputs.repo }}/mechanus:${{ github.event.release.tag_name }}`
+            🐳 **Docker image for this release** (linux/amd64 + linux/arm64):
+            - `${{ steps.repo.outputs.image }}:${{ github.event.release.tag_name }}`
+            - `${{ steps.repo.outputs.image }}:latest`
+
+            📦 **Binaries**: download the archive for your platform below and see [installation](https://github.com/${{ github.repository }}/blob/main/docs/installation.md).

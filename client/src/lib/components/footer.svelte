@@ -31,7 +31,7 @@
     <div>
       <h2 class="mb-6 text-sm font-semibold text-gray-400 uppercase dark:text-white">Legal</h2>
       <FooterLinkGroup>
-        <FooterLink liClass="mb-4" href="https://github.com/DaanV2/mechanus/blob/main/License"
+        <FooterLink liClass="mb-4" href="https://github.com/DaanV2/mechanus/blob/main/LICENSE"
           >LICENSE</FooterLink
         >
       </FooterLinkGroup>

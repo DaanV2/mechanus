@@ -1,0 +1,104 @@
+name: 📦 Release build
+env:
+  FORCE_COLOR: true
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: 📦 Build binaries
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📦 Checkout Repository
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # GoReleaser derives the version from tags
+
+      - name: ⚒️ Setup Go
+        uses: actions/setup-go@v7
+        with:
+          go-version-file: ./server/go.mod
+          cache-dependency-path: ./server/go.sum
+
+      - name: ⚒️ Setup Node.js Environment
+        uses: actions/setup-node@v7
+        with:
+          cache: npm
+          cache-dependency-path: client/package-lock.json
+          node-version-file: client/package.json
+
+      - name: 🛠️ Build all platforms (snapshot)
+        uses: goreleaser/goreleaser-action@v7
+        with:
+          distribution: goreleaser
+          version: "~> v2"
+          args: release --snapshot --clean
+
+      - name: 📤 Upload archives
+        uses: actions/upload-artifact@v7
+        with:
+          name: release-archives
+          path: |
+            dist/*.tar.gz
+            dist/*.zip
+            dist/checksums.txt
+          retention-days: 3
+
+  smoke-test:
+    name: 🔥 Run (${{ matrix.archive }})
+    needs: build
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: ubuntu-latest, archive: linux_amd64.tar.gz }
+          - { os: ubuntu-24.04-arm, archive: linux_arm64.tar.gz }
+          - { os: windows-latest, archive: windows_amd64.zip }
+          - { os: windows-11-arm, archive: windows_arm64.zip }
+          - { os: macos-latest, archive: darwin_arm64.tar.gz }
+          - { os: macos-15-intel, archive: darwin_amd64.tar.gz }
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: 📥 Download archives
+        uses: actions/download-artifact@v8
+        with:
+          name: release-archives
+
+      - name: 📂 Extract
+        run: |
+          file=$(ls *_${{ matrix.archive }})
+          mkdir mechanus
+          case "$file" in
+            *.zip) unzip -q "$file" -d mechanus ;;
+            *) tar -xzf "$file" -C mechanus ;;
+          esac
+          ls mechanus mechanus/web | head -20
+
+      - name: 🚀 Start the server and fetch pages
+        working-directory: mechanus
+        env:
+          DATABASE_TYPE: memory
+        run: |
+          ./mechanus server --server.static.folder web > server.log 2>&1 &
+          for i in $(seq 1 30); do
+            curl -sf http://localhost:8080/ > /dev/null && break
+            sleep 1
+          done
+          set -x
+          curl -sf http://localhost:8080/ | grep -q '<html'
+          curl -sf http://localhost:8080/about/ | grep -q '<html'
+          curl -sf http://localhost:8080/licenses/go.json | grep -q '"license"'
+          curl -sf http://localhost:8080/licenses/npm.json | grep -q '"license"'
+
+      - name: 📜 Server log
+        if: always()
+        working-directory: mechanus
+        run: cat server.log || true
