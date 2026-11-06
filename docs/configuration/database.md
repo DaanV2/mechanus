@@ -13,11 +13,9 @@ Mechanus supports four database backends, configured via CLI flags, environment 
 | ------------------------------ | ---------------------------- | -------------- | -------------------------------------------------------- |
 | `--database.type`              | `DATABASE_TYPE`              | `sqlite`       | Backend: `sqlite`, `memory`, `postgres`, `mysql`         |
 | `--database.dsn`               | `DATABASE_DSN`               | `db.sqlite`    | File path (SQLite) or connection string (Postgres/MySQL) |
-| `--database.max-idle-conss`    | `DATABASE_MAX_IDLE_CONSS`    | `2`            | Max idle connections in the pool                         |
+| `--database.max-idle-conns`    | `DATABASE_MAX_IDLE_CONNS`    | `2`            | Max idle connections in the pool                         |
 | `--database.max-open-conns`    | `DATABASE_MAX_OPEN_CONNS`    | `0` (no limit) | Max open connections                                     |
 | `--database.conn-max-lifetime` | `DATABASE_CONN_MAX_LIFETIME` | `1h`           | Max time a connection may be reused                      |
-
-> The idle-connections setting is spelled `max-idle-conss` (double `s`) in the code, so `max-idle-conns` / `DATABASE_MAX_IDLE_CONNS` is silently ignored. Use the spelling above.
 
 The database schema is migrated automatically on every start.
 
@@ -69,7 +67,7 @@ Uses the [pgx](https://github.com/jackc/pgx) driver. The DSN is either key/value
 database:
   type: postgres
   dsn: "host=localhost user=mechanus password=secret dbname=mechanus port=5432 sslmode=disable"
-  max-idle-conss: 5
+  max-idle-conns: 5
   max-open-conns: 20
   conn-max-lifetime: 30m
 ```
@@ -87,7 +85,7 @@ Uses the [go-sql-driver/mysql](https://github.com/go-sql-driver/mysql#dsn-data-s
 database:
   type: mysql
   dsn: "mechanus:secret@tcp(localhost:3306)/mechanus?charset=utf8mb4&parseTime=True&loc=Local"
-  max-idle-conss: 5
+  max-idle-conns: 5
   max-open-conns: 20
   conn-max-lifetime: 30m
 ```

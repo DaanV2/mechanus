@@ -1,7 +1,7 @@
 database:
   conn-max-lifetime: 1h0m0s
   dsn: db.sqlite
-  max-idle-conss: 2
+  max-idle-conns: 2
   max-open-conns: 0
   type: sqlite
 initialize:

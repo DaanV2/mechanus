@@ -19,7 +19,7 @@ Set via CLI flags, environment variables, or the config file:
 | ------------------------------ | --------------- | -------------------------------------------------------- |
 | `--database.type`              | `sqlite`        | Backend type                                             |
 | `--database.dsn`               | `db.sqlite`     | File path (SQLite) or connection string (Postgres/MySQL) |
-| `--database.max-idle-conss`    | `2`             | Max idle connections in the pool                         |
+| `--database.max-idle-conns`    | `2`             | Max idle connections in the pool                         |
 | `--database.max-open-conns`    | `0` (unlimited) | Max open connections                                     |
 | `--database.conn-max-lifetime` | `1h`            | Max connection reuse duration                            |
 
