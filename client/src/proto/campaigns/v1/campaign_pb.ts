@@ -12,7 +12,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file campaigns/v1/campaign.proto.
  */
 export const file_campaigns_v1_campaign: GenFile = /*@__PURE__*/
-  fileDesc("ChtjYW1wYWlnbnMvdjEvY2FtcGFpZ24ucHJvdG8SDGNhbXBhaWducy52MSIlChVDcmVhdGVDYW1wYWlnblJlcXVlc3QSDAoEbmFtZRgBIAEoCSJCChZDcmVhdGVDYW1wYWlnblJlc3BvbnNlEigKCGNhbXBhaWduGAEgASgLMhYuY2FtcGFpZ25zLnYxLkNhbXBhaWduIiAKEkdldENhbXBhaWduUmVxdWVzdBIKCgJpZBgBIAEoCSI/ChNHZXRDYW1wYWlnblJlc3BvbnNlEigKCGNhbXBhaWduGAEgASgLMhYuY2FtcGFpZ25zLnYxLkNhbXBhaWduIhYKFExpc3RDYW1wYWlnbnNSZXF1ZXN0IkIKFUxpc3RDYW1wYWlnbnNSZXNwb25zZRIpCgljYW1wYWlnbnMYASADKAsyFi5jYW1wYWlnbnMudjEuQ2FtcGFpZ24igwEKCENhbXBhaWduEgoKAmlkGAEgASgJEgwKBG5hbWUYAiABKAkSLgoKY3JlYXRlZF9hdBgDIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASLQoHbWVtYmVycxgEIAMoCzIcLmNhbXBhaWducy52MS5DYW1wYWlnbk1lbWJlciIqCg5DYW1wYWlnbk1lbWJlchIKCgJpZBgBIAEoCRIMCgRuYW1lGAIgASgJMokCCg9DYW1wYWlnblNlcnZpY2USVQoGQ3JlYXRlEiMuY2FtcGFpZ25zLnYxLkNyZWF0ZUNhbXBhaWduUmVxdWVzdBokLmNhbXBhaWducy52MS5DcmVhdGVDYW1wYWlnblJlc3BvbnNlIgASTAoDR2V0EiAuY2FtcGFpZ25zLnYxLkdldENhbXBhaWduUmVxdWVzdBohLmNhbXBhaWducy52MS5HZXRDYW1wYWlnblJlc3BvbnNlIgASUQoETGlzdBIiLmNhbXBhaWducy52MS5MaXN0Q2FtcGFpZ25zUmVxdWVzdBojLmNhbXBhaWducy52MS5MaXN0Q2FtcGFpZ25zUmVzcG9uc2UiAEJCWkBnaXRodWIuY29tL0RhYW5WMi9tZWNoYW51cy9zZXJ2ZXIvcHJvdG8vY2FtcGFpZ25zL3YxO2NhbXBhaWduc3YxYgZwcm90bzM", [file_google_protobuf_timestamp]);
+  fileDesc("ChtjYW1wYWlnbnMvdjEvY2FtcGFpZ24ucHJvdG8SDGNhbXBhaWducy52MSI6ChVDcmVhdGVDYW1wYWlnblJlcXVlc3QSDAoEbmFtZRgBIAEoCRITCgtkZXNjcmlwdGlvbhgCIAEoCSJCChZDcmVhdGVDYW1wYWlnblJlc3BvbnNlEigKCGNhbXBhaWduGAEgASgLMhYuY2FtcGFpZ25zLnYxLkNhbXBhaWduIiAKEkdldENhbXBhaWduUmVxdWVzdBIKCgJpZBgBIAEoCSI/ChNHZXRDYW1wYWlnblJlc3BvbnNlEigKCGNhbXBhaWduGAEgASgLMhYuY2FtcGFpZ25zLnYxLkNhbXBhaWduIhYKFExpc3RDYW1wYWlnbnNSZXF1ZXN0IkIKFUxpc3RDYW1wYWlnbnNSZXNwb25zZRIpCgljYW1wYWlnbnMYASADKAsyFi5jYW1wYWlnbnMudjEuQ2FtcGFpZ24iRgoVVXBkYXRlQ2FtcGFpZ25SZXF1ZXN0EgoKAmlkGAEgASgJEgwKBG5hbWUYAiABKAkSEwoLZGVzY3JpcHRpb24YAyABKAkiQgoWVXBkYXRlQ2FtcGFpZ25SZXNwb25zZRIoCghjYW1wYWlnbhgBIAEoCzIWLmNhbXBhaWducy52MS5DYW1wYWlnbiIjChVEZWxldGVDYW1wYWlnblJlcXVlc3QSCgoCaWQYASABKAkiGAoWRGVsZXRlQ2FtcGFpZ25SZXNwb25zZSIpChJMaXN0UGxheWVyc1JlcXVlc3QSEwoLY2FtcGFpZ25faWQYASABKAkiRAoTTGlzdFBsYXllcnNSZXNwb25zZRItCgdwbGF5ZXJzGAEgAygLMhwuY2FtcGFpZ25zLnYxLkNhbXBhaWduTWVtYmVyIjkKEEFkZFBsYXllclJlcXVlc3QSEwoLY2FtcGFpZ25faWQYASABKAkSEAoIdXNlcm5hbWUYAiABKAkiQQoRQWRkUGxheWVyUmVzcG9uc2USLAoGcGxheWVyGAEgASgLMhwuY2FtcGFpZ25zLnYxLkNhbXBhaWduTWVtYmVyIjsKE1JlbW92ZVBsYXllclJlcXVlc3QSEwoLY2FtcGFpZ25faWQYASABKAkSDwoHdXNlcl9pZBgCIAEoCSIWChRSZW1vdmVQbGF5ZXJSZXNwb25zZSK+AQoIQ2FtcGFpZ24SCgoCaWQYASABKAkSDAoEbmFtZRgCIAEoCRIuCgpjcmVhdGVkX2F0GAMgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBItCgdtZW1iZXJzGAQgAygLMhwuY2FtcGFpZ25zLnYxLkNhbXBhaWduTWVtYmVyEhMKC2Rlc2NyaXB0aW9uGAUgASgJEhAKCG93bmVyX2lkGAYgASgJEhIKCmNhbl9tYW5hZ2UYByABKAgiKgoOQ2FtcGFpZ25NZW1iZXISCgoCaWQYASABKAkSDAoEbmFtZRgCIAEoCTK2BQoPQ2FtcGFpZ25TZXJ2aWNlElUKBkNyZWF0ZRIjLmNhbXBhaWducy52MS5DcmVhdGVDYW1wYWlnblJlcXVlc3QaJC5jYW1wYWlnbnMudjEuQ3JlYXRlQ2FtcGFpZ25SZXNwb25zZSIAEkwKA0dldBIgLmNhbXBhaWducy52MS5HZXRDYW1wYWlnblJlcXVlc3QaIS5jYW1wYWlnbnMudjEuR2V0Q2FtcGFpZ25SZXNwb25zZSIAElEKBExpc3QSIi5jYW1wYWlnbnMudjEuTGlzdENhbXBhaWduc1JlcXVlc3QaIy5jYW1wYWlnbnMudjEuTGlzdENhbXBhaWduc1Jlc3BvbnNlIgASVQoGVXBkYXRlEiMuY2FtcGFpZ25zLnYxLlVwZGF0ZUNhbXBhaWduUmVxdWVzdBokLmNhbXBhaWducy52MS5VcGRhdGVDYW1wYWlnblJlc3BvbnNlIgASVQoGRGVsZXRlEiMuY2FtcGFpZ25zLnYxLkRlbGV0ZUNhbXBhaWduUmVxdWVzdBokLmNhbXBhaWducy52MS5EZWxldGVDYW1wYWlnblJlc3BvbnNlIgASVAoLTGlzdFBsYXllcnMSIC5jYW1wYWlnbnMudjEuTGlzdFBsYXllcnNSZXF1ZXN0GiEuY2FtcGFpZ25zLnYxLkxpc3RQbGF5ZXJzUmVzcG9uc2UiABJOCglBZGRQbGF5ZXISHi5jYW1wYWlnbnMudjEuQWRkUGxheWVyUmVxdWVzdBofLmNhbXBhaWducy52MS5BZGRQbGF5ZXJSZXNwb25zZSIAElcKDFJlbW92ZVBsYXllchIhLmNhbXBhaWducy52MS5SZW1vdmVQbGF5ZXJSZXF1ZXN0GiIuY2FtcGFpZ25zLnYxLlJlbW92ZVBsYXllclJlc3BvbnNlIgBCQlpAZ2l0aHViLmNvbS9EYWFuVjIvbWVjaGFudXMvc2VydmVyL3Byb3RvL2NhbXBhaWducy92MTtjYW1wYWlnbnN2MWIGcHJvdG8z", [file_google_protobuf_timestamp]);
 
 /**
  * @generated from message campaigns.v1.CreateCampaignRequest
@@ -24,6 +24,13 @@ export type CreateCampaignRequest = Message<"campaigns.v1.CreateCampaignRequest"
    * @generated from field: string name = 1;
    */
   name: string;
+
+  /**
+   * An optional description of the campaign
+   *
+   * @generated from field: string description = 2;
+   */
+  description: string;
 };
 
 /**
@@ -117,6 +124,208 @@ export const ListCampaignsResponseSchema: GenMessage<ListCampaignsResponse> = /*
   messageDesc(file_campaigns_v1_campaign, 5);
 
 /**
+ * @generated from message campaigns.v1.UpdateCampaignRequest
+ */
+export type UpdateCampaignRequest = Message<"campaigns.v1.UpdateCampaignRequest"> & {
+  /**
+   * The campaign UUID to update
+   *
+   * @generated from field: string id = 1;
+   */
+  id: string;
+
+  /**
+   * The new name of the campaign, cannot be empty
+   *
+   * @generated from field: string name = 2;
+   */
+  name: string;
+
+  /**
+   * The new description of the campaign, can be empty
+   *
+   * @generated from field: string description = 3;
+   */
+  description: string;
+};
+
+/**
+ * Describes the message campaigns.v1.UpdateCampaignRequest.
+ * Use `create(UpdateCampaignRequestSchema)` to create a new message.
+ */
+export const UpdateCampaignRequestSchema: GenMessage<UpdateCampaignRequest> = /*@__PURE__*/
+  messageDesc(file_campaigns_v1_campaign, 6);
+
+/**
+ * @generated from message campaigns.v1.UpdateCampaignResponse
+ */
+export type UpdateCampaignResponse = Message<"campaigns.v1.UpdateCampaignResponse"> & {
+  /**
+   * @generated from field: campaigns.v1.Campaign campaign = 1;
+   */
+  campaign?: Campaign | undefined;
+};
+
+/**
+ * Describes the message campaigns.v1.UpdateCampaignResponse.
+ * Use `create(UpdateCampaignResponseSchema)` to create a new message.
+ */
+export const UpdateCampaignResponseSchema: GenMessage<UpdateCampaignResponse> = /*@__PURE__*/
+  messageDesc(file_campaigns_v1_campaign, 7);
+
+/**
+ * @generated from message campaigns.v1.DeleteCampaignRequest
+ */
+export type DeleteCampaignRequest = Message<"campaigns.v1.DeleteCampaignRequest"> & {
+  /**
+   * The campaign UUID to delete
+   *
+   * @generated from field: string id = 1;
+   */
+  id: string;
+};
+
+/**
+ * Describes the message campaigns.v1.DeleteCampaignRequest.
+ * Use `create(DeleteCampaignRequestSchema)` to create a new message.
+ */
+export const DeleteCampaignRequestSchema: GenMessage<DeleteCampaignRequest> = /*@__PURE__*/
+  messageDesc(file_campaigns_v1_campaign, 8);
+
+/**
+ * @generated from message campaigns.v1.DeleteCampaignResponse
+ */
+export type DeleteCampaignResponse = Message<"campaigns.v1.DeleteCampaignResponse"> & {
+};
+
+/**
+ * Describes the message campaigns.v1.DeleteCampaignResponse.
+ * Use `create(DeleteCampaignResponseSchema)` to create a new message.
+ */
+export const DeleteCampaignResponseSchema: GenMessage<DeleteCampaignResponse> = /*@__PURE__*/
+  messageDesc(file_campaigns_v1_campaign, 9);
+
+/**
+ * @generated from message campaigns.v1.ListPlayersRequest
+ */
+export type ListPlayersRequest = Message<"campaigns.v1.ListPlayersRequest"> & {
+  /**
+   * The campaign UUID
+   *
+   * @generated from field: string campaign_id = 1;
+   */
+  campaignId: string;
+};
+
+/**
+ * Describes the message campaigns.v1.ListPlayersRequest.
+ * Use `create(ListPlayersRequestSchema)` to create a new message.
+ */
+export const ListPlayersRequestSchema: GenMessage<ListPlayersRequest> = /*@__PURE__*/
+  messageDesc(file_campaigns_v1_campaign, 10);
+
+/**
+ * @generated from message campaigns.v1.ListPlayersResponse
+ */
+export type ListPlayersResponse = Message<"campaigns.v1.ListPlayersResponse"> & {
+  /**
+   * @generated from field: repeated campaigns.v1.CampaignMember players = 1;
+   */
+  players: CampaignMember[];
+};
+
+/**
+ * Describes the message campaigns.v1.ListPlayersResponse.
+ * Use `create(ListPlayersResponseSchema)` to create a new message.
+ */
+export const ListPlayersResponseSchema: GenMessage<ListPlayersResponse> = /*@__PURE__*/
+  messageDesc(file_campaigns_v1_campaign, 11);
+
+/**
+ * @generated from message campaigns.v1.AddPlayerRequest
+ */
+export type AddPlayerRequest = Message<"campaigns.v1.AddPlayerRequest"> & {
+  /**
+   * The campaign UUID
+   *
+   * @generated from field: string campaign_id = 1;
+   */
+  campaignId: string;
+
+  /**
+   * The username of the existing user to add
+   *
+   * @generated from field: string username = 2;
+   */
+  username: string;
+};
+
+/**
+ * Describes the message campaigns.v1.AddPlayerRequest.
+ * Use `create(AddPlayerRequestSchema)` to create a new message.
+ */
+export const AddPlayerRequestSchema: GenMessage<AddPlayerRequest> = /*@__PURE__*/
+  messageDesc(file_campaigns_v1_campaign, 12);
+
+/**
+ * @generated from message campaigns.v1.AddPlayerResponse
+ */
+export type AddPlayerResponse = Message<"campaigns.v1.AddPlayerResponse"> & {
+  /**
+   * The player that was added
+   *
+   * @generated from field: campaigns.v1.CampaignMember player = 1;
+   */
+  player?: CampaignMember | undefined;
+};
+
+/**
+ * Describes the message campaigns.v1.AddPlayerResponse.
+ * Use `create(AddPlayerResponseSchema)` to create a new message.
+ */
+export const AddPlayerResponseSchema: GenMessage<AddPlayerResponse> = /*@__PURE__*/
+  messageDesc(file_campaigns_v1_campaign, 13);
+
+/**
+ * @generated from message campaigns.v1.RemovePlayerRequest
+ */
+export type RemovePlayerRequest = Message<"campaigns.v1.RemovePlayerRequest"> & {
+  /**
+   * The campaign UUID
+   *
+   * @generated from field: string campaign_id = 1;
+   */
+  campaignId: string;
+
+  /**
+   * The UUID of the user to remove
+   *
+   * @generated from field: string user_id = 2;
+   */
+  userId: string;
+};
+
+/**
+ * Describes the message campaigns.v1.RemovePlayerRequest.
+ * Use `create(RemovePlayerRequestSchema)` to create a new message.
+ */
+export const RemovePlayerRequestSchema: GenMessage<RemovePlayerRequest> = /*@__PURE__*/
+  messageDesc(file_campaigns_v1_campaign, 14);
+
+/**
+ * @generated from message campaigns.v1.RemovePlayerResponse
+ */
+export type RemovePlayerResponse = Message<"campaigns.v1.RemovePlayerResponse"> & {
+};
+
+/**
+ * Describes the message campaigns.v1.RemovePlayerResponse.
+ * Use `create(RemovePlayerResponseSchema)` to create a new message.
+ */
+export const RemovePlayerResponseSchema: GenMessage<RemovePlayerResponse> = /*@__PURE__*/
+  messageDesc(file_campaigns_v1_campaign, 15);
+
+/**
  * @generated from message campaigns.v1.Campaign
  */
 export type Campaign = Message<"campaigns.v1.Campaign"> & {
@@ -147,6 +356,27 @@ export type Campaign = Message<"campaigns.v1.Campaign"> & {
    * @generated from field: repeated campaigns.v1.CampaignMember members = 4;
    */
   members: CampaignMember[];
+
+  /**
+   * The campaign description
+   *
+   * @generated from field: string description = 5;
+   */
+  description: string;
+
+  /**
+   * The UUID of the user who owns (created) the campaign, empty when unknown
+   *
+   * @generated from field: string owner_id = 6;
+   */
+  ownerId: string;
+
+  /**
+   * Whenever the calling user may edit, delete and manage the players of the campaign
+   *
+   * @generated from field: bool can_manage = 7;
+   */
+  canManage: boolean;
 };
 
 /**
@@ -154,7 +384,7 @@ export type Campaign = Message<"campaigns.v1.Campaign"> & {
  * Use `create(CampaignSchema)` to create a new message.
  */
 export const CampaignSchema: GenMessage<Campaign> = /*@__PURE__*/
-  messageDesc(file_campaigns_v1_campaign, 6);
+  messageDesc(file_campaigns_v1_campaign, 16);
 
 /**
  * @generated from message campaigns.v1.CampaignMember
@@ -180,7 +410,7 @@ export type CampaignMember = Message<"campaigns.v1.CampaignMember"> & {
  * Use `create(CampaignMemberSchema)` to create a new message.
  */
 export const CampaignMemberSchema: GenMessage<CampaignMember> = /*@__PURE__*/
-  messageDesc(file_campaigns_v1_campaign, 7);
+  messageDesc(file_campaigns_v1_campaign, 17);
 
 /**
  * A service for viewing and managing campaigns
@@ -189,7 +419,7 @@ export const CampaignMemberSchema: GenMessage<CampaignMember> = /*@__PURE__*/
  */
 export const CampaignService: GenService<{
   /**
-   * Create a new campaign, the calling user becomes a member of it
+   * Create a new campaign, the calling user becomes its owner and a member of it
    *
    * @generated from rpc campaigns.v1.CampaignService.Create
    */
@@ -217,6 +447,57 @@ export const CampaignService: GenService<{
     methodKind: "unary";
     input: typeof ListCampaignsRequestSchema;
     output: typeof ListCampaignsResponseSchema;
+  },
+  /**
+   * Update the name and description of a campaign, only available to admins and the owner of the campaign
+   *
+   * @generated from rpc campaigns.v1.CampaignService.Update
+   */
+  update: {
+    methodKind: "unary";
+    input: typeof UpdateCampaignRequestSchema;
+    output: typeof UpdateCampaignResponseSchema;
+  },
+  /**
+   * Delete a campaign, only available to admins and the owner of the campaign. The campaign is soft deleted
+   *
+   * @generated from rpc campaigns.v1.CampaignService.Delete
+   */
+  delete: {
+    methodKind: "unary";
+    input: typeof DeleteCampaignRequestSchema;
+    output: typeof DeleteCampaignResponseSchema;
+  },
+  /**
+   * List the players of a campaign, only available to admins and members of the campaign
+   *
+   * @generated from rpc campaigns.v1.CampaignService.ListPlayers
+   */
+  listPlayers: {
+    methodKind: "unary";
+    input: typeof ListPlayersRequestSchema;
+    output: typeof ListPlayersResponseSchema;
+  },
+  /**
+   * Add an existing user to a campaign, only available to admins and the owner of the campaign
+   *
+   * @generated from rpc campaigns.v1.CampaignService.AddPlayer
+   */
+  addPlayer: {
+    methodKind: "unary";
+    input: typeof AddPlayerRequestSchema;
+    output: typeof AddPlayerResponseSchema;
+  },
+  /**
+   * Remove a player from a campaign, available to admins and the owner of the campaign,
+   * and to players removing themselves. The owner can't be removed
+   *
+   * @generated from rpc campaigns.v1.CampaignService.RemovePlayer
+   */
+  removePlayer: {
+    methodKind: "unary";
+    input: typeof RemovePlayerRequestSchema;
+    output: typeof RemovePlayerResponseSchema;
   },
 }> = /*@__PURE__*/
   serviceDesc(file_campaigns_v1_campaign, 0);

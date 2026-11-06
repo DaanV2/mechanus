@@ -39,16 +39,40 @@ const (
 	CampaignServiceGetProcedure = "/campaigns.v1.CampaignService/Get"
 	// CampaignServiceListProcedure is the fully-qualified name of the CampaignService's List RPC.
 	CampaignServiceListProcedure = "/campaigns.v1.CampaignService/List"
+	// CampaignServiceUpdateProcedure is the fully-qualified name of the CampaignService's Update RPC.
+	CampaignServiceUpdateProcedure = "/campaigns.v1.CampaignService/Update"
+	// CampaignServiceDeleteProcedure is the fully-qualified name of the CampaignService's Delete RPC.
+	CampaignServiceDeleteProcedure = "/campaigns.v1.CampaignService/Delete"
+	// CampaignServiceListPlayersProcedure is the fully-qualified name of the CampaignService's
+	// ListPlayers RPC.
+	CampaignServiceListPlayersProcedure = "/campaigns.v1.CampaignService/ListPlayers"
+	// CampaignServiceAddPlayerProcedure is the fully-qualified name of the CampaignService's AddPlayer
+	// RPC.
+	CampaignServiceAddPlayerProcedure = "/campaigns.v1.CampaignService/AddPlayer"
+	// CampaignServiceRemovePlayerProcedure is the fully-qualified name of the CampaignService's
+	// RemovePlayer RPC.
+	CampaignServiceRemovePlayerProcedure = "/campaigns.v1.CampaignService/RemovePlayer"
 )
 
 // CampaignServiceClient is a client for the campaigns.v1.CampaignService service.
 type CampaignServiceClient interface {
-	// Create a new campaign, the calling user becomes a member of it
+	// Create a new campaign, the calling user becomes its owner and a member of it
 	Create(context.Context, *connect.Request[v1.CreateCampaignRequest]) (*connect.Response[v1.CreateCampaignResponse], error)
 	// Get a single campaign, only available to admins and members of the campaign
 	Get(context.Context, *connect.Request[v1.GetCampaignRequest]) (*connect.Response[v1.GetCampaignResponse], error)
 	// List the campaigns, admins see all campaigns, other users only the campaigns they are in
 	List(context.Context, *connect.Request[v1.ListCampaignsRequest]) (*connect.Response[v1.ListCampaignsResponse], error)
+	// Update the name and description of a campaign, only available to admins and the owner of the campaign
+	Update(context.Context, *connect.Request[v1.UpdateCampaignRequest]) (*connect.Response[v1.UpdateCampaignResponse], error)
+	// Delete a campaign, only available to admins and the owner of the campaign. The campaign is soft deleted
+	Delete(context.Context, *connect.Request[v1.DeleteCampaignRequest]) (*connect.Response[v1.DeleteCampaignResponse], error)
+	// List the players of a campaign, only available to admins and members of the campaign
+	ListPlayers(context.Context, *connect.Request[v1.ListPlayersRequest]) (*connect.Response[v1.ListPlayersResponse], error)
+	// Add an existing user to a campaign, only available to admins and the owner of the campaign
+	AddPlayer(context.Context, *connect.Request[v1.AddPlayerRequest]) (*connect.Response[v1.AddPlayerResponse], error)
+	// Remove a player from a campaign, available to admins and the owner of the campaign,
+	// and to players removing themselves. The owner can't be removed
+	RemovePlayer(context.Context, *connect.Request[v1.RemovePlayerRequest]) (*connect.Response[v1.RemovePlayerResponse], error)
 }
 
 // NewCampaignServiceClient constructs a client for the campaigns.v1.CampaignService service. By
@@ -80,14 +104,49 @@ func NewCampaignServiceClient(httpClient connect.HTTPClient, baseURL string, opt
 			connect.WithSchema(campaignServiceMethods.ByName("List")),
 			connect.WithClientOptions(opts...),
 		),
+		update: connect.NewClient[v1.UpdateCampaignRequest, v1.UpdateCampaignResponse](
+			httpClient,
+			baseURL+CampaignServiceUpdateProcedure,
+			connect.WithSchema(campaignServiceMethods.ByName("Update")),
+			connect.WithClientOptions(opts...),
+		),
+		delete: connect.NewClient[v1.DeleteCampaignRequest, v1.DeleteCampaignResponse](
+			httpClient,
+			baseURL+CampaignServiceDeleteProcedure,
+			connect.WithSchema(campaignServiceMethods.ByName("Delete")),
+			connect.WithClientOptions(opts...),
+		),
+		listPlayers: connect.NewClient[v1.ListPlayersRequest, v1.ListPlayersResponse](
+			httpClient,
+			baseURL+CampaignServiceListPlayersProcedure,
+			connect.WithSchema(campaignServiceMethods.ByName("ListPlayers")),
+			connect.WithClientOptions(opts...),
+		),
+		addPlayer: connect.NewClient[v1.AddPlayerRequest, v1.AddPlayerResponse](
+			httpClient,
+			baseURL+CampaignServiceAddPlayerProcedure,
+			connect.WithSchema(campaignServiceMethods.ByName("AddPlayer")),
+			connect.WithClientOptions(opts...),
+		),
+		removePlayer: connect.NewClient[v1.RemovePlayerRequest, v1.RemovePlayerResponse](
+			httpClient,
+			baseURL+CampaignServiceRemovePlayerProcedure,
+			connect.WithSchema(campaignServiceMethods.ByName("RemovePlayer")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
 // campaignServiceClient implements CampaignServiceClient.
 type campaignServiceClient struct {
-	create *connect.Client[v1.CreateCampaignRequest, v1.CreateCampaignResponse]
-	get    *connect.Client[v1.GetCampaignRequest, v1.GetCampaignResponse]
-	list   *connect.Client[v1.ListCampaignsRequest, v1.ListCampaignsResponse]
+	create       *connect.Client[v1.CreateCampaignRequest, v1.CreateCampaignResponse]
+	get          *connect.Client[v1.GetCampaignRequest, v1.GetCampaignResponse]
+	list         *connect.Client[v1.ListCampaignsRequest, v1.ListCampaignsResponse]
+	update       *connect.Client[v1.UpdateCampaignRequest, v1.UpdateCampaignResponse]
+	delete       *connect.Client[v1.DeleteCampaignRequest, v1.DeleteCampaignResponse]
+	listPlayers  *connect.Client[v1.ListPlayersRequest, v1.ListPlayersResponse]
+	addPlayer    *connect.Client[v1.AddPlayerRequest, v1.AddPlayerResponse]
+	removePlayer *connect.Client[v1.RemovePlayerRequest, v1.RemovePlayerResponse]
 }
 
 // Create calls campaigns.v1.CampaignService.Create.
@@ -105,14 +164,50 @@ func (c *campaignServiceClient) List(ctx context.Context, req *connect.Request[v
 	return c.list.CallUnary(ctx, req)
 }
 
+// Update calls campaigns.v1.CampaignService.Update.
+func (c *campaignServiceClient) Update(ctx context.Context, req *connect.Request[v1.UpdateCampaignRequest]) (*connect.Response[v1.UpdateCampaignResponse], error) {
+	return c.update.CallUnary(ctx, req)
+}
+
+// Delete calls campaigns.v1.CampaignService.Delete.
+func (c *campaignServiceClient) Delete(ctx context.Context, req *connect.Request[v1.DeleteCampaignRequest]) (*connect.Response[v1.DeleteCampaignResponse], error) {
+	return c.delete.CallUnary(ctx, req)
+}
+
+// ListPlayers calls campaigns.v1.CampaignService.ListPlayers.
+func (c *campaignServiceClient) ListPlayers(ctx context.Context, req *connect.Request[v1.ListPlayersRequest]) (*connect.Response[v1.ListPlayersResponse], error) {
+	return c.listPlayers.CallUnary(ctx, req)
+}
+
+// AddPlayer calls campaigns.v1.CampaignService.AddPlayer.
+func (c *campaignServiceClient) AddPlayer(ctx context.Context, req *connect.Request[v1.AddPlayerRequest]) (*connect.Response[v1.AddPlayerResponse], error) {
+	return c.addPlayer.CallUnary(ctx, req)
+}
+
+// RemovePlayer calls campaigns.v1.CampaignService.RemovePlayer.
+func (c *campaignServiceClient) RemovePlayer(ctx context.Context, req *connect.Request[v1.RemovePlayerRequest]) (*connect.Response[v1.RemovePlayerResponse], error) {
+	return c.removePlayer.CallUnary(ctx, req)
+}
+
 // CampaignServiceHandler is an implementation of the campaigns.v1.CampaignService service.
 type CampaignServiceHandler interface {
-	// Create a new campaign, the calling user becomes a member of it
+	// Create a new campaign, the calling user becomes its owner and a member of it
 	Create(context.Context, *connect.Request[v1.CreateCampaignRequest]) (*connect.Response[v1.CreateCampaignResponse], error)
 	// Get a single campaign, only available to admins and members of the campaign
 	Get(context.Context, *connect.Request[v1.GetCampaignRequest]) (*connect.Response[v1.GetCampaignResponse], error)
 	// List the campaigns, admins see all campaigns, other users only the campaigns they are in
 	List(context.Context, *connect.Request[v1.ListCampaignsRequest]) (*connect.Response[v1.ListCampaignsResponse], error)
+	// Update the name and description of a campaign, only available to admins and the owner of the campaign
+	Update(context.Context, *connect.Request[v1.UpdateCampaignRequest]) (*connect.Response[v1.UpdateCampaignResponse], error)
+	// Delete a campaign, only available to admins and the owner of the campaign. The campaign is soft deleted
+	Delete(context.Context, *connect.Request[v1.DeleteCampaignRequest]) (*connect.Response[v1.DeleteCampaignResponse], error)
+	// List the players of a campaign, only available to admins and members of the campaign
+	ListPlayers(context.Context, *connect.Request[v1.ListPlayersRequest]) (*connect.Response[v1.ListPlayersResponse], error)
+	// Add an existing user to a campaign, only available to admins and the owner of the campaign
+	AddPlayer(context.Context, *connect.Request[v1.AddPlayerRequest]) (*connect.Response[v1.AddPlayerResponse], error)
+	// Remove a player from a campaign, available to admins and the owner of the campaign,
+	// and to players removing themselves. The owner can't be removed
+	RemovePlayer(context.Context, *connect.Request[v1.RemovePlayerRequest]) (*connect.Response[v1.RemovePlayerResponse], error)
 }
 
 // NewCampaignServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -140,6 +235,36 @@ func NewCampaignServiceHandler(svc CampaignServiceHandler, opts ...connect.Handl
 		connect.WithSchema(campaignServiceMethods.ByName("List")),
 		connect.WithHandlerOptions(opts...),
 	)
+	campaignServiceUpdateHandler := connect.NewUnaryHandler(
+		CampaignServiceUpdateProcedure,
+		svc.Update,
+		connect.WithSchema(campaignServiceMethods.ByName("Update")),
+		connect.WithHandlerOptions(opts...),
+	)
+	campaignServiceDeleteHandler := connect.NewUnaryHandler(
+		CampaignServiceDeleteProcedure,
+		svc.Delete,
+		connect.WithSchema(campaignServiceMethods.ByName("Delete")),
+		connect.WithHandlerOptions(opts...),
+	)
+	campaignServiceListPlayersHandler := connect.NewUnaryHandler(
+		CampaignServiceListPlayersProcedure,
+		svc.ListPlayers,
+		connect.WithSchema(campaignServiceMethods.ByName("ListPlayers")),
+		connect.WithHandlerOptions(opts...),
+	)
+	campaignServiceAddPlayerHandler := connect.NewUnaryHandler(
+		CampaignServiceAddPlayerProcedure,
+		svc.AddPlayer,
+		connect.WithSchema(campaignServiceMethods.ByName("AddPlayer")),
+		connect.WithHandlerOptions(opts...),
+	)
+	campaignServiceRemovePlayerHandler := connect.NewUnaryHandler(
+		CampaignServiceRemovePlayerProcedure,
+		svc.RemovePlayer,
+		connect.WithSchema(campaignServiceMethods.ByName("RemovePlayer")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/campaigns.v1.CampaignService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case CampaignServiceCreateProcedure:
@@ -148,6 +273,16 @@ func NewCampaignServiceHandler(svc CampaignServiceHandler, opts ...connect.Handl
 			campaignServiceGetHandler.ServeHTTP(w, r)
 		case CampaignServiceListProcedure:
 			campaignServiceListHandler.ServeHTTP(w, r)
+		case CampaignServiceUpdateProcedure:
+			campaignServiceUpdateHandler.ServeHTTP(w, r)
+		case CampaignServiceDeleteProcedure:
+			campaignServiceDeleteHandler.ServeHTTP(w, r)
+		case CampaignServiceListPlayersProcedure:
+			campaignServiceListPlayersHandler.ServeHTTP(w, r)
+		case CampaignServiceAddPlayerProcedure:
+			campaignServiceAddPlayerHandler.ServeHTTP(w, r)
+		case CampaignServiceRemovePlayerProcedure:
+			campaignServiceRemovePlayerHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -167,4 +302,24 @@ func (UnimplementedCampaignServiceHandler) Get(context.Context, *connect.Request
 
 func (UnimplementedCampaignServiceHandler) List(context.Context, *connect.Request[v1.ListCampaignsRequest]) (*connect.Response[v1.ListCampaignsResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("campaigns.v1.CampaignService.List is not implemented"))
+}
+
+func (UnimplementedCampaignServiceHandler) Update(context.Context, *connect.Request[v1.UpdateCampaignRequest]) (*connect.Response[v1.UpdateCampaignResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("campaigns.v1.CampaignService.Update is not implemented"))
+}
+
+func (UnimplementedCampaignServiceHandler) Delete(context.Context, *connect.Request[v1.DeleteCampaignRequest]) (*connect.Response[v1.DeleteCampaignResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("campaigns.v1.CampaignService.Delete is not implemented"))
+}
+
+func (UnimplementedCampaignServiceHandler) ListPlayers(context.Context, *connect.Request[v1.ListPlayersRequest]) (*connect.Response[v1.ListPlayersResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("campaigns.v1.CampaignService.ListPlayers is not implemented"))
+}
+
+func (UnimplementedCampaignServiceHandler) AddPlayer(context.Context, *connect.Request[v1.AddPlayerRequest]) (*connect.Response[v1.AddPlayerResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("campaigns.v1.CampaignService.AddPlayer is not implemented"))
+}
+
+func (UnimplementedCampaignServiceHandler) RemovePlayer(context.Context, *connect.Request[v1.RemovePlayerRequest]) (*connect.Response[v1.RemovePlayerResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("campaigns.v1.CampaignService.RemovePlayer is not implemented"))
 }
