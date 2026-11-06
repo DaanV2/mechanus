@@ -29,4 +29,21 @@ export namespace Campaign {
 
     return resp.campaign;
   }
+
+  /**
+   * Adds the existing user with the given username to the campaign, as the user of the given token (the owner or an admin)
+   */
+  export async function addPlayer(
+    request: APIRequestContext,
+    token: string,
+    campaignId: string,
+    username: string,
+  ): Promise<void> {
+    await callRPC(
+      request,
+      "campaigns.v1.CampaignService/AddPlayer",
+      { campaignId, username },
+      token,
+    );
+  }
 }

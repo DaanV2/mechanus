@@ -10,7 +10,6 @@ import (
 	"github.com/DaanV2/mechanus/server/application"
 	"github.com/DaanV2/mechanus/server/engine/authentication/roles"
 	"github.com/DaanV2/mechanus/server/infrastructure/logging"
-	"github.com/DaanV2/mechanus/server/infrastructure/persistence"
 	"github.com/DaanV2/mechanus/server/infrastructure/persistence/models"
 	"github.com/DaanV2/mechanus/server/pkg/extensions/xerrors"
 	campaignsv1 "github.com/DaanV2/mechanus/server/proto/campaigns/v1"
@@ -64,7 +63,7 @@ func (c *CampaignServiceHandler) Create(ctx context.Context, req *connect.Reques
 		return nil, connect.NewError(connect.CodePermissionDenied, xerrors.ErrNotExist)
 	}
 
-	campaign := &models.Campaign{Name: name}
+	campaign := &models.Campaign{Name: name, Description: strings.TrimSpace(req.Msg.GetDescription())}
 	err = c.campaigns.CreateWithUser(ctx, campaign, user)
 	if err != nil {
 		logger.Error("error during creation of campaign", "error", err)
@@ -72,7 +71,7 @@ func (c *CampaignServiceHandler) Create(ctx context.Context, req *connect.Reques
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
 
-	return connect.NewResponse(&campaignsv1.CreateCampaignResponse{Campaign: toCampaign(campaign)}), nil
+	return connect.NewResponse(&campaignsv1.CreateCampaignResponse{Campaign: toCampaign(campaign, true)}), nil
 }
 
 // Get implements campaignsv1connect.CampaignServiceHandler.
@@ -82,29 +81,13 @@ func (c *CampaignServiceHandler) Get(ctx context.Context, req *connect.Request[c
 		return nil, err
 	}
 
-	id := req.Msg.GetId()
-	if id == "" {
-		return nil, connect.NewError(connect.CodeInvalidArgument, xerrors.ErrNotExist)
-	}
-
-	logger := CampaignLogger.From(ctx, "campaignId", id, "userId", jwt.Claims.User.ID)
-
-	campaign, err := c.campaigns.Get(ctx, id)
-	if err != nil {
-		if persistence.IsNotExist(err) {
-			return nil, connect.NewError(connect.CodeNotFound, xerrors.ErrNotExist)
-		}
-		logger.Error("error during retrieve of campaign", "error", err)
-
-		return nil, connect.NewError(connect.CodeInternal, err)
-	}
-
 	// Non-members get the same answer as for a missing campaign, so ids can't be probed
-	if !jwt.IsAuthenicatedWithRole(roles.Admin) && !isMember(campaign, jwt.Claims.User.ID) {
-		return nil, connect.NewError(connect.CodeNotFound, xerrors.ErrNotExist)
+	campaign, err := c.visibleCampaign(ctx, jwt, req.Msg.GetId())
+	if err != nil {
+		return nil, err
 	}
 
-	return connect.NewResponse(&campaignsv1.GetCampaignResponse{Campaign: toCampaign(campaign)}), nil
+	return connect.NewResponse(&campaignsv1.GetCampaignResponse{Campaign: toCampaign(campaign, canManage(jwt, campaign))}), nil
 }
 
 // List implements campaignsv1connect.CampaignServiceHandler.
@@ -128,7 +111,7 @@ func (c *CampaignServiceHandler) List(ctx context.Context, _ *connect.Request[ca
 
 	result := make([]*campaignsv1.Campaign, 0, len(campaigns))
 	for _, campaign := range campaigns {
-		result = append(result, toCampaign(campaign))
+		result = append(result, toCampaign(campaign, canManage(jwt, campaign)))
 	}
 
 	return connect.NewResponse(&campaignsv1.ListCampaignsResponse{Campaigns: result}), nil
@@ -140,19 +123,30 @@ func isMember(campaign *models.Campaign, userId string) bool {
 	})
 }
 
-func toCampaign(campaign *models.Campaign) *campaignsv1.Campaign {
-	members := make([]*campaignsv1.CampaignMember, 0, len(campaign.Users))
-	for _, user := range campaign.Users {
-		members = append(members, &campaignsv1.CampaignMember{
-			Id:   user.ID,
-			Name: user.Username,
-		})
+func toMember(user *models.User) *campaignsv1.CampaignMember {
+	return &campaignsv1.CampaignMember{
+		Id:   user.ID,
+		Name: user.Username,
+	}
+}
+
+func toMembers(users []*models.User) []*campaignsv1.CampaignMember {
+	members := make([]*campaignsv1.CampaignMember, 0, len(users))
+	for _, user := range users {
+		members = append(members, toMember(user))
 	}
 
+	return members
+}
+
+func toCampaign(campaign *models.Campaign, manageable bool) *campaignsv1.Campaign {
 	return &campaignsv1.Campaign{
-		Id:        campaign.ID,
-		Name:      campaign.Name,
-		CreatedAt: timestamppb.New(campaign.CreatedAt),
-		Members:   members,
+		Id:          campaign.ID,
+		Name:        campaign.Name,
+		Description: campaign.Description,
+		OwnerId:     campaign.OwnerID,
+		CanManage:   manageable,
+		CreatedAt:   timestamppb.New(campaign.CreatedAt),
+		Members:     toMembers(campaign.Users),
 	}
 }

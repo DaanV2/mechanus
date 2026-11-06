@@ -6,6 +6,7 @@ import (
 	"github.com/DaanV2/mechanus/server/infrastructure/logging"
 	"github.com/DaanV2/mechanus/server/infrastructure/persistence"
 	"github.com/DaanV2/mechanus/server/infrastructure/persistence/models"
+	"gorm.io/gorm"
 )
 
 const (
@@ -84,14 +85,42 @@ func (repo *CampaignRepository) Create(ctx context.Context, campaign *models.Cam
 	return tx.Error
 }
 
-// Update will take the new information in the campaign and update the database entry. Note, this does not update the password or the ID
+// Update writes the name and description of the campaign to the database, empty values included.
+// Other fields (owner, users, ...) are left alone.
 func (repo *CampaignRepository) Update(ctx context.Context, campaign *models.Campaign) error {
 	logger := CampaignLogger.From(ctx, "campaignId", campaign.ID)
 	logger.Debug("updating campaign")
 
-	tx := repo.db.WithContext(ctx).Omit("id").Updates(campaign)
+	tx := repo.db.WithContext(ctx).
+		Model(&models.Campaign{Model: models.Model{ID: campaign.ID}}).
+		Updates(map[string]any{
+			"name":        campaign.Name,
+			"description": campaign.Description,
+		})
+	if tx.Error != nil {
+		return tx.Error
+	}
+	if tx.RowsAffected == 0 {
+		return gorm.ErrRecordNotFound
+	}
 
-	return tx.Error
+	return nil
+}
+
+// Delete soft deletes the campaign, its player links are kept so it can be restored.
+func (repo *CampaignRepository) Delete(ctx context.Context, campaignId string) error {
+	logger := CampaignLogger.From(ctx, "campaignId", campaignId)
+	logger.Debug("deleting campaign")
+
+	tx := repo.db.WithContext(ctx).Delete(&models.Campaign{}, "id = ?", campaignId)
+	if tx.Error != nil {
+		return tx.Error
+	}
+	if tx.RowsAffected == 0 {
+		return gorm.ErrRecordNotFound
+	}
+
+	return nil
 }
 
 // LinkUser associates a user with a campaign.
