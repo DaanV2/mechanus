@@ -1,7 +1,7 @@
 # yaml-language-server: $schema=https://goreleaser.com/static/schema.json
 # Release binaries for Linux, Windows and macOS (amd64 + arm64).
 # Each archive holds the server binary and the compiled web client in `web/`;
-# start it with `mechanus server --server.static.folder web`, see docs/installation.md.
+# start it with `mechanus server --server.static.folder web`, see docs/getting-started/binaries.md.
 #
 # Local / PR check:  goreleaser release --snapshot --clean   (output in dist/)
 # Release:           .github/workflows/release-assets.yaml
