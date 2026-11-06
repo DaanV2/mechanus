@@ -8,7 +8,9 @@
   import { WebsocketHandler } from '$lib/networking/websocket';
   import { create } from '@bufbuild/protobuf';
   import { onMount } from 'svelte';
+  import { MoveEntitySchema, SetCameraSchema } from '../../../proto/screens/v1/play_actions_pb';
   import { InitialSetupRequestSchema } from '../../../proto/screens/v1/setup_pb';
+  import { CameraSchema, Vector2Schema } from '../../../proto/screens/v1/state_pb';
 
   const RECONNECT_DELAY_MS = 3000;
   /** WebSocket close status the server uses when the credential of a connection expired or got revoked */
@@ -54,6 +56,12 @@
       conn.events.add('initialSetup', (_, msg) => renderer.setState(msg.state));
       conn.events.add('screenState', (_, msg) => renderer.setState(msg));
       conn.events.add('splashScreenUpdate', (_, msg) => renderer.setSplash(msg));
+      conn.events.add('entityUpdate', (_, msg) => renderer.updateEntity(msg));
+      conn.events.add('entityRemove', (_, msg) => renderer.removeEntity(msg));
+      conn.events.add('cameraUpdate', (_, msg) => renderer.setCamera(msg));
+      conn.events.add('actionError', (id, msg) =>
+        console.warn('action refused', id, msg.code, msg.message)
+      );
       conn.addEventListener('open', function () {
         opened = true;
         status = 'connected';
@@ -78,6 +86,32 @@
         }
 
         reconnect = setTimeout(connect, RECONNECT_DELAY_MS);
+      });
+    }
+
+    // A logged in user looking at a screen can move tokens and the camera. A paired device only shows it: touch
+    // control is configured per device, which is not built yet
+    if (!asDevice) {
+      renderer.enableControls({
+        moveEntity: (entityId, position) =>
+          conn?.send({
+            action: {
+              case: 'moveEntity',
+              value: create(MoveEntitySchema, {
+                entityId,
+                position: create(Vector2Schema, position)
+              })
+            }
+          }),
+        setCamera: (center, zoom) =>
+          conn?.send({
+            action: {
+              case: 'setCamera',
+              value: create(SetCameraSchema, {
+                camera: create(CameraSchema, { center: create(Vector2Schema, center), zoom })
+              })
+            }
+          })
       });
     }
 

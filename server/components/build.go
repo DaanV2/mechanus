@@ -79,12 +79,16 @@ func BuildServer(setupCtx context.Context) (*ServerComponents, error) {
 	if err != nil {
 		return nil, err
 	}
+	screenDriver := screen.NewDriver(screenManager, assetStore)
 	sceneService, deviceMonitor, err := createSceneService(lfManager, sceneConfigs, sceneStates, deviceService.Room(sceneConfigs),
-		screen.NewDriver(screenManager, assetStore),
+		screenDriver,
 	)
 	if err != nil {
 		return nil, err
 	}
+	// Token and camera moves reach the screens without re-sending the whole battle map
+	sceneService.AddBattleMapDriver(screenDriver)
+	screenManager.SetController(screen.NewController(sceneService))
 
 	// Servers
 	websocketHandler := websocket.NewWebsocketHandler(screenManager, jwtService, websocketCfg)

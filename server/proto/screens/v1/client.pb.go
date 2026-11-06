@@ -72,6 +72,8 @@ type ClientMessage struct {
 	//
 	//	*ClientMessage_InitialSetupRequest
 	//	*ClientMessage_Ping
+	//	*ClientMessage_MoveEntity
+	//	*ClientMessage_SetCamera
 	Action        isClientMessage_Action `protobuf_oneof:"action"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -139,6 +141,24 @@ func (x *ClientMessage) GetPing() *Ping {
 	return nil
 }
 
+func (x *ClientMessage) GetMoveEntity() *MoveEntity {
+	if x != nil {
+		if x, ok := x.Action.(*ClientMessage_MoveEntity); ok {
+			return x.MoveEntity
+		}
+	}
+	return nil
+}
+
+func (x *ClientMessage) GetSetCamera() *SetCamera {
+	if x != nil {
+		if x, ok := x.Action.(*ClientMessage_SetCamera); ok {
+			return x.SetCamera
+		}
+	}
+	return nil
+}
+
 type isClientMessage_Action interface {
 	isClientMessage_Action()
 }
@@ -151,22 +171,38 @@ type ClientMessage_Ping struct {
 	Ping *Ping `protobuf:"bytes,3,opt,name=ping,proto3,oneof"`
 }
 
+type ClientMessage_MoveEntity struct {
+	MoveEntity *MoveEntity `protobuf:"bytes,4,opt,name=move_entity,json=moveEntity,proto3,oneof"`
+}
+
+type ClientMessage_SetCamera struct {
+	SetCamera *SetCamera `protobuf:"bytes,5,opt,name=set_camera,json=setCamera,proto3,oneof"`
+}
+
 func (*ClientMessage_InitialSetupRequest) isClientMessage_Action() {}
 
 func (*ClientMessage_Ping) isClientMessage_Action() {}
+
+func (*ClientMessage_MoveEntity) isClientMessage_Action() {}
+
+func (*ClientMessage_SetCamera) isClientMessage_Action() {}
 
 var File_screens_v1_client_proto protoreflect.FileDescriptor
 
 const file_screens_v1_client_proto_rawDesc = "" +
 	"\n" +
 	"\x17screens/v1/client.proto\x12\n" +
-	"screens.v1\x1a\x18screens/v1/general.proto\x1a\x16screens/v1/setup.proto\"C\n" +
+	"screens.v1\x1a\x18screens/v1/general.proto\x1a\x1dscreens/v1/play_actions.proto\x1a\x16screens/v1/setup.proto\"C\n" +
 	"\x0eClientMessages\x121\n" +
-	"\x06action\x18\x01 \x03(\v2\x19.screens.v1.ClientMessageR\x06action\"\xb4\x01\n" +
+	"\x06action\x18\x01 \x03(\v2\x19.screens.v1.ClientMessageR\x06action\"\xa7\x02\n" +
 	"\rClientMessage\x12\x13\n" +
 	"\x02id\x18\x01 \x01(\tH\x01R\x02id\x88\x01\x01\x12U\n" +
 	"\x15initial_setup_request\x18\x02 \x01(\v2\x1f.screens.v1.InitialSetupRequestH\x00R\x13initialSetupRequest\x12&\n" +
-	"\x04ping\x18\x03 \x01(\v2\x10.screens.v1.PingH\x00R\x04pingB\b\n" +
+	"\x04ping\x18\x03 \x01(\v2\x10.screens.v1.PingH\x00R\x04ping\x129\n" +
+	"\vmove_entity\x18\x04 \x01(\v2\x16.screens.v1.MoveEntityH\x00R\n" +
+	"moveEntity\x126\n" +
+	"\n" +
+	"set_camera\x18\x05 \x01(\v2\x15.screens.v1.SetCameraH\x00R\tsetCameraB\b\n" +
 	"\x06actionB\x05\n" +
 	"\x03_idB>Z<github.com/DaanV2/mechanus/server/proto/screens/v1;screensv1b\x06proto3"
 
@@ -188,16 +224,20 @@ var file_screens_v1_client_proto_goTypes = []any{
 	(*ClientMessage)(nil),       // 1: screens.v1.ClientMessage
 	(*InitialSetupRequest)(nil), // 2: screens.v1.InitialSetupRequest
 	(*Ping)(nil),                // 3: screens.v1.Ping
+	(*MoveEntity)(nil),          // 4: screens.v1.MoveEntity
+	(*SetCamera)(nil),           // 5: screens.v1.SetCamera
 }
 var file_screens_v1_client_proto_depIdxs = []int32{
 	1, // 0: screens.v1.ClientMessages.action:type_name -> screens.v1.ClientMessage
 	2, // 1: screens.v1.ClientMessage.initial_setup_request:type_name -> screens.v1.InitialSetupRequest
 	3, // 2: screens.v1.ClientMessage.ping:type_name -> screens.v1.Ping
-	3, // [3:3] is the sub-list for method output_type
-	3, // [3:3] is the sub-list for method input_type
-	3, // [3:3] is the sub-list for extension type_name
-	3, // [3:3] is the sub-list for extension extendee
-	0, // [0:3] is the sub-list for field type_name
+	4, // 3: screens.v1.ClientMessage.move_entity:type_name -> screens.v1.MoveEntity
+	5, // 4: screens.v1.ClientMessage.set_camera:type_name -> screens.v1.SetCamera
+	5, // [5:5] is the sub-list for method output_type
+	5, // [5:5] is the sub-list for method input_type
+	5, // [5:5] is the sub-list for extension type_name
+	5, // [5:5] is the sub-list for extension extendee
+	0, // [0:5] is the sub-list for field type_name
 }
 
 func init() { file_screens_v1_client_proto_init() }
@@ -206,10 +246,13 @@ func file_screens_v1_client_proto_init() {
 		return
 	}
 	file_screens_v1_general_proto_init()
+	file_screens_v1_play_actions_proto_init()
 	file_screens_v1_setup_proto_init()
 	file_screens_v1_client_proto_msgTypes[1].OneofWrappers = []any{
 		(*ClientMessage_InitialSetupRequest)(nil),
 		(*ClientMessage_Ping)(nil),
+		(*ClientMessage_MoveEntity)(nil),
+		(*ClientMessage_SetCamera)(nil),
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{

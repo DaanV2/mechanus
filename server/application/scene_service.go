@@ -8,6 +8,7 @@ import (
 
 	"github.com/DaanV2/mechanus/server/engine/devices"
 	"github.com/DaanV2/mechanus/server/engine/scenes"
+	"github.com/DaanV2/mechanus/server/pkg/math/vectors"
 )
 
 var (
@@ -15,6 +16,10 @@ var (
 	ErrNoDriver = errors.New("no driver registered for integration")
 	// ErrNoActiveScene is returned when an operation requires an active scene.
 	ErrNoActiveScene = errors.New("no active scene")
+	// ErrNoBattleMap is returned when a screen device shows no battle map of the active scene.
+	ErrNoBattleMap = errors.New("device shows no battle map of the active scene")
+	// ErrDeviceUpdate wraps the errors of devices that could not be told about a change that did happen.
+	ErrDeviceUpdate = errors.New("not every device could be updated")
 )
 
 // SceneConfigStore reads authored scene configuration. Backed by file storage.
@@ -54,6 +59,18 @@ type SceneListener interface {
 	SceneChanged(ctx context.Context, transition *scenes.Transition)
 }
 
+// BattleMapDriver applies small battle map changes to a device without re-sending its whole
+// instruction, so a moved token or camera doesn't reload the map. Devices of an integration without
+// one see these changes with their next instruction.
+type BattleMapDriver interface {
+	// Integration returns the integration identifier this driver handles, see devices.Integration*.
+	Integration() string
+	// MoveEntity moves an entity's token, in grid units. Never called for hidden entities.
+	MoveEntity(ctx context.Context, scene scenes.Ref, device *devices.Device, entityID string, position vectors.Vector2D) error
+	// SetCamera moves the part of the battle map the device shows.
+	SetCamera(ctx context.Context, scene scenes.Ref, device *devices.Device, camera scenes.Camera) error
+}
+
 // SceneService loads, switches and exits scenes and instructs the devices in the room.
 //
 // Configuration is only ever read. The active scene's state is saved when the scene is loaded and
@@ -64,9 +81,10 @@ type SceneService struct {
 	rooms   RoomConfigStore
 	drivers map[string]OutputDriver
 
-	lock      sync.Mutex
-	active    *scenes.Scene
-	listeners []SceneListener
+	lock       sync.Mutex
+	active     *scenes.Scene
+	listeners  []SceneListener
+	battleMaps map[string]BattleMapDriver
 }
 
 // NewSceneService creates a new SceneService with the given drivers.
@@ -90,6 +108,17 @@ func (s *SceneService) AddListener(listener SceneListener) {
 	defer s.lock.Unlock()
 
 	s.listeners = append(s.listeners, listener)
+}
+
+// AddBattleMapDriver registers the driver for live battle map changes of its integration.
+func (s *SceneService) AddBattleMapDriver(driver BattleMapDriver) {
+	s.lock.Lock()
+	defer s.lock.Unlock()
+
+	if s.battleMaps == nil {
+		s.battleMaps = map[string]BattleMapDriver{}
+	}
+	s.battleMaps[driver.Integration()] = driver
 }
 
 // Active returns the active scene and variant, zero when no scene is active.
@@ -164,6 +193,226 @@ func (s *SceneService) Adjust(ctx context.Context, overrides scenes.Instructions
 
 		return nil
 	})
+}
+
+// SetEntityHidden hides an entity of the active scene from the screens, or reveals it.
+func (s *SceneService) SetEntityHidden(ctx context.Context, entityID string, hidden bool) (*scenes.Transition, error) {
+	s.lock.Lock()
+	defer s.lock.Unlock()
+
+	return s.change(ctx, func(sc *scenes.Scene) error { return sc.State.SetHidden(entityID, hidden) })
+}
+
+// SpawnEntity adds an entity to the active scene during play, at position when given. Without a
+// position, and not placed by the battle map, it isn't drawn on battle maps until it is moved.
+func (s *SceneService) SpawnEntity(ctx context.Context, entity scenes.Entity, position *vectors.Vector2D) (*scenes.Transition, error) {
+	s.lock.Lock()
+	defer s.lock.Unlock()
+
+	// Checked first, so a refused spawn leaves no entity behind
+	if position != nil {
+		if err := scenes.ValidatePosition(*position); err != nil {
+			return nil, err
+		}
+	}
+
+	return s.change(ctx, func(sc *scenes.Scene) error {
+		if err := sc.State.Spawn(entity); err != nil {
+			return err
+		}
+		if position == nil {
+			return nil
+		}
+
+		return sc.State.Move(entity.ID, *position)
+	})
+}
+
+// RemoveEntity removes an entity from the active scene (defeated, fled, ...).
+func (s *SceneService) RemoveEntity(ctx context.Context, entityID string) (*scenes.Transition, error) {
+	s.lock.Lock()
+	defer s.lock.Unlock()
+
+	return s.change(ctx, func(sc *scenes.Scene) error { return sc.State.Remove(entityID) })
+}
+
+// MoveEntity moves an entity of the active scene on the battle map, in grid units. The screens
+// showing a battle map of the scene get only the moved token, unless the entity had no position in
+// the state yet: then those screens are re-instructed once, as the battle map may not have drawn it.
+// A hidden entity is moved without telling any screen.
+//
+// An error wrapping [ErrDeviceUpdate] means the entity was moved but some devices could not be told.
+func (s *SceneService) MoveEntity(ctx context.Context, entityID string, position vectors.Vector2D) error {
+	s.lock.Lock()
+	defer s.lock.Unlock()
+
+	if s.active == nil {
+		return ErrNoActiveScene
+	}
+	if _, moved := s.active.Position(entityID); !moved {
+		t, err := s.change(ctx, func(sc *scenes.Scene) error { return sc.State.Move(entityID, position) })
+
+		return deviceUpdateError(t != nil, err)
+	}
+
+	if err := s.active.State.Move(entityID, position); err != nil {
+		return err
+	}
+	if s.active.State.Entities[entityID].Hidden {
+		return nil
+	}
+	targets, err := s.active.BattleMapTargets()
+	if err != nil {
+		return err
+	}
+	scene := s.active.Ref()
+
+	return s.updateBattleMaps(ctx, targets, func(driver BattleMapDriver, device *devices.Device) error {
+		return driver.MoveEntity(ctx, scene, device, entityID, position)
+	})
+}
+
+// SetCamera moves the camera of the battle maps a screen device shows in the active scene. Every
+// device bound to the same targets follows. Returns [ErrNoBattleMap] when the device shows none.
+//
+// An error wrapping [ErrDeviceUpdate] means the camera was moved but some devices could not be told.
+func (s *SceneService) SetCamera(ctx context.Context, deviceID string, camera scenes.Camera) error {
+	if err := camera.Validate(); err != nil {
+		return err
+	}
+
+	s.lock.Lock()
+	defer s.lock.Unlock()
+
+	targets, err := s.battleMapTargetsOf(ctx, deviceID)
+	if err != nil {
+		return err
+	}
+	for _, target := range targets {
+		if err := s.active.State.SetCamera(target, camera); err != nil {
+			return err
+		}
+	}
+	scene := s.active.Ref()
+
+	return s.updateBattleMaps(ctx, targets, func(driver BattleMapDriver, device *devices.Device) error {
+		return driver.SetCamera(ctx, scene, device, camera)
+	})
+}
+
+// ShowsBattleMap reports whether a screen device shows a battle map of the active scene.
+func (s *SceneService) ShowsBattleMap(ctx context.Context, deviceID string) (bool, error) {
+	s.lock.Lock()
+	defer s.lock.Unlock()
+
+	_, err := s.battleMapTargetsOf(ctx, deviceID)
+	switch {
+	case errors.Is(err, ErrNoBattleMap), errors.Is(err, ErrNoActiveScene):
+		return false, nil
+	case err != nil:
+		return false, err
+	default:
+		return true, nil
+	}
+}
+
+// ActiveEntities returns the entities present in the active scene, hidden ones included, nil when no
+// scene is active.
+func (s *SceneService) ActiveEntities() []ActiveEntity {
+	s.lock.Lock()
+	defer s.lock.Unlock()
+
+	if s.active == nil {
+		return nil
+	}
+
+	entities := s.active.Entities()
+	result := make([]ActiveEntity, 0, len(entities))
+	for _, e := range entities {
+		ae := ActiveEntity{Entity: e}
+		if pos, ok := s.active.Position(e.ID); ok {
+			ae.Position = &pos
+		}
+		result = append(result, ae)
+	}
+
+	return result
+}
+
+// ActiveEntity is an entity present in the active scene.
+type ActiveEntity struct {
+	scenes.Entity
+
+	Position *vectors.Vector2D // Where it was moved to during play, nil when it stands where the battle map places it
+}
+
+// battleMapTargetsOf returns the targets of the active scene that show a battle map on the device.
+func (s *SceneService) battleMapTargetsOf(ctx context.Context, deviceID string) ([]string, error) {
+	if s.active == nil {
+		return nil, ErrNoActiveScene
+	}
+	targets, err := s.active.BattleMapTargets()
+	if err != nil {
+		return nil, err
+	}
+	room, err := s.rooms.CurrentRoom(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("loading room: %w", err)
+	}
+
+	var result []string
+	for _, target := range targets {
+		for _, device := range room.DevicesFor(target, devices.KindScreen) {
+			if device.ID == deviceID {
+				result = append(result, target)
+
+				break
+			}
+		}
+	}
+	if len(result) == 0 {
+		return nil, fmt.Errorf("device %q: %w", deviceID, ErrNoBattleMap)
+	}
+
+	return result, nil
+}
+
+// updateBattleMaps hands a live change to the battle map driver of every screen device bound to the targets.
+func (s *SceneService) updateBattleMaps(ctx context.Context, targets []string, update func(BattleMapDriver, *devices.Device) error) error {
+	room, err := s.rooms.CurrentRoom(ctx)
+	if err != nil {
+		return fmt.Errorf("%w: loading room: %w", ErrDeviceUpdate, err)
+	}
+
+	var errs []error
+	seen := map[string]bool{}
+	for _, target := range targets {
+		for _, device := range room.DevicesFor(target, devices.KindScreen) {
+			if seen[device.ID] {
+				continue
+			}
+			seen[device.ID] = true
+
+			driver, ok := s.battleMaps[device.Integration]
+			if !ok {
+				continue
+			}
+			if err := update(driver, device); err != nil {
+				errs = append(errs, fmt.Errorf("device %q: %w", device.ID, err))
+			}
+		}
+	}
+
+	return deviceUpdateError(true, errors.Join(errs...))
+}
+
+// deviceUpdateError marks err as a device error when the change itself happened.
+func deviceUpdateError(changed bool, err error) error {
+	if err == nil || !changed {
+		return err
+	}
+
+	return fmt.Errorf("%w: %w", ErrDeviceUpdate, err)
 }
 
 // Scenes returns the configuration of every scene that can be activated.

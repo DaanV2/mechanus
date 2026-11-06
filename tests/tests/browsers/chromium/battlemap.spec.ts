@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type APIRequestContext, type Page } from "@playwright/test";
 import { callRPC, login as apiLogin } from "../../lib/api/client";
 import { User } from "../../lib/users/create";
 import { login } from "../../lib/users/login";
@@ -15,6 +15,11 @@ const RUG = "#7c2d2d";
 const BARREL = "#3f2a14";
 const BARKEEP = "#16a34a";
 const HERO = "#2563eb";
+const SPY = "#dc2626";
+
+// The tests share the one active scene and its saved state, so they run one after the other and put back what
+// they changed
+test.describe.configure({ mode: "serial" });
 
 type RGB = [number, number, number];
 
@@ -132,5 +137,114 @@ test.describe("battle map on a TV", { tag: ["@scenes", "@battlemap"] }, () => {
     const response = await request.get(`/assets/scenes/${SCENE}/maps/tavern.map.json`);
 
     expect(response.status()).toBe(404);
+  });
+});
+
+test.describe("live play on the battle map", { tag: ["@scenes", "@battlemap"] }, () => {
+  let token = "";
+
+  /** Puts the scene back as the other tests expect it: hero at the map's position, spy hidden. */
+  async function resetScene(request: APIRequestContext) {
+    await callRPC(request, "scenes.v1.SceneService/Activate", { sceneId: SCENE }, token);
+    await callRPC(request, "scenes.v1.SceneService/SetVariant", {}, token);
+    await callRPC(request, "scenes.v1.SceneService/MoveEntity", { entityId: "hero", position: { x: 4, y: 4 } }, token);
+    await callRPC(request, "scenes.v1.SceneService/SetEntityHidden", { entityId: "spy", hidden: true }, token);
+  }
+
+  /** Opens the screen of the TV as a logged in user, who can move tokens on it. */
+  async function openTV(page: Page) {
+    await page.goto(`/views/devices/?device=${DEVICE}`);
+    await expect(page.locator("canvas")).toBeVisible();
+    await expectColors(page, { "the hero's placeholder token": [heroPoint(4, 4), HERO] });
+  }
+
+  /** A point on the hero's placeholder disc, left of the initial drawn in its middle. */
+  function heroPoint(x: number, y: number): [number, number] {
+    const [cx, cy] = cell(x, y);
+
+    return [cx - 28, cy];
+  }
+
+  test.beforeEach(async ({ request }) => {
+    token = await apiLogin(request, User.createAdmin());
+    await resetScene(request);
+  });
+
+  test.afterEach(async ({ request }) => {
+    await resetScene(request);
+  });
+
+  test("dragging a token moves it on every screen and stores it in the scene state", async ({ page, request }) => {
+    test.setTimeout(90000);
+    await login(page, User.createAdmin());
+    await openTV(page);
+    const other = await page.context().newPage();
+    await openTV(other);
+
+    await test.step("by dragging the hero two cells right and down", async () => {
+      const [fromX, fromY] = cell(4, 4);
+      const [toX, toY] = cell(6, 6);
+      await page.mouse.move(fromX, fromY);
+      await page.mouse.down();
+      await page.mouse.move(toX, toY, { steps: 10 });
+      await page.mouse.up();
+    });
+
+    await test.step("the token moved on the screen it was dragged on", async () => {
+      await expectColors(page, {
+        "the hero at its new cell": [heroPoint(6, 6), HERO],
+        "the floor where it stood": [heroPoint(4, 4), FLOOR],
+      });
+    });
+
+    await test.step("and on the other screen showing the TV", async () => {
+      await expectColors(other, {
+        "the hero at its new cell": [heroPoint(6, 6), HERO],
+        "the floor where it stood": [heroPoint(4, 4), FLOOR],
+      });
+    });
+
+    await test.step("the position is kept in the scene state", async () => {
+      const resp = await callRPC<{ active: { entities: { id: string; position?: { x?: number; y?: number } }[] } }>(
+        request,
+        "scenes.v1.SceneService/GetActive",
+        {},
+        token,
+      );
+      const hero = resp.active.entities.find((e) => e.id === "hero");
+      expect(hero?.position).toEqual({ x: 6, y: 6 });
+    });
+
+    await test.step("a screen opened later draws it at its new position", async () => {
+      const later = await page.context().newPage();
+      await later.goto(`/views/devices/?device=${DEVICE}`);
+      await expectColors(later, { "the hero at its new cell": [heroPoint(6, 6), HERO] });
+    });
+  });
+
+  test("the GM reveals and hides an entity from the GM view", async ({ page }) => {
+    test.setTimeout(90000);
+    await login(page, User.createAdmin());
+    await openTV(page);
+    const gm = await page.context().newPage();
+    await gm.goto("/views/game-master/");
+    const spy = gm.getByTestId("entity-spy");
+    await expect(spy).toContainText("Hidden");
+
+    await test.step("the TV doesn't show the hidden spy", async () => {
+      await expectColors(page, { "the floor, where the hidden spy stands": [cell(5, 7), FLOOR] });
+    });
+
+    await test.step("revealing the spy shows it on the TV", async () => {
+      await spy.getByRole("button", { name: "Reveal" }).click();
+      await expect(spy).toContainText("Visible");
+      await expectColors(page, { "the spy's token": [cell(5, 7), SPY] });
+    });
+
+    await test.step("hiding it again removes it from the TV", async () => {
+      await spy.getByRole("button", { name: "Hide" }).click();
+      await expect(spy).toContainText("Hidden");
+      await expectColors(page, { "the floor, where the hidden spy stands": [cell(5, 7), FLOOR] });
+    });
   });
 });

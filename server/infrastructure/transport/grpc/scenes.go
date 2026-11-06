@@ -3,6 +3,7 @@ package grpc
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strings"
 
 	"connectrpc.com/connect"
@@ -11,6 +12,7 @@ import (
 	"github.com/DaanV2/mechanus/server/engine/scenes"
 	"github.com/DaanV2/mechanus/server/infrastructure/logging"
 	"github.com/DaanV2/mechanus/server/infrastructure/scenestore"
+	"github.com/DaanV2/mechanus/server/pkg/math/vectors"
 	scenesv1 "github.com/DaanV2/mechanus/server/proto/scenes/v1"
 	"github.com/DaanV2/mechanus/server/proto/scenes/v1/scenesv1connect"
 )
@@ -111,7 +113,7 @@ func (s *SceneServiceHandler) active() *scenesv1.ActiveScene {
 		return nil
 	}
 
-	return &scenesv1.ActiveScene{Scene: toScene(cfg), VariantId: ref.VariantID}
+	return &scenesv1.ActiveScene{Scene: toScene(cfg), VariantId: ref.VariantID, Entities: toEntities(s.scenes.ActiveEntities())}
 }
 
 // splitDeviceErrors separates device errors from failures of the change itself: when a transition is
@@ -140,7 +142,11 @@ func sceneError(err error) error {
 	switch {
 	case errors.Is(err, scenes.ErrSceneNotFound), errors.Is(err, scenes.ErrVariantNotFound):
 		return connect.NewError(connect.CodeNotFound, err)
-	case errors.Is(err, scenestore.ErrInvalidID):
+	case errors.Is(err, scenes.ErrEntityNotFound):
+		return connect.NewError(connect.CodeNotFound, err)
+	case errors.Is(err, scenes.ErrEntityExists):
+		return connect.NewError(connect.CodeAlreadyExists, err)
+	case errors.Is(err, scenestore.ErrInvalidID), errors.Is(err, scenes.ErrInvalidEntity), errors.Is(err, scenes.ErrInvalidPosition):
 		return connect.NewError(connect.CodeInvalidArgument, err)
 	case errors.Is(err, application.ErrNoActiveScene):
 		return connect.NewError(connect.CodeFailedPrecondition, err)
@@ -162,4 +168,153 @@ func toScene(cfg *scenes.Config) *scenesv1.Scene {
 		Variants:       variants,
 		DefaultVariant: cfg.DefaultVariant,
 	}
+}
+
+// SetEntityHidden implements scenesv1connect.SceneServiceHandler.
+func (s *SceneServiceHandler) SetEntityHidden(ctx context.Context, req *connect.Request[scenesv1.SetEntityHiddenRequest]) (*connect.Response[scenesv1.SetEntityHiddenResponse], error) {
+	jwt, err := requireRole(ctx, roles.User)
+	if err != nil {
+		return nil, err
+	}
+
+	entityID := req.Msg.GetEntityId()
+	logger := SceneLogger.From(ctx, "userId", jwt.Claims.User.ID, "entityId", entityID, "hidden", req.Msg.GetHidden())
+
+	t, err := s.scenes.SetEntityHidden(ctx, entityID, req.Msg.GetHidden())
+	deviceErrs, err := splitDeviceErrors(t, err)
+	if err != nil {
+		logger.Warn("could not hide / reveal entity", "error", err)
+
+		return nil, sceneError(err)
+	}
+	logger.Info("changed entity visibility", "device_errors", len(deviceErrs))
+
+	return connect.NewResponse(&scenesv1.SetEntityHiddenResponse{Active: s.active(), DeviceErrors: deviceErrs}), nil
+}
+
+// SpawnEntity implements scenesv1connect.SceneServiceHandler.
+func (s *SceneServiceHandler) SpawnEntity(ctx context.Context, req *connect.Request[scenesv1.SpawnEntityRequest]) (*connect.Response[scenesv1.SpawnEntityResponse], error) {
+	jwt, err := requireRole(ctx, roles.User)
+	if err != nil {
+		return nil, err
+	}
+
+	entity := scenes.Entity{
+		ID:     strings.TrimSpace(req.Msg.GetEntityId()),
+		Kind:   fromEntityKind(req.Msg.GetKind()),
+		Name:   strings.TrimSpace(req.Msg.GetName()),
+		Hidden: req.Msg.GetHidden(),
+	}
+	var position *vectors.Vector2D
+	if p := req.Msg.GetPosition(); p != nil {
+		position = &vectors.Vector2D{X: p.GetX(), Y: p.GetY()}
+	}
+	logger := SceneLogger.From(ctx, "userId", jwt.Claims.User.ID, "entityId", entity.ID)
+
+	t, err := s.scenes.SpawnEntity(ctx, entity, position)
+	deviceErrs, err := splitDeviceErrors(t, err)
+	if err != nil {
+		logger.Warn("could not spawn entity", "error", err)
+
+		return nil, sceneError(err)
+	}
+	logger.Info("spawned entity", "device_errors", len(deviceErrs))
+
+	return connect.NewResponse(&scenesv1.SpawnEntityResponse{Active: s.active(), DeviceErrors: deviceErrs}), nil
+}
+
+// RemoveEntity implements scenesv1connect.SceneServiceHandler.
+func (s *SceneServiceHandler) RemoveEntity(ctx context.Context, req *connect.Request[scenesv1.RemoveEntityRequest]) (*connect.Response[scenesv1.RemoveEntityResponse], error) {
+	jwt, err := requireRole(ctx, roles.User)
+	if err != nil {
+		return nil, err
+	}
+
+	entityID := req.Msg.GetEntityId()
+	logger := SceneLogger.From(ctx, "userId", jwt.Claims.User.ID, "entityId", entityID)
+
+	t, err := s.scenes.RemoveEntity(ctx, entityID)
+	deviceErrs, err := splitDeviceErrors(t, err)
+	if err != nil {
+		logger.Warn("could not remove entity", "error", err)
+
+		return nil, sceneError(err)
+	}
+	logger.Info("removed entity", "device_errors", len(deviceErrs))
+
+	return connect.NewResponse(&scenesv1.RemoveEntityResponse{Active: s.active(), DeviceErrors: deviceErrs}), nil
+}
+
+// MoveEntity implements scenesv1connect.SceneServiceHandler.
+func (s *SceneServiceHandler) MoveEntity(ctx context.Context, req *connect.Request[scenesv1.MoveEntityRequest]) (*connect.Response[scenesv1.MoveEntityResponse], error) {
+	jwt, err := requireRole(ctx, roles.User)
+	if err != nil {
+		return nil, err
+	}
+
+	entityID := req.Msg.GetEntityId()
+	p := req.Msg.GetPosition()
+	logger := SceneLogger.From(ctx, "userId", jwt.Claims.User.ID, "entityId", entityID)
+	if p == nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, fmt.Errorf("%w: no position", scenes.ErrInvalidPosition))
+	}
+
+	var deviceErrs []string
+	err = s.scenes.MoveEntity(ctx, entityID, vectors.Vector2D{X: p.GetX(), Y: p.GetY()})
+	if errors.Is(err, application.ErrDeviceUpdate) {
+		deviceErrs, err = []string{err.Error()}, nil
+	}
+	if err != nil {
+		logger.Warn("could not move entity", "error", err)
+
+		return nil, sceneError(err)
+	}
+	logger.Debug("moved entity", "x", p.GetX(), "y", p.GetY())
+
+	return connect.NewResponse(&scenesv1.MoveEntityResponse{Active: s.active(), DeviceErrors: deviceErrs}), nil
+}
+
+func toEntityKind(kind scenes.EntityKind) scenesv1.EntityKind {
+	switch kind {
+	case scenes.EntityPlayer:
+		return scenesv1.EntityKind_ENTITY_KIND_PLAYER
+	case scenes.EntityNPC:
+		return scenesv1.EntityKind_ENTITY_KIND_NPC
+	case scenes.EntityEnemy:
+		return scenesv1.EntityKind_ENTITY_KIND_ENEMY
+	case scenes.EntityObject:
+		return scenesv1.EntityKind_ENTITY_KIND_OBJECT
+	default:
+		return scenesv1.EntityKind_ENTITY_KIND_UNSPECIFIED
+	}
+}
+
+// fromEntityKind returns the scene entity kind, empty (and so refused by a spawn) for an unspecified kind.
+func fromEntityKind(kind scenesv1.EntityKind) scenes.EntityKind {
+	switch kind {
+	case scenesv1.EntityKind_ENTITY_KIND_PLAYER:
+		return scenes.EntityPlayer
+	case scenesv1.EntityKind_ENTITY_KIND_NPC:
+		return scenes.EntityNPC
+	case scenesv1.EntityKind_ENTITY_KIND_ENEMY:
+		return scenes.EntityEnemy
+	case scenesv1.EntityKind_ENTITY_KIND_OBJECT:
+		return scenes.EntityObject
+	case scenesv1.EntityKind_ENTITY_KIND_UNSPECIFIED:
+	}
+
+	return ""
+}
+
+func toEntities(entities []application.ActiveEntity) []*scenesv1.Entity {
+	result := make([]*scenesv1.Entity, 0, len(entities))
+	for _, e := range entities {
+		pe := &scenesv1.Entity{Id: e.ID, Kind: toEntityKind(e.Kind), Name: e.Name, Hidden: e.Hidden}
+		if e.Position != nil {
+			pe.Position = &scenesv1.Position{X: e.Position.X, Y: e.Position.Y}
+		}
+		result = append(result, pe)
+	}
+
+	return result
 }

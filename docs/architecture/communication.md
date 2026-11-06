@@ -15,7 +15,7 @@ Current services:
 | `LoginService`    | `users/v1`     | Authenticate and issue JWTs                                                 |
 | `UserService`     | `users/v1`     | User CRUD, admin list / password reset                                      |
 | `CampaignService` | `campaigns/v1` | Create, get, list, update and (soft) delete campaigns, and list / add / remove their players. Members and admins see a campaign; its owner (creator) and admins manage it; players can leave |
-| `SceneService`    | `scenes/v1`    | GM scene control: list scenes, activate a scene, switch variant, get the active scene (any logged-in user) |
+| `SceneService`    | `scenes/v1`    | GM scene control: list scenes, activate a scene, switch variant, get the active scene with its entities, reveal / hide / spawn / remove / move entities (any logged-in user) |
 | `DeviceService`   | `devices/v1`   | Pair a device (server stream) and refresh its tokens without a login; confirm a pairing, list, revoke and bind devices as an admin |
 
 ConnectRPC is called from the browser using either the Connect protocol or gRPC-web over HTTP/2. A gRPC reflection endpoint and gRPC health endpoint are available for tooling and infrastructure probes.
@@ -87,8 +87,10 @@ Request/response correlation: if a `ClientMessage` carries a non-empty `id` fiel
 | --------------------- | ---------------------------------------------------------- |
 | `Ping`                | Keep-alive / latency check                                 |
 | `InitialSetupRequest` | Sent on connect; server responds with initial screen state, plus the splash screen while the screen has not been instructed (view `blank`) |
+| `MoveEntity`          | Move a token on the battle map the screen shows (entity ID, top left corner in grid units). Logged in users only |
+| `SetCamera`           | Pan / zoom the battle map the screen shows (center in grid units, zoom between 0.1 and 10). Users and the screen's own device |
 
-_(Additional messages for pan, zoom, token moves, etc. are not implemented yet.)_
+Play actions (`MoveEntity`, `SetCamera`) are handed to the `screens.SceneController` set on the `ScreenManager` (`infrastructure/outputs/screen.Controller`), which validates them and applies them to the active scene through `SceneService`. They need the screen to show a battle map of the active scene. A refused action is answered with an `ActionError` carrying the request's `id`; the connection stays open. A move is sent to every screen showing a battle map of the scene as an `EntityUpdate`, a camera change as a `camera_update` to every screen bound to the same target; both are kept in the scene's state, see [scenes.md](./scenes.md#entities). A paired device can only pan and zoom: touch control per device is not built yet. The device view (`/views/devices/`) lets a logged in user drag tokens (snapped to the grid), drag the map to pan and use the wheel to zoom.
 
 ### Server messages
 
@@ -102,6 +104,7 @@ _(Additional messages for pan, zoom, token moves, etc. are not implemented yet.)
 | `SplashScreen`                         | Show / hide the title card                                                                 |
 | `SceneChange` / `SceneChangeCompleted` | Scene load started / finished                                                              |
 | `Ping`                                 | Broadcast of a client ping                                                                 |
+| `ActionError`                          | A play action of this client was refused (code + reason)                                   |
 
 `ScreenState` (`screens/v1/state.proto`) is what the Pixi.js renderer draws:
 
@@ -114,7 +117,7 @@ _(Additional messages for pan, zoom, token moves, etc. are not implemented yet.)
 | `environment`   | In-game time, background colour, light intensity                                                                                                          |
 | `splash_screen` | Optional title card                                                                                                                                       |
 
-The server-side model is `engine/screens/state`; `ScreenState.ToProto()` converts it. Delta messages (`EntityUpdate`, `EntityRemove`, `camera_update`) are defined but nothing sends them yet. Fog of war and walls are not in the model yet; they are added as battle map layer kinds with the feature that needs them (see [scenes.md](./scenes.md#screens--views)).
+The server-side model is `engine/screens/state`; `ScreenState.ToProto()` converts it. `EntityUpdate` and `camera_update` are sent for token and camera moves (`ScreenHandler.MoveEntity` / `SetCamera`, which also update the screen's state so a later connection gets them); `EntityRemove` is defined but nothing sends it yet, as reveal / hide / remove re-send the battle map. Fog of war and walls are not in the model yet; they are added as battle map layer kinds with the feature that needs them (see [scenes.md](./scenes.md#screens--views)).
 
 ### Server-side flow
 

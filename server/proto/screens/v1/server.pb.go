@@ -79,6 +79,7 @@ type ServerMessage struct {
 	//	*ServerMessage_EntityUpdate
 	//	*ServerMessage_EntityRemove
 	//	*ServerMessage_CameraUpdate
+	//	*ServerMessage_ActionError
 	Action        isServerMessage_Action `protobuf_oneof:"action"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -209,6 +210,15 @@ func (x *ServerMessage) GetCameraUpdate() *Camera {
 	return nil
 }
 
+func (x *ServerMessage) GetActionError() *ActionError {
+	if x != nil {
+		if x, ok := x.Action.(*ServerMessage_ActionError); ok {
+			return x.ActionError
+		}
+	}
+	return nil
+}
+
 type isServerMessage_Action interface {
 	isServerMessage_Action()
 }
@@ -249,6 +259,10 @@ type ServerMessage_CameraUpdate struct {
 	CameraUpdate *Camera `protobuf:"bytes,10,opt,name=camera_update,json=cameraUpdate,proto3,oneof"`
 }
 
+type ServerMessage_ActionError struct {
+	ActionError *ActionError `protobuf:"bytes,11,opt,name=action_error,json=actionError,proto3,oneof"` // An action of this client was refused
+}
+
 func (*ServerMessage_InitialSetup) isServerMessage_Action() {}
 
 func (*ServerMessage_SplashScreenUpdate) isServerMessage_Action() {}
@@ -266,6 +280,8 @@ func (*ServerMessage_EntityUpdate) isServerMessage_Action() {}
 func (*ServerMessage_EntityRemove) isServerMessage_Action() {}
 
 func (*ServerMessage_CameraUpdate) isServerMessage_Action() {}
+
+func (*ServerMessage_ActionError) isServerMessage_Action() {}
 
 // EntityUpdate adds an entity to a layer, or replaces it when an entity with the same id exists.
 type EntityUpdate struct {
@@ -378,9 +394,9 @@ var File_screens_v1_server_proto protoreflect.FileDescriptor
 const file_screens_v1_server_proto_rawDesc = "" +
 	"\n" +
 	"\x17screens/v1/server.proto\x12\n" +
-	"screens.v1\x1a\x18screens/v1/general.proto\x1a\x1escreens/v1/scene_actions.proto\x1a\x16screens/v1/setup.proto\x1a\x1escreens/v1/splash_screen.proto\x1a\x16screens/v1/state.proto\"C\n" +
+	"screens.v1\x1a\x18screens/v1/general.proto\x1a\x1dscreens/v1/play_actions.proto\x1a\x1escreens/v1/scene_actions.proto\x1a\x16screens/v1/setup.proto\x1a\x1escreens/v1/splash_screen.proto\x1a\x16screens/v1/state.proto\"C\n" +
 	"\x0eServerMessages\x121\n" +
-	"\x06action\x18\x01 \x03(\v2\x19.screens.v1.ServerMessageR\x06action\"\x87\x05\n" +
+	"\x06action\x18\x01 \x03(\v2\x19.screens.v1.ServerMessageR\x06action\"\xc5\x05\n" +
 	"\rServerMessage\x12\x13\n" +
 	"\x02id\x18\x01 \x01(\tH\x01R\x02id\x88\x01\x01\x12G\n" +
 	"\rinitial_setup\x18\x02 \x01(\v2 .screens.v1.InitialSetupResponseH\x00R\finitialSetup\x12L\n" +
@@ -392,7 +408,8 @@ const file_screens_v1_server_proto_rawDesc = "" +
 	"\rentity_update\x18\b \x01(\v2\x18.screens.v1.EntityUpdateH\x00R\fentityUpdate\x12?\n" +
 	"\rentity_remove\x18\t \x01(\v2\x18.screens.v1.EntityRemoveH\x00R\fentityRemove\x129\n" +
 	"\rcamera_update\x18\n" +
-	" \x01(\v2\x12.screens.v1.CameraH\x00R\fcameraUpdateB\b\n" +
+	" \x01(\v2\x12.screens.v1.CameraH\x00R\fcameraUpdate\x12<\n" +
+	"\faction_error\x18\v \x01(\v2\x17.screens.v1.ActionErrorH\x00R\vactionErrorB\b\n" +
 	"\x06actionB\x05\n" +
 	"\x03_id\"U\n" +
 	"\fEntityUpdate\x12\x19\n" +
@@ -427,7 +444,8 @@ var file_screens_v1_server_proto_goTypes = []any{
 	(*Ping)(nil),                 // 8: screens.v1.Ping
 	(*ScreenState)(nil),          // 9: screens.v1.ScreenState
 	(*Camera)(nil),               // 10: screens.v1.Camera
-	(*Entity)(nil),               // 11: screens.v1.Entity
+	(*ActionError)(nil),          // 11: screens.v1.ActionError
+	(*Entity)(nil),               // 12: screens.v1.Entity
 }
 var file_screens_v1_server_proto_depIdxs = []int32{
 	1,  // 0: screens.v1.ServerMessages.action:type_name -> screens.v1.ServerMessage
@@ -440,12 +458,13 @@ var file_screens_v1_server_proto_depIdxs = []int32{
 	2,  // 7: screens.v1.ServerMessage.entity_update:type_name -> screens.v1.EntityUpdate
 	3,  // 8: screens.v1.ServerMessage.entity_remove:type_name -> screens.v1.EntityRemove
 	10, // 9: screens.v1.ServerMessage.camera_update:type_name -> screens.v1.Camera
-	11, // 10: screens.v1.EntityUpdate.entity:type_name -> screens.v1.Entity
-	11, // [11:11] is the sub-list for method output_type
-	11, // [11:11] is the sub-list for method input_type
-	11, // [11:11] is the sub-list for extension type_name
-	11, // [11:11] is the sub-list for extension extendee
-	0,  // [0:11] is the sub-list for field type_name
+	11, // 10: screens.v1.ServerMessage.action_error:type_name -> screens.v1.ActionError
+	12, // 11: screens.v1.EntityUpdate.entity:type_name -> screens.v1.Entity
+	12, // [12:12] is the sub-list for method output_type
+	12, // [12:12] is the sub-list for method input_type
+	12, // [12:12] is the sub-list for extension type_name
+	12, // [12:12] is the sub-list for extension extendee
+	0,  // [0:12] is the sub-list for field type_name
 }
 
 func init() { file_screens_v1_server_proto_init() }
@@ -454,6 +473,7 @@ func file_screens_v1_server_proto_init() {
 		return
 	}
 	file_screens_v1_general_proto_init()
+	file_screens_v1_play_actions_proto_init()
 	file_screens_v1_scene_actions_proto_init()
 	file_screens_v1_setup_proto_init()
 	file_screens_v1_splash_screen_proto_init()
@@ -468,6 +488,7 @@ func file_screens_v1_server_proto_init() {
 		(*ServerMessage_EntityUpdate)(nil),
 		(*ServerMessage_EntityRemove)(nil),
 		(*ServerMessage_CameraUpdate)(nil),
+		(*ServerMessage_ActionError)(nil),
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{

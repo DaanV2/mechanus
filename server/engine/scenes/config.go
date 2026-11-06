@@ -3,6 +3,7 @@ package scenes
 import (
 	"errors"
 	"fmt"
+	"strings"
 )
 
 var (
@@ -31,6 +32,19 @@ type Entity struct {
 	Name        string     `json:"name"`                   // Display name
 	CharacterID string     `json:"character_id,omitempty"` // Optional link to a persisted character
 	Hidden      bool       `json:"hidden"`                 // In a [Config]: hidden when the scene is first loaded. Otherwise: currently hidden.
+}
+
+// validate checks the entity has an ID and a known kind.
+func (e *Entity) validate() error {
+	if strings.TrimSpace(e.ID) == "" {
+		return fmt.Errorf("%w: empty id", ErrInvalidEntity)
+	}
+	switch e.Kind {
+	case EntityPlayer, EntityNPC, EntityEnemy, EntityObject:
+		return nil
+	default:
+		return fmt.Errorf("%w: %q: unknown kind %q", ErrInvalidEntity, e.ID, e.Kind)
+	}
 }
 
 // Config is the authored definition of a scene, as prepared by the GM. It is loaded from file

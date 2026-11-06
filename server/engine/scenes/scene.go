@@ -3,6 +3,10 @@ package scenes
 import (
 	"errors"
 	"fmt"
+	"maps"
+	"slices"
+
+	"github.com/DaanV2/mechanus/server/pkg/math/vectors"
 )
 
 var (
@@ -64,13 +68,53 @@ func (s *Scene) Instructions() (Instructions, error) {
 
 	ins = ins.Merge(s.State.Overrides)
 	for target, screen := range ins.Screens {
-		if screen.View == ViewBattleMap {
-			screen.Entities = s.VisibleEntities()
-			ins.Screens[target] = screen
+		if screen.View != ViewBattleMap {
+			continue
 		}
+		screen.Entities = s.VisibleEntities()
+		for _, e := range screen.Entities {
+			if pos, ok := s.Position(e.ID); ok {
+				if screen.Positions == nil {
+					screen.Positions = map[string]vectors.Vector2D{}
+				}
+				screen.Positions[e.ID] = pos
+			}
+		}
+		if camera, ok := s.State.Cameras[target]; ok {
+			screen.Camera = &camera
+		}
+		ins.Screens[target] = screen
 	}
 
 	return ins, nil
+}
+
+// BattleMapTargets returns the screen targets that show a battle map, sorted.
+func (s *Scene) BattleMapTargets() ([]string, error) {
+	ins, err := s.Instructions()
+	if err != nil {
+		return nil, err
+	}
+
+	var result []string
+	for _, target := range slices.Sorted(maps.Keys(ins.Screens)) {
+		if ins.Screens[target].View == ViewBattleMap {
+			result = append(result, target)
+		}
+	}
+
+	return result, nil
+}
+
+// Position returns where an entity was moved to during play. False when it was never moved, so it
+// stands where the battle map places it.
+func (s *Scene) Position(entityID string) (vectors.Vector2D, bool) {
+	es, ok := s.State.Entities[entityID]
+	if !ok || es.Position == nil {
+		return vectors.Vector2D{}, false
+	}
+
+	return *es.Position, true
 }
 
 // SetVariant switches the active variant (empty for the default). Live overrides are cleared, as

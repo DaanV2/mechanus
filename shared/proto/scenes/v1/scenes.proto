@@ -13,6 +13,14 @@ service SceneService {
   rpc SetVariant(SetVariantRequest) returns (SetVariantResponse) {}
   // Get the active scene, if any
   rpc GetActive(GetActiveSceneRequest) returns (GetActiveSceneResponse) {}
+  // Hide an entity of the active scene from the screens, or reveal it
+  rpc SetEntityHidden(SetEntityHiddenRequest) returns (SetEntityHiddenResponse) {}
+  // Add an entity to the active scene during play
+  rpc SpawnEntity(SpawnEntityRequest) returns (SpawnEntityResponse) {}
+  // Remove an entity from the active scene (defeated, fled, ...)
+  rpc RemoveEntity(RemoveEntityRequest) returns (RemoveEntityResponse) {}
+  // Move an entity of the active scene on the battle map
+  rpc MoveEntity(MoveEntityRequest) returns (MoveEntityResponse) {}
 }
 
 message ListScenesRequest {}
@@ -65,4 +73,71 @@ message Variant {
 message ActiveScene {
   Scene scene = 1;
   string variant_id = 2; // Empty when the base instructions are active
+  repeated Entity entities = 3; // Entities present in the scene, hidden ones included
+}
+
+message SetEntityHiddenRequest {
+  string entity_id = 1;
+  bool hidden = 2; // True hides the entity from the screens, false reveals it
+}
+
+message SetEntityHiddenResponse {
+  ActiveScene active = 1;
+  repeated string device_errors = 2; // Devices that could not be instructed; the change happened regardless
+}
+
+message SpawnEntityRequest {
+  string entity_id = 1; // Unique within the scene
+  EntityKind kind = 2;
+  string name = 3;
+  bool hidden = 4; // Spawn hidden from the screens
+  optional Position position = 5; // Where to draw it on battle maps, unset to not draw it until it is moved
+}
+
+message SpawnEntityResponse {
+  ActiveScene active = 1;
+  repeated string device_errors = 2; // Devices that could not be instructed; the change happened regardless
+}
+
+message RemoveEntityRequest {
+  string entity_id = 1;
+}
+
+message RemoveEntityResponse {
+  ActiveScene active = 1;
+  repeated string device_errors = 2; // Devices that could not be instructed; the change happened regardless
+}
+
+message MoveEntityRequest {
+  string entity_id = 1;
+  Position position = 2;
+}
+
+message MoveEntityResponse {
+  ActiveScene active = 1;
+  repeated string device_errors = 2; // Devices that could not be told; the change happened regardless
+}
+
+// EntityKind is the role an entity plays in a scene.
+enum EntityKind {
+  ENTITY_KIND_UNSPECIFIED = 0;
+  ENTITY_KIND_PLAYER = 1;
+  ENTITY_KIND_NPC = 2;
+  ENTITY_KIND_ENEMY = 3;
+  ENTITY_KIND_OBJECT = 4;
+}
+
+// An entity present in the active scene
+message Entity {
+  string id = 1;
+  EntityKind kind = 2;
+  string name = 3;
+  bool hidden = 4; // Hidden from the screens
+  optional Position position = 5; // Where it was moved to during play, unset when it stands where the battle map places it
+}
+
+// A position on a battle map, in grid units
+message Position {
+  double x = 1;
+  double y = 2;
 }

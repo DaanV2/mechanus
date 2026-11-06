@@ -21,6 +21,62 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// EntityKind is the role an entity plays in a scene.
+type EntityKind int32
+
+const (
+	EntityKind_ENTITY_KIND_UNSPECIFIED EntityKind = 0
+	EntityKind_ENTITY_KIND_PLAYER      EntityKind = 1
+	EntityKind_ENTITY_KIND_NPC         EntityKind = 2
+	EntityKind_ENTITY_KIND_ENEMY       EntityKind = 3
+	EntityKind_ENTITY_KIND_OBJECT      EntityKind = 4
+)
+
+// Enum value maps for EntityKind.
+var (
+	EntityKind_name = map[int32]string{
+		0: "ENTITY_KIND_UNSPECIFIED",
+		1: "ENTITY_KIND_PLAYER",
+		2: "ENTITY_KIND_NPC",
+		3: "ENTITY_KIND_ENEMY",
+		4: "ENTITY_KIND_OBJECT",
+	}
+	EntityKind_value = map[string]int32{
+		"ENTITY_KIND_UNSPECIFIED": 0,
+		"ENTITY_KIND_PLAYER":      1,
+		"ENTITY_KIND_NPC":         2,
+		"ENTITY_KIND_ENEMY":       3,
+		"ENTITY_KIND_OBJECT":      4,
+	}
+)
+
+func (x EntityKind) Enum() *EntityKind {
+	p := new(EntityKind)
+	*p = x
+	return p
+}
+
+func (x EntityKind) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (EntityKind) Descriptor() protoreflect.EnumDescriptor {
+	return file_scenes_v1_scenes_proto_enumTypes[0].Descriptor()
+}
+
+func (EntityKind) Type() protoreflect.EnumType {
+	return &file_scenes_v1_scenes_proto_enumTypes[0]
+}
+
+func (x EntityKind) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use EntityKind.Descriptor instead.
+func (EntityKind) EnumDescriptor() ([]byte, []int) {
+	return file_scenes_v1_scenes_proto_rawDescGZIP(), []int{0}
+}
+
 type ListScenesRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
@@ -523,6 +579,7 @@ type ActiveScene struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Scene         *Scene                 `protobuf:"bytes,1,opt,name=scene,proto3" json:"scene,omitempty"`
 	VariantId     string                 `protobuf:"bytes,2,opt,name=variant_id,json=variantId,proto3" json:"variant_id,omitempty"` // Empty when the base instructions are active
+	Entities      []*Entity              `protobuf:"bytes,3,rep,name=entities,proto3" json:"entities,omitempty"`                    // Entities present in the scene, hidden ones included
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -571,6 +628,575 @@ func (x *ActiveScene) GetVariantId() string {
 	return ""
 }
 
+func (x *ActiveScene) GetEntities() []*Entity {
+	if x != nil {
+		return x.Entities
+	}
+	return nil
+}
+
+type SetEntityHiddenRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	EntityId      string                 `protobuf:"bytes,1,opt,name=entity_id,json=entityId,proto3" json:"entity_id,omitempty"`
+	Hidden        bool                   `protobuf:"varint,2,opt,name=hidden,proto3" json:"hidden,omitempty"` // True hides the entity from the screens, false reveals it
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SetEntityHiddenRequest) Reset() {
+	*x = SetEntityHiddenRequest{}
+	mi := &file_scenes_v1_scenes_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SetEntityHiddenRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SetEntityHiddenRequest) ProtoMessage() {}
+
+func (x *SetEntityHiddenRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_scenes_v1_scenes_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SetEntityHiddenRequest.ProtoReflect.Descriptor instead.
+func (*SetEntityHiddenRequest) Descriptor() ([]byte, []int) {
+	return file_scenes_v1_scenes_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *SetEntityHiddenRequest) GetEntityId() string {
+	if x != nil {
+		return x.EntityId
+	}
+	return ""
+}
+
+func (x *SetEntityHiddenRequest) GetHidden() bool {
+	if x != nil {
+		return x.Hidden
+	}
+	return false
+}
+
+type SetEntityHiddenResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Active        *ActiveScene           `protobuf:"bytes,1,opt,name=active,proto3" json:"active,omitempty"`
+	DeviceErrors  []string               `protobuf:"bytes,2,rep,name=device_errors,json=deviceErrors,proto3" json:"device_errors,omitempty"` // Devices that could not be instructed; the change happened regardless
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SetEntityHiddenResponse) Reset() {
+	*x = SetEntityHiddenResponse{}
+	mi := &file_scenes_v1_scenes_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SetEntityHiddenResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SetEntityHiddenResponse) ProtoMessage() {}
+
+func (x *SetEntityHiddenResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_scenes_v1_scenes_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SetEntityHiddenResponse.ProtoReflect.Descriptor instead.
+func (*SetEntityHiddenResponse) Descriptor() ([]byte, []int) {
+	return file_scenes_v1_scenes_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *SetEntityHiddenResponse) GetActive() *ActiveScene {
+	if x != nil {
+		return x.Active
+	}
+	return nil
+}
+
+func (x *SetEntityHiddenResponse) GetDeviceErrors() []string {
+	if x != nil {
+		return x.DeviceErrors
+	}
+	return nil
+}
+
+type SpawnEntityRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	EntityId      string                 `protobuf:"bytes,1,opt,name=entity_id,json=entityId,proto3" json:"entity_id,omitempty"` // Unique within the scene
+	Kind          EntityKind             `protobuf:"varint,2,opt,name=kind,proto3,enum=scenes.v1.EntityKind" json:"kind,omitempty"`
+	Name          string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
+	Hidden        bool                   `protobuf:"varint,4,opt,name=hidden,proto3" json:"hidden,omitempty"`          // Spawn hidden from the screens
+	Position      *Position              `protobuf:"bytes,5,opt,name=position,proto3,oneof" json:"position,omitempty"` // Where to draw it on battle maps, unset to not draw it until it is moved
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SpawnEntityRequest) Reset() {
+	*x = SpawnEntityRequest{}
+	mi := &file_scenes_v1_scenes_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SpawnEntityRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SpawnEntityRequest) ProtoMessage() {}
+
+func (x *SpawnEntityRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_scenes_v1_scenes_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SpawnEntityRequest.ProtoReflect.Descriptor instead.
+func (*SpawnEntityRequest) Descriptor() ([]byte, []int) {
+	return file_scenes_v1_scenes_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *SpawnEntityRequest) GetEntityId() string {
+	if x != nil {
+		return x.EntityId
+	}
+	return ""
+}
+
+func (x *SpawnEntityRequest) GetKind() EntityKind {
+	if x != nil {
+		return x.Kind
+	}
+	return EntityKind_ENTITY_KIND_UNSPECIFIED
+}
+
+func (x *SpawnEntityRequest) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *SpawnEntityRequest) GetHidden() bool {
+	if x != nil {
+		return x.Hidden
+	}
+	return false
+}
+
+func (x *SpawnEntityRequest) GetPosition() *Position {
+	if x != nil {
+		return x.Position
+	}
+	return nil
+}
+
+type SpawnEntityResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Active        *ActiveScene           `protobuf:"bytes,1,opt,name=active,proto3" json:"active,omitempty"`
+	DeviceErrors  []string               `protobuf:"bytes,2,rep,name=device_errors,json=deviceErrors,proto3" json:"device_errors,omitempty"` // Devices that could not be instructed; the change happened regardless
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SpawnEntityResponse) Reset() {
+	*x = SpawnEntityResponse{}
+	mi := &file_scenes_v1_scenes_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SpawnEntityResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SpawnEntityResponse) ProtoMessage() {}
+
+func (x *SpawnEntityResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_scenes_v1_scenes_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SpawnEntityResponse.ProtoReflect.Descriptor instead.
+func (*SpawnEntityResponse) Descriptor() ([]byte, []int) {
+	return file_scenes_v1_scenes_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *SpawnEntityResponse) GetActive() *ActiveScene {
+	if x != nil {
+		return x.Active
+	}
+	return nil
+}
+
+func (x *SpawnEntityResponse) GetDeviceErrors() []string {
+	if x != nil {
+		return x.DeviceErrors
+	}
+	return nil
+}
+
+type RemoveEntityRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	EntityId      string                 `protobuf:"bytes,1,opt,name=entity_id,json=entityId,proto3" json:"entity_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RemoveEntityRequest) Reset() {
+	*x = RemoveEntityRequest{}
+	mi := &file_scenes_v1_scenes_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RemoveEntityRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RemoveEntityRequest) ProtoMessage() {}
+
+func (x *RemoveEntityRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_scenes_v1_scenes_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RemoveEntityRequest.ProtoReflect.Descriptor instead.
+func (*RemoveEntityRequest) Descriptor() ([]byte, []int) {
+	return file_scenes_v1_scenes_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *RemoveEntityRequest) GetEntityId() string {
+	if x != nil {
+		return x.EntityId
+	}
+	return ""
+}
+
+type RemoveEntityResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Active        *ActiveScene           `protobuf:"bytes,1,opt,name=active,proto3" json:"active,omitempty"`
+	DeviceErrors  []string               `protobuf:"bytes,2,rep,name=device_errors,json=deviceErrors,proto3" json:"device_errors,omitempty"` // Devices that could not be instructed; the change happened regardless
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RemoveEntityResponse) Reset() {
+	*x = RemoveEntityResponse{}
+	mi := &file_scenes_v1_scenes_proto_msgTypes[16]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RemoveEntityResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RemoveEntityResponse) ProtoMessage() {}
+
+func (x *RemoveEntityResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_scenes_v1_scenes_proto_msgTypes[16]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RemoveEntityResponse.ProtoReflect.Descriptor instead.
+func (*RemoveEntityResponse) Descriptor() ([]byte, []int) {
+	return file_scenes_v1_scenes_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *RemoveEntityResponse) GetActive() *ActiveScene {
+	if x != nil {
+		return x.Active
+	}
+	return nil
+}
+
+func (x *RemoveEntityResponse) GetDeviceErrors() []string {
+	if x != nil {
+		return x.DeviceErrors
+	}
+	return nil
+}
+
+type MoveEntityRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	EntityId      string                 `protobuf:"bytes,1,opt,name=entity_id,json=entityId,proto3" json:"entity_id,omitempty"`
+	Position      *Position              `protobuf:"bytes,2,opt,name=position,proto3" json:"position,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *MoveEntityRequest) Reset() {
+	*x = MoveEntityRequest{}
+	mi := &file_scenes_v1_scenes_proto_msgTypes[17]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *MoveEntityRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*MoveEntityRequest) ProtoMessage() {}
+
+func (x *MoveEntityRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_scenes_v1_scenes_proto_msgTypes[17]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use MoveEntityRequest.ProtoReflect.Descriptor instead.
+func (*MoveEntityRequest) Descriptor() ([]byte, []int) {
+	return file_scenes_v1_scenes_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *MoveEntityRequest) GetEntityId() string {
+	if x != nil {
+		return x.EntityId
+	}
+	return ""
+}
+
+func (x *MoveEntityRequest) GetPosition() *Position {
+	if x != nil {
+		return x.Position
+	}
+	return nil
+}
+
+type MoveEntityResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Active        *ActiveScene           `protobuf:"bytes,1,opt,name=active,proto3" json:"active,omitempty"`
+	DeviceErrors  []string               `protobuf:"bytes,2,rep,name=device_errors,json=deviceErrors,proto3" json:"device_errors,omitempty"` // Devices that could not be told; the change happened regardless
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *MoveEntityResponse) Reset() {
+	*x = MoveEntityResponse{}
+	mi := &file_scenes_v1_scenes_proto_msgTypes[18]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *MoveEntityResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*MoveEntityResponse) ProtoMessage() {}
+
+func (x *MoveEntityResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_scenes_v1_scenes_proto_msgTypes[18]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use MoveEntityResponse.ProtoReflect.Descriptor instead.
+func (*MoveEntityResponse) Descriptor() ([]byte, []int) {
+	return file_scenes_v1_scenes_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *MoveEntityResponse) GetActive() *ActiveScene {
+	if x != nil {
+		return x.Active
+	}
+	return nil
+}
+
+func (x *MoveEntityResponse) GetDeviceErrors() []string {
+	if x != nil {
+		return x.DeviceErrors
+	}
+	return nil
+}
+
+// An entity present in the active scene
+type Entity struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Kind          EntityKind             `protobuf:"varint,2,opt,name=kind,proto3,enum=scenes.v1.EntityKind" json:"kind,omitempty"`
+	Name          string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
+	Hidden        bool                   `protobuf:"varint,4,opt,name=hidden,proto3" json:"hidden,omitempty"`          // Hidden from the screens
+	Position      *Position              `protobuf:"bytes,5,opt,name=position,proto3,oneof" json:"position,omitempty"` // Where it was moved to during play, unset when it stands where the battle map places it
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Entity) Reset() {
+	*x = Entity{}
+	mi := &file_scenes_v1_scenes_proto_msgTypes[19]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Entity) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Entity) ProtoMessage() {}
+
+func (x *Entity) ProtoReflect() protoreflect.Message {
+	mi := &file_scenes_v1_scenes_proto_msgTypes[19]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Entity.ProtoReflect.Descriptor instead.
+func (*Entity) Descriptor() ([]byte, []int) {
+	return file_scenes_v1_scenes_proto_rawDescGZIP(), []int{19}
+}
+
+func (x *Entity) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *Entity) GetKind() EntityKind {
+	if x != nil {
+		return x.Kind
+	}
+	return EntityKind_ENTITY_KIND_UNSPECIFIED
+}
+
+func (x *Entity) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *Entity) GetHidden() bool {
+	if x != nil {
+		return x.Hidden
+	}
+	return false
+}
+
+func (x *Entity) GetPosition() *Position {
+	if x != nil {
+		return x.Position
+	}
+	return nil
+}
+
+// A position on a battle map, in grid units
+type Position struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	X             float64                `protobuf:"fixed64,1,opt,name=x,proto3" json:"x,omitempty"`
+	Y             float64                `protobuf:"fixed64,2,opt,name=y,proto3" json:"y,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Position) Reset() {
+	*x = Position{}
+	mi := &file_scenes_v1_scenes_proto_msgTypes[20]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Position) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Position) ProtoMessage() {}
+
+func (x *Position) ProtoReflect() protoreflect.Message {
+	mi := &file_scenes_v1_scenes_proto_msgTypes[20]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Position.ProtoReflect.Descriptor instead.
+func (*Position) Descriptor() ([]byte, []int) {
+	return file_scenes_v1_scenes_proto_rawDescGZIP(), []int{20}
+}
+
+func (x *Position) GetX() float64 {
+	if x != nil {
+		return x.X
+	}
+	return 0
+}
+
+func (x *Position) GetY() float64 {
+	if x != nil {
+		return x.Y
+	}
+	return 0
+}
+
 var File_scenes_v1_scenes_proto protoreflect.FileDescriptor
 
 const file_scenes_v1_scenes_proto_rawDesc = "" +
@@ -608,17 +1234,67 @@ const file_scenes_v1_scenes_proto_rawDesc = "" +
 	"\x04tags\x18\x03 \x03(\v2\x1c.scenes.v1.Variant.TagsEntryR\x04tags\x1a7\n" +
 	"\tTagsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"T\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\x83\x01\n" +
 	"\vActiveScene\x12&\n" +
 	"\x05scene\x18\x01 \x01(\v2\x10.scenes.v1.SceneR\x05scene\x12\x1d\n" +
 	"\n" +
-	"variant_id\x18\x02 \x01(\tR\tvariantId2\xc7\x02\n" +
+	"variant_id\x18\x02 \x01(\tR\tvariantId\x12-\n" +
+	"\bentities\x18\x03 \x03(\v2\x11.scenes.v1.EntityR\bentities\"M\n" +
+	"\x16SetEntityHiddenRequest\x12\x1b\n" +
+	"\tentity_id\x18\x01 \x01(\tR\bentityId\x12\x16\n" +
+	"\x06hidden\x18\x02 \x01(\bR\x06hidden\"n\n" +
+	"\x17SetEntityHiddenResponse\x12.\n" +
+	"\x06active\x18\x01 \x01(\v2\x16.scenes.v1.ActiveSceneR\x06active\x12#\n" +
+	"\rdevice_errors\x18\x02 \x03(\tR\fdeviceErrors\"\xcb\x01\n" +
+	"\x12SpawnEntityRequest\x12\x1b\n" +
+	"\tentity_id\x18\x01 \x01(\tR\bentityId\x12)\n" +
+	"\x04kind\x18\x02 \x01(\x0e2\x15.scenes.v1.EntityKindR\x04kind\x12\x12\n" +
+	"\x04name\x18\x03 \x01(\tR\x04name\x12\x16\n" +
+	"\x06hidden\x18\x04 \x01(\bR\x06hidden\x124\n" +
+	"\bposition\x18\x05 \x01(\v2\x13.scenes.v1.PositionH\x00R\bposition\x88\x01\x01B\v\n" +
+	"\t_position\"j\n" +
+	"\x13SpawnEntityResponse\x12.\n" +
+	"\x06active\x18\x01 \x01(\v2\x16.scenes.v1.ActiveSceneR\x06active\x12#\n" +
+	"\rdevice_errors\x18\x02 \x03(\tR\fdeviceErrors\"2\n" +
+	"\x13RemoveEntityRequest\x12\x1b\n" +
+	"\tentity_id\x18\x01 \x01(\tR\bentityId\"k\n" +
+	"\x14RemoveEntityResponse\x12.\n" +
+	"\x06active\x18\x01 \x01(\v2\x16.scenes.v1.ActiveSceneR\x06active\x12#\n" +
+	"\rdevice_errors\x18\x02 \x03(\tR\fdeviceErrors\"a\n" +
+	"\x11MoveEntityRequest\x12\x1b\n" +
+	"\tentity_id\x18\x01 \x01(\tR\bentityId\x12/\n" +
+	"\bposition\x18\x02 \x01(\v2\x13.scenes.v1.PositionR\bposition\"i\n" +
+	"\x12MoveEntityResponse\x12.\n" +
+	"\x06active\x18\x01 \x01(\v2\x16.scenes.v1.ActiveSceneR\x06active\x12#\n" +
+	"\rdevice_errors\x18\x02 \x03(\tR\fdeviceErrors\"\xb2\x01\n" +
+	"\x06Entity\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12)\n" +
+	"\x04kind\x18\x02 \x01(\x0e2\x15.scenes.v1.EntityKindR\x04kind\x12\x12\n" +
+	"\x04name\x18\x03 \x01(\tR\x04name\x12\x16\n" +
+	"\x06hidden\x18\x04 \x01(\bR\x06hidden\x124\n" +
+	"\bposition\x18\x05 \x01(\v2\x13.scenes.v1.PositionH\x00R\bposition\x88\x01\x01B\v\n" +
+	"\t_position\"&\n" +
+	"\bPosition\x12\f\n" +
+	"\x01x\x18\x01 \x01(\x01R\x01x\x12\f\n" +
+	"\x01y\x18\x02 \x01(\x01R\x01y*\x85\x01\n" +
+	"\n" +
+	"EntityKind\x12\x1b\n" +
+	"\x17ENTITY_KIND_UNSPECIFIED\x10\x00\x12\x16\n" +
+	"\x12ENTITY_KIND_PLAYER\x10\x01\x12\x13\n" +
+	"\x0fENTITY_KIND_NPC\x10\x02\x12\x15\n" +
+	"\x11ENTITY_KIND_ENEMY\x10\x03\x12\x16\n" +
+	"\x12ENTITY_KIND_OBJECT\x10\x042\x93\x05\n" +
 	"\fSceneService\x12E\n" +
 	"\x04List\x12\x1c.scenes.v1.ListScenesRequest\x1a\x1d.scenes.v1.ListScenesResponse\"\x00\x12O\n" +
 	"\bActivate\x12\x1f.scenes.v1.ActivateSceneRequest\x1a .scenes.v1.ActivateSceneResponse\"\x00\x12K\n" +
 	"\n" +
 	"SetVariant\x12\x1c.scenes.v1.SetVariantRequest\x1a\x1d.scenes.v1.SetVariantResponse\"\x00\x12R\n" +
-	"\tGetActive\x12 .scenes.v1.GetActiveSceneRequest\x1a!.scenes.v1.GetActiveSceneResponse\"\x00B<Z:github.com/DaanV2/mechanus/server/proto/scenes/v1;scenesv1b\x06proto3"
+	"\tGetActive\x12 .scenes.v1.GetActiveSceneRequest\x1a!.scenes.v1.GetActiveSceneResponse\"\x00\x12Z\n" +
+	"\x0fSetEntityHidden\x12!.scenes.v1.SetEntityHiddenRequest\x1a\".scenes.v1.SetEntityHiddenResponse\"\x00\x12N\n" +
+	"\vSpawnEntity\x12\x1d.scenes.v1.SpawnEntityRequest\x1a\x1e.scenes.v1.SpawnEntityResponse\"\x00\x12Q\n" +
+	"\fRemoveEntity\x12\x1e.scenes.v1.RemoveEntityRequest\x1a\x1f.scenes.v1.RemoveEntityResponse\"\x00\x12K\n" +
+	"\n" +
+	"MoveEntity\x12\x1c.scenes.v1.MoveEntityRequest\x1a\x1d.scenes.v1.MoveEntityResponse\"\x00B<Z:github.com/DaanV2/mechanus/server/proto/scenes/v1;scenesv1b\x06proto3"
 
 var (
 	file_scenes_v1_scenes_proto_rawDescOnce sync.Once
@@ -632,42 +1308,72 @@ func file_scenes_v1_scenes_proto_rawDescGZIP() []byte {
 	return file_scenes_v1_scenes_proto_rawDescData
 }
 
-var file_scenes_v1_scenes_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
+var file_scenes_v1_scenes_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
+var file_scenes_v1_scenes_proto_msgTypes = make([]protoimpl.MessageInfo, 22)
 var file_scenes_v1_scenes_proto_goTypes = []any{
-	(*ListScenesRequest)(nil),      // 0: scenes.v1.ListScenesRequest
-	(*ListScenesResponse)(nil),     // 1: scenes.v1.ListScenesResponse
-	(*ActivateSceneRequest)(nil),   // 2: scenes.v1.ActivateSceneRequest
-	(*ActivateSceneResponse)(nil),  // 3: scenes.v1.ActivateSceneResponse
-	(*SetVariantRequest)(nil),      // 4: scenes.v1.SetVariantRequest
-	(*SetVariantResponse)(nil),     // 5: scenes.v1.SetVariantResponse
-	(*GetActiveSceneRequest)(nil),  // 6: scenes.v1.GetActiveSceneRequest
-	(*GetActiveSceneResponse)(nil), // 7: scenes.v1.GetActiveSceneResponse
-	(*Scene)(nil),                  // 8: scenes.v1.Scene
-	(*Variant)(nil),                // 9: scenes.v1.Variant
-	(*ActiveScene)(nil),            // 10: scenes.v1.ActiveScene
-	nil,                            // 11: scenes.v1.Variant.TagsEntry
+	(EntityKind)(0),                 // 0: scenes.v1.EntityKind
+	(*ListScenesRequest)(nil),       // 1: scenes.v1.ListScenesRequest
+	(*ListScenesResponse)(nil),      // 2: scenes.v1.ListScenesResponse
+	(*ActivateSceneRequest)(nil),    // 3: scenes.v1.ActivateSceneRequest
+	(*ActivateSceneResponse)(nil),   // 4: scenes.v1.ActivateSceneResponse
+	(*SetVariantRequest)(nil),       // 5: scenes.v1.SetVariantRequest
+	(*SetVariantResponse)(nil),      // 6: scenes.v1.SetVariantResponse
+	(*GetActiveSceneRequest)(nil),   // 7: scenes.v1.GetActiveSceneRequest
+	(*GetActiveSceneResponse)(nil),  // 8: scenes.v1.GetActiveSceneResponse
+	(*Scene)(nil),                   // 9: scenes.v1.Scene
+	(*Variant)(nil),                 // 10: scenes.v1.Variant
+	(*ActiveScene)(nil),             // 11: scenes.v1.ActiveScene
+	(*SetEntityHiddenRequest)(nil),  // 12: scenes.v1.SetEntityHiddenRequest
+	(*SetEntityHiddenResponse)(nil), // 13: scenes.v1.SetEntityHiddenResponse
+	(*SpawnEntityRequest)(nil),      // 14: scenes.v1.SpawnEntityRequest
+	(*SpawnEntityResponse)(nil),     // 15: scenes.v1.SpawnEntityResponse
+	(*RemoveEntityRequest)(nil),     // 16: scenes.v1.RemoveEntityRequest
+	(*RemoveEntityResponse)(nil),    // 17: scenes.v1.RemoveEntityResponse
+	(*MoveEntityRequest)(nil),       // 18: scenes.v1.MoveEntityRequest
+	(*MoveEntityResponse)(nil),      // 19: scenes.v1.MoveEntityResponse
+	(*Entity)(nil),                  // 20: scenes.v1.Entity
+	(*Position)(nil),                // 21: scenes.v1.Position
+	nil,                             // 22: scenes.v1.Variant.TagsEntry
 }
 var file_scenes_v1_scenes_proto_depIdxs = []int32{
-	8,  // 0: scenes.v1.ListScenesResponse.scenes:type_name -> scenes.v1.Scene
-	10, // 1: scenes.v1.ActivateSceneResponse.active:type_name -> scenes.v1.ActiveScene
-	10, // 2: scenes.v1.SetVariantResponse.active:type_name -> scenes.v1.ActiveScene
-	10, // 3: scenes.v1.GetActiveSceneResponse.active:type_name -> scenes.v1.ActiveScene
-	9,  // 4: scenes.v1.Scene.variants:type_name -> scenes.v1.Variant
-	11, // 5: scenes.v1.Variant.tags:type_name -> scenes.v1.Variant.TagsEntry
-	8,  // 6: scenes.v1.ActiveScene.scene:type_name -> scenes.v1.Scene
-	0,  // 7: scenes.v1.SceneService.List:input_type -> scenes.v1.ListScenesRequest
-	2,  // 8: scenes.v1.SceneService.Activate:input_type -> scenes.v1.ActivateSceneRequest
-	4,  // 9: scenes.v1.SceneService.SetVariant:input_type -> scenes.v1.SetVariantRequest
-	6,  // 10: scenes.v1.SceneService.GetActive:input_type -> scenes.v1.GetActiveSceneRequest
-	1,  // 11: scenes.v1.SceneService.List:output_type -> scenes.v1.ListScenesResponse
-	3,  // 12: scenes.v1.SceneService.Activate:output_type -> scenes.v1.ActivateSceneResponse
-	5,  // 13: scenes.v1.SceneService.SetVariant:output_type -> scenes.v1.SetVariantResponse
-	7,  // 14: scenes.v1.SceneService.GetActive:output_type -> scenes.v1.GetActiveSceneResponse
-	11, // [11:15] is the sub-list for method output_type
-	7,  // [7:11] is the sub-list for method input_type
-	7,  // [7:7] is the sub-list for extension type_name
-	7,  // [7:7] is the sub-list for extension extendee
-	0,  // [0:7] is the sub-list for field type_name
+	9,  // 0: scenes.v1.ListScenesResponse.scenes:type_name -> scenes.v1.Scene
+	11, // 1: scenes.v1.ActivateSceneResponse.active:type_name -> scenes.v1.ActiveScene
+	11, // 2: scenes.v1.SetVariantResponse.active:type_name -> scenes.v1.ActiveScene
+	11, // 3: scenes.v1.GetActiveSceneResponse.active:type_name -> scenes.v1.ActiveScene
+	10, // 4: scenes.v1.Scene.variants:type_name -> scenes.v1.Variant
+	22, // 5: scenes.v1.Variant.tags:type_name -> scenes.v1.Variant.TagsEntry
+	9,  // 6: scenes.v1.ActiveScene.scene:type_name -> scenes.v1.Scene
+	20, // 7: scenes.v1.ActiveScene.entities:type_name -> scenes.v1.Entity
+	11, // 8: scenes.v1.SetEntityHiddenResponse.active:type_name -> scenes.v1.ActiveScene
+	0,  // 9: scenes.v1.SpawnEntityRequest.kind:type_name -> scenes.v1.EntityKind
+	21, // 10: scenes.v1.SpawnEntityRequest.position:type_name -> scenes.v1.Position
+	11, // 11: scenes.v1.SpawnEntityResponse.active:type_name -> scenes.v1.ActiveScene
+	11, // 12: scenes.v1.RemoveEntityResponse.active:type_name -> scenes.v1.ActiveScene
+	21, // 13: scenes.v1.MoveEntityRequest.position:type_name -> scenes.v1.Position
+	11, // 14: scenes.v1.MoveEntityResponse.active:type_name -> scenes.v1.ActiveScene
+	0,  // 15: scenes.v1.Entity.kind:type_name -> scenes.v1.EntityKind
+	21, // 16: scenes.v1.Entity.position:type_name -> scenes.v1.Position
+	1,  // 17: scenes.v1.SceneService.List:input_type -> scenes.v1.ListScenesRequest
+	3,  // 18: scenes.v1.SceneService.Activate:input_type -> scenes.v1.ActivateSceneRequest
+	5,  // 19: scenes.v1.SceneService.SetVariant:input_type -> scenes.v1.SetVariantRequest
+	7,  // 20: scenes.v1.SceneService.GetActive:input_type -> scenes.v1.GetActiveSceneRequest
+	12, // 21: scenes.v1.SceneService.SetEntityHidden:input_type -> scenes.v1.SetEntityHiddenRequest
+	14, // 22: scenes.v1.SceneService.SpawnEntity:input_type -> scenes.v1.SpawnEntityRequest
+	16, // 23: scenes.v1.SceneService.RemoveEntity:input_type -> scenes.v1.RemoveEntityRequest
+	18, // 24: scenes.v1.SceneService.MoveEntity:input_type -> scenes.v1.MoveEntityRequest
+	2,  // 25: scenes.v1.SceneService.List:output_type -> scenes.v1.ListScenesResponse
+	4,  // 26: scenes.v1.SceneService.Activate:output_type -> scenes.v1.ActivateSceneResponse
+	6,  // 27: scenes.v1.SceneService.SetVariant:output_type -> scenes.v1.SetVariantResponse
+	8,  // 28: scenes.v1.SceneService.GetActive:output_type -> scenes.v1.GetActiveSceneResponse
+	13, // 29: scenes.v1.SceneService.SetEntityHidden:output_type -> scenes.v1.SetEntityHiddenResponse
+	15, // 30: scenes.v1.SceneService.SpawnEntity:output_type -> scenes.v1.SpawnEntityResponse
+	17, // 31: scenes.v1.SceneService.RemoveEntity:output_type -> scenes.v1.RemoveEntityResponse
+	19, // 32: scenes.v1.SceneService.MoveEntity:output_type -> scenes.v1.MoveEntityResponse
+	25, // [25:33] is the sub-list for method output_type
+	17, // [17:25] is the sub-list for method input_type
+	17, // [17:17] is the sub-list for extension type_name
+	17, // [17:17] is the sub-list for extension extendee
+	0,  // [0:17] is the sub-list for field type_name
 }
 
 func init() { file_scenes_v1_scenes_proto_init() }
@@ -676,18 +1382,21 @@ func file_scenes_v1_scenes_proto_init() {
 		return
 	}
 	file_scenes_v1_scenes_proto_msgTypes[7].OneofWrappers = []any{}
+	file_scenes_v1_scenes_proto_msgTypes[13].OneofWrappers = []any{}
+	file_scenes_v1_scenes_proto_msgTypes[19].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_scenes_v1_scenes_proto_rawDesc), len(file_scenes_v1_scenes_proto_rawDesc)),
-			NumEnums:      0,
-			NumMessages:   12,
+			NumEnums:      1,
+			NumMessages:   22,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
 		GoTypes:           file_scenes_v1_scenes_proto_goTypes,
 		DependencyIndexes: file_scenes_v1_scenes_proto_depIdxs,
+		EnumInfos:         file_scenes_v1_scenes_proto_enumTypes,
 		MessageInfos:      file_scenes_v1_scenes_proto_msgTypes,
 	}.Build()
 	File_scenes_v1_scenes_proto = out.File

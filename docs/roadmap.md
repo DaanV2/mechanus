@@ -134,9 +134,9 @@ Done: per-login sessions (one JTI each) with an RS512 access token (1 h) and a `
 
 **Goal**: a full combat encounter can be run on the table: tokens move, fog is revealed, initiative is tracked, and players see only what they should.
 
-- [~] Entity tokens on the battle map: tokens are drawn at the position from the map file; still to do: positions stored in scene state
-- [ ] Screen WebSocket messages for pan, zoom, token moves
-- [ ] GM controls: reveal / hide / spawn / remove entities
+- [x] Entity tokens on the battle map: drawn at the position from the map file, moves stored in scene state (saved on exit, the map's position is the default)
+- [x] Screen WebSocket messages for pan, zoom, token moves: validated server-side, sent to the screens of the scene, camera kept per target in scene state
+- [x] GM controls: reveal / hide / spawn / remove entities (`scenes/v1` and the GM view)
 - [ ] Token control: `controlled_by` users per entity, GM assigns / shares control, live movement lock
 - [ ] Fog of war and reveal, stored in scene state
 - [~] Overlays: `entities` lists names on battle maps; still to do: portraits, the same on other views, and the `initiative` tracker
