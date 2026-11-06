@@ -7,9 +7,10 @@ shared
 
 server/tests
 server/scripts
+!server/scripts/licenses
 server/reports
 
 client/.svelte-kit
 build
 node_modules
-tests
+testsdist

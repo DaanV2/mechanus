@@ -1,0 +1,56 @@
+# yaml-language-server: $schema=https://goreleaser.com/static/schema.json
+# Release binaries for Linux, Windows and macOS (amd64 + arm64).
+# Each archive holds the server binary and the compiled web client in `web/`;
+# start it with `mechanus server --server.static.folder web`, see docs/installation.md.
+#
+# Local / PR check:  goreleaser release --snapshot --clean   (output in dist/)
+# Release:           .github/workflows/release-assets.yaml
+version: 2
+project_name: mechanus
+
+before:
+  hooks:
+    - npm ci --ignore-scripts --prefix client
+    # also writes client/build/licenses/npm.json (client/scripts/vite-plugin-licenses.ts)
+    - npm run build --prefix client
+    - go -C server run ./scripts/licenses -o ../client/build/licenses/go.json
+
+builds:
+  - id: mechanus
+    dir: server
+    main: .
+    binary: mechanus
+    env:
+      - CGO_ENABLED=0 # SQLite is pure Go, no cgo needed
+    goos: [linux, windows, darwin]
+    goarch: [amd64, arm64]
+    flags: [-trimpath]
+    ldflags: [-s -w]
+    mod_timestamp: "{{ .CommitTimestamp }}"
+
+archives:
+  - id: mechanus
+    formats: [tar.gz]
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    files:
+      - LICENSE
+      - README.md
+      - src: client/build/*
+        dst: web
+        strip_parent: false
+
+checksum:
+  name_template: checksums.txt
+
+snapshot:
+  version_template: "{{ incpatch .Version }}-snapshot+{{ .ShortCommit }}"
+
+changelog:
+  disable: true # release-drafter writes the notes
+
+release:
+  # The release already exists (release-drafter) when this runs; only upload the archives.
+  mode: keep-existing

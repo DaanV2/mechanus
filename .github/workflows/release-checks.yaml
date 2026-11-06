@@ -1,0 +1,65 @@
+name: 📦 Release build
+env:
+  FORCE_COLOR: true
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: 📦 Build binaries (all platforms)
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📦 Checkout Repository
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # GoReleaser derives the version from tags
+
+      - name: ⚒️ Setup Go
+        uses: actions/setup-go@v7
+        with:
+          go-version-file: ./server/go.mod
+          cache-dependency-path: ./server/go.sum
+
+      - name: ⚒️ Setup Node.js Environment
+        uses: actions/setup-node@v7
+        with:
+          cache: npm
+          cache-dependency-path: client/package-lock.json
+          node-version-file: client/package.json
+
+      - name: 🛠️ Build all platforms (snapshot)
+        uses: goreleaser/goreleaser-action@v7
+        with:
+          distribution: goreleaser
+          version: "~> v2"
+          args: release --snapshot --clean
+
+      # One quick run on this runner (linux/amd64); the other targets are only cross-compiled.
+      - name: 🚀 Start the linux/amd64 server and fetch pages
+        env:
+          DATABASE_TYPE: memory
+        run: |
+          mkdir smoke
+          tar -xzf dist/*_linux_amd64.tar.gz -C smoke
+          cd smoke
+          ./mechanus server --server.static.folder web > server.log 2>&1 &
+          for i in $(seq 1 30); do
+            curl -sf http://localhost:8080/ > /dev/null && break
+            sleep 1
+          done
+          set -x
+          # save to a file first: `curl | grep -q` fails under pipefail once grep stops reading
+          check() { curl -sf "http://localhost:8080$1" -o response && grep -q "$2" response; }
+          check / '<html'
+          check /about/ '<html'
+          check /licenses/go.json '"license"'
+          check /licenses/npm.json '"license"'
+
+      - name: 📜 Server log
+        if: always()
+        run: cat smoke/server.log || true
