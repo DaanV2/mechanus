@@ -93,10 +93,12 @@ jobs:
             sleep 1
           done
           set -x
-          curl -sf http://localhost:8080/ | grep -q '<html'
-          curl -sf http://localhost:8080/about/ | grep -q '<html'
-          curl -sf http://localhost:8080/licenses/go.json | grep -q '"license"'
-          curl -sf http://localhost:8080/licenses/npm.json | grep -q '"license"'
+          # save to a file first: `curl | grep -q` fails under pipefail once grep stops reading
+          check() { curl -sf "http://localhost:8080$1" -o response && grep -q "$2" response; }
+          check / '<html'
+          check /about/ '<html'
+          check /licenses/go.json '"license"'
+          check /licenses/npm.json '"license"'
 
       - name: 📜 Server log
         if: always()
