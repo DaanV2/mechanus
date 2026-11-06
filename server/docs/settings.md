@@ -17,6 +17,8 @@
 | Name | Type | Description | Default | Env |
 |------|------|-------------|---------|-----|
 | access-token-duration | duration | How long an access token is valid for | 1h0m0s | AUTH_ACCESS_TOKEN_DURATION |
+| device-refresh-token-duration | duration | How long a device refresh token is valid for, a device that isn't used within this time has to pair again | 720h0m0s | AUTH_DEVICE_REFRESH_TOKEN_DURATION |
+| device-token-duration | duration | How long a device access token is valid for | 8h0m0s | AUTH_DEVICE_TOKEN_DURATION |
 | invite-duration | duration | How long an invite link stays valid when no duration is given, at most 30 days | 168h0m0s | AUTH_INVITE_DURATION |
 | key-rotation | duration | How often a new jwt signing key is generated, old keys are removed once every token they signed has expired. 0 disables rotation | 720h0m0s | AUTH_KEY_ROTATION |
 | refresh-token-duration | duration | How long a refresh token is valid for, a session that isn't refreshed within this time has to log in again | 168h0m0s | AUTH_REFRESH_TOKEN_DURATION |
@@ -28,9 +30,9 @@
 |------|------|-------------|---------|-----|
 | conn-max-lifetime | duration | Sets the maximum amount of time a connection may be reused. If d <= 0, connections are not closed due to a connection's age. | 1h0m0s | DATABASE_CONN_MAX_LIFETIME |
 | dsn | string | A datasource name, depends on type of database, but usually referes to file name or the connection string | db.sqlite | DATABASE_DSN |
-| max-idle-conss | int | Sets the maximum number of connections in the idle connection pool. If n <= 0, no idle connections are retained. | 2 | DATABASE_MAX_IDLE_CONSS |
+| max-idle-conns | int | Sets the maximum number of connections in the idle connection pool. If n <= 0, no idle connections are retained. | 2 | DATABASE_MAX_IDLE_CONNS |
 | max-open-conns | int | Sets the maximum number of open connections to the database. If n <= 0, then there is no limit on the number of open connections. | 0 | DATABASE_MAX_OPEN_CONNS |
-| type | string | The type of database to connect/use: supported values: sqlite, postgres, mysql. (For testing purposes there is also inmemory) | sqlite | DATABASE_TYPE |
+| type | string | The type of database to connect/use: supported values: sqlite, postgres, mysql. (For testing purposes there is also memory) | sqlite | DATABASE_TYPE |
 
 ## Initialize
 
@@ -109,7 +111,7 @@
 
 | Name | Type | Description | Default | Env |
 |------|------|-------------|---------|-----|
-| folder | string | The default files to serve | ../client/build | SERVER_STATIC_FOLDER |
+| folder | string | The default files to serve | /web | SERVER_STATIC_FOLDER |
 
 ### Tls
 

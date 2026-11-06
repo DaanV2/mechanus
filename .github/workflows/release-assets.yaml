@@ -97,4 +97,4 @@ jobs:
             - `${{ steps.repo.outputs.image }}:${{ github.event.release.tag_name }}`
             - `${{ steps.repo.outputs.image }}:latest`
 
-            📦 **Binaries**: download the archive for your platform below and see [installation](https://github.com/${{ github.repository }}/blob/main/docs/installation.md).
+            📦 **Binaries**: download the archive for your platform below and see [getting started](https://github.com/${{ github.repository }}/blob/main/docs/getting-started/binaries.md).

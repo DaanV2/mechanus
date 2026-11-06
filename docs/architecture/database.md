@@ -23,7 +23,7 @@ Set via CLI flags, environment variables, or the config file:
 | `--database.max-open-conns`    | `0` (unlimited) | Max open connections                                     |
 | `--database.conn-max-lifetime` | `1h`            | Max connection reuse duration                            |
 
-For SQLite, if the DSN is empty or the default `db.sqlite`, the server resolves the path to the OS-appropriate state directory (e.g. `~/.local/share/mechanus/db.sqlite` on Linux, `%APPDATA%\mechanus\db.sqlite` on Windows).
+For SQLite, if the DSN is empty or the default `db.sqlite`, the server resolves the path to the OS-appropriate state directory (`~/.local/state/mechanus/db.sqlite` on Linux, `~/Library/Application Support/mechanus/State/db.sqlite` on macOS, `%LOCALAPPDATA%\mechanus\db.sqlite` on Windows), or to `./.local/db.sqlite` when a `.local` folder exists in the working directory.
 
 See [configuration/config-file.md](../configuration/config-file.md) for config file locations.
 
