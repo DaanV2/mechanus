@@ -6,6 +6,8 @@ import type { GenFile, GenMessage } from "@bufbuild/protobuf/codegenv2";
 import { fileDesc, messageDesc } from "@bufbuild/protobuf/codegenv2";
 import type { Ping } from "./general_pb";
 import { file_screens_v1_general } from "./general_pb";
+import type { MoveEntity, SetCamera } from "./play_actions_pb";
+import { file_screens_v1_play_actions } from "./play_actions_pb";
 import type { InitialSetupRequest } from "./setup_pb";
 import { file_screens_v1_setup } from "./setup_pb";
 import type { Message } from "@bufbuild/protobuf";
@@ -14,7 +16,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file screens/v1/client.proto.
  */
 export const file_screens_v1_client: GenFile = /*@__PURE__*/
-  fileDesc("ChdzY3JlZW5zL3YxL2NsaWVudC5wcm90bxIKc2NyZWVucy52MSI7Cg5DbGllbnRNZXNzYWdlcxIpCgZhY3Rpb24YASADKAsyGS5zY3JlZW5zLnYxLkNsaWVudE1lc3NhZ2UilQEKDUNsaWVudE1lc3NhZ2USDwoCaWQYASABKAlIAYgBARJAChVpbml0aWFsX3NldHVwX3JlcXVlc3QYAiABKAsyHy5zY3JlZW5zLnYxLkluaXRpYWxTZXR1cFJlcXVlc3RIABIgCgRwaW5nGAMgASgLMhAuc2NyZWVucy52MS5QaW5nSABCCAoGYWN0aW9uQgUKA19pZEI+WjxnaXRodWIuY29tL0RhYW5WMi9tZWNoYW51cy9zZXJ2ZXIvcHJvdG8vc2NyZWVucy92MTtzY3JlZW5zdjFiBnByb3RvMw", [file_screens_v1_general, file_screens_v1_setup]);
+  fileDesc("ChdzY3JlZW5zL3YxL2NsaWVudC5wcm90bxIKc2NyZWVucy52MSI7Cg5DbGllbnRNZXNzYWdlcxIpCgZhY3Rpb24YASADKAsyGS5zY3JlZW5zLnYxLkNsaWVudE1lc3NhZ2Ui8QEKDUNsaWVudE1lc3NhZ2USDwoCaWQYASABKAlIAYgBARJAChVpbml0aWFsX3NldHVwX3JlcXVlc3QYAiABKAsyHy5zY3JlZW5zLnYxLkluaXRpYWxTZXR1cFJlcXVlc3RIABIgCgRwaW5nGAMgASgLMhAuc2NyZWVucy52MS5QaW5nSAASLQoLbW92ZV9lbnRpdHkYBCABKAsyFi5zY3JlZW5zLnYxLk1vdmVFbnRpdHlIABIrCgpzZXRfY2FtZXJhGAUgASgLMhUuc2NyZWVucy52MS5TZXRDYW1lcmFIAEIICgZhY3Rpb25CBQoDX2lkQj5aPGdpdGh1Yi5jb20vRGFhblYyL21lY2hhbnVzL3NlcnZlci9wcm90by9zY3JlZW5zL3YxO3NjcmVlbnN2MWIGcHJvdG8z", [file_screens_v1_general, file_screens_v1_play_actions, file_screens_v1_setup]);
 
 /**
  * @generated from message screens.v1.ClientMessages
@@ -59,6 +61,18 @@ export type ClientMessage = Message<"screens.v1.ClientMessage"> & {
      */
     value: Ping;
     case: "ping";
+  } | {
+    /**
+     * @generated from field: screens.v1.MoveEntity move_entity = 4;
+     */
+    value: MoveEntity;
+    case: "moveEntity";
+  } | {
+    /**
+     * @generated from field: screens.v1.SetCamera set_camera = 5;
+     */
+    value: SetCamera;
+    case: "setCamera";
   } | { case: undefined; value?: undefined };
 };
 

@@ -86,7 +86,9 @@ var _ = Describe("Scene", func() {
 		It("rejects unknown and duplicate entities", func() {
 			s := load(tavern(), nil)
 			Expect(s.State.SetHidden("ghost", true)).To(MatchError(scenes.ErrEntityNotFound))
-			Expect(s.State.Spawn(scenes.Entity{ID: "spy"})).To(MatchError(scenes.ErrEntityExists))
+			Expect(s.State.Spawn(scenes.Entity{ID: "spy", Kind: scenes.EntityEnemy})).To(MatchError(scenes.ErrEntityExists))
+			Expect(s.State.Spawn(scenes.Entity{ID: " ", Kind: scenes.EntityEnemy})).To(MatchError(scenes.ErrInvalidEntity))
+			Expect(s.State.Spawn(scenes.Entity{ID: "imp", Kind: "demon"})).To(MatchError(scenes.ErrInvalidEntity))
 		})
 	})
 

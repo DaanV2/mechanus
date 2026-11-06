@@ -6,6 +6,8 @@ import type { GenFile, GenMessage } from "@bufbuild/protobuf/codegenv2";
 import { fileDesc, messageDesc } from "@bufbuild/protobuf/codegenv2";
 import type { Ping } from "./general_pb";
 import { file_screens_v1_general } from "./general_pb";
+import type { ActionError } from "./play_actions_pb";
+import { file_screens_v1_play_actions } from "./play_actions_pb";
 import type { SceneChange, SceneChangeCompleted } from "./scene_actions_pb";
 import { file_screens_v1_scene_actions } from "./scene_actions_pb";
 import type { InitialSetupResponse } from "./setup_pb";
@@ -20,7 +22,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file screens/v1/server.proto.
  */
 export const file_screens_v1_server: GenFile = /*@__PURE__*/
-  fileDesc("ChdzY3JlZW5zL3YxL3NlcnZlci5wcm90bxIKc2NyZWVucy52MSI7Cg5TZXJ2ZXJNZXNzYWdlcxIpCgZhY3Rpb24YASADKAsyGS5zY3JlZW5zLnYxLlNlcnZlck1lc3NhZ2UigQQKDVNlcnZlck1lc3NhZ2USDwoCaWQYASABKAlIAYgBARI5Cg1pbml0aWFsX3NldHVwGAIgASgLMiAuc2NyZWVucy52MS5Jbml0aWFsU2V0dXBSZXNwb25zZUgAEjgKFHNwbGFzaF9zY3JlZW5fdXBkYXRlGAMgASgLMhguc2NyZWVucy52MS5TcGxhc2hTY3JlZW5IABIvCgxzY2VuZV9jaGFuZ2UYBCABKAsyFy5zY3JlZW5zLnYxLlNjZW5lQ2hhbmdlSAASQgoWc2NlbmVfY2hhbmdlX2NvbXBsZXRlZBgFIAEoCzIgLnNjcmVlbnMudjEuU2NlbmVDaGFuZ2VDb21wbGV0ZWRIABIgCgRwaW5nGAYgASgLMhAuc2NyZWVucy52MS5QaW5nSAASLwoMc2NyZWVuX3N0YXRlGAcgASgLMhcuc2NyZWVucy52MS5TY3JlZW5TdGF0ZUgAEjEKDWVudGl0eV91cGRhdGUYCCABKAsyGC5zY3JlZW5zLnYxLkVudGl0eVVwZGF0ZUgAEjEKDWVudGl0eV9yZW1vdmUYCSABKAsyGC5zY3JlZW5zLnYxLkVudGl0eVJlbW92ZUgAEisKDWNhbWVyYV91cGRhdGUYCiABKAsyEi5zY3JlZW5zLnYxLkNhbWVyYUgAQggKBmFjdGlvbkIFCgNfaWQiRAoMRW50aXR5VXBkYXRlEhAKCGxheWVyX2lkGAEgASgJEiIKBmVudGl0eRgCIAEoCzISLnNjcmVlbnMudjEuRW50aXR5IjMKDEVudGl0eVJlbW92ZRIQCghsYXllcl9pZBgBIAEoCRIRCgllbnRpdHlfaWQYAiABKAlCPlo8Z2l0aHViLmNvbS9EYWFuVjIvbWVjaGFudXMvc2VydmVyL3Byb3RvL3NjcmVlbnMvdjE7c2NyZWVuc3YxYgZwcm90bzM", [file_screens_v1_general, file_screens_v1_scene_actions, file_screens_v1_setup, file_screens_v1_splash_screen, file_screens_v1_state]);
+  fileDesc("ChdzY3JlZW5zL3YxL3NlcnZlci5wcm90bxIKc2NyZWVucy52MSI7Cg5TZXJ2ZXJNZXNzYWdlcxIpCgZhY3Rpb24YASADKAsyGS5zY3JlZW5zLnYxLlNlcnZlck1lc3NhZ2UisgQKDVNlcnZlck1lc3NhZ2USDwoCaWQYASABKAlIAYgBARI5Cg1pbml0aWFsX3NldHVwGAIgASgLMiAuc2NyZWVucy52MS5Jbml0aWFsU2V0dXBSZXNwb25zZUgAEjgKFHNwbGFzaF9zY3JlZW5fdXBkYXRlGAMgASgLMhguc2NyZWVucy52MS5TcGxhc2hTY3JlZW5IABIvCgxzY2VuZV9jaGFuZ2UYBCABKAsyFy5zY3JlZW5zLnYxLlNjZW5lQ2hhbmdlSAASQgoWc2NlbmVfY2hhbmdlX2NvbXBsZXRlZBgFIAEoCzIgLnNjcmVlbnMudjEuU2NlbmVDaGFuZ2VDb21wbGV0ZWRIABIgCgRwaW5nGAYgASgLMhAuc2NyZWVucy52MS5QaW5nSAASLwoMc2NyZWVuX3N0YXRlGAcgASgLMhcuc2NyZWVucy52MS5TY3JlZW5TdGF0ZUgAEjEKDWVudGl0eV91cGRhdGUYCCABKAsyGC5zY3JlZW5zLnYxLkVudGl0eVVwZGF0ZUgAEjEKDWVudGl0eV9yZW1vdmUYCSABKAsyGC5zY3JlZW5zLnYxLkVudGl0eVJlbW92ZUgAEisKDWNhbWVyYV91cGRhdGUYCiABKAsyEi5zY3JlZW5zLnYxLkNhbWVyYUgAEi8KDGFjdGlvbl9lcnJvchgLIAEoCzIXLnNjcmVlbnMudjEuQWN0aW9uRXJyb3JIAEIICgZhY3Rpb25CBQoDX2lkIkQKDEVudGl0eVVwZGF0ZRIQCghsYXllcl9pZBgBIAEoCRIiCgZlbnRpdHkYAiABKAsyEi5zY3JlZW5zLnYxLkVudGl0eSIzCgxFbnRpdHlSZW1vdmUSEAoIbGF5ZXJfaWQYASABKAkSEQoJZW50aXR5X2lkGAIgASgJQj5aPGdpdGh1Yi5jb20vRGFhblYyL21lY2hhbnVzL3NlcnZlci9wcm90by9zY3JlZW5zL3YxO3NjcmVlbnN2MWIGcHJvdG8z", [file_screens_v1_general, file_screens_v1_play_actions, file_screens_v1_scene_actions, file_screens_v1_setup, file_screens_v1_splash_screen, file_screens_v1_state]);
 
 /**
  * @generated from message screens.v1.ServerMessages
@@ -109,6 +111,14 @@ export type ServerMessage = Message<"screens.v1.ServerMessage"> & {
      */
     value: Camera;
     case: "cameraUpdate";
+  } | {
+    /**
+     * An action of this client was refused
+     *
+     * @generated from field: screens.v1.ActionError action_error = 11;
+     */
+    value: ActionError;
+    case: "actionError";
   } | { case: undefined; value?: undefined };
 };
 

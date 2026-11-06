@@ -41,6 +41,17 @@ const (
 	SceneServiceSetVariantProcedure = "/scenes.v1.SceneService/SetVariant"
 	// SceneServiceGetActiveProcedure is the fully-qualified name of the SceneService's GetActive RPC.
 	SceneServiceGetActiveProcedure = "/scenes.v1.SceneService/GetActive"
+	// SceneServiceSetEntityHiddenProcedure is the fully-qualified name of the SceneService's
+	// SetEntityHidden RPC.
+	SceneServiceSetEntityHiddenProcedure = "/scenes.v1.SceneService/SetEntityHidden"
+	// SceneServiceSpawnEntityProcedure is the fully-qualified name of the SceneService's SpawnEntity
+	// RPC.
+	SceneServiceSpawnEntityProcedure = "/scenes.v1.SceneService/SpawnEntity"
+	// SceneServiceRemoveEntityProcedure is the fully-qualified name of the SceneService's RemoveEntity
+	// RPC.
+	SceneServiceRemoveEntityProcedure = "/scenes.v1.SceneService/RemoveEntity"
+	// SceneServiceMoveEntityProcedure is the fully-qualified name of the SceneService's MoveEntity RPC.
+	SceneServiceMoveEntityProcedure = "/scenes.v1.SceneService/MoveEntity"
 )
 
 // SceneServiceClient is a client for the scenes.v1.SceneService service.
@@ -53,6 +64,14 @@ type SceneServiceClient interface {
 	SetVariant(context.Context, *connect.Request[v1.SetVariantRequest]) (*connect.Response[v1.SetVariantResponse], error)
 	// Get the active scene, if any
 	GetActive(context.Context, *connect.Request[v1.GetActiveSceneRequest]) (*connect.Response[v1.GetActiveSceneResponse], error)
+	// Hide an entity of the active scene from the screens, or reveal it
+	SetEntityHidden(context.Context, *connect.Request[v1.SetEntityHiddenRequest]) (*connect.Response[v1.SetEntityHiddenResponse], error)
+	// Add an entity to the active scene during play
+	SpawnEntity(context.Context, *connect.Request[v1.SpawnEntityRequest]) (*connect.Response[v1.SpawnEntityResponse], error)
+	// Remove an entity from the active scene (defeated, fled, ...)
+	RemoveEntity(context.Context, *connect.Request[v1.RemoveEntityRequest]) (*connect.Response[v1.RemoveEntityResponse], error)
+	// Move an entity of the active scene on the battle map
+	MoveEntity(context.Context, *connect.Request[v1.MoveEntityRequest]) (*connect.Response[v1.MoveEntityResponse], error)
 }
 
 // NewSceneServiceClient constructs a client for the scenes.v1.SceneService service. By default, it
@@ -90,15 +109,43 @@ func NewSceneServiceClient(httpClient connect.HTTPClient, baseURL string, opts .
 			connect.WithSchema(sceneServiceMethods.ByName("GetActive")),
 			connect.WithClientOptions(opts...),
 		),
+		setEntityHidden: connect.NewClient[v1.SetEntityHiddenRequest, v1.SetEntityHiddenResponse](
+			httpClient,
+			baseURL+SceneServiceSetEntityHiddenProcedure,
+			connect.WithSchema(sceneServiceMethods.ByName("SetEntityHidden")),
+			connect.WithClientOptions(opts...),
+		),
+		spawnEntity: connect.NewClient[v1.SpawnEntityRequest, v1.SpawnEntityResponse](
+			httpClient,
+			baseURL+SceneServiceSpawnEntityProcedure,
+			connect.WithSchema(sceneServiceMethods.ByName("SpawnEntity")),
+			connect.WithClientOptions(opts...),
+		),
+		removeEntity: connect.NewClient[v1.RemoveEntityRequest, v1.RemoveEntityResponse](
+			httpClient,
+			baseURL+SceneServiceRemoveEntityProcedure,
+			connect.WithSchema(sceneServiceMethods.ByName("RemoveEntity")),
+			connect.WithClientOptions(opts...),
+		),
+		moveEntity: connect.NewClient[v1.MoveEntityRequest, v1.MoveEntityResponse](
+			httpClient,
+			baseURL+SceneServiceMoveEntityProcedure,
+			connect.WithSchema(sceneServiceMethods.ByName("MoveEntity")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
 // sceneServiceClient implements SceneServiceClient.
 type sceneServiceClient struct {
-	list       *connect.Client[v1.ListScenesRequest, v1.ListScenesResponse]
-	activate   *connect.Client[v1.ActivateSceneRequest, v1.ActivateSceneResponse]
-	setVariant *connect.Client[v1.SetVariantRequest, v1.SetVariantResponse]
-	getActive  *connect.Client[v1.GetActiveSceneRequest, v1.GetActiveSceneResponse]
+	list            *connect.Client[v1.ListScenesRequest, v1.ListScenesResponse]
+	activate        *connect.Client[v1.ActivateSceneRequest, v1.ActivateSceneResponse]
+	setVariant      *connect.Client[v1.SetVariantRequest, v1.SetVariantResponse]
+	getActive       *connect.Client[v1.GetActiveSceneRequest, v1.GetActiveSceneResponse]
+	setEntityHidden *connect.Client[v1.SetEntityHiddenRequest, v1.SetEntityHiddenResponse]
+	spawnEntity     *connect.Client[v1.SpawnEntityRequest, v1.SpawnEntityResponse]
+	removeEntity    *connect.Client[v1.RemoveEntityRequest, v1.RemoveEntityResponse]
+	moveEntity      *connect.Client[v1.MoveEntityRequest, v1.MoveEntityResponse]
 }
 
 // List calls scenes.v1.SceneService.List.
@@ -121,6 +168,26 @@ func (c *sceneServiceClient) GetActive(ctx context.Context, req *connect.Request
 	return c.getActive.CallUnary(ctx, req)
 }
 
+// SetEntityHidden calls scenes.v1.SceneService.SetEntityHidden.
+func (c *sceneServiceClient) SetEntityHidden(ctx context.Context, req *connect.Request[v1.SetEntityHiddenRequest]) (*connect.Response[v1.SetEntityHiddenResponse], error) {
+	return c.setEntityHidden.CallUnary(ctx, req)
+}
+
+// SpawnEntity calls scenes.v1.SceneService.SpawnEntity.
+func (c *sceneServiceClient) SpawnEntity(ctx context.Context, req *connect.Request[v1.SpawnEntityRequest]) (*connect.Response[v1.SpawnEntityResponse], error) {
+	return c.spawnEntity.CallUnary(ctx, req)
+}
+
+// RemoveEntity calls scenes.v1.SceneService.RemoveEntity.
+func (c *sceneServiceClient) RemoveEntity(ctx context.Context, req *connect.Request[v1.RemoveEntityRequest]) (*connect.Response[v1.RemoveEntityResponse], error) {
+	return c.removeEntity.CallUnary(ctx, req)
+}
+
+// MoveEntity calls scenes.v1.SceneService.MoveEntity.
+func (c *sceneServiceClient) MoveEntity(ctx context.Context, req *connect.Request[v1.MoveEntityRequest]) (*connect.Response[v1.MoveEntityResponse], error) {
+	return c.moveEntity.CallUnary(ctx, req)
+}
+
 // SceneServiceHandler is an implementation of the scenes.v1.SceneService service.
 type SceneServiceHandler interface {
 	// List the scenes that can be activated
@@ -131,6 +198,14 @@ type SceneServiceHandler interface {
 	SetVariant(context.Context, *connect.Request[v1.SetVariantRequest]) (*connect.Response[v1.SetVariantResponse], error)
 	// Get the active scene, if any
 	GetActive(context.Context, *connect.Request[v1.GetActiveSceneRequest]) (*connect.Response[v1.GetActiveSceneResponse], error)
+	// Hide an entity of the active scene from the screens, or reveal it
+	SetEntityHidden(context.Context, *connect.Request[v1.SetEntityHiddenRequest]) (*connect.Response[v1.SetEntityHiddenResponse], error)
+	// Add an entity to the active scene during play
+	SpawnEntity(context.Context, *connect.Request[v1.SpawnEntityRequest]) (*connect.Response[v1.SpawnEntityResponse], error)
+	// Remove an entity from the active scene (defeated, fled, ...)
+	RemoveEntity(context.Context, *connect.Request[v1.RemoveEntityRequest]) (*connect.Response[v1.RemoveEntityResponse], error)
+	// Move an entity of the active scene on the battle map
+	MoveEntity(context.Context, *connect.Request[v1.MoveEntityRequest]) (*connect.Response[v1.MoveEntityResponse], error)
 }
 
 // NewSceneServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -164,6 +239,30 @@ func NewSceneServiceHandler(svc SceneServiceHandler, opts ...connect.HandlerOpti
 		connect.WithSchema(sceneServiceMethods.ByName("GetActive")),
 		connect.WithHandlerOptions(opts...),
 	)
+	sceneServiceSetEntityHiddenHandler := connect.NewUnaryHandler(
+		SceneServiceSetEntityHiddenProcedure,
+		svc.SetEntityHidden,
+		connect.WithSchema(sceneServiceMethods.ByName("SetEntityHidden")),
+		connect.WithHandlerOptions(opts...),
+	)
+	sceneServiceSpawnEntityHandler := connect.NewUnaryHandler(
+		SceneServiceSpawnEntityProcedure,
+		svc.SpawnEntity,
+		connect.WithSchema(sceneServiceMethods.ByName("SpawnEntity")),
+		connect.WithHandlerOptions(opts...),
+	)
+	sceneServiceRemoveEntityHandler := connect.NewUnaryHandler(
+		SceneServiceRemoveEntityProcedure,
+		svc.RemoveEntity,
+		connect.WithSchema(sceneServiceMethods.ByName("RemoveEntity")),
+		connect.WithHandlerOptions(opts...),
+	)
+	sceneServiceMoveEntityHandler := connect.NewUnaryHandler(
+		SceneServiceMoveEntityProcedure,
+		svc.MoveEntity,
+		connect.WithSchema(sceneServiceMethods.ByName("MoveEntity")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/scenes.v1.SceneService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case SceneServiceListProcedure:
@@ -174,6 +273,14 @@ func NewSceneServiceHandler(svc SceneServiceHandler, opts ...connect.HandlerOpti
 			sceneServiceSetVariantHandler.ServeHTTP(w, r)
 		case SceneServiceGetActiveProcedure:
 			sceneServiceGetActiveHandler.ServeHTTP(w, r)
+		case SceneServiceSetEntityHiddenProcedure:
+			sceneServiceSetEntityHiddenHandler.ServeHTTP(w, r)
+		case SceneServiceSpawnEntityProcedure:
+			sceneServiceSpawnEntityHandler.ServeHTTP(w, r)
+		case SceneServiceRemoveEntityProcedure:
+			sceneServiceRemoveEntityHandler.ServeHTTP(w, r)
+		case SceneServiceMoveEntityProcedure:
+			sceneServiceMoveEntityHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -197,4 +304,20 @@ func (UnimplementedSceneServiceHandler) SetVariant(context.Context, *connect.Req
 
 func (UnimplementedSceneServiceHandler) GetActive(context.Context, *connect.Request[v1.GetActiveSceneRequest]) (*connect.Response[v1.GetActiveSceneResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scenes.v1.SceneService.GetActive is not implemented"))
+}
+
+func (UnimplementedSceneServiceHandler) SetEntityHidden(context.Context, *connect.Request[v1.SetEntityHiddenRequest]) (*connect.Response[v1.SetEntityHiddenResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scenes.v1.SceneService.SetEntityHidden is not implemented"))
+}
+
+func (UnimplementedSceneServiceHandler) SpawnEntity(context.Context, *connect.Request[v1.SpawnEntityRequest]) (*connect.Response[v1.SpawnEntityResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scenes.v1.SceneService.SpawnEntity is not implemented"))
+}
+
+func (UnimplementedSceneServiceHandler) RemoveEntity(context.Context, *connect.Request[v1.RemoveEntityRequest]) (*connect.Response[v1.RemoveEntityResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scenes.v1.SceneService.RemoveEntity is not implemented"))
+}
+
+func (UnimplementedSceneServiceHandler) MoveEntity(context.Context, *connect.Request[v1.MoveEntityRequest]) (*connect.Response[v1.MoveEntityResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scenes.v1.SceneService.MoveEntity is not implemented"))
 }

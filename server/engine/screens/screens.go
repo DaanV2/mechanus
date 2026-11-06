@@ -30,6 +30,8 @@ type ScreenHandler struct {
 
 	stateLock sync.RWMutex
 	state     *state.ScreenState
+
+	controller func() SceneController // Set by the [ScreenManager], nil without one
 }
 
 // NewScreenHandler creates a new screen handler with the given ID.
@@ -122,7 +124,7 @@ func (s *ScreenHandler) HandleMessages(ctx context.Context, listener *ScreenConn
 	var err error
 
 	for _, v := range msg.GetAction() {
-		resp, e := s.HandleMessage(ctx, v)
+		resp, e := s.HandleMessage(ctx, listener, v)
 		if e != nil {
 			err = errors.Join(err, e)
 		}
@@ -142,8 +144,8 @@ func (s *ScreenHandler) HandleMessages(ctx context.Context, listener *ScreenConn
 	return err
 }
 
-// HandleMessage processes a single client message and returns server responses.
-func (s *ScreenHandler) HandleMessage(ctx context.Context, msg *screensv1.ClientMessage) ([]*screensv1.ServerMessage, error) {
+// HandleMessage processes a single client message of a listener and returns server responses.
+func (s *ScreenHandler) HandleMessage(ctx context.Context, listener *ScreenConn, msg *screensv1.ClientMessage) ([]*screensv1.ServerMessage, error) {
 	// Non block read to see if we need to stop
 	select {
 	case <-ctx.Done():
@@ -164,6 +166,10 @@ func (s *ScreenHandler) HandleMessage(ctx context.Context, msg *screensv1.Client
 		response, err = s.HandlePingRequest(ctx, v)
 	case *screensv1.ClientMessage_InitialSetupRequest:
 		response, err = s.HandleInitialSetupRequest(ctx, v)
+	case *screensv1.ClientMessage_MoveEntity:
+		response = s.HandleMoveEntity(ctx, listener, v.MoveEntity)
+	case *screensv1.ClientMessage_SetCamera:
+		response = s.HandleSetCamera(ctx, listener, v.SetCamera)
 	}
 	// Message track id
 	id := msg.GetId()

@@ -7,9 +7,37 @@
   import NavBar from '$lib/components/nav-bar.svelte';
   import { userHandler } from '$lib/handlers/user';
   import { createSceneClient } from '$lib/stores/clients';
-  import { Badge, Button, Heading, Hr } from 'flowbite-svelte';
+  import {
+    Badge,
+    Button,
+    Checkbox,
+    Heading,
+    Hr,
+    Input,
+    Label,
+    Select,
+    Table,
+    TableBody,
+    TableBodyCell,
+    TableBodyRow,
+    TableHead,
+    TableHeadCell
+  } from 'flowbite-svelte';
   import { onMount } from 'svelte';
-  import type { ActiveScene, Scene } from '../../../proto/scenes/v1/scenes_pb';
+  import {
+    EntityKind,
+    type ActiveScene,
+    type Entity,
+    type Scene
+  } from '../../../proto/scenes/v1/scenes_pb';
+
+  const KINDS = [
+    { value: EntityKind.ENEMY, name: 'Enemy' },
+    { value: EntityKind.NPC, name: 'NPC' },
+    { value: EntityKind.PLAYER, name: 'Player' },
+    { value: EntityKind.OBJECT, name: 'Object' }
+  ];
+  const kindName = (kind: EntityKind) => KINDS.find((k) => k.value === kind)?.name ?? 'Unknown';
 
   let scenes = $state<Scene[] | undefined>(undefined);
   let active = $state<ActiveScene | undefined>(undefined);
@@ -41,6 +69,36 @@
   const activate = (scene: Scene) => run(() => createSceneClient().activate({ sceneId: scene.id }));
   const setVariant = (variantId: string) =>
     run(() => createSceneClient().setVariant({ variantId }));
+  const setHidden = (entity: Entity, hidden: boolean) =>
+    run(() => createSceneClient().setEntityHidden({ entityId: entity.id, hidden }));
+  const remove = (entity: Entity) =>
+    run(() => createSceneClient().removeEntity({ entityId: entity.id }));
+
+  // Spawn form: a new entity, by default hidden so the GM can place it before revealing it
+  let spawnId = $state('');
+  let spawnName = $state('');
+  let spawnKind = $state(EntityKind.ENEMY);
+  let spawnHidden = $state(true);
+  let spawnX = $state(0);
+  let spawnY = $state(0);
+
+  async function spawn(event: SubmitEvent) {
+    event.preventDefault();
+    const entityId = spawnId.trim();
+    await run(() =>
+      createSceneClient().spawnEntity({
+        entityId,
+        name: spawnName.trim() || entityId,
+        kind: Number(spawnKind),
+        hidden: spawnHidden,
+        position: { x: Number(spawnX), y: Number(spawnY) }
+      })
+    );
+    if (!errorObj) {
+      spawnId = '';
+      spawnName = '';
+    }
+  }
 
   onMount(async () => {
     if (!userHandler.current.loggedin) {
@@ -94,6 +152,84 @@
           </ul>
         {/if}
       </SimpleCard>
+    </div>
+
+    <div class="w-full max-w-3xl px-5 py-3">
+      <Heading tag="h3" class="py-2 text-xl">Entities</Heading>
+      <Table>
+        <TableHead>
+          <TableHeadCell>Name</TableHeadCell>
+          <TableHeadCell>Kind</TableHeadCell>
+          <TableHeadCell>Status</TableHeadCell>
+          <TableHeadCell><span class="sr-only">Actions</span></TableHeadCell>
+        </TableHead>
+        <TableBody>
+          {#each active.entities as entity (entity.id)}
+            <TableBodyRow data-testid={`entity-${entity.id}`}>
+              <TableBodyCell>{entity.name || entity.id}</TableBodyCell>
+              <TableBodyCell>{kindName(entity.kind)}</TableBodyCell>
+              <TableBodyCell>
+                <Badge color={entity.hidden ? 'gray' : 'green'}>
+                  {entity.hidden ? 'Hidden' : 'Visible'}
+                </Badge>
+              </TableBodyCell>
+              <TableBodyCell class="space-x-1 text-right">
+                {#if entity.hidden}
+                  <Button size="xs" disabled={busy} onclick={() => setHidden(entity, false)}
+                    >Reveal</Button
+                  >
+                {:else}
+                  <Button
+                    size="xs"
+                    color="alternative"
+                    disabled={busy}
+                    onclick={() => setHidden(entity, true)}>Hide</Button
+                  >
+                {/if}
+                <Button size="xs" color="red" disabled={busy} onclick={() => remove(entity)}
+                  >Remove</Button
+                >
+              </TableBodyCell>
+            </TableBodyRow>
+          {:else}
+            <TableBodyRow>
+              <TableBodyCell colspan={4}>No entities in this scene</TableBodyCell>
+            </TableBodyRow>
+          {/each}
+        </TableBody>
+      </Table>
+
+      <form class="mt-3 flex flex-wrap items-end gap-2" aria-label="Spawn entity" onsubmit={spawn}>
+        <Label class="space-y-1">
+          <span>ID</span>
+          <Input
+            type="text"
+            size="sm"
+            required
+            maxlength={64}
+            placeholder="wolf-1"
+            bind:value={spawnId}
+          />
+        </Label>
+        <Label class="space-y-1">
+          <span>Name</span>
+          <Input type="text" size="sm" maxlength={64} placeholder="Wolf" bind:value={spawnName} />
+        </Label>
+        <Label class="space-y-1">
+          <span>Kind</span>
+          <Select size="sm" items={KINDS} bind:value={spawnKind} />
+        </Label>
+        <Label class="w-20 space-y-1">
+          <span>X</span>
+          <Input type="number" size="sm" step="any" bind:value={spawnX} />
+        </Label>
+        <Label class="w-20 space-y-1">
+          <span>Y</span>
+          <Input type="number" size="sm" step="any" bind:value={spawnY} />
+        </Label>
+        <Checkbox bind:checked={spawnHidden}>Hidden</Checkbox>
+        <Button type="submit" size="sm" disabled={busy}>Spawn</Button>
+      </form>
     </div>
   {/if}
 

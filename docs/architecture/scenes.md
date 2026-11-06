@@ -118,6 +118,8 @@ Switching variant (`Scene.SetVariant`) **clears the live overrides**: a variant 
 
 The config lists the entities present when the scene starts (`Entity.Hidden` = starts hidden). During play the state tracks, per entity ID, whether it is hidden or removed (`State.SetHidden`, `State.Remove`), and holds entities added mid-scene (`State.Spawn`). `Scene.Entities()` returns configured + spawned entities that are not removed, with their current hidden status; `Scene.VisibleEntities()` filters out hidden ones.
 
+On battle maps, the state also holds where an entity was moved to during play (`EntityState.Position`, `State.Move`, in grid units) and a camera per screen target (`State.Cameras`, `State.SetCamera`). Only moved entities have a position: an entity without one stands where the battle map file places it, so the map stays the default. `Scene.Instructions()` gives a battle map view the positions of its visible entities (`ScreenInstruction.Positions`) and its camera (`ScreenInstruction.Camera`), both derived and never stored, like `Entities`. The screen driver draws a moved token at its state position; a visible entity the map doesn't place (a spawned one) is drawn as a placeholder on the first entity layer once it has a position. Positions and cameras must be finite and within `scenes.MaxCoordinate` grid units of the origin, zoom between `MinZoom` and `MaxZoom`.
+
 ### Transitions
 
 `scenes.NewTransition(from, prev, to, next)` compares two sets of effective instructions. Scene switches, variant switches, and live adjustments are all transitions.
@@ -145,6 +147,12 @@ The config lists the entities present when the scene starts (`Entity.Hidden` = s
 | `Adjust(overrides)`            | Apply live overrides to the active scene.                               |
 | `Exit()`                       | Save state, deactivate. Intended for `BeforeShutdown`.                  |
 | `Active()`                     | Active scene + variant.                                                 |
+| `SetEntityHidden` / `SpawnEntity` / `RemoveEntity` | GM entity controls on the active scene; a transition, so only battle map screens are re-instructed and hidden entities are never sent. |
+| `MoveEntity(entityID, position)` | Store the position; screens showing a battle map get just the token through the `BattleMapDriver`. The first move of an entity re-instructs them instead, as the map may not draw it yet. Hidden entities are moved silently. |
+| `SetCamera(deviceID, camera)`  | Set the camera of the battle map targets the device shows; every device bound to those targets follows through the `BattleMapDriver`. |
+| `ActiveEntities()`             | Entities present in the active scene, hidden ones included, with their state position. |
+
+Token and camera moves skip the full transition: an optional `BattleMapDriver` per integration (`SceneService.AddBattleMapDriver`, the screen driver for `screen`) applies them to a device in place, so dragging a token doesn't reload the map. Errors from devices that could not be told wrap `ErrDeviceUpdate`; the change happened regardless.
 
 Each change computes a transition and dispatches `Changes`: for every changed instruction, find the devices bound to its target with the matching kind and hand each to the driver registered for `device.Integration`. Devices are instructed concurrently, each device getting its instructions in order, so a slow or unreachable device does not hold up the others. Device errors (including `ErrNoDriver`) are joined and returned; the scene is active regardless.
 
@@ -251,18 +259,18 @@ server/
 │   ├── scenes/
 │   │   ├── config.go       Config, Entity, Variant                                                    [config]
 │   │   ├── battlemap.go    BattleMap: grid + ordered image / entity layers, parsing, validation       [config]
-│   │   ├── state.go        State, EntityState                                                         [state]
+│   │   ├── state.go        State, EntityState (hidden / removed / position), Camera                  [state]
 │   │   ├── scene.go        Scene = Config + State, Load                                               [both]
 │   │   ├── instructions.go Instructions and the per-kind instruction types
 │   │   └── transition.go   Ref, Transition, NewTransition
-│   └── screens/            Screen WebSocket fan-out — the transport for the "screen" integration
+│   └── screens/            Screen WebSocket fan-out — the transport for the "screen" integration; play.go: SceneController port for token / camera moves
 ├── application/
 │   ├── scene_service.go    SceneService + ports: SceneConfigStore, RoomConfigStore, SceneStateStore, OutputDriver, SceneListener
 │   └── device_monitor.go   DeviceMonitor (status per device, instruction timeout) + port: DeviceChecker
 └── infrastructure/
     ├── assets/             Resolves scene / shared asset references to hashed URLs, serves /assets/
     ├── outputs/            Settings shared by all integrations
-    ├── outputs/screen/     Screen driver: ScreenInstruction → ScreenState on the device's screen
+    ├── outputs/screen/     Screen driver: ScreenInstruction → ScreenState on the device's screen, live token / camera moves; Controller for screen play actions
     ├── outputs/mqtt/       MQTT driver: CustomInstruction → retained envelope on the device's topic
     ├── scenestore/         ConfigStore (file storage), StateStore (database)
     └── storage/            Generic file / database storage providers
@@ -270,17 +278,17 @@ server/
 
 ## Status
 
-**Implemented**: the domain model above with the config / state split, variant resolution, live overrides, entity status tracking, transition change detection, `SceneService` with load / exit persistence, `scenestore` adapters for file storage and the database, and tests for each. `SceneService` is wired in `components` with the instance's single room (`rooms/room.dat`, `scenestore.RoomID`; a missing room file is an empty room) and saves the active scene on `BeforeShutdown`. Paired devices (`application.DeviceService`) are registered in the database and can be bound to a target, those bindings are merged into the room when it is read. Battle map format v0 (`scenes.BattleMap`, [battle-maps.md](../configuration/battle-maps.md)) with an example scene in `docs/examples/battlemap`. The screen driver (`infrastructure/outputs/screen`) turns a `ScreenInstruction` into screen state (view, asset URL, and for battle maps the grid settings, layers, visible entities and instance groups) and pushes it to the device's screen; screens are keyed by device ID. The client draws it with the layer system in `client/src/lib/2d/layers`. `scenes/v1.SceneService` (ConnectRPC) lists scenes, activates them, switches variant and returns the active scene. Scene and shared assets are served under `/assets/` with a content hash (`infrastructure/assets`). The [driver framework](#driver-framework) is in place with integration config sets and `DeviceMonitor`, and the MQTT driver (`infrastructure/outputs/mqtt`) delivers custom instructions, scene events and availability.
+**Implemented**: the domain model above with the config / state split, variant resolution, live overrides, entity status tracking, transition change detection, `SceneService` with load / exit persistence, `scenestore` adapters for file storage and the database, and tests for each. `SceneService` is wired in `components` with the instance's single room (`rooms/room.dat`, `scenestore.RoomID`; a missing room file is an empty room) and saves the active scene on `BeforeShutdown`. Paired devices (`application.DeviceService`) are registered in the database and can be bound to a target, those bindings are merged into the room when it is read. Battle map format v0 (`scenes.BattleMap`, [battle-maps.md](../configuration/battle-maps.md)) with an example scene in `docs/examples/battlemap`. The screen driver (`infrastructure/outputs/screen`) turns a `ScreenInstruction` into screen state (view, asset URL, and for battle maps the grid settings, layers, visible entities and instance groups) and pushes it to the device's screen; screens are keyed by device ID. The client draws it with the layer system in `client/src/lib/2d/layers`. `scenes/v1.SceneService` (ConnectRPC) lists scenes, activates them, switches variant, returns the active scene with its entities, and reveals / hides / spawns / removes / moves entities; the GM view (`/views/game-master/`) has the entity controls. Token positions and a camera per target are kept in the scene state, and screens send token moves, pans and zooms over the screen WebSocket ([communication.md](./communication.md#supported-client-messages)), which are validated and sent to the screens of the scene without reloading the map. Scene and shared assets are served under `/assets/` with a content hash (`infrastructure/assets`). The [driver framework](#driver-framework) is in place with integration config sets and `DeviceMonitor`, and the MQTT driver (`infrastructure/outputs/mqtt`) delivers custom instructions, scene events and availability.
 
 **Not implemented yet**:
 
-- Battle map play: token positions in state, fog of war, walls and other layer kinds ([M3](../roadmap.md#m3--live-play-on-the-battle-map)). Tokens stay at the position from the map file, and spawned entities have no position so aren't drawn.
+- Battle map play: token control (`controlled_by`), fog of war, walls and other layer kinds ([M3](../roadmap.md#m3--live-play-on-the-battle-map)). Any logged in user can move any token until a GM role and per entity control exist; paired devices can only pan and zoom. A spawned entity without a position isn't drawn until it is moved.
 - The `initiative` and `custom` overlays, and the `entities` overlay on views other than the battle map.
 - Authoring: no tooling or API to create / edit scene and room configs (files have to be written by hand).
 - Remembering which scene was active across a server restart.
 - No drivers other than the screen and MQTT drivers: Hue, Matter, Home Assistant, Spotify, iTunes.
 - `DeviceMonitor.Statuses` has no API or GM view yet; the screen driver does not implement `DeviceChecker`, so a screen is `online` once instructed whether or not anything is connected to it.
-- The scene control API has no `Adjust` or entity (reveal / spawn) calls yet.
+- The scene control API has no `Adjust` call yet.
 - Handling of `Transition.Released`.
 
 ## Extending

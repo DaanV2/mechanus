@@ -1,9 +1,16 @@
 import { Container, Application as PixiApplication } from 'pixi.js';
 import type { SplashScreen as SplashScreenState } from '../../proto/screens/v1/splash_screen_pb';
-import { ViewKind, type Asset, type ScreenState } from '../../proto/screens/v1/state_pb';
+import type { EntityRemove, EntityUpdate } from '../../proto/screens/v1/server_pb';
+import {
+  ViewKind,
+  type Asset,
+  type Camera,
+  type ScreenState
+} from '../../proto/screens/v1/state_pb';
+import { attachBattleMapControls, type BattleMapActions } from './battlemap-controls';
 import { SplashScreen } from './components/splashscreen';
 import { createBackdrop } from './layers/backdrop';
-import { createBattleMap } from './layers/battlemap';
+import { BattleMapView, createBattleMap } from './layers/battlemap';
 import type { ViewContent } from './layers/layer';
 import { createOverlays } from './layers/overlay-layer';
 import { TextureCache } from './layers/textures';
@@ -25,6 +32,9 @@ export class ScreenRenderer {
   private state?: ScreenState;
   private splashState?: SplashScreenState;
   private contents: ViewContent[] = [];
+  private current?: ViewContent;
+  private controls?: BattleMapActions;
+  private detachControls?: () => void;
   private stateChanged = false;
   private resized = false;
   // Incremented on every rebuild, so a slow asset load can't draw over a newer state
@@ -42,6 +52,7 @@ export class ScreenRenderer {
 
   destroy() {
     this.buildID++;
+    this.detachControls?.();
     this.app.destroy(true, { children: true });
     this.textures.clear();
   }
@@ -51,6 +62,42 @@ export class ScreenRenderer {
     this.state = state;
     if (state?.view && state.view.kind !== ViewKind.BLANK) this.splashState = undefined;
     this.stateChanged = true;
+  }
+
+  /**
+   * Applies an entity update: a token that is drawn moves in place, anything else rebuilds the view.
+   */
+  updateEntity(update: EntityUpdate) {
+    const layer = this.state?.layer.find((l) => l.id === update.layerId);
+    const entity = update.entity;
+    if (!layer || !entity) return;
+
+    const i = layer.entity.findIndex((e) => e.id === entity.id);
+    if (i >= 0) layer.entity[i] = entity;
+    else layer.entity.push(entity);
+
+    const view = this.current;
+    if (!(view instanceof BattleMapView) || !view.moveToken(layer.id, entity))
+      this.stateChanged = true;
+  }
+
+  removeEntity(remove: EntityRemove) {
+    const layer = this.state?.layer.find((l) => l.id === remove.layerId);
+    if (!layer) return;
+
+    layer.entity = layer.entity.filter((e) => e.id !== remove.entityId);
+    this.stateChanged = true;
+  }
+
+  setCamera(camera: Camera) {
+    if (this.state) this.state.camera = camera;
+    if (this.current instanceof BattleMapView) this.current.setCamera(camera);
+  }
+
+  /** Lets the pointer move tokens and the camera of battle maps, which the actions send to the server. */
+  enableControls(actions: BattleMapActions) {
+    this.controls = actions;
+    this.attachControls();
   }
 
   setSplash(splash: SplashScreenState | undefined) {
@@ -96,7 +143,23 @@ export class ScreenRenderer {
     this.view.addChild(view.root);
     this.overlays.addChild(overlays.root);
     this.contents = [view, overlays];
+    this.current = view;
+    this.attachControls();
     this.layout();
+  }
+
+  private attachControls() {
+    this.detachControls?.();
+    this.detachControls = undefined;
+    if (this.controls && this.state && this.current instanceof BattleMapView) {
+      this.detachControls = attachBattleMapControls(
+        this.app.stage,
+        this.app.screen,
+        this.current,
+        this.state,
+        this.controls
+      );
+    }
   }
 
   private renderSplash() {

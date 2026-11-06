@@ -1,0 +1,34 @@
+syntax = "proto3";
+package screens.v1;
+
+import "screens/v1/state.proto";
+
+option go_package = "github.com/DaanV2/mechanus/server/proto/screens/v1;screensv1";
+
+// MoveEntity moves an entity's token on the battle map the screen shows. Only users may move tokens.
+// Every screen showing a battle map of the scene gets an EntityUpdate.
+message MoveEntity {
+  string entity_id = 1;
+  Vector2 position = 2; // Top left corner in grid units
+}
+
+// SetCamera pans / zooms the battle map the screen shows. Every screen bound to the same target gets a camera update.
+message SetCamera {
+  Camera camera = 1;
+}
+
+// ActionErrorCode is why an action was refused.
+enum ActionErrorCode {
+  ACTION_ERROR_CODE_UNSPECIFIED = 0;
+  ACTION_ERROR_CODE_INVALID_ARGUMENT = 1; // The action's values are not valid, e.g. a zoom out of range
+  ACTION_ERROR_CODE_NOT_FOUND = 2; // The entity is not part of the active scene
+  ACTION_ERROR_CODE_PERMISSION_DENIED = 3; // The connection may not perform the action
+  ACTION_ERROR_CODE_FAILED_PRECONDITION = 4; // The screen shows no battle map of the active scene
+  ACTION_ERROR_CODE_INTERNAL = 5; // The server failed
+}
+
+// ActionError tells the client an action it sent was refused. Its message id is the id of the action.
+message ActionError {
+  ActionErrorCode code = 1;
+  string message = 2;
+}

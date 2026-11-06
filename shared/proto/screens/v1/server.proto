@@ -2,6 +2,7 @@ syntax = "proto3";
 package screens.v1;
 
 import "screens/v1/general.proto";
+import "screens/v1/play_actions.proto";
 import "screens/v1/scene_actions.proto";
 import "screens/v1/setup.proto";
 import "screens/v1/splash_screen.proto";
@@ -26,6 +27,7 @@ message ServerMessage {
     EntityUpdate entity_update = 8;
     EntityRemove entity_remove = 9;
     Camera camera_update = 10;
+    ActionError action_error = 11; // An action of this client was refused
   }
 }
 

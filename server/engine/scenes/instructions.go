@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/DaanV2/mechanus/server/engine/devices"
+	"github.com/DaanV2/mechanus/server/pkg/math/vectors"
 )
 
 // Instruction is something a device of a specific kind should do.
@@ -56,6 +57,12 @@ type ScreenInstruction struct {
 	// Entities are the scene's visible entities, for views that draw them. Filled in by
 	// [Scene.Instructions], never stored: a change in them is a change in the instruction.
 	Entities []Entity `json:"-"`
+	// Positions are where visible entities were moved to during play, in grid units. Filled in by
+	// [Scene.Instructions] for battle map views, never stored.
+	Positions map[string]vectors.Vector2D `json:"-"`
+	// Camera is the part of the battle map the screen shows, nil for the whole map. Filled in by
+	// [Scene.Instructions] for battle map views, never stored.
+	Camera *Camera `json:"-"`
 }
 
 // Kind implements [Instruction].

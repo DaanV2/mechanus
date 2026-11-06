@@ -2,15 +2,15 @@
 // @generated from file scenes/v1/scenes.proto (package scenes.v1, syntax proto3)
 /* eslint-disable */
 
-import type { GenFile, GenMessage, GenService } from "@bufbuild/protobuf/codegenv2";
-import { fileDesc, messageDesc, serviceDesc } from "@bufbuild/protobuf/codegenv2";
+import type { GenEnum, GenFile, GenMessage, GenService } from "@bufbuild/protobuf/codegenv2";
+import { enumDesc, fileDesc, messageDesc, serviceDesc } from "@bufbuild/protobuf/codegenv2";
 import type { Message } from "@bufbuild/protobuf";
 
 /**
  * Describes the file scenes/v1/scenes.proto.
  */
 export const file_scenes_v1_scenes: GenFile = /*@__PURE__*/
-  fileDesc("ChZzY2VuZXMvdjEvc2NlbmVzLnByb3RvEglzY2VuZXMudjEiEwoRTGlzdFNjZW5lc1JlcXVlc3QiNgoSTGlzdFNjZW5lc1Jlc3BvbnNlEiAKBnNjZW5lcxgBIAMoCzIQLnNjZW5lcy52MS5TY2VuZSI8ChRBY3RpdmF0ZVNjZW5lUmVxdWVzdBIQCghzY2VuZV9pZBgBIAEoCRISCgp2YXJpYW50X2lkGAIgASgJIlYKFUFjdGl2YXRlU2NlbmVSZXNwb25zZRImCgZhY3RpdmUYASABKAsyFi5zY2VuZXMudjEuQWN0aXZlU2NlbmUSFQoNZGV2aWNlX2Vycm9ycxgCIAMoCSInChFTZXRWYXJpYW50UmVxdWVzdBISCgp2YXJpYW50X2lkGAEgASgJIlMKElNldFZhcmlhbnRSZXNwb25zZRImCgZhY3RpdmUYASABKAsyFi5zY2VuZXMudjEuQWN0aXZlU2NlbmUSFQoNZGV2aWNlX2Vycm9ycxgCIAMoCSIXChVHZXRBY3RpdmVTY2VuZVJlcXVlc3QiUAoWR2V0QWN0aXZlU2NlbmVSZXNwb25zZRIrCgZhY3RpdmUYASABKAsyFi5zY2VuZXMudjEuQWN0aXZlU2NlbmVIAIgBAUIJCgdfYWN0aXZlInUKBVNjZW5lEgoKAmlkGAEgASgJEgwKBG5hbWUYAiABKAkSEwoLZGVzY3JpcHRpb24YAyABKAkSJAoIdmFyaWFudHMYBCADKAsyEi5zY2VuZXMudjEuVmFyaWFudBIXCg9kZWZhdWx0X3ZhcmlhbnQYBSABKAkifAoHVmFyaWFudBIKCgJpZBgBIAEoCRIMCgRuYW1lGAIgASgJEioKBHRhZ3MYAyADKAsyHC5zY2VuZXMudjEuVmFyaWFudC5UYWdzRW50cnkaKwoJVGFnc0VudHJ5EgsKA2tleRgBIAEoCRINCgV2YWx1ZRgCIAEoCToCOAEiQgoLQWN0aXZlU2NlbmUSHwoFc2NlbmUYASABKAsyEC5zY2VuZXMudjEuU2NlbmUSEgoKdmFyaWFudF9pZBgCIAEoCTLHAgoMU2NlbmVTZXJ2aWNlEkUKBExpc3QSHC5zY2VuZXMudjEuTGlzdFNjZW5lc1JlcXVlc3QaHS5zY2VuZXMudjEuTGlzdFNjZW5lc1Jlc3BvbnNlIgASTwoIQWN0aXZhdGUSHy5zY2VuZXMudjEuQWN0aXZhdGVTY2VuZVJlcXVlc3QaIC5zY2VuZXMudjEuQWN0aXZhdGVTY2VuZVJlc3BvbnNlIgASSwoKU2V0VmFyaWFudBIcLnNjZW5lcy52MS5TZXRWYXJpYW50UmVxdWVzdBodLnNjZW5lcy52MS5TZXRWYXJpYW50UmVzcG9uc2UiABJSCglHZXRBY3RpdmUSIC5zY2VuZXMudjEuR2V0QWN0aXZlU2NlbmVSZXF1ZXN0GiEuc2NlbmVzLnYxLkdldEFjdGl2ZVNjZW5lUmVzcG9uc2UiAEI8WjpnaXRodWIuY29tL0RhYW5WMi9tZWNoYW51cy9zZXJ2ZXIvcHJvdG8vc2NlbmVzL3YxO3NjZW5lc3YxYgZwcm90bzM");
+  fileDesc("ChZzY2VuZXMvdjEvc2NlbmVzLnByb3RvEglzY2VuZXMudjEiEwoRTGlzdFNjZW5lc1JlcXVlc3QiNgoSTGlzdFNjZW5lc1Jlc3BvbnNlEiAKBnNjZW5lcxgBIAMoCzIQLnNjZW5lcy52MS5TY2VuZSI8ChRBY3RpdmF0ZVNjZW5lUmVxdWVzdBIQCghzY2VuZV9pZBgBIAEoCRISCgp2YXJpYW50X2lkGAIgASgJIlYKFUFjdGl2YXRlU2NlbmVSZXNwb25zZRImCgZhY3RpdmUYASABKAsyFi5zY2VuZXMudjEuQWN0aXZlU2NlbmUSFQoNZGV2aWNlX2Vycm9ycxgCIAMoCSInChFTZXRWYXJpYW50UmVxdWVzdBISCgp2YXJpYW50X2lkGAEgASgJIlMKElNldFZhcmlhbnRSZXNwb25zZRImCgZhY3RpdmUYASABKAsyFi5zY2VuZXMudjEuQWN0aXZlU2NlbmUSFQoNZGV2aWNlX2Vycm9ycxgCIAMoCSIXChVHZXRBY3RpdmVTY2VuZVJlcXVlc3QiUAoWR2V0QWN0aXZlU2NlbmVSZXNwb25zZRIrCgZhY3RpdmUYASABKAsyFi5zY2VuZXMudjEuQWN0aXZlU2NlbmVIAIgBAUIJCgdfYWN0aXZlInUKBVNjZW5lEgoKAmlkGAEgASgJEgwKBG5hbWUYAiABKAkSEwoLZGVzY3JpcHRpb24YAyABKAkSJAoIdmFyaWFudHMYBCADKAsyEi5zY2VuZXMudjEuVmFyaWFudBIXCg9kZWZhdWx0X3ZhcmlhbnQYBSABKAkifAoHVmFyaWFudBIKCgJpZBgBIAEoCRIMCgRuYW1lGAIgASgJEioKBHRhZ3MYAyADKAsyHC5zY2VuZXMudjEuVmFyaWFudC5UYWdzRW50cnkaKwoJVGFnc0VudHJ5EgsKA2tleRgBIAEoCRINCgV2YWx1ZRgCIAEoCToCOAEiZwoLQWN0aXZlU2NlbmUSHwoFc2NlbmUYASABKAsyEC5zY2VuZXMudjEuU2NlbmUSEgoKdmFyaWFudF9pZBgCIAEoCRIjCghlbnRpdGllcxgDIAMoCzIRLnNjZW5lcy52MS5FbnRpdHkiOwoWU2V0RW50aXR5SGlkZGVuUmVxdWVzdBIRCgllbnRpdHlfaWQYASABKAkSDgoGaGlkZGVuGAIgASgIIlgKF1NldEVudGl0eUhpZGRlblJlc3BvbnNlEiYKBmFjdGl2ZRgBIAEoCzIWLnNjZW5lcy52MS5BY3RpdmVTY2VuZRIVCg1kZXZpY2VfZXJyb3JzGAIgAygJIqMBChJTcGF3bkVudGl0eVJlcXVlc3QSEQoJZW50aXR5X2lkGAEgASgJEiMKBGtpbmQYAiABKA4yFS5zY2VuZXMudjEuRW50aXR5S2luZBIMCgRuYW1lGAMgASgJEg4KBmhpZGRlbhgEIAEoCBIqCghwb3NpdGlvbhgFIAEoCzITLnNjZW5lcy52MS5Qb3NpdGlvbkgAiAEBQgsKCV9wb3NpdGlvbiJUChNTcGF3bkVudGl0eVJlc3BvbnNlEiYKBmFjdGl2ZRgBIAEoCzIWLnNjZW5lcy52MS5BY3RpdmVTY2VuZRIVCg1kZXZpY2VfZXJyb3JzGAIgAygJIigKE1JlbW92ZUVudGl0eVJlcXVlc3QSEQoJZW50aXR5X2lkGAEgASgJIlUKFFJlbW92ZUVudGl0eVJlc3BvbnNlEiYKBmFjdGl2ZRgBIAEoCzIWLnNjZW5lcy52MS5BY3RpdmVTY2VuZRIVCg1kZXZpY2VfZXJyb3JzGAIgAygJIk0KEU1vdmVFbnRpdHlSZXF1ZXN0EhEKCWVudGl0eV9pZBgBIAEoCRIlCghwb3NpdGlvbhgCIAEoCzITLnNjZW5lcy52MS5Qb3NpdGlvbiJTChJNb3ZlRW50aXR5UmVzcG9uc2USJgoGYWN0aXZlGAEgASgLMhYuc2NlbmVzLnYxLkFjdGl2ZVNjZW5lEhUKDWRldmljZV9lcnJvcnMYAiADKAkikAEKBkVudGl0eRIKCgJpZBgBIAEoCRIjCgRraW5kGAIgASgOMhUuc2NlbmVzLnYxLkVudGl0eUtpbmQSDAoEbmFtZRgDIAEoCRIOCgZoaWRkZW4YBCABKAgSKgoIcG9zaXRpb24YBSABKAsyEy5zY2VuZXMudjEuUG9zaXRpb25IAIgBAUILCglfcG9zaXRpb24iIAoIUG9zaXRpb24SCQoBeBgBIAEoARIJCgF5GAIgASgBKoUBCgpFbnRpdHlLaW5kEhsKF0VOVElUWV9LSU5EX1VOU1BFQ0lGSUVEEAASFgoSRU5USVRZX0tJTkRfUExBWUVSEAESEwoPRU5USVRZX0tJTkRfTlBDEAISFQoRRU5USVRZX0tJTkRfRU5FTVkQAxIWChJFTlRJVFlfS0lORF9PQkpFQ1QQBDKTBQoMU2NlbmVTZXJ2aWNlEkUKBExpc3QSHC5zY2VuZXMudjEuTGlzdFNjZW5lc1JlcXVlc3QaHS5zY2VuZXMudjEuTGlzdFNjZW5lc1Jlc3BvbnNlIgASTwoIQWN0aXZhdGUSHy5zY2VuZXMudjEuQWN0aXZhdGVTY2VuZVJlcXVlc3QaIC5zY2VuZXMudjEuQWN0aXZhdGVTY2VuZVJlc3BvbnNlIgASSwoKU2V0VmFyaWFudBIcLnNjZW5lcy52MS5TZXRWYXJpYW50UmVxdWVzdBodLnNjZW5lcy52MS5TZXRWYXJpYW50UmVzcG9uc2UiABJSCglHZXRBY3RpdmUSIC5zY2VuZXMudjEuR2V0QWN0aXZlU2NlbmVSZXF1ZXN0GiEuc2NlbmVzLnYxLkdldEFjdGl2ZVNjZW5lUmVzcG9uc2UiABJaCg9TZXRFbnRpdHlIaWRkZW4SIS5zY2VuZXMudjEuU2V0RW50aXR5SGlkZGVuUmVxdWVzdBoiLnNjZW5lcy52MS5TZXRFbnRpdHlIaWRkZW5SZXNwb25zZSIAEk4KC1NwYXduRW50aXR5Eh0uc2NlbmVzLnYxLlNwYXduRW50aXR5UmVxdWVzdBoeLnNjZW5lcy52MS5TcGF3bkVudGl0eVJlc3BvbnNlIgASUQoMUmVtb3ZlRW50aXR5Eh4uc2NlbmVzLnYxLlJlbW92ZUVudGl0eVJlcXVlc3QaHy5zY2VuZXMudjEuUmVtb3ZlRW50aXR5UmVzcG9uc2UiABJLCgpNb3ZlRW50aXR5Ehwuc2NlbmVzLnYxLk1vdmVFbnRpdHlSZXF1ZXN0Gh0uc2NlbmVzLnYxLk1vdmVFbnRpdHlSZXNwb25zZSIAQjxaOmdpdGh1Yi5jb20vRGFhblYyL21lY2hhbnVzL3NlcnZlci9wcm90by9zY2VuZXMvdjE7c2NlbmVzdjFiBnByb3RvMw");
 
 /**
  * @generated from message scenes.v1.ListScenesRequest
@@ -254,6 +254,13 @@ export type ActiveScene = Message<"scenes.v1.ActiveScene"> & {
    * @generated from field: string variant_id = 2;
    */
   variantId: string;
+
+  /**
+   * Entities present in the scene, hidden ones included
+   *
+   * @generated from field: repeated scenes.v1.Entity entities = 3;
+   */
+  entities: Entity[];
 };
 
 /**
@@ -262,6 +269,313 @@ export type ActiveScene = Message<"scenes.v1.ActiveScene"> & {
  */
 export const ActiveSceneSchema: GenMessage<ActiveScene> = /*@__PURE__*/
   messageDesc(file_scenes_v1_scenes, 10);
+
+/**
+ * @generated from message scenes.v1.SetEntityHiddenRequest
+ */
+export type SetEntityHiddenRequest = Message<"scenes.v1.SetEntityHiddenRequest"> & {
+  /**
+   * @generated from field: string entity_id = 1;
+   */
+  entityId: string;
+
+  /**
+   * True hides the entity from the screens, false reveals it
+   *
+   * @generated from field: bool hidden = 2;
+   */
+  hidden: boolean;
+};
+
+/**
+ * Describes the message scenes.v1.SetEntityHiddenRequest.
+ * Use `create(SetEntityHiddenRequestSchema)` to create a new message.
+ */
+export const SetEntityHiddenRequestSchema: GenMessage<SetEntityHiddenRequest> = /*@__PURE__*/
+  messageDesc(file_scenes_v1_scenes, 11);
+
+/**
+ * @generated from message scenes.v1.SetEntityHiddenResponse
+ */
+export type SetEntityHiddenResponse = Message<"scenes.v1.SetEntityHiddenResponse"> & {
+  /**
+   * @generated from field: scenes.v1.ActiveScene active = 1;
+   */
+  active?: ActiveScene | undefined;
+
+  /**
+   * Devices that could not be instructed; the change happened regardless
+   *
+   * @generated from field: repeated string device_errors = 2;
+   */
+  deviceErrors: string[];
+};
+
+/**
+ * Describes the message scenes.v1.SetEntityHiddenResponse.
+ * Use `create(SetEntityHiddenResponseSchema)` to create a new message.
+ */
+export const SetEntityHiddenResponseSchema: GenMessage<SetEntityHiddenResponse> = /*@__PURE__*/
+  messageDesc(file_scenes_v1_scenes, 12);
+
+/**
+ * @generated from message scenes.v1.SpawnEntityRequest
+ */
+export type SpawnEntityRequest = Message<"scenes.v1.SpawnEntityRequest"> & {
+  /**
+   * Unique within the scene
+   *
+   * @generated from field: string entity_id = 1;
+   */
+  entityId: string;
+
+  /**
+   * @generated from field: scenes.v1.EntityKind kind = 2;
+   */
+  kind: EntityKind;
+
+  /**
+   * @generated from field: string name = 3;
+   */
+  name: string;
+
+  /**
+   * Spawn hidden from the screens
+   *
+   * @generated from field: bool hidden = 4;
+   */
+  hidden: boolean;
+
+  /**
+   * Where to draw it on battle maps, unset to not draw it until it is moved
+   *
+   * @generated from field: optional scenes.v1.Position position = 5;
+   */
+  position?: Position | undefined;
+};
+
+/**
+ * Describes the message scenes.v1.SpawnEntityRequest.
+ * Use `create(SpawnEntityRequestSchema)` to create a new message.
+ */
+export const SpawnEntityRequestSchema: GenMessage<SpawnEntityRequest> = /*@__PURE__*/
+  messageDesc(file_scenes_v1_scenes, 13);
+
+/**
+ * @generated from message scenes.v1.SpawnEntityResponse
+ */
+export type SpawnEntityResponse = Message<"scenes.v1.SpawnEntityResponse"> & {
+  /**
+   * @generated from field: scenes.v1.ActiveScene active = 1;
+   */
+  active?: ActiveScene | undefined;
+
+  /**
+   * Devices that could not be instructed; the change happened regardless
+   *
+   * @generated from field: repeated string device_errors = 2;
+   */
+  deviceErrors: string[];
+};
+
+/**
+ * Describes the message scenes.v1.SpawnEntityResponse.
+ * Use `create(SpawnEntityResponseSchema)` to create a new message.
+ */
+export const SpawnEntityResponseSchema: GenMessage<SpawnEntityResponse> = /*@__PURE__*/
+  messageDesc(file_scenes_v1_scenes, 14);
+
+/**
+ * @generated from message scenes.v1.RemoveEntityRequest
+ */
+export type RemoveEntityRequest = Message<"scenes.v1.RemoveEntityRequest"> & {
+  /**
+   * @generated from field: string entity_id = 1;
+   */
+  entityId: string;
+};
+
+/**
+ * Describes the message scenes.v1.RemoveEntityRequest.
+ * Use `create(RemoveEntityRequestSchema)` to create a new message.
+ */
+export const RemoveEntityRequestSchema: GenMessage<RemoveEntityRequest> = /*@__PURE__*/
+  messageDesc(file_scenes_v1_scenes, 15);
+
+/**
+ * @generated from message scenes.v1.RemoveEntityResponse
+ */
+export type RemoveEntityResponse = Message<"scenes.v1.RemoveEntityResponse"> & {
+  /**
+   * @generated from field: scenes.v1.ActiveScene active = 1;
+   */
+  active?: ActiveScene | undefined;
+
+  /**
+   * Devices that could not be instructed; the change happened regardless
+   *
+   * @generated from field: repeated string device_errors = 2;
+   */
+  deviceErrors: string[];
+};
+
+/**
+ * Describes the message scenes.v1.RemoveEntityResponse.
+ * Use `create(RemoveEntityResponseSchema)` to create a new message.
+ */
+export const RemoveEntityResponseSchema: GenMessage<RemoveEntityResponse> = /*@__PURE__*/
+  messageDesc(file_scenes_v1_scenes, 16);
+
+/**
+ * @generated from message scenes.v1.MoveEntityRequest
+ */
+export type MoveEntityRequest = Message<"scenes.v1.MoveEntityRequest"> & {
+  /**
+   * @generated from field: string entity_id = 1;
+   */
+  entityId: string;
+
+  /**
+   * @generated from field: scenes.v1.Position position = 2;
+   */
+  position?: Position | undefined;
+};
+
+/**
+ * Describes the message scenes.v1.MoveEntityRequest.
+ * Use `create(MoveEntityRequestSchema)` to create a new message.
+ */
+export const MoveEntityRequestSchema: GenMessage<MoveEntityRequest> = /*@__PURE__*/
+  messageDesc(file_scenes_v1_scenes, 17);
+
+/**
+ * @generated from message scenes.v1.MoveEntityResponse
+ */
+export type MoveEntityResponse = Message<"scenes.v1.MoveEntityResponse"> & {
+  /**
+   * @generated from field: scenes.v1.ActiveScene active = 1;
+   */
+  active?: ActiveScene | undefined;
+
+  /**
+   * Devices that could not be told; the change happened regardless
+   *
+   * @generated from field: repeated string device_errors = 2;
+   */
+  deviceErrors: string[];
+};
+
+/**
+ * Describes the message scenes.v1.MoveEntityResponse.
+ * Use `create(MoveEntityResponseSchema)` to create a new message.
+ */
+export const MoveEntityResponseSchema: GenMessage<MoveEntityResponse> = /*@__PURE__*/
+  messageDesc(file_scenes_v1_scenes, 18);
+
+/**
+ * An entity present in the active scene
+ *
+ * @generated from message scenes.v1.Entity
+ */
+export type Entity = Message<"scenes.v1.Entity"> & {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id: string;
+
+  /**
+   * @generated from field: scenes.v1.EntityKind kind = 2;
+   */
+  kind: EntityKind;
+
+  /**
+   * @generated from field: string name = 3;
+   */
+  name: string;
+
+  /**
+   * Hidden from the screens
+   *
+   * @generated from field: bool hidden = 4;
+   */
+  hidden: boolean;
+
+  /**
+   * Where it was moved to during play, unset when it stands where the battle map places it
+   *
+   * @generated from field: optional scenes.v1.Position position = 5;
+   */
+  position?: Position | undefined;
+};
+
+/**
+ * Describes the message scenes.v1.Entity.
+ * Use `create(EntitySchema)` to create a new message.
+ */
+export const EntitySchema: GenMessage<Entity> = /*@__PURE__*/
+  messageDesc(file_scenes_v1_scenes, 19);
+
+/**
+ * A position on a battle map, in grid units
+ *
+ * @generated from message scenes.v1.Position
+ */
+export type Position = Message<"scenes.v1.Position"> & {
+  /**
+   * @generated from field: double x = 1;
+   */
+  x: number;
+
+  /**
+   * @generated from field: double y = 2;
+   */
+  y: number;
+};
+
+/**
+ * Describes the message scenes.v1.Position.
+ * Use `create(PositionSchema)` to create a new message.
+ */
+export const PositionSchema: GenMessage<Position> = /*@__PURE__*/
+  messageDesc(file_scenes_v1_scenes, 20);
+
+/**
+ * EntityKind is the role an entity plays in a scene.
+ *
+ * @generated from enum scenes.v1.EntityKind
+ */
+export enum EntityKind {
+  /**
+   * @generated from enum value: ENTITY_KIND_UNSPECIFIED = 0;
+   */
+  UNSPECIFIED = 0,
+
+  /**
+   * @generated from enum value: ENTITY_KIND_PLAYER = 1;
+   */
+  PLAYER = 1,
+
+  /**
+   * @generated from enum value: ENTITY_KIND_NPC = 2;
+   */
+  NPC = 2,
+
+  /**
+   * @generated from enum value: ENTITY_KIND_ENEMY = 3;
+   */
+  ENEMY = 3,
+
+  /**
+   * @generated from enum value: ENTITY_KIND_OBJECT = 4;
+   */
+  OBJECT = 4,
+}
+
+/**
+ * Describes the enum scenes.v1.EntityKind.
+ */
+export const EntityKindSchema: GenEnum<EntityKind> = /*@__PURE__*/
+  enumDesc(file_scenes_v1_scenes, 0);
 
 /**
  * A service for the GM to control which scene the room plays
@@ -308,6 +622,46 @@ export const SceneService: GenService<{
     methodKind: "unary";
     input: typeof GetActiveSceneRequestSchema;
     output: typeof GetActiveSceneResponseSchema;
+  },
+  /**
+   * Hide an entity of the active scene from the screens, or reveal it
+   *
+   * @generated from rpc scenes.v1.SceneService.SetEntityHidden
+   */
+  setEntityHidden: {
+    methodKind: "unary";
+    input: typeof SetEntityHiddenRequestSchema;
+    output: typeof SetEntityHiddenResponseSchema;
+  },
+  /**
+   * Add an entity to the active scene during play
+   *
+   * @generated from rpc scenes.v1.SceneService.SpawnEntity
+   */
+  spawnEntity: {
+    methodKind: "unary";
+    input: typeof SpawnEntityRequestSchema;
+    output: typeof SpawnEntityResponseSchema;
+  },
+  /**
+   * Remove an entity from the active scene (defeated, fled, ...)
+   *
+   * @generated from rpc scenes.v1.SceneService.RemoveEntity
+   */
+  removeEntity: {
+    methodKind: "unary";
+    input: typeof RemoveEntityRequestSchema;
+    output: typeof RemoveEntityResponseSchema;
+  },
+  /**
+   * Move an entity of the active scene on the battle map
+   *
+   * @generated from rpc scenes.v1.SceneService.MoveEntity
+   */
+  moveEntity: {
+    methodKind: "unary";
+    input: typeof MoveEntityRequestSchema;
+    output: typeof MoveEntityResponseSchema;
   },
 }> = /*@__PURE__*/
   serviceDesc(file_scenes_v1_scenes, 0);

@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"io/fs"
+	"maps"
 
 	"github.com/DaanV2/mechanus/server/application"
 	"github.com/DaanV2/mechanus/server/engine/devices"
@@ -17,7 +18,10 @@ import (
 	"github.com/DaanV2/mechanus/server/pkg/math/vectors"
 )
 
-var _ application.OutputDriver = &Driver{}
+var (
+	_ application.OutputDriver    = &Driver{}
+	_ application.BattleMapDriver = &Driver{}
+)
 
 // AssetResolver turns asset references from a scene config into URLs screens can load, and opens the
 // ones the server reads itself.
@@ -72,6 +76,9 @@ func (d *Driver) State(scene scenes.Ref, ins *scenes.ScreenInstruction) (*state.
 		st.View.Kind = scenes.ViewBlank
 	}
 
+	if ins.View == scenes.ViewBattleMap && ins.Camera != nil {
+		st.Camera = &state.Camera{Center: ins.Camera.Center, Zoom: ins.Camera.Zoom}
+	}
 	if ins.View == scenes.ViewBattleMap {
 		if err := d.applyBattleMap(st, scene.SceneID, ins); err != nil {
 			return nil, err
@@ -130,13 +137,74 @@ func (d *Driver) applyBattleMap(st *state.ScreenState, sceneID string, ins *scen
 		present[ins.Entities[i].ID] = &ins.Entities[i]
 	}
 
+	unplaced := unplacedTokens(m, ins)
 	for i := range m.Layers {
-		layer, err := d.layer(sceneID, &m.Layers[i], present)
+		layer, err := d.layer(sceneID, &m.Layers[i], present, ins.Positions)
 		if err != nil {
 			return fmt.Errorf("battle map layer %q: %w", m.Layers[i].ID, err)
 		}
+		// Entities the map doesn't place, but that were given a position during play (spawned ones), go
+		// on the first entity layer
+		if layer.Kind == scenes.MapLayerEntities && unplaced != nil {
+			maps.Copy(layer.Entities, unplaced)
+			unplaced = nil
+		}
 		st.Layers = append(st.Layers, layer)
 	}
+	if unplaced != nil {
+		st.Layers = append(st.Layers, &state.Layer{ID: PlayLayerID, Kind: scenes.MapLayerEntities, Entities: unplaced})
+	}
+
+	return nil
+}
+
+// PlayLayerID is the ID of the entity layer added to a battle map without one, to draw the entities
+// that were given a position during play.
+const PlayLayerID = "play"
+
+// unplacedTokens returns placeholder tokens of the visible entities the map doesn't place but that have
+// a position in the state, nil when there are none.
+func unplacedTokens(m *scenes.BattleMap, ins *scenes.ScreenInstruction) map[string]*state.Entity {
+	placed := map[string]bool{}
+	for i := range m.Layers {
+		for _, e := range m.Layers[i].Entities {
+			placed[e.Entity] = true
+		}
+	}
+
+	var result map[string]*state.Entity
+	for _, e := range ins.Entities {
+		pos, ok := ins.Positions[e.ID]
+		if !ok || placed[e.ID] {
+			continue
+		}
+		if result == nil {
+			result = map[string]*state.Entity{}
+		}
+		result[e.ID] = &state.Entity{
+			ID:       e.ID,
+			Name:     e.Name,
+			Kind:     e.Kind,
+			Position: pos,
+			Size:     vectors.Vector2D{X: 1, Y: 1},
+		}
+	}
+
+	return result
+}
+
+// MoveEntity implements application.BattleMapDriver: the device's screen gets only the moved token.
+func (d *Driver) MoveEntity(ctx context.Context, _ scenes.Ref, device *devices.Device, entityID string, position vectors.Vector2D) error {
+	if screen, ok := d.screens.Get(device.ID); ok {
+		screen.MoveEntity(ctx, entityID, position)
+	}
+
+	return nil
+}
+
+// SetCamera implements application.BattleMapDriver: the device's screen gets only the camera.
+func (d *Driver) SetCamera(ctx context.Context, _ scenes.Ref, device *devices.Device, camera scenes.Camera) error {
+	d.screens.GetOrCreate(device.ID).SetCamera(ctx, state.Camera{Center: camera.Center, Zoom: camera.Zoom})
 
 	return nil
 }
@@ -156,7 +224,7 @@ func (d *Driver) loadBattleMap(sceneID, ref string) (*scenes.BattleMap, error) {
 	return m, nil
 }
 
-func (d *Driver) layer(sceneID string, l *scenes.MapLayer, present map[string]*scenes.Entity) (*state.Layer, error) {
+func (d *Driver) layer(sceneID string, l *scenes.MapLayer, present map[string]*scenes.Entity, positions map[string]vectors.Vector2D) (*state.Layer, error) {
 	result := &state.Layer{ID: l.ID, Kind: l.Kind}
 
 	if l.Kind == scenes.MapLayerImage {
@@ -190,6 +258,9 @@ func (d *Driver) layer(sceneID string, l *scenes.MapLayer, present map[string]*s
 			Position: placed.Position,
 			Size:     cellsOrOne(placed.Size),
 			Rotation: placed.Rotation,
+		}
+		if pos, ok := positions[entity.ID]; ok {
+			token.Position = pos
 		}
 		if placed.Asset != "" {
 			asset, err := d.asset(sceneID, placed.Asset)
