@@ -73,9 +73,9 @@ func statusOf(ctx context.Context, m *application.DeviceMonitor, id string) devi
 
 	all, err := m.Statuses(ctx)
 	Expect(err).ToNot(HaveOccurred())
-	for _, s := range all {
-		if s.DeviceID == id {
-			return s
+	for i := range all {
+		if all[i].DeviceID == id {
+			return all[i]
 		}
 	}
 	Fail("no status for device " + id)
@@ -160,6 +160,19 @@ var _ = Describe("DeviceMonitor", func() {
 				ids = append(ids, s.DeviceID)
 			}
 			Expect(ids).To(Equal([]string{"fog", "lamp", "lamp-2", "speaker"}))
+		})
+
+		It("describes each device with its kind and the targets it is bound to", func() {
+			room.Devices["lamp"].Name = "Ceiling lamp"
+			Expect(room.Bind("combat", "lamp")).To(Succeed())
+
+			lamp := statusOf(ctx, monitor, "lamp")
+			Expect(lamp.Name).To(Equal("Ceiling lamp"))
+			Expect(lamp.Kind).To(Equal(devices.KindLight))
+			Expect(lamp.Integration).To(Equal(devices.IntegrationHue))
+			Expect(lamp.Targets).To(Equal([]string{"ambient", "combat"}))
+
+			Expect(statusOf(ctx, monitor, "fog").Targets).To(BeEmpty(), "not bound to any target")
 		})
 	})
 
