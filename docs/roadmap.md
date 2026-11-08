@@ -143,7 +143,7 @@ Done: per-login sessions (one JTI each) with an RS512 access token (1 h) and a `
 - [ ] Game primitives: resource bars, condition tags with round counters, initiative order with turn / round tracking, free-form entity stats
 - [ ] Info board view (handouts, initiative order, quest log)
 - [ ] Player view with limited visibility, overridable by a scene's `players` target
-- [ ] Reset a scene's state back to its config
+- [x] Reset a scene's state back to its config (`SceneService.Reset`, a reset button per scene in the GM view): spawned entities, moves, visibility, overrides, cameras and the variant go back to the authored config
 - [ ] Touch input on screens: per-device `touch` mode, live GM touch lock
 
 **Decisions**

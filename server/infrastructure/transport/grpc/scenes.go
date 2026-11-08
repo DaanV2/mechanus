@@ -274,6 +274,28 @@ func (s *SceneServiceHandler) MoveEntity(ctx context.Context, req *connect.Reque
 	return connect.NewResponse(&scenesv1.MoveEntityResponse{Active: s.active(), DeviceErrors: deviceErrs}), nil
 }
 
+// Reset implements scenesv1connect.SceneServiceHandler.
+func (s *SceneServiceHandler) Reset(ctx context.Context, req *connect.Request[scenesv1.ResetSceneRequest]) (*connect.Response[scenesv1.ResetSceneResponse], error) {
+	jwt, err := requireRole(ctx, roles.User)
+	if err != nil {
+		return nil, err
+	}
+
+	sceneID := strings.TrimSpace(req.Msg.GetSceneId())
+	logger := SceneLogger.From(ctx, "userId", jwt.Claims.User.ID, "sceneId", sceneID)
+
+	t, err := s.scenes.Reset(ctx, sceneID)
+	deviceErrs, err := splitDeviceErrors(t, err)
+	if err != nil {
+		logger.Error("could not reset scene", "error", err)
+
+		return nil, sceneError(err)
+	}
+	logger.Info("reset scene", "active", t != nil, "device_errors", len(deviceErrs))
+
+	return connect.NewResponse(&scenesv1.ResetSceneResponse{Active: s.active(), DeviceErrors: deviceErrs}), nil
+}
+
 func toEntityKind(kind scenes.EntityKind) scenesv1.EntityKind {
 	switch kind {
 	case scenes.EntityPlayer:

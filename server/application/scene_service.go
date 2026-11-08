@@ -195,6 +195,37 @@ func (s *SceneService) Adjust(ctx context.Context, overrides scenes.Instructions
 	})
 }
 
+// Reset throws away what happened in a scene during play, so it starts again from its
+// configuration: spawned entities are gone, moved, hidden and removed entities are back as
+// authored, live adjustments and cameras are cleared, and the default variant is active.
+//
+// The active scene is reset in place and every device of the room is re-instructed, like a fresh
+// activation. Another scene only has its saved state replaced, which its next activation picks up;
+// the returned transition is then nil. Nothing changes when the fresh state can't be saved.
+func (s *SceneService) Reset(ctx context.Context, sceneID string) (*scenes.Transition, error) {
+	s.lock.Lock()
+	defer s.lock.Unlock()
+
+	cfg, err := s.configs.GetSceneConfig(ctx, sceneID)
+	if err != nil {
+		return nil, fmt.Errorf("loading config of scene %q: %w", sceneID, err)
+	}
+	next, err := scenes.Load(cfg, nil)
+	if err != nil {
+		return nil, err
+	}
+	if err := s.states.SaveSceneState(ctx, next.State); err != nil {
+		return nil, fmt.Errorf("saving state of scene %q: %w", sceneID, err)
+	}
+	if s.active == nil || s.active.ID() != sceneID {
+		return nil, nil //nolint:nilnil // Reset, but not active: no devices to instruct
+	}
+
+	// No previous instructions: the reset scene instructs every device, as cameras and overrides that
+	// were sent live are gone too.
+	return s.transition(ctx, s.active.Ref(), scenes.Instructions{}, next)
+}
+
 // SetEntityHidden hides an entity of the active scene from the screens, or reveals it.
 func (s *SceneService) SetEntityHidden(ctx context.Context, entityID string, hidden bool) (*scenes.Transition, error) {
 	s.lock.Lock()

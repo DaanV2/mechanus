@@ -52,6 +52,8 @@ const (
 	SceneServiceRemoveEntityProcedure = "/scenes.v1.SceneService/RemoveEntity"
 	// SceneServiceMoveEntityProcedure is the fully-qualified name of the SceneService's MoveEntity RPC.
 	SceneServiceMoveEntityProcedure = "/scenes.v1.SceneService/MoveEntity"
+	// SceneServiceResetProcedure is the fully-qualified name of the SceneService's Reset RPC.
+	SceneServiceResetProcedure = "/scenes.v1.SceneService/Reset"
 )
 
 // SceneServiceClient is a client for the scenes.v1.SceneService service.
@@ -72,6 +74,9 @@ type SceneServiceClient interface {
 	RemoveEntity(context.Context, *connect.Request[v1.RemoveEntityRequest]) (*connect.Response[v1.RemoveEntityResponse], error)
 	// Move an entity of the active scene on the battle map
 	MoveEntity(context.Context, *connect.Request[v1.MoveEntityRequest]) (*connect.Response[v1.MoveEntityResponse], error)
+	// Throw away what happened in a scene during play, so it starts again from its configuration.
+	// The active scene is reset in place and the room's devices follow; another scene starts fresh on its next activation
+	Reset(context.Context, *connect.Request[v1.ResetSceneRequest]) (*connect.Response[v1.ResetSceneResponse], error)
 }
 
 // NewSceneServiceClient constructs a client for the scenes.v1.SceneService service. By default, it
@@ -133,6 +138,12 @@ func NewSceneServiceClient(httpClient connect.HTTPClient, baseURL string, opts .
 			connect.WithSchema(sceneServiceMethods.ByName("MoveEntity")),
 			connect.WithClientOptions(opts...),
 		),
+		reset: connect.NewClient[v1.ResetSceneRequest, v1.ResetSceneResponse](
+			httpClient,
+			baseURL+SceneServiceResetProcedure,
+			connect.WithSchema(sceneServiceMethods.ByName("Reset")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -146,6 +157,7 @@ type sceneServiceClient struct {
 	spawnEntity     *connect.Client[v1.SpawnEntityRequest, v1.SpawnEntityResponse]
 	removeEntity    *connect.Client[v1.RemoveEntityRequest, v1.RemoveEntityResponse]
 	moveEntity      *connect.Client[v1.MoveEntityRequest, v1.MoveEntityResponse]
+	reset           *connect.Client[v1.ResetSceneRequest, v1.ResetSceneResponse]
 }
 
 // List calls scenes.v1.SceneService.List.
@@ -188,6 +200,11 @@ func (c *sceneServiceClient) MoveEntity(ctx context.Context, req *connect.Reques
 	return c.moveEntity.CallUnary(ctx, req)
 }
 
+// Reset calls scenes.v1.SceneService.Reset.
+func (c *sceneServiceClient) Reset(ctx context.Context, req *connect.Request[v1.ResetSceneRequest]) (*connect.Response[v1.ResetSceneResponse], error) {
+	return c.reset.CallUnary(ctx, req)
+}
+
 // SceneServiceHandler is an implementation of the scenes.v1.SceneService service.
 type SceneServiceHandler interface {
 	// List the scenes that can be activated
@@ -206,6 +223,9 @@ type SceneServiceHandler interface {
 	RemoveEntity(context.Context, *connect.Request[v1.RemoveEntityRequest]) (*connect.Response[v1.RemoveEntityResponse], error)
 	// Move an entity of the active scene on the battle map
 	MoveEntity(context.Context, *connect.Request[v1.MoveEntityRequest]) (*connect.Response[v1.MoveEntityResponse], error)
+	// Throw away what happened in a scene during play, so it starts again from its configuration.
+	// The active scene is reset in place and the room's devices follow; another scene starts fresh on its next activation
+	Reset(context.Context, *connect.Request[v1.ResetSceneRequest]) (*connect.Response[v1.ResetSceneResponse], error)
 }
 
 // NewSceneServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -263,6 +283,12 @@ func NewSceneServiceHandler(svc SceneServiceHandler, opts ...connect.HandlerOpti
 		connect.WithSchema(sceneServiceMethods.ByName("MoveEntity")),
 		connect.WithHandlerOptions(opts...),
 	)
+	sceneServiceResetHandler := connect.NewUnaryHandler(
+		SceneServiceResetProcedure,
+		svc.Reset,
+		connect.WithSchema(sceneServiceMethods.ByName("Reset")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/scenes.v1.SceneService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case SceneServiceListProcedure:
@@ -281,6 +307,8 @@ func NewSceneServiceHandler(svc SceneServiceHandler, opts ...connect.HandlerOpti
 			sceneServiceRemoveEntityHandler.ServeHTTP(w, r)
 		case SceneServiceMoveEntityProcedure:
 			sceneServiceMoveEntityHandler.ServeHTTP(w, r)
+		case SceneServiceResetProcedure:
+			sceneServiceResetHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -320,4 +348,8 @@ func (UnimplementedSceneServiceHandler) RemoveEntity(context.Context, *connect.R
 
 func (UnimplementedSceneServiceHandler) MoveEntity(context.Context, *connect.Request[v1.MoveEntityRequest]) (*connect.Response[v1.MoveEntityResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scenes.v1.SceneService.MoveEntity is not implemented"))
+}
+
+func (UnimplementedSceneServiceHandler) Reset(context.Context, *connect.Request[v1.ResetSceneRequest]) (*connect.Response[v1.ResetSceneResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scenes.v1.SceneService.Reset is not implemented"))
 }

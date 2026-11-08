@@ -21,6 +21,9 @@ service SceneService {
   rpc RemoveEntity(RemoveEntityRequest) returns (RemoveEntityResponse) {}
   // Move an entity of the active scene on the battle map
   rpc MoveEntity(MoveEntityRequest) returns (MoveEntityResponse) {}
+  // Throw away what happened in a scene during play, so it starts again from its configuration.
+  // The active scene is reset in place and the room's devices follow; another scene starts fresh on its next activation
+  rpc Reset(ResetSceneRequest) returns (ResetSceneResponse) {}
 }
 
 message ListScenesRequest {}
@@ -116,6 +119,15 @@ message MoveEntityRequest {
 message MoveEntityResponse {
   ActiveScene active = 1;
   repeated string device_errors = 2; // Devices that could not be told; the change happened regardless
+}
+
+message ResetSceneRequest {
+  string scene_id = 1; // The scene to reset, active or not
+}
+
+message ResetSceneResponse {
+  optional ActiveScene active = 1; // The active scene after the reset, not set when no scene is active
+  repeated string device_errors = 2; // Devices that could not be instructed; the scene was reset regardless
 }
 
 // EntityKind is the role an entity plays in a scene.
