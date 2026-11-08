@@ -160,7 +160,7 @@ Done: per-login sessions (one JTI each) with an RS512 access token (1 h) and a `
 **Goal**: activating or switching a scene also sets the lights, starts the right music, and triggers custom devices.
 
 - [x] Driver framework: integration config sets (credentials, bridge / broker addresses), health / connection status per device (`DeviceMonitor`), per-instruction timeout, devices instructed concurrently — see [scenes.md](./architecture/scenes.md#driver-framework)
-- [ ] Show device status to the GM: API and GM view on top of `DeviceMonitor.Statuses`
+- [x] Show device status to the GM: `SceneService.ListDeviceStatuses` and a Devices table in the GM view (polled), screens are `online` while the device has its screen open
 - [ ] Lights: Philips Hue
 - [ ] Lights: Home Assistant
 - [ ] Lights: Matter (native Go controller: commissioning, fabric management)

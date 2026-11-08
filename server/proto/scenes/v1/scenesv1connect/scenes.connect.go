@@ -54,6 +54,9 @@ const (
 	SceneServiceMoveEntityProcedure = "/scenes.v1.SceneService/MoveEntity"
 	// SceneServiceResetProcedure is the fully-qualified name of the SceneService's Reset RPC.
 	SceneServiceResetProcedure = "/scenes.v1.SceneService/Reset"
+	// SceneServiceListDeviceStatusesProcedure is the fully-qualified name of the SceneService's
+	// ListDeviceStatuses RPC.
+	SceneServiceListDeviceStatusesProcedure = "/scenes.v1.SceneService/ListDeviceStatuses"
 )
 
 // SceneServiceClient is a client for the scenes.v1.SceneService service.
@@ -77,6 +80,8 @@ type SceneServiceClient interface {
 	// Throw away what happened in a scene during play, so it starts again from its configuration.
 	// The active scene is reset in place and the room's devices follow; another scene starts fresh on its next activation
 	Reset(context.Context, *connect.Request[v1.ResetSceneRequest]) (*connect.Response[v1.ResetSceneResponse], error)
+	// List the devices of the room with whether they can be reached and how their last instruction went
+	ListDeviceStatuses(context.Context, *connect.Request[v1.ListDeviceStatusesRequest]) (*connect.Response[v1.ListDeviceStatusesResponse], error)
 }
 
 // NewSceneServiceClient constructs a client for the scenes.v1.SceneService service. By default, it
@@ -144,20 +149,27 @@ func NewSceneServiceClient(httpClient connect.HTTPClient, baseURL string, opts .
 			connect.WithSchema(sceneServiceMethods.ByName("Reset")),
 			connect.WithClientOptions(opts...),
 		),
+		listDeviceStatuses: connect.NewClient[v1.ListDeviceStatusesRequest, v1.ListDeviceStatusesResponse](
+			httpClient,
+			baseURL+SceneServiceListDeviceStatusesProcedure,
+			connect.WithSchema(sceneServiceMethods.ByName("ListDeviceStatuses")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
 // sceneServiceClient implements SceneServiceClient.
 type sceneServiceClient struct {
-	list            *connect.Client[v1.ListScenesRequest, v1.ListScenesResponse]
-	activate        *connect.Client[v1.ActivateSceneRequest, v1.ActivateSceneResponse]
-	setVariant      *connect.Client[v1.SetVariantRequest, v1.SetVariantResponse]
-	getActive       *connect.Client[v1.GetActiveSceneRequest, v1.GetActiveSceneResponse]
-	setEntityHidden *connect.Client[v1.SetEntityHiddenRequest, v1.SetEntityHiddenResponse]
-	spawnEntity     *connect.Client[v1.SpawnEntityRequest, v1.SpawnEntityResponse]
-	removeEntity    *connect.Client[v1.RemoveEntityRequest, v1.RemoveEntityResponse]
-	moveEntity      *connect.Client[v1.MoveEntityRequest, v1.MoveEntityResponse]
-	reset           *connect.Client[v1.ResetSceneRequest, v1.ResetSceneResponse]
+	list               *connect.Client[v1.ListScenesRequest, v1.ListScenesResponse]
+	activate           *connect.Client[v1.ActivateSceneRequest, v1.ActivateSceneResponse]
+	setVariant         *connect.Client[v1.SetVariantRequest, v1.SetVariantResponse]
+	getActive          *connect.Client[v1.GetActiveSceneRequest, v1.GetActiveSceneResponse]
+	setEntityHidden    *connect.Client[v1.SetEntityHiddenRequest, v1.SetEntityHiddenResponse]
+	spawnEntity        *connect.Client[v1.SpawnEntityRequest, v1.SpawnEntityResponse]
+	removeEntity       *connect.Client[v1.RemoveEntityRequest, v1.RemoveEntityResponse]
+	moveEntity         *connect.Client[v1.MoveEntityRequest, v1.MoveEntityResponse]
+	reset              *connect.Client[v1.ResetSceneRequest, v1.ResetSceneResponse]
+	listDeviceStatuses *connect.Client[v1.ListDeviceStatusesRequest, v1.ListDeviceStatusesResponse]
 }
 
 // List calls scenes.v1.SceneService.List.
@@ -205,6 +217,11 @@ func (c *sceneServiceClient) Reset(ctx context.Context, req *connect.Request[v1.
 	return c.reset.CallUnary(ctx, req)
 }
 
+// ListDeviceStatuses calls scenes.v1.SceneService.ListDeviceStatuses.
+func (c *sceneServiceClient) ListDeviceStatuses(ctx context.Context, req *connect.Request[v1.ListDeviceStatusesRequest]) (*connect.Response[v1.ListDeviceStatusesResponse], error) {
+	return c.listDeviceStatuses.CallUnary(ctx, req)
+}
+
 // SceneServiceHandler is an implementation of the scenes.v1.SceneService service.
 type SceneServiceHandler interface {
 	// List the scenes that can be activated
@@ -226,6 +243,8 @@ type SceneServiceHandler interface {
 	// Throw away what happened in a scene during play, so it starts again from its configuration.
 	// The active scene is reset in place and the room's devices follow; another scene starts fresh on its next activation
 	Reset(context.Context, *connect.Request[v1.ResetSceneRequest]) (*connect.Response[v1.ResetSceneResponse], error)
+	// List the devices of the room with whether they can be reached and how their last instruction went
+	ListDeviceStatuses(context.Context, *connect.Request[v1.ListDeviceStatusesRequest]) (*connect.Response[v1.ListDeviceStatusesResponse], error)
 }
 
 // NewSceneServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -289,6 +308,12 @@ func NewSceneServiceHandler(svc SceneServiceHandler, opts ...connect.HandlerOpti
 		connect.WithSchema(sceneServiceMethods.ByName("Reset")),
 		connect.WithHandlerOptions(opts...),
 	)
+	sceneServiceListDeviceStatusesHandler := connect.NewUnaryHandler(
+		SceneServiceListDeviceStatusesProcedure,
+		svc.ListDeviceStatuses,
+		connect.WithSchema(sceneServiceMethods.ByName("ListDeviceStatuses")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/scenes.v1.SceneService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case SceneServiceListProcedure:
@@ -309,6 +334,8 @@ func NewSceneServiceHandler(svc SceneServiceHandler, opts ...connect.HandlerOpti
 			sceneServiceMoveEntityHandler.ServeHTTP(w, r)
 		case SceneServiceResetProcedure:
 			sceneServiceResetHandler.ServeHTTP(w, r)
+		case SceneServiceListDeviceStatusesProcedure:
+			sceneServiceListDeviceStatusesHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -352,4 +379,8 @@ func (UnimplementedSceneServiceHandler) MoveEntity(context.Context, *connect.Req
 
 func (UnimplementedSceneServiceHandler) Reset(context.Context, *connect.Request[v1.ResetSceneRequest]) (*connect.Response[v1.ResetSceneResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scenes.v1.SceneService.Reset is not implemented"))
+}
+
+func (UnimplementedSceneServiceHandler) ListDeviceStatuses(context.Context, *connect.Request[v1.ListDeviceStatusesRequest]) (*connect.Response[v1.ListDeviceStatusesResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scenes.v1.SceneService.ListDeviceStatuses is not implemented"))
 }

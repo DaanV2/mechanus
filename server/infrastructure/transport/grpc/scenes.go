@@ -9,6 +9,7 @@ import (
 	"connectrpc.com/connect"
 	"github.com/DaanV2/mechanus/server/application"
 	"github.com/DaanV2/mechanus/server/engine/authentication/roles"
+	"github.com/DaanV2/mechanus/server/engine/devices"
 	"github.com/DaanV2/mechanus/server/engine/scenes"
 	"github.com/DaanV2/mechanus/server/infrastructure/logging"
 	"github.com/DaanV2/mechanus/server/infrastructure/scenestore"
@@ -23,15 +24,22 @@ const (
 	SceneLogger logging.Prefixed = "grpc-scenes"
 )
 
+// DeviceStatuses reports the health / connection status of the devices in the room, see [application.DeviceMonitor].
+type DeviceStatuses interface {
+	Statuses(ctx context.Context) ([]devices.Status, error)
+}
+
 // SceneServiceHandler implements the scenes gRPC service, the GM's control over the active scene.
 type SceneServiceHandler struct {
-	scenes *application.SceneService
+	scenes  *application.SceneService
+	devices DeviceStatuses
 }
 
 // NewSceneServiceHandler creates a new SceneServiceHandler.
-func NewSceneServiceHandler(sceneService *application.SceneService) *SceneServiceHandler {
+func NewSceneServiceHandler(sceneService *application.SceneService, deviceStatuses DeviceStatuses) *SceneServiceHandler {
 	return &SceneServiceHandler{
-		scenes: sceneService,
+		scenes:  sceneService,
+		devices: deviceStatuses,
 	}
 }
 

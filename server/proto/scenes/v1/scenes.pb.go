@@ -9,6 +9,7 @@ package scenesv1
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
@@ -75,6 +76,56 @@ func (x EntityKind) Number() protoreflect.EnumNumber {
 // Deprecated: Use EntityKind.Descriptor instead.
 func (EntityKind) EnumDescriptor() ([]byte, []int) {
 	return file_scenes_v1_scenes_proto_rawDescGZIP(), []int{0}
+}
+
+// DeviceState says whether a device of the room can be reached
+type DeviceState int32
+
+const (
+	DeviceState_DEVICE_STATE_UNSPECIFIED DeviceState = 0 // Nothing is known yet: not instructed, and its integration cannot check it
+	DeviceState_DEVICE_STATE_ONLINE      DeviceState = 1
+	DeviceState_DEVICE_STATE_OFFLINE     DeviceState = 2 // See DeviceStatus.error
+)
+
+// Enum value maps for DeviceState.
+var (
+	DeviceState_name = map[int32]string{
+		0: "DEVICE_STATE_UNSPECIFIED",
+		1: "DEVICE_STATE_ONLINE",
+		2: "DEVICE_STATE_OFFLINE",
+	}
+	DeviceState_value = map[string]int32{
+		"DEVICE_STATE_UNSPECIFIED": 0,
+		"DEVICE_STATE_ONLINE":      1,
+		"DEVICE_STATE_OFFLINE":     2,
+	}
+)
+
+func (x DeviceState) Enum() *DeviceState {
+	p := new(DeviceState)
+	*p = x
+	return p
+}
+
+func (x DeviceState) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (DeviceState) Descriptor() protoreflect.EnumDescriptor {
+	return file_scenes_v1_scenes_proto_enumTypes[1].Descriptor()
+}
+
+func (DeviceState) Type() protoreflect.EnumType {
+	return &file_scenes_v1_scenes_proto_enumTypes[1]
+}
+
+func (x DeviceState) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use DeviceState.Descriptor instead.
+func (DeviceState) EnumDescriptor() ([]byte, []int) {
+	return file_scenes_v1_scenes_proto_rawDescGZIP(), []int{1}
 }
 
 type ListScenesRequest struct {
@@ -1293,11 +1344,200 @@ func (x *Position) GetY() float64 {
 	return 0
 }
 
+type ListDeviceStatusesRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListDeviceStatusesRequest) Reset() {
+	*x = ListDeviceStatusesRequest{}
+	mi := &file_scenes_v1_scenes_proto_msgTypes[23]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListDeviceStatusesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListDeviceStatusesRequest) ProtoMessage() {}
+
+func (x *ListDeviceStatusesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_scenes_v1_scenes_proto_msgTypes[23]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListDeviceStatusesRequest.ProtoReflect.Descriptor instead.
+func (*ListDeviceStatusesRequest) Descriptor() ([]byte, []int) {
+	return file_scenes_v1_scenes_proto_rawDescGZIP(), []int{23}
+}
+
+type ListDeviceStatusesResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Devices       []*DeviceStatus        `protobuf:"bytes,1,rep,name=devices,proto3" json:"devices,omitempty"` // Every device of the room, sorted by ID
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListDeviceStatusesResponse) Reset() {
+	*x = ListDeviceStatusesResponse{}
+	mi := &file_scenes_v1_scenes_proto_msgTypes[24]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListDeviceStatusesResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListDeviceStatusesResponse) ProtoMessage() {}
+
+func (x *ListDeviceStatusesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_scenes_v1_scenes_proto_msgTypes[24]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListDeviceStatusesResponse.ProtoReflect.Descriptor instead.
+func (*ListDeviceStatusesResponse) Descriptor() ([]byte, []int) {
+	return file_scenes_v1_scenes_proto_rawDescGZIP(), []int{24}
+}
+
+func (x *ListDeviceStatusesResponse) GetDevices() []*DeviceStatus {
+	if x != nil {
+		return x.Devices
+	}
+	return nil
+}
+
+// The health / connection status of a device of the room
+type DeviceStatus struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	DeviceId       string                 `protobuf:"bytes,1,opt,name=device_id,json=deviceId,proto3" json:"device_id,omitempty"`
+	Name           string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`               // Empty when the device has none
+	Kind           string                 `protobuf:"bytes,3,opt,name=kind,proto3" json:"kind,omitempty"`               // What instructions the device accepts: screen, light, music or custom
+	Integration    string                 `protobuf:"bytes,4,opt,name=integration,proto3" json:"integration,omitempty"` // The integration that reaches the device, eg: screen, mqtt, hue
+	Targets        []string               `protobuf:"bytes,5,rep,name=targets,proto3" json:"targets,omitempty"`         // The targets of the room the device is bound to, sorted
+	State          DeviceState            `protobuf:"varint,6,opt,name=state,proto3,enum=scenes.v1.DeviceState" json:"state,omitempty"`
+	Error          string                 `protobuf:"bytes,7,opt,name=error,proto3" json:"error,omitempty"`                                           // Why the device is offline
+	LastApply      *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=last_apply,json=lastApply,proto3" json:"last_apply,omitempty"`                  // When the device was last instructed, unset if never
+	LastApplyError string                 `protobuf:"bytes,9,opt,name=last_apply_error,json=lastApplyError,proto3" json:"last_apply_error,omitempty"` // What went wrong the last time the device was instructed
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *DeviceStatus) Reset() {
+	*x = DeviceStatus{}
+	mi := &file_scenes_v1_scenes_proto_msgTypes[25]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeviceStatus) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeviceStatus) ProtoMessage() {}
+
+func (x *DeviceStatus) ProtoReflect() protoreflect.Message {
+	mi := &file_scenes_v1_scenes_proto_msgTypes[25]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeviceStatus.ProtoReflect.Descriptor instead.
+func (*DeviceStatus) Descriptor() ([]byte, []int) {
+	return file_scenes_v1_scenes_proto_rawDescGZIP(), []int{25}
+}
+
+func (x *DeviceStatus) GetDeviceId() string {
+	if x != nil {
+		return x.DeviceId
+	}
+	return ""
+}
+
+func (x *DeviceStatus) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *DeviceStatus) GetKind() string {
+	if x != nil {
+		return x.Kind
+	}
+	return ""
+}
+
+func (x *DeviceStatus) GetIntegration() string {
+	if x != nil {
+		return x.Integration
+	}
+	return ""
+}
+
+func (x *DeviceStatus) GetTargets() []string {
+	if x != nil {
+		return x.Targets
+	}
+	return nil
+}
+
+func (x *DeviceStatus) GetState() DeviceState {
+	if x != nil {
+		return x.State
+	}
+	return DeviceState_DEVICE_STATE_UNSPECIFIED
+}
+
+func (x *DeviceStatus) GetError() string {
+	if x != nil {
+		return x.Error
+	}
+	return ""
+}
+
+func (x *DeviceStatus) GetLastApply() *timestamppb.Timestamp {
+	if x != nil {
+		return x.LastApply
+	}
+	return nil
+}
+
+func (x *DeviceStatus) GetLastApplyError() string {
+	if x != nil {
+		return x.LastApplyError
+	}
+	return ""
+}
+
 var File_scenes_v1_scenes_proto protoreflect.FileDescriptor
 
 const file_scenes_v1_scenes_proto_rawDesc = "" +
 	"\n" +
-	"\x16scenes/v1/scenes.proto\x12\tscenes.v1\"\x13\n" +
+	"\x16scenes/v1/scenes.proto\x12\tscenes.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"\x13\n" +
 	"\x11ListScenesRequest\">\n" +
 	"\x12ListScenesResponse\x12(\n" +
 	"\x06scenes\x18\x01 \x03(\v2\x10.scenes.v1.SceneR\x06scenes\"P\n" +
@@ -1378,14 +1618,32 @@ const file_scenes_v1_scenes_proto_rawDesc = "" +
 	"\t_position\"&\n" +
 	"\bPosition\x12\f\n" +
 	"\x01x\x18\x01 \x01(\x01R\x01x\x12\f\n" +
-	"\x01y\x18\x02 \x01(\x01R\x01y*\x85\x01\n" +
+	"\x01y\x18\x02 \x01(\x01R\x01y\"\x1b\n" +
+	"\x19ListDeviceStatusesRequest\"O\n" +
+	"\x1aListDeviceStatusesResponse\x121\n" +
+	"\adevices\x18\x01 \x03(\v2\x17.scenes.v1.DeviceStatusR\adevices\"\xb8\x02\n" +
+	"\fDeviceStatus\x12\x1b\n" +
+	"\tdevice_id\x18\x01 \x01(\tR\bdeviceId\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12\x12\n" +
+	"\x04kind\x18\x03 \x01(\tR\x04kind\x12 \n" +
+	"\vintegration\x18\x04 \x01(\tR\vintegration\x12\x18\n" +
+	"\atargets\x18\x05 \x03(\tR\atargets\x12,\n" +
+	"\x05state\x18\x06 \x01(\x0e2\x16.scenes.v1.DeviceStateR\x05state\x12\x14\n" +
+	"\x05error\x18\a \x01(\tR\x05error\x129\n" +
+	"\n" +
+	"last_apply\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\tlastApply\x12(\n" +
+	"\x10last_apply_error\x18\t \x01(\tR\x0elastApplyError*\x85\x01\n" +
 	"\n" +
 	"EntityKind\x12\x1b\n" +
 	"\x17ENTITY_KIND_UNSPECIFIED\x10\x00\x12\x16\n" +
 	"\x12ENTITY_KIND_PLAYER\x10\x01\x12\x13\n" +
 	"\x0fENTITY_KIND_NPC\x10\x02\x12\x15\n" +
 	"\x11ENTITY_KIND_ENEMY\x10\x03\x12\x16\n" +
-	"\x12ENTITY_KIND_OBJECT\x10\x042\xdb\x05\n" +
+	"\x12ENTITY_KIND_OBJECT\x10\x04*^\n" +
+	"\vDeviceState\x12\x1c\n" +
+	"\x18DEVICE_STATE_UNSPECIFIED\x10\x00\x12\x17\n" +
+	"\x13DEVICE_STATE_ONLINE\x10\x01\x12\x18\n" +
+	"\x14DEVICE_STATE_OFFLINE\x10\x022\xc0\x06\n" +
 	"\fSceneService\x12E\n" +
 	"\x04List\x12\x1c.scenes.v1.ListScenesRequest\x1a\x1d.scenes.v1.ListScenesResponse\"\x00\x12O\n" +
 	"\bActivate\x12\x1f.scenes.v1.ActivateSceneRequest\x1a .scenes.v1.ActivateSceneResponse\"\x00\x12K\n" +
@@ -1397,7 +1655,8 @@ const file_scenes_v1_scenes_proto_rawDesc = "" +
 	"\fRemoveEntity\x12\x1e.scenes.v1.RemoveEntityRequest\x1a\x1f.scenes.v1.RemoveEntityResponse\"\x00\x12K\n" +
 	"\n" +
 	"MoveEntity\x12\x1c.scenes.v1.MoveEntityRequest\x1a\x1d.scenes.v1.MoveEntityResponse\"\x00\x12F\n" +
-	"\x05Reset\x12\x1c.scenes.v1.ResetSceneRequest\x1a\x1d.scenes.v1.ResetSceneResponse\"\x00B<Z:github.com/DaanV2/mechanus/server/proto/scenes/v1;scenesv1b\x06proto3"
+	"\x05Reset\x12\x1c.scenes.v1.ResetSceneRequest\x1a\x1d.scenes.v1.ResetSceneResponse\"\x00\x12c\n" +
+	"\x12ListDeviceStatuses\x12$.scenes.v1.ListDeviceStatusesRequest\x1a%.scenes.v1.ListDeviceStatusesResponse\"\x00B<Z:github.com/DaanV2/mechanus/server/proto/scenes/v1;scenesv1b\x06proto3"
 
 var (
 	file_scenes_v1_scenes_proto_rawDescOnce sync.Once
@@ -1411,77 +1670,87 @@ func file_scenes_v1_scenes_proto_rawDescGZIP() []byte {
 	return file_scenes_v1_scenes_proto_rawDescData
 }
 
-var file_scenes_v1_scenes_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_scenes_v1_scenes_proto_msgTypes = make([]protoimpl.MessageInfo, 24)
+var file_scenes_v1_scenes_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
+var file_scenes_v1_scenes_proto_msgTypes = make([]protoimpl.MessageInfo, 27)
 var file_scenes_v1_scenes_proto_goTypes = []any{
-	(EntityKind)(0),                 // 0: scenes.v1.EntityKind
-	(*ListScenesRequest)(nil),       // 1: scenes.v1.ListScenesRequest
-	(*ListScenesResponse)(nil),      // 2: scenes.v1.ListScenesResponse
-	(*ActivateSceneRequest)(nil),    // 3: scenes.v1.ActivateSceneRequest
-	(*ActivateSceneResponse)(nil),   // 4: scenes.v1.ActivateSceneResponse
-	(*SetVariantRequest)(nil),       // 5: scenes.v1.SetVariantRequest
-	(*SetVariantResponse)(nil),      // 6: scenes.v1.SetVariantResponse
-	(*GetActiveSceneRequest)(nil),   // 7: scenes.v1.GetActiveSceneRequest
-	(*GetActiveSceneResponse)(nil),  // 8: scenes.v1.GetActiveSceneResponse
-	(*Scene)(nil),                   // 9: scenes.v1.Scene
-	(*Variant)(nil),                 // 10: scenes.v1.Variant
-	(*ActiveScene)(nil),             // 11: scenes.v1.ActiveScene
-	(*SetEntityHiddenRequest)(nil),  // 12: scenes.v1.SetEntityHiddenRequest
-	(*SetEntityHiddenResponse)(nil), // 13: scenes.v1.SetEntityHiddenResponse
-	(*SpawnEntityRequest)(nil),      // 14: scenes.v1.SpawnEntityRequest
-	(*SpawnEntityResponse)(nil),     // 15: scenes.v1.SpawnEntityResponse
-	(*RemoveEntityRequest)(nil),     // 16: scenes.v1.RemoveEntityRequest
-	(*RemoveEntityResponse)(nil),    // 17: scenes.v1.RemoveEntityResponse
-	(*MoveEntityRequest)(nil),       // 18: scenes.v1.MoveEntityRequest
-	(*MoveEntityResponse)(nil),      // 19: scenes.v1.MoveEntityResponse
-	(*ResetSceneRequest)(nil),       // 20: scenes.v1.ResetSceneRequest
-	(*ResetSceneResponse)(nil),      // 21: scenes.v1.ResetSceneResponse
-	(*Entity)(nil),                  // 22: scenes.v1.Entity
-	(*Position)(nil),                // 23: scenes.v1.Position
-	nil,                             // 24: scenes.v1.Variant.TagsEntry
+	(EntityKind)(0),                    // 0: scenes.v1.EntityKind
+	(DeviceState)(0),                   // 1: scenes.v1.DeviceState
+	(*ListScenesRequest)(nil),          // 2: scenes.v1.ListScenesRequest
+	(*ListScenesResponse)(nil),         // 3: scenes.v1.ListScenesResponse
+	(*ActivateSceneRequest)(nil),       // 4: scenes.v1.ActivateSceneRequest
+	(*ActivateSceneResponse)(nil),      // 5: scenes.v1.ActivateSceneResponse
+	(*SetVariantRequest)(nil),          // 6: scenes.v1.SetVariantRequest
+	(*SetVariantResponse)(nil),         // 7: scenes.v1.SetVariantResponse
+	(*GetActiveSceneRequest)(nil),      // 8: scenes.v1.GetActiveSceneRequest
+	(*GetActiveSceneResponse)(nil),     // 9: scenes.v1.GetActiveSceneResponse
+	(*Scene)(nil),                      // 10: scenes.v1.Scene
+	(*Variant)(nil),                    // 11: scenes.v1.Variant
+	(*ActiveScene)(nil),                // 12: scenes.v1.ActiveScene
+	(*SetEntityHiddenRequest)(nil),     // 13: scenes.v1.SetEntityHiddenRequest
+	(*SetEntityHiddenResponse)(nil),    // 14: scenes.v1.SetEntityHiddenResponse
+	(*SpawnEntityRequest)(nil),         // 15: scenes.v1.SpawnEntityRequest
+	(*SpawnEntityResponse)(nil),        // 16: scenes.v1.SpawnEntityResponse
+	(*RemoveEntityRequest)(nil),        // 17: scenes.v1.RemoveEntityRequest
+	(*RemoveEntityResponse)(nil),       // 18: scenes.v1.RemoveEntityResponse
+	(*MoveEntityRequest)(nil),          // 19: scenes.v1.MoveEntityRequest
+	(*MoveEntityResponse)(nil),         // 20: scenes.v1.MoveEntityResponse
+	(*ResetSceneRequest)(nil),          // 21: scenes.v1.ResetSceneRequest
+	(*ResetSceneResponse)(nil),         // 22: scenes.v1.ResetSceneResponse
+	(*Entity)(nil),                     // 23: scenes.v1.Entity
+	(*Position)(nil),                   // 24: scenes.v1.Position
+	(*ListDeviceStatusesRequest)(nil),  // 25: scenes.v1.ListDeviceStatusesRequest
+	(*ListDeviceStatusesResponse)(nil), // 26: scenes.v1.ListDeviceStatusesResponse
+	(*DeviceStatus)(nil),               // 27: scenes.v1.DeviceStatus
+	nil,                                // 28: scenes.v1.Variant.TagsEntry
+	(*timestamppb.Timestamp)(nil),      // 29: google.protobuf.Timestamp
 }
 var file_scenes_v1_scenes_proto_depIdxs = []int32{
-	9,  // 0: scenes.v1.ListScenesResponse.scenes:type_name -> scenes.v1.Scene
-	11, // 1: scenes.v1.ActivateSceneResponse.active:type_name -> scenes.v1.ActiveScene
-	11, // 2: scenes.v1.SetVariantResponse.active:type_name -> scenes.v1.ActiveScene
-	11, // 3: scenes.v1.GetActiveSceneResponse.active:type_name -> scenes.v1.ActiveScene
-	10, // 4: scenes.v1.Scene.variants:type_name -> scenes.v1.Variant
-	24, // 5: scenes.v1.Variant.tags:type_name -> scenes.v1.Variant.TagsEntry
-	9,  // 6: scenes.v1.ActiveScene.scene:type_name -> scenes.v1.Scene
-	22, // 7: scenes.v1.ActiveScene.entities:type_name -> scenes.v1.Entity
-	11, // 8: scenes.v1.SetEntityHiddenResponse.active:type_name -> scenes.v1.ActiveScene
+	10, // 0: scenes.v1.ListScenesResponse.scenes:type_name -> scenes.v1.Scene
+	12, // 1: scenes.v1.ActivateSceneResponse.active:type_name -> scenes.v1.ActiveScene
+	12, // 2: scenes.v1.SetVariantResponse.active:type_name -> scenes.v1.ActiveScene
+	12, // 3: scenes.v1.GetActiveSceneResponse.active:type_name -> scenes.v1.ActiveScene
+	11, // 4: scenes.v1.Scene.variants:type_name -> scenes.v1.Variant
+	28, // 5: scenes.v1.Variant.tags:type_name -> scenes.v1.Variant.TagsEntry
+	10, // 6: scenes.v1.ActiveScene.scene:type_name -> scenes.v1.Scene
+	23, // 7: scenes.v1.ActiveScene.entities:type_name -> scenes.v1.Entity
+	12, // 8: scenes.v1.SetEntityHiddenResponse.active:type_name -> scenes.v1.ActiveScene
 	0,  // 9: scenes.v1.SpawnEntityRequest.kind:type_name -> scenes.v1.EntityKind
-	23, // 10: scenes.v1.SpawnEntityRequest.position:type_name -> scenes.v1.Position
-	11, // 11: scenes.v1.SpawnEntityResponse.active:type_name -> scenes.v1.ActiveScene
-	11, // 12: scenes.v1.RemoveEntityResponse.active:type_name -> scenes.v1.ActiveScene
-	23, // 13: scenes.v1.MoveEntityRequest.position:type_name -> scenes.v1.Position
-	11, // 14: scenes.v1.MoveEntityResponse.active:type_name -> scenes.v1.ActiveScene
-	11, // 15: scenes.v1.ResetSceneResponse.active:type_name -> scenes.v1.ActiveScene
+	24, // 10: scenes.v1.SpawnEntityRequest.position:type_name -> scenes.v1.Position
+	12, // 11: scenes.v1.SpawnEntityResponse.active:type_name -> scenes.v1.ActiveScene
+	12, // 12: scenes.v1.RemoveEntityResponse.active:type_name -> scenes.v1.ActiveScene
+	24, // 13: scenes.v1.MoveEntityRequest.position:type_name -> scenes.v1.Position
+	12, // 14: scenes.v1.MoveEntityResponse.active:type_name -> scenes.v1.ActiveScene
+	12, // 15: scenes.v1.ResetSceneResponse.active:type_name -> scenes.v1.ActiveScene
 	0,  // 16: scenes.v1.Entity.kind:type_name -> scenes.v1.EntityKind
-	23, // 17: scenes.v1.Entity.position:type_name -> scenes.v1.Position
-	1,  // 18: scenes.v1.SceneService.List:input_type -> scenes.v1.ListScenesRequest
-	3,  // 19: scenes.v1.SceneService.Activate:input_type -> scenes.v1.ActivateSceneRequest
-	5,  // 20: scenes.v1.SceneService.SetVariant:input_type -> scenes.v1.SetVariantRequest
-	7,  // 21: scenes.v1.SceneService.GetActive:input_type -> scenes.v1.GetActiveSceneRequest
-	12, // 22: scenes.v1.SceneService.SetEntityHidden:input_type -> scenes.v1.SetEntityHiddenRequest
-	14, // 23: scenes.v1.SceneService.SpawnEntity:input_type -> scenes.v1.SpawnEntityRequest
-	16, // 24: scenes.v1.SceneService.RemoveEntity:input_type -> scenes.v1.RemoveEntityRequest
-	18, // 25: scenes.v1.SceneService.MoveEntity:input_type -> scenes.v1.MoveEntityRequest
-	20, // 26: scenes.v1.SceneService.Reset:input_type -> scenes.v1.ResetSceneRequest
-	2,  // 27: scenes.v1.SceneService.List:output_type -> scenes.v1.ListScenesResponse
-	4,  // 28: scenes.v1.SceneService.Activate:output_type -> scenes.v1.ActivateSceneResponse
-	6,  // 29: scenes.v1.SceneService.SetVariant:output_type -> scenes.v1.SetVariantResponse
-	8,  // 30: scenes.v1.SceneService.GetActive:output_type -> scenes.v1.GetActiveSceneResponse
-	13, // 31: scenes.v1.SceneService.SetEntityHidden:output_type -> scenes.v1.SetEntityHiddenResponse
-	15, // 32: scenes.v1.SceneService.SpawnEntity:output_type -> scenes.v1.SpawnEntityResponse
-	17, // 33: scenes.v1.SceneService.RemoveEntity:output_type -> scenes.v1.RemoveEntityResponse
-	19, // 34: scenes.v1.SceneService.MoveEntity:output_type -> scenes.v1.MoveEntityResponse
-	21, // 35: scenes.v1.SceneService.Reset:output_type -> scenes.v1.ResetSceneResponse
-	27, // [27:36] is the sub-list for method output_type
-	18, // [18:27] is the sub-list for method input_type
-	18, // [18:18] is the sub-list for extension type_name
-	18, // [18:18] is the sub-list for extension extendee
-	0,  // [0:18] is the sub-list for field type_name
+	24, // 17: scenes.v1.Entity.position:type_name -> scenes.v1.Position
+	27, // 18: scenes.v1.ListDeviceStatusesResponse.devices:type_name -> scenes.v1.DeviceStatus
+	1,  // 19: scenes.v1.DeviceStatus.state:type_name -> scenes.v1.DeviceState
+	29, // 20: scenes.v1.DeviceStatus.last_apply:type_name -> google.protobuf.Timestamp
+	2,  // 21: scenes.v1.SceneService.List:input_type -> scenes.v1.ListScenesRequest
+	4,  // 22: scenes.v1.SceneService.Activate:input_type -> scenes.v1.ActivateSceneRequest
+	6,  // 23: scenes.v1.SceneService.SetVariant:input_type -> scenes.v1.SetVariantRequest
+	8,  // 24: scenes.v1.SceneService.GetActive:input_type -> scenes.v1.GetActiveSceneRequest
+	13, // 25: scenes.v1.SceneService.SetEntityHidden:input_type -> scenes.v1.SetEntityHiddenRequest
+	15, // 26: scenes.v1.SceneService.SpawnEntity:input_type -> scenes.v1.SpawnEntityRequest
+	17, // 27: scenes.v1.SceneService.RemoveEntity:input_type -> scenes.v1.RemoveEntityRequest
+	19, // 28: scenes.v1.SceneService.MoveEntity:input_type -> scenes.v1.MoveEntityRequest
+	21, // 29: scenes.v1.SceneService.Reset:input_type -> scenes.v1.ResetSceneRequest
+	25, // 30: scenes.v1.SceneService.ListDeviceStatuses:input_type -> scenes.v1.ListDeviceStatusesRequest
+	3,  // 31: scenes.v1.SceneService.List:output_type -> scenes.v1.ListScenesResponse
+	5,  // 32: scenes.v1.SceneService.Activate:output_type -> scenes.v1.ActivateSceneResponse
+	7,  // 33: scenes.v1.SceneService.SetVariant:output_type -> scenes.v1.SetVariantResponse
+	9,  // 34: scenes.v1.SceneService.GetActive:output_type -> scenes.v1.GetActiveSceneResponse
+	14, // 35: scenes.v1.SceneService.SetEntityHidden:output_type -> scenes.v1.SetEntityHiddenResponse
+	16, // 36: scenes.v1.SceneService.SpawnEntity:output_type -> scenes.v1.SpawnEntityResponse
+	18, // 37: scenes.v1.SceneService.RemoveEntity:output_type -> scenes.v1.RemoveEntityResponse
+	20, // 38: scenes.v1.SceneService.MoveEntity:output_type -> scenes.v1.MoveEntityResponse
+	22, // 39: scenes.v1.SceneService.Reset:output_type -> scenes.v1.ResetSceneResponse
+	26, // 40: scenes.v1.SceneService.ListDeviceStatuses:output_type -> scenes.v1.ListDeviceStatusesResponse
+	31, // [31:41] is the sub-list for method output_type
+	21, // [21:31] is the sub-list for method input_type
+	21, // [21:21] is the sub-list for extension type_name
+	21, // [21:21] is the sub-list for extension extendee
+	0,  // [0:21] is the sub-list for field type_name
 }
 
 func init() { file_scenes_v1_scenes_proto_init() }
@@ -1498,8 +1767,8 @@ func file_scenes_v1_scenes_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_scenes_v1_scenes_proto_rawDesc), len(file_scenes_v1_scenes_proto_rawDesc)),
-			NumEnums:      1,
-			NumMessages:   24,
+			NumEnums:      2,
+			NumMessages:   27,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

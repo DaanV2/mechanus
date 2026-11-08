@@ -15,7 +15,10 @@ const (
 // Status is the health / connection status of a device. It is runtime information, never stored.
 type Status struct {
 	DeviceID       string    `json:"device_id"`
+	Name           string    `json:"name,omitempty"` // Human readable name of the device, empty when it has none
+	Kind           Kind      `json:"kind"`
 	Integration    string    `json:"integration"`
+	Targets        []string  `json:"targets,omitempty"` // Targets of the room the device is bound to, sorted
 	State          State     `json:"state"`
 	Error          string    `json:"error,omitempty"`            // Why the device is offline
 	LastApply      time.Time `json:"last_apply,omitzero"`        // When the device was last instructed, zero if never
