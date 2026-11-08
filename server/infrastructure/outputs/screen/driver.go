@@ -5,6 +5,7 @@ package screen
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io/fs"
 	"maps"
@@ -21,7 +22,11 @@ import (
 var (
 	_ application.OutputDriver    = &Driver{}
 	_ application.BattleMapDriver = &Driver{}
+	_ application.DeviceChecker   = &Driver{}
 )
+
+// ErrNotConnected is the reason a screen device is offline: it has no connection to its screen.
+var ErrNotConnected = errors.New("screen not connected")
 
 // AssetResolver turns asset references from a scene config into URLs screens can load, and opens the
 // ones the server reads itself.
@@ -61,6 +66,20 @@ func (d *Driver) Apply(ctx context.Context, scene scenes.Ref, _ string, device *
 	d.screens.GetOrCreate(device.ID).SetState(ctx, st)
 
 	return nil
+}
+
+// CheckDevice implements application.DeviceChecker: a screen device can be reached while it has
+// its screen open. Users looking at the device's screen don't count, only the device itself.
+func (d *Driver) CheckDevice(_ context.Context, device *devices.Device) error {
+	if h, ok := d.screens.Get(device.ID); ok {
+		for _, conn := range h.Connections() {
+			if conn.DeviceID == device.ID {
+				return nil
+			}
+		}
+	}
+
+	return ErrNotConnected
 }
 
 // State builds the screen state for a screen instruction of the given scene.
