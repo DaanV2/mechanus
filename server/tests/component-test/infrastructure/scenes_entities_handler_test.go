@@ -157,6 +157,37 @@ var _ = Describe("SceneServiceHandler entity controls", func() {
 		Expect(x).To(Equal([]float64{4}))
 	})
 
+	It("resets the active scene to its configuration, also in the database", func(ctx SpecContext) {
+		_, err := handler.SpawnEntity(userContext(ctx), connect.NewRequest(&scenesv1.SpawnEntityRequest{
+			EntityId: "wolf",
+			Kind:     scenesv1.EntityKind_ENTITY_KIND_ENEMY,
+			Position: &scenesv1.Position{X: 2, Y: 3},
+		}))
+		Expect(err).ToNot(HaveOccurred())
+		Expect(screenEntities()).To(ConsistOf("wolf"))
+
+		resp, err := handler.Reset(userContext(ctx), connect.NewRequest(&scenesv1.ResetSceneRequest{SceneId: " cave "}))
+		Expect(err).ToNot(HaveOccurred())
+		Expect(resp.Msg.GetDeviceErrors()).To(BeEmpty())
+		Expect(resp.Msg.GetActive().GetEntities()).To(HaveLen(2))
+		Expect(screenEntities()).To(BeEmpty(), "the tv no longer draws the spawned wolf")
+
+		// Exiting and activating again loads the reset state from the database
+		Expect(sceneService.Exit(ctx)).To(Succeed())
+		active, err := handler.Activate(userContext(ctx), connect.NewRequest(&scenesv1.ActivateSceneRequest{SceneId: "cave"}))
+		Expect(err).ToNot(HaveOccurred())
+		Expect(active.Msg.GetActive().GetEntities()).To(HaveLen(2))
+	})
+
+	It("resets a scene that isn't active without activating it", func(ctx SpecContext) {
+		Expect(sceneService.Exit(ctx)).To(Succeed())
+
+		resp, err := handler.Reset(userContext(ctx), connect.NewRequest(&scenesv1.ResetSceneRequest{SceneId: "cave"}))
+		Expect(err).ToNot(HaveOccurred())
+		Expect(resp.Msg.GetActive()).To(BeNil())
+		Expect(sceneService.Active().IsZero()).To(BeTrue())
+	})
+
 	DescribeTable("maps failures to connect codes",
 		func(ctx SpecContext, call func(context.Context) error, code connect.Code) {
 			Expect(connect.CodeOf(call(userContext(ctx)))).To(Equal(code))
@@ -191,6 +222,16 @@ var _ = Describe("SceneServiceHandler entity controls", func() {
 
 			return err
 		}, connect.CodeInvalidArgument),
+		Entry("resetting an unknown scene", func(ctx context.Context) error {
+			_, err := handler.Reset(ctx, connect.NewRequest(&scenesv1.ResetSceneRequest{SceneId: "ghost"}))
+
+			return err
+		}, connect.CodeNotFound),
+		Entry("resetting without a scene", func(ctx context.Context) error {
+			_, err := handler.Reset(ctx, connect.NewRequest(&scenesv1.ResetSceneRequest{}))
+
+			return err
+		}, connect.CodeInvalidArgument),
 	)
 
 	It("requires an authenticated user", func(ctx SpecContext) {
@@ -201,6 +242,8 @@ var _ = Describe("SceneServiceHandler entity controls", func() {
 		_, err = handler.RemoveEntity(ctx, connect.NewRequest(&scenesv1.RemoveEntityRequest{EntityId: "hero"}))
 		Expect(connect.CodeOf(err)).To(Equal(connect.CodeUnauthenticated))
 		_, err = handler.MoveEntity(ctx, connect.NewRequest(&scenesv1.MoveEntityRequest{EntityId: "hero"}))
+		Expect(connect.CodeOf(err)).To(Equal(connect.CodeUnauthenticated))
+		_, err = handler.Reset(ctx, connect.NewRequest(&scenesv1.ResetSceneRequest{SceneId: "cave"}))
 		Expect(connect.CodeOf(err)).To(Equal(connect.CodeUnauthenticated))
 	})
 })

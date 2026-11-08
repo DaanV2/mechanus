@@ -143,12 +143,10 @@ test.describe("battle map on a TV", { tag: ["@scenes", "@battlemap"] }, () => {
 test.describe("live play on the battle map", { tag: ["@scenes", "@battlemap"] }, () => {
   let token = "";
 
-  /** Puts the scene back as the other tests expect it: hero at the map's position, spy hidden. */
+  /** Puts the scene back as configured, as the other tests expect it: hero at the map's position, spy hidden. */
   async function resetScene(request: APIRequestContext) {
     await callRPC(request, "scenes.v1.SceneService/Activate", { sceneId: SCENE }, token);
-    await callRPC(request, "scenes.v1.SceneService/SetVariant", {}, token);
-    await callRPC(request, "scenes.v1.SceneService/MoveEntity", { entityId: "hero", position: { x: 4, y: 4 } }, token);
-    await callRPC(request, "scenes.v1.SceneService/SetEntityHidden", { entityId: "spy", hidden: true }, token);
+    await callRPC(request, "scenes.v1.SceneService/Reset", { sceneId: SCENE }, token);
   }
 
   /** Opens the screen of the TV as a logged in user, who can move tokens on it. */
@@ -245,6 +243,48 @@ test.describe("live play on the battle map", { tag: ["@scenes", "@battlemap"] },
       await spy.getByRole("button", { name: "Hide" }).click();
       await expect(spy).toContainText("Hidden");
       await expectColors(page, { "the floor, where the hidden spy stands": [cell(5, 7), FLOOR] });
+    });
+  });
+
+  test("the GM resets the scene to its configuration from the GM view", async ({ page, request }) => {
+    test.setTimeout(90000);
+    await login(page, User.createAdmin());
+    await openTV(page);
+
+    await test.step("by playing: moving the hero, revealing the spy and switching to night", async () => {
+      await callRPC(request, "scenes.v1.SceneService/MoveEntity", { entityId: "hero", position: { x: 6, y: 6 } }, token);
+      await callRPC(request, "scenes.v1.SceneService/SetEntityHidden", { entityId: "spy", hidden: false }, token);
+      await callRPC(request, "scenes.v1.SceneService/SetVariant", { variantId: "night" }, token);
+      await expectColors(page, {
+        "the night floor": [cell(3, 6), FLOOR_NIGHT],
+        "the hero at its new cell": [heroPoint(6, 6), HERO],
+        "the spy's token": [cell(5, 7), SPY],
+      });
+    });
+
+    const gm = await page.context().newPage();
+    await gm.goto("/views/game-master/");
+
+    await test.step("cancelling the reset changes nothing", async () => {
+      await gm.getByRole("button", { name: "Reset scene" }).click();
+      const dialog = gm.getByRole("dialog");
+      await expect(dialog).toContainText("Example tavern");
+      await dialog.getByRole("button", { name: "Cancel" }).click();
+      await expect(gm.getByTestId("entity-spy")).toContainText("Visible");
+    });
+
+    await test.step("confirming it puts the scene back as configured", async () => {
+      await gm.getByRole("button", { name: "Reset scene" }).click();
+      await gm.getByRole("dialog").getByRole("button", { name: "Reset" }).click();
+      await expect(gm.getByTestId("entity-spy")).toContainText("Hidden");
+    });
+
+    await test.step("and the TV follows", async () => {
+      await expectColors(page, {
+        "the day floor": [cell(3, 6), FLOOR],
+        "the hero at the map's position": [heroPoint(4, 4), HERO],
+        "the floor, where the hidden spy stands": [cell(5, 7), FLOOR],
+      });
     });
   });
 });

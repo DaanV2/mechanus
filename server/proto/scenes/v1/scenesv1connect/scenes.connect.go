@@ -52,6 +52,8 @@ const (
 	SceneServiceRemoveEntityProcedure = "/scenes.v1.SceneService/RemoveEntity"
 	// SceneServiceMoveEntityProcedure is the fully-qualified name of the SceneService's MoveEntity RPC.
 	SceneServiceMoveEntityProcedure = "/scenes.v1.SceneService/MoveEntity"
+	// SceneServiceResetProcedure is the fully-qualified name of the SceneService's Reset RPC.
+	SceneServiceResetProcedure = "/scenes.v1.SceneService/Reset"
 	// SceneServiceListDeviceStatusesProcedure is the fully-qualified name of the SceneService's
 	// ListDeviceStatuses RPC.
 	SceneServiceListDeviceStatusesProcedure = "/scenes.v1.SceneService/ListDeviceStatuses"
@@ -75,6 +77,9 @@ type SceneServiceClient interface {
 	RemoveEntity(context.Context, *connect.Request[v1.RemoveEntityRequest]) (*connect.Response[v1.RemoveEntityResponse], error)
 	// Move an entity of the active scene on the battle map
 	MoveEntity(context.Context, *connect.Request[v1.MoveEntityRequest]) (*connect.Response[v1.MoveEntityResponse], error)
+	// Throw away what happened in a scene during play, so it starts again from its configuration.
+	// The active scene is reset in place and the room's devices follow; another scene starts fresh on its next activation
+	Reset(context.Context, *connect.Request[v1.ResetSceneRequest]) (*connect.Response[v1.ResetSceneResponse], error)
 	// List the devices of the room with whether they can be reached and how their last instruction went
 	ListDeviceStatuses(context.Context, *connect.Request[v1.ListDeviceStatusesRequest]) (*connect.Response[v1.ListDeviceStatusesResponse], error)
 }
@@ -138,6 +143,12 @@ func NewSceneServiceClient(httpClient connect.HTTPClient, baseURL string, opts .
 			connect.WithSchema(sceneServiceMethods.ByName("MoveEntity")),
 			connect.WithClientOptions(opts...),
 		),
+		reset: connect.NewClient[v1.ResetSceneRequest, v1.ResetSceneResponse](
+			httpClient,
+			baseURL+SceneServiceResetProcedure,
+			connect.WithSchema(sceneServiceMethods.ByName("Reset")),
+			connect.WithClientOptions(opts...),
+		),
 		listDeviceStatuses: connect.NewClient[v1.ListDeviceStatusesRequest, v1.ListDeviceStatusesResponse](
 			httpClient,
 			baseURL+SceneServiceListDeviceStatusesProcedure,
@@ -157,6 +168,7 @@ type sceneServiceClient struct {
 	spawnEntity        *connect.Client[v1.SpawnEntityRequest, v1.SpawnEntityResponse]
 	removeEntity       *connect.Client[v1.RemoveEntityRequest, v1.RemoveEntityResponse]
 	moveEntity         *connect.Client[v1.MoveEntityRequest, v1.MoveEntityResponse]
+	reset              *connect.Client[v1.ResetSceneRequest, v1.ResetSceneResponse]
 	listDeviceStatuses *connect.Client[v1.ListDeviceStatusesRequest, v1.ListDeviceStatusesResponse]
 }
 
@@ -200,6 +212,11 @@ func (c *sceneServiceClient) MoveEntity(ctx context.Context, req *connect.Reques
 	return c.moveEntity.CallUnary(ctx, req)
 }
 
+// Reset calls scenes.v1.SceneService.Reset.
+func (c *sceneServiceClient) Reset(ctx context.Context, req *connect.Request[v1.ResetSceneRequest]) (*connect.Response[v1.ResetSceneResponse], error) {
+	return c.reset.CallUnary(ctx, req)
+}
+
 // ListDeviceStatuses calls scenes.v1.SceneService.ListDeviceStatuses.
 func (c *sceneServiceClient) ListDeviceStatuses(ctx context.Context, req *connect.Request[v1.ListDeviceStatusesRequest]) (*connect.Response[v1.ListDeviceStatusesResponse], error) {
 	return c.listDeviceStatuses.CallUnary(ctx, req)
@@ -223,6 +240,9 @@ type SceneServiceHandler interface {
 	RemoveEntity(context.Context, *connect.Request[v1.RemoveEntityRequest]) (*connect.Response[v1.RemoveEntityResponse], error)
 	// Move an entity of the active scene on the battle map
 	MoveEntity(context.Context, *connect.Request[v1.MoveEntityRequest]) (*connect.Response[v1.MoveEntityResponse], error)
+	// Throw away what happened in a scene during play, so it starts again from its configuration.
+	// The active scene is reset in place and the room's devices follow; another scene starts fresh on its next activation
+	Reset(context.Context, *connect.Request[v1.ResetSceneRequest]) (*connect.Response[v1.ResetSceneResponse], error)
 	// List the devices of the room with whether they can be reached and how their last instruction went
 	ListDeviceStatuses(context.Context, *connect.Request[v1.ListDeviceStatusesRequest]) (*connect.Response[v1.ListDeviceStatusesResponse], error)
 }
@@ -282,6 +302,12 @@ func NewSceneServiceHandler(svc SceneServiceHandler, opts ...connect.HandlerOpti
 		connect.WithSchema(sceneServiceMethods.ByName("MoveEntity")),
 		connect.WithHandlerOptions(opts...),
 	)
+	sceneServiceResetHandler := connect.NewUnaryHandler(
+		SceneServiceResetProcedure,
+		svc.Reset,
+		connect.WithSchema(sceneServiceMethods.ByName("Reset")),
+		connect.WithHandlerOptions(opts...),
+	)
 	sceneServiceListDeviceStatusesHandler := connect.NewUnaryHandler(
 		SceneServiceListDeviceStatusesProcedure,
 		svc.ListDeviceStatuses,
@@ -306,6 +332,8 @@ func NewSceneServiceHandler(svc SceneServiceHandler, opts ...connect.HandlerOpti
 			sceneServiceRemoveEntityHandler.ServeHTTP(w, r)
 		case SceneServiceMoveEntityProcedure:
 			sceneServiceMoveEntityHandler.ServeHTTP(w, r)
+		case SceneServiceResetProcedure:
+			sceneServiceResetHandler.ServeHTTP(w, r)
 		case SceneServiceListDeviceStatusesProcedure:
 			sceneServiceListDeviceStatusesHandler.ServeHTTP(w, r)
 		default:
@@ -347,6 +375,10 @@ func (UnimplementedSceneServiceHandler) RemoveEntity(context.Context, *connect.R
 
 func (UnimplementedSceneServiceHandler) MoveEntity(context.Context, *connect.Request[v1.MoveEntityRequest]) (*connect.Response[v1.MoveEntityResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scenes.v1.SceneService.MoveEntity is not implemented"))
+}
+
+func (UnimplementedSceneServiceHandler) Reset(context.Context, *connect.Request[v1.ResetSceneRequest]) (*connect.Response[v1.ResetSceneResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scenes.v1.SceneService.Reset is not implemented"))
 }
 
 func (UnimplementedSceneServiceHandler) ListDeviceStatuses(context.Context, *connect.Request[v1.ListDeviceStatusesRequest]) (*connect.Response[v1.ListDeviceStatusesResponse], error) {

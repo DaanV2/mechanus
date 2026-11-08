@@ -32,6 +32,7 @@ func (c configStore) ListSceneConfigs(context.Context) ([]*scenes.Config, error)
 type stateStore struct {
 	saved map[string]scenes.State // stored by value, as a database would
 	saves int
+	err   error // returned by every save when set
 }
 
 func (s *stateStore) LoadSceneState(_ context.Context, id string) (*scenes.State, error) {
@@ -43,6 +44,9 @@ func (s *stateStore) LoadSceneState(_ context.Context, id string) (*scenes.State
 }
 
 func (s *stateStore) SaveSceneState(_ context.Context, st *scenes.State) error {
+	if s.err != nil {
+		return s.err
+	}
 	s.saved[st.SceneID] = *st
 	s.saves++
 

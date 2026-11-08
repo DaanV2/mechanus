@@ -15,7 +15,7 @@ Current services:
 | `LoginService`    | `users/v1`     | Authenticate and issue JWTs                                                 |
 | `UserService`     | `users/v1`     | User CRUD, admin list / password reset                                      |
 | `CampaignService` | `campaigns/v1` | Create, get, list, update and (soft) delete campaigns, and list / add / remove their players. Members and admins see a campaign; its owner (creator) and admins manage it; players can leave |
-| `SceneService`    | `scenes/v1`    | GM scene control: list scenes, activate a scene, switch variant, get the active scene with its entities, reveal / hide / spawn / remove / move entities, the status of the room's devices (any logged-in user) |
+| `SceneService`    | `scenes/v1`    | GM scene control: list scenes, activate a scene, switch variant, get the active scene with its entities, reveal / hide / spawn / remove / move entities, reset a scene to its config, the status of the room's devices (any logged-in user) |
 | `DeviceService`   | `devices/v1`   | Pair a device (server stream) and refresh its tokens without a login; confirm a pairing, list, revoke and bind devices as an admin |
 
 ConnectRPC is called from the browser using either the Connect protocol or gRPC-web over HTTP/2. A gRPC reflection endpoint and gRPC health endpoint are available for tooling and infrastructure probes.

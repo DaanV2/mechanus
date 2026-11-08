@@ -15,6 +15,7 @@
     Hr,
     Input,
     Label,
+    Modal,
     Select,
     Table,
     TableBody,
@@ -96,6 +97,17 @@
   const remove = (entity: Entity) =>
     run(() => createSceneClient().removeEntity({ entityId: entity.id }));
 
+  // Reset: throws away what happened in a scene during play, asked for in a modal first
+  let resetScene = $state<Scene | undefined>(undefined);
+  let resetOpen = $state(false);
+  const askReset = (scene: Scene) => ((resetScene = scene), (resetOpen = true));
+
+  async function reset() {
+    const sceneId = resetScene?.id ?? '';
+    resetOpen = false;
+    await run(() => createSceneClient().reset({ sceneId }));
+  }
+
   // Spawn form: a new entity, by default hidden so the GM can place it before revealing it
   let spawnId = $state('');
   let spawnName = $state('');
@@ -169,6 +181,14 @@
               onclick={() => setVariant(variant.id)}>{variant.name || variant.id}</Button
             >
           {/each}
+          <Button
+            size="sm"
+            color="red"
+            outline
+            class="ms-auto"
+            disabled={busy}
+            onclick={() => active?.scene && askReset(active.scene)}>Reset scene</Button
+          >
         </div>
         {#if deviceErrors.length > 0}
           <ul class="mt-3 text-sm text-red-600 dark:text-red-400">
@@ -275,6 +295,9 @@
               <Badge color="green">Active</Badge>
             {:else}
               <Button size="sm" disabled={busy} onclick={() => activate(scene)}>Activate</Button>
+              <Button size="sm" color="alternative" disabled={busy} onclick={() => askReset(scene)}
+                >Reset</Button
+              >
             {/if}
             {#if scene.variants.length > 0}
               <span class="text-sm text-gray-500">{scene.variants.length} variant(s)</span>
@@ -326,3 +349,15 @@
     </div>
   {/if}
 </div>
+
+<Modal title="Reset scene" bind:open={resetOpen} size="sm">
+  <p>
+    Reset <strong>{resetScene?.name || resetScene?.id}</strong> to how it is configured? Spawned entities
+    are gone, moved, hidden and removed entities go back to their start, live adjustments and cameras
+    are cleared and the default variant is active. This can't be undone.
+  </p>
+  <div class="flex gap-2">
+    <Button color="red" onclick={reset}>Reset</Button>
+    <Button color="alternative" onclick={() => (resetOpen = false)}>Cancel</Button>
+  </div>
+</Modal>

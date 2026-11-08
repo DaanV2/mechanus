@@ -252,4 +252,79 @@ var _ = Describe("SceneService during play", func() {
 			Expect(svc.ShowsBattleMap(ctx, "tv")).To(BeFalse())
 		})
 	})
+
+	Describe("Reset", func() {
+		play := func() {
+			GinkgoHelper()
+			_, err := svc.SetEntityHidden(ctx, "troll", false)
+			Expect(err).ToNot(HaveOccurred())
+			_, err = svc.RemoveEntity(ctx, "hero")
+			Expect(err).ToNot(HaveOccurred())
+			_, err = svc.SpawnEntity(ctx, scenes.Entity{ID: "wolf", Kind: scenes.EntityEnemy}, nil)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(svc.MoveEntity(ctx, "troll", vectors.Vector2D{X: 2, Y: 2})).To(Succeed())
+			Expect(svc.SetCamera(ctx, "tv", scenes.Camera{Center: vectors.Vector2D{X: 1, Y: 1}, Zoom: 2})).To(Succeed())
+		}
+
+		It("puts the active scene back as configured and re-instructs every device", func() {
+			play()
+			screen.applied = nil
+
+			t, err := svc.Reset(ctx, "cave")
+			Expect(err).ToNot(HaveOccurred())
+			Expect(t).ToNot(BeNil())
+			Expect(svc.ActiveEntities()).To(ConsistOf(
+				application.ActiveEntity{Entity: scenes.Entity{ID: "troll", Kind: scenes.EntityEnemy, Hidden: true}},
+				application.ActiveEntity{Entity: scenes.Entity{ID: "hero", Kind: scenes.EntityPlayer}},
+			))
+
+			Expect(screen.applied).To(HaveLen(3), "tv, tablet and wall-tv, even the unchanged scenery")
+			for _, a := range screen.applied {
+				ins, _ := a.instruction.(scenes.ScreenInstruction)
+				Expect(ins.Camera).To(BeNil())
+				Expect(ins.Positions).To(BeEmpty())
+			}
+			Expect(battleMapEntities()).To(ConsistOf("hero"))
+
+			Expect(states.saved["cave"].Spawned).To(BeEmpty(), "the fresh state is saved")
+			Expect(states.saved["cave"].Cameras).To(BeEmpty())
+		})
+
+		It("goes back to the default variant", func() {
+			_, err := svc.Activate(ctx, "road", "")
+			Expect(err).ToNot(HaveOccurred())
+			_, err = svc.Reset(ctx, "road")
+			Expect(err).ToNot(HaveOccurred())
+			Expect(svc.Active()).To(Equal(scenes.Ref{SceneID: "road"}))
+		})
+
+		It("replaces the saved state of a scene that isn't active", func() {
+			play()
+			_, err := svc.Activate(ctx, "road", "")
+			Expect(err).ToNot(HaveOccurred())
+			screen.applied = nil
+
+			t, err := svc.Reset(ctx, "cave")
+			Expect(err).ToNot(HaveOccurred())
+			Expect(t).To(BeNil())
+			Expect(screen.applied).To(BeEmpty(), "no device shows the scene")
+			Expect(svc.Active()).To(Equal(scenes.Ref{SceneID: "road"}), "the active scene stays")
+
+			_, err = svc.Activate(ctx, "cave", "")
+			Expect(err).ToNot(HaveOccurred())
+			Expect(svc.ActiveEntities()).To(HaveLen(2))
+			Expect(svc.ActiveEntities()).To(HaveEach(HaveField("Position", BeNil())))
+		})
+
+		It("refuses unknown scenes and changes nothing when the state can't be saved", func() {
+			_, err := svc.Reset(ctx, "ghost")
+			Expect(err).To(HaveOccurred())
+
+			play()
+			states.err = errors.New("disk full")
+			_, err = svc.Reset(ctx, "cave")
+			Expect(err).To(MatchError(ContainSubstring("disk full")))
+			Expect(svc.ActiveEntities()).To(ContainElement(HaveField("ID", "wolf")), "still as played")
+		})
+	})
 })
