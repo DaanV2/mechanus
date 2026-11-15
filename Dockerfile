@@ -16,7 +16,7 @@ COPY ./client .
 RUN npm run build
 
 # build server
-FROM --platform=$BUILDPLATFORM golang:1.27.3 AS server
+FROM --platform=$BUILDPLATFORM golang:1.27.4 AS server
 ARG TARGETOS
 ARG TARGETARCH
 WORKDIR /app
