@@ -6,7 +6,6 @@ import (
 	"github.com/DaanV2/mechanus/server/components"
 	"github.com/DaanV2/mechanus/server/infrastructure/config"
 	"github.com/DaanV2/mechanus/server/infrastructure/persistence/models"
-	"github.com/DaanV2/mechanus/server/infrastructure/telemetry"
 	"github.com/DaanV2/mechanus/server/pkg/extensions/xgorm"
 	"github.com/DaanV2/mechanus/server/pkg/extensions/xstrings"
 	"github.com/charmbracelet/log"
@@ -25,15 +24,11 @@ var (
 
 // InitializeServer runs the necessary checks to verify if the server has been properly initialized.
 func InitializeServer(ctx context.Context, server *components.ServerComponents) {
-	ctx, span := telemetry.Span(ctx, "server.initialize")
-	defer span.End()
 	ctx = xgorm.WithPrefix(ctx, "checks")
 
 	// Is there an admin account?
 	users, err := server.Users.Find(ctx, &models.User{Roles: pq.StringArray{"admin"}})
 	if err != nil {
-		span.RecordError(err)
-		span.End()
 		log.Fatal("error attempting to check if there is an admin account", "error", err)
 	}
 	if len(users) == 0 {
