@@ -1,0 +1,47 @@
+name: 📐 OpenSpec
+env:
+  FORCE_COLOR: true
+  OPENSPEC_TELEMETRY: 0
+  # Pinned so a new OpenSpec release can't break CI unannounced; bump together with `just spec skills`.
+  OPENSPEC_VERSION: 2.1.0
+
+# Standalone (not part of checks.yaml): only runs when the specs or this workflow change.
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - docs/openspec/**
+      - .github/workflows/openspec-checks.yaml
+  push:
+    branches:
+      - main
+    paths:
+      - docs/openspec/**
+      - .github/workflows/openspec-checks.yaml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: 📋 Validate specs and changes
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: docs
+    steps:
+      - name: 📦 Checkout Repository
+        uses: actions/checkout@v7
+
+      - name: 🟢 Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: lts/*
+
+      - name: 📥 Install OpenSpec
+        run: npm install -g "@fission-ai/openspec@${OPENSPEC_VERSION}"
+
+      - name: 📐 Validate
+        run: openspec validate --all --strict

@@ -27,4 +27,6 @@ The OpenSpec skills are committed in `.claude/skills/openspec-*` (and `.agents/s
 
 Lifecycle: propose (or pick an existing change) → apply (work through `tasks.md`) → archive (deltas merge into `specs/`, and the change's line comes out of the roadmap).
 
+CI: [`openspec-checks.yaml`](../../.github/workflows/openspec-checks.yaml) runs `openspec validate --all --strict` on PRs that touch `docs/openspec/`, with the CLI version pinned there.
+
 Requires the OpenSpec CLI (`npm install -g @fission-ai/openspec`, or the standalone installer from openspec.dev). Telemetry is turned off in the just recipes (`OPENSPEC_TELEMETRY=0`).
