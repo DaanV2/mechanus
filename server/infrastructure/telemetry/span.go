@@ -11,6 +11,12 @@ import (
 )
 
 // SpanLogger starts a new span and returns a context containing the span and a SpanLogger
+func Span(ctx context.Context, name string, attributes ...attribute.KeyValue) (context.Context, trace.Span) {
+	ctx, span := otel.Tracer("default").Start(ctx, name)
+	return ctx, span
+}
+
+// SpanLogger starts a new span and returns a context containing the span and a SpanLogger
 func SpanLogger(ctx context.Context, name string, attributes ...attribute.KeyValue) (context.Context, trace.Span, *log.Logger) {
 	ctx, span := otel.Tracer("default").Start(ctx, name)
 	logger := logging.From(ctx)
