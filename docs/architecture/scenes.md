@@ -181,7 +181,7 @@ How the planned integrations fit, none of them built yet (`DeviceMonitor`'s test
 | Home Assistant | `LightInstruction` | entity ID          | `integrations.homeassistant` | connected, entity available  |
 | Spotify        | `MusicInstruction` | speaker ID         | `integrations.spotify`     | token valid, speaker available |
 
-Not covered by the framework: the Spotify OAuth flow on a LAN-only server is still an open question (see [roadmap M4](../roadmap.md#m4--the-room-comes-alive)), and Matter commissioning would need its own setup flow.
+Not covered by the framework: the Spotify OAuth flow on a LAN-only server is still an open question (see [`add-spotify-music-driver`](../openspec/changes/add-spotify-music-driver/design.md)), and Matter commissioning would need its own setup flow.
 
 ## Storage layout
 
@@ -283,7 +283,7 @@ server/
 
 **Not implemented yet**:
 
-- Battle map play: token control (`controlled_by`), fog of war, walls and other layer kinds ([M3](../roadmap.md#m3--live-play-on-the-battle-map)). Any logged in user can move any token until a GM role and per entity control exist; paired devices can only pan and zoom. A spawned entity without a position isn't drawn until it is moved.
+- Battle map play: token control (`controlled_by`), fog of war, walls and other layer kinds ([M3](../openspec/README.md#m3--live-play-on-the-battle-map)). Any logged in user can move any token until a GM role and per entity control exist; paired devices can only pan and zoom. A spawned entity without a position isn't drawn until it is moved.
 - The `initiative` and `custom` overlays, and the `entities` overlay on views other than the battle map.
 - Authoring: no tooling or API to create / edit scene and room configs (files have to be written by hand).
 - Remembering which scene was active across a server restart.

@@ -123,7 +123,7 @@ func (u *UserServiceHandler) Create(ctx context.Context, req *connect.Request[us
 func (u *UserServiceHandler) create(ctx context.Context, username, password string) (*connect.Response[usersv1.CreateAccountResponse], error) {
 ```
 
-Interceptors can put who is calling on the context, but don't decide whether the call may proceed. `grpc.PolicyInterceptor` on `DeviceService` doesn't follow this yet and is to be replaced, see the [roadmap](../roadmap.md#auth).
+Interceptors can put who is calling on the context, but don't decide whether the call may proceed. `grpc.PolicyInterceptor` on `DeviceService` doesn't follow this yet and is to be replaced, see the [`move-security-checks-into-handlers`](../openspec/changes/move-security-checks-into-handlers/proposal.md) change.
 
 ## Device authentication
 

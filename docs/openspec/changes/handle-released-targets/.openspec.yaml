@@ -1,0 +1,5 @@
+schema: spec-driven
+created: 2026-11-17
+goal: M4 The room comes alive
+affected_areas:
+  - server

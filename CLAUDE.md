@@ -2,7 +2,7 @@
 
 Mechanus is a server-driven UI system for local TTRPG (tabletop RPG) setups. A Go server manages all game state and pushes it to browser clients (GM dashboard, player screens, TV/table battle map display) over ConnectRPC (gRPC) and WebSocket.
 
-The product is built around **scenes**: a scene holds the entities present (players / NPCs / enemies), has variants (time of day, weather, ...) it can transition between, and instructs every device in the room — screens (battle map, scenery, info board, custom views), lights (Hue / Matter / Home Assistant), music (Spotify / iTunes) and custom devices (MQTT / event bus). Read `docs/architecture/scenes.md` before working on scenes, devices, or integrations; its "Status" section lists what is and isn't implemented. `docs/roadmap.md` lists the milestones and features still to build; keep it updated when a feature lands or an unknown (`TBD`) is decided.
+The product is built around **scenes**: a scene holds the entities present (players / NPCs / enemies), has variants (time of day, weather, ...) it can transition between, and instructs every device in the room — screens (battle map, scenery, info board, custom views), lights (Hue / Matter / Home Assistant), music (Spotify / iTunes) and custom devices (MQTT / event bus). Read `docs/architecture/scenes.md` before working on scenes, devices, or integrations; its "Status" section lists what is and isn't implemented. Features are planned with OpenSpec in `docs/openspec/` (see its README): `specs/` describes current behaviour, `changes/` holds the work still to build, with open decisions under "Open Questions" in each change's `design.md`. The "Milestones" section of that README is the roadmap, linking every open change; keep it updated when a change is added or archived. The `openspec` CLI only finds its root from inside `docs/`, so run it there or use `just spec <recipe>`.
 
 ## Repo layout
 
@@ -12,7 +12,8 @@ mechanus/
 ├── client/       SvelteKit + Pixi.js browser client
 ├── tests/        Integration tests (Playwright)
 ├── docs/         Documentation
-│   └── architecture/   Architecture docs — read these first
+│   ├── architecture/   Architecture docs — read these first
+│   └── openspec/       OpenSpec specs (current behaviour) and changes (to build)
 ├── buf.yaml      Proto compiler config (Buf)
 └── docker-compose.yaml
 ```
@@ -73,6 +74,14 @@ just server vulncheck      # govulncheck (deps + standard library)
 just server format         # go fmt
 just server checks         # build + vet + test + format + lint + vulncheck + docs
 just server start-server   # go run main.go server
+```
+
+### Specs (`just spec <recipe>`, runs in `docs/`)
+```bash
+just spec list       # open OpenSpec changes and task progress
+just spec specs      # capabilities (current behaviour)
+just spec validate   # validate all specs and changes (strict)
+just spec skills     # regenerate the OpenSpec skills into .claude/skills
 ```
 
 ### Client (`just client <recipe>`)

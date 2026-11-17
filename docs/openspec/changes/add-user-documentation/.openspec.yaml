@@ -1,0 +1,6 @@
+schema: spec-driven
+created: 2026-11-17
+goal: M6 Polish & release
+affected_areas:
+  - docs
+skip_specs: true
