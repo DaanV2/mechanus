@@ -9,7 +9,7 @@ on:
 
 jobs:
   docker-checks:
-    name: 🐳 Checks
+    name: 🐳 Default build
     runs-on: ubuntu-latest
     steps:
       - name: 📦 Checkout Repository

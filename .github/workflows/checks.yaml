@@ -34,12 +34,14 @@ jobs:
     uses: ./.github/workflows/server-checks.yaml
 
   docker-checks:
+    if: github.event.pull_request.draft == false
     needs:
       - proto-checks
     name: 🐳 Docker
     uses: ./.github/workflows/docker-checks.yaml
 
   release-checks:
+    if: github.event.pull_request.draft == false
     needs:
       - proto-checks
     name: 📦 Release build
@@ -50,4 +52,5 @@ jobs:
       - docker-checks
       - proto-checks
     name: 🎭 Integration tests
+    if: github.event.pull_request.draft == false
     uses: ./.github/workflows/integration-tests.yaml

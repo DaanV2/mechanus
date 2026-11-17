@@ -7,9 +7,42 @@ on:
   workflow_call:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
-  server-checks:
-    name: 📋 Checks ${{ matrix.os }}
+  # Platform-independent checks only need to run once, on Linux.
+  lint:
+    name: 🔍 Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📦 Checkout Repository
+        uses: actions/checkout@v7
+
+      - name: ⚒️ Setup Golang
+        uses: actions/setup-go@v7
+        with:
+          go-version-file: ./server/go.mod
+          cache-dependency-path: ./server/go.sum
+
+      # The golangci-lint version pinned in go.mod, same as `just server lint`.
+      - name: 🔍 Run linting
+        working-directory: server
+        run: go tool golangci-lint run
+
+      # Also covers the standard library, so a stale `go` directive in go.mod fails here.
+      - name: 🛡️ Run govulncheck
+        if: ${{ !cancelled() }} # still report vulnerabilities when linting fails
+        working-directory: server
+        run: go tool govulncheck ./...
+
+      - name: 📝 Reporting
+        run: |
+          echo "✅ Server lint" >> $GITHUB_STEP_SUMMARY
+
+  # Build, vet and test on every platform the binary is released for.
+  build-test:
+    name: 📋 Build & test ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -20,7 +53,7 @@ jobs:
       - name: 📦 Checkout Repository
         uses: actions/checkout@v7
 
-      - name: ⚒️  Setup Golang
+      - name: ⚒️ Setup Golang
         uses: actions/setup-go@v7
         with:
           go-version-file: ./server/go.mod
@@ -28,19 +61,16 @@ jobs:
 
       - name: 🛠️ Build
         working-directory: server
-        run: |
-          go build ./...
+        run: go build ./...
+
+      - name: 🔎 Vet
+        working-directory: server
+        run: go vet ./...
 
       - name: 📋 Run Tests
         working-directory: server
         run: |
           go tool ginkgo run --output-dir reports --cover --covermode atomic -coverprofile=coverage.out ./...
-
-      - name: 🔍 Run linting
-        uses: golangci/golangci-lint-action@v9
-        with:
-          version: latest
-          working-directory: server
 
       - name: 📝 Reporting
         run: |
