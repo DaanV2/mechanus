@@ -1,4 +1,6 @@
 <script lang="ts">
+  import Page from '$lib/components/page.svelte';
+  import ActionButton from '$lib/components/buttons/action-button.svelte';
   import { goto } from '$app/navigation';
   import ErrorMessage from '$lib/components/error-message.svelte';
   import type { MechanusError } from '$lib/components/errors';
@@ -118,24 +120,24 @@
 
 <NavBar />
 
-<div class="flex min-h-screen flex-col items-center p-8">
-  <div class="w-full max-w-3xl space-y-4">
-    <h1 class="text-2xl font-bold text-white">Invites</h1>
-    <p class="text-gray-300">
+<Page>
+  <div class="space-y-4">
+    <h1 class="text-ink text-2xl font-bold">Invites</h1>
+    <p class="text-muted">
       An invite is a single use link a new player opens to pick their own username and password.
     </p>
 
-    <form class="flex flex-wrap items-end gap-2" onsubmit={create}>
+    <form class="panel flex flex-wrap items-end gap-3" onsubmit={create}>
       <Label class="space-y-2">
-        <span class="text-white">Valid for</span>
+        <span class="text-ink">Valid for</span>
         <Select items={DURATIONS} bind:value={validFor} />
       </Label>
-      <Button type="submit">Create invite</Button>
+      <ActionButton intent="create" type="submit">Create invite</ActionButton>
     </form>
 
     <ErrorMessage error={errorObj} />
 
-    <Table>
+    <Table class="border-line overflow-hidden rounded-lg border">
       <TableHead>
         <TableHeadCell>Created</TableHeadCell>
         <TableHeadCell>Expires</TableHeadCell>
@@ -152,7 +154,9 @@
             <TableBodyCell>{expiresAt(invite)}</TableBodyCell>
             <TableBodyCell class="space-x-1 text-right">
               <Button size="xs" color="alternative" onclick={() => show(invite)}>Show</Button>
-              <Button size="xs" color="red" onclick={() => revoke(invite)}>Revoke</Button>
+              <ActionButton intent="delete" size="xs" onclick={() => revoke(invite)}
+                >Revoke</ActionButton
+              >
             </TableBodyCell>
           </TableBodyRow>
         {:else}
@@ -163,7 +167,7 @@
       </TableBody>
     </Table>
   </div>
-</div>
+</Page>
 
 <Modal title="Invite" bind:open={shownOpen} size="sm">
   <div class="space-y-4">
@@ -175,7 +179,7 @@
       <Input type="text" readonly value={shownLink} data-testid="invite-link" />
     </Label>
     {#if shown}
-      <p class="text-sm text-gray-500">Single use, expires {expiresAt(shown)}.</p>
+      <p class="text-muted text-sm">Single use, expires {expiresAt(shown)}.</p>
     {/if}
     <Button class="w-full" onclick={copy}>{copied ? 'Copied' : 'Copy link'}</Button>
   </div>

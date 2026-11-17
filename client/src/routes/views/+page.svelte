@@ -1,4 +1,5 @@
 <script lang="ts">
+  import Page from '$lib/components/page.svelte';
   import SimpleCard from '$lib/components/cards/simple.svelte';
   import Fluid from '$lib/components/collections/fluid.svelte';
   import Footer from '$lib/components/footer.svelte';
@@ -19,7 +20,7 @@
 
 <NavBar />
 
-<div class="flex min-h-screen flex-col items-center py-5">
+<Page width="wide" title="Views">
   <Fluid>
     {#if userData}
       <SimpleCard href="/views/game-master" title="Game Master" />
@@ -27,6 +28,6 @@
     {/if}
     <SimpleCard href="/views/devices" title="Devices" />
   </Fluid>
-</div>
+</Page>
 
 <Footer />

@@ -1,5 +1,6 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
+  import { page } from '$app/state';
   import { userHandler, UserState } from '$lib/handlers/user';
   import {
     Avatar,
@@ -24,6 +25,17 @@
     currentUser = await userHandler.restore();
   });
 
+  // Dark text on the orange bar (white only reaches 3.7:1); the active page is bold and underlined
+  const navActive =
+    'text-primary-950 font-bold underline decoration-2 underline-offset-4 md:hover:bg-transparent hover:bg-primary-950/15 rounded transition-colors';
+  const navInactive =
+    'text-primary-950 md:hover:text-white md:hover:bg-transparent hover:bg-primary-950/15 rounded transition-colors';
+  const navButton =
+    'bg-quaternary text-secondary hover:bg-secondary hover:text-quaternary dark:bg-secondary dark:text-quaternary dark:hover:bg-quaternary dark:hover:text-secondary mx-1 transition-colors';
+
+  // Nav links have no trailing slash, the router adds one (`trailingSlash = 'always'`)
+  let activeUrl = $derived(page.url.pathname.replace(/(.)\/$/, '$1'));
+
   async function logout() {
     await userHandler.logout();
     currentUser = UserState.LOGGED_OUT;
@@ -31,10 +43,10 @@
   }
 </script>
 
-<Navbar class="bg-primary">
+<Navbar class="bg-primary dark:bg-primary">
   <NavBrand href="/">
     <!-- <img src="/images/flowbite-svelte-icon-logo.svg" class="me-3 h-6 sm:h-9" alt="Flowbite Logo" /> -->
-    <span class="text-text-100 self-center text-xl font-semibold whitespace-nowrap">Mechanus</span>
+    <span class="self-center text-xl font-semibold whitespace-nowrap text-white">Mechanus</span>
   </NavBrand>
 
   <div class="flex flex-row items-center">
@@ -57,44 +69,29 @@
         <DropdownHeader onclick={logout}>Sign out</DropdownHeader>
       </Dropdown>
     {:else}
-      <Button
-        class="bg-quaternary hover:bg-secondary hover:text-quaternary text-secondary mx-1 flex transition-colors md:order-3"
-        href="/users/login">Login</Button
-      >
+      <Button class="{navButton} flex md:order-3" href="/users/login">Login</Button>
     {/if}
 
-    <DarkMode
-      class="bg-quaternary hover:bg-secondary hover:text-quaternary text-secondary mx-1 transition-colors md:order-2"
-    />
+    <DarkMode class="{navButton} md:order-2" />
 
     <!-- Navigation -->
-    <NavHamburger
-      class="bg-quaternary hover:bg-secondary hover:text-quaternary text-secondary order-1"
-    />
-    <NavUl class="text-text-100 order-1">
-      <NavLi
-        activeClass="text-secondary hover:bg-tertiary hover:text-quaternary transition-colors"
-        nonActiveClass="hover:text-text-100 text-secondary transition-colors"
-        href="/">Home</NavLi
-      >
+    <NavHamburger class="{navButton} order-1" />
+    <NavUl
+      {activeUrl}
+      class="order-1"
+      classes={{
+        ul: 'bg-primary md:bg-transparent border-primary-950/20 dark:bg-primary dark:border-primary-950/20'
+      }}
+    >
+      <NavLi activeClass={navActive} nonActiveClass={navInactive} href="/">Home</NavLi>
 
       {#if userData}
-        <NavLi
-          activeClass="text-secondary hover:bg-tertiary hover:text-quaternary transition-colors"
-          nonActiveClass="hover:text-text-100 text-secondary transition-colors"
-          href="/campaigns">Campaigns</NavLi
+        <NavLi activeClass={navActive} nonActiveClass={navInactive} href="/campaigns"
+          >Campaigns</NavLi
         >
       {/if}
-      <NavLi
-        activeClass="text-secondary hover:bg-tertiary hover:text-quaternary transition-colors"
-        nonActiveClass="hover:text-text-100 text-secondary transition-colors"
-        href="/devices">Devices</NavLi
-      >
-      <NavLi
-        activeClass="text-secondary hover:bg-tertiary hover:text-quaternary transition-colors"
-        nonActiveClass="hover:text-text-100 text-secondary transition-colors"
-        href="/about">About</NavLi
-      >
+      <NavLi activeClass={navActive} nonActiveClass={navInactive} href="/devices">Devices</NavLi>
+      <NavLi activeClass={navActive} nonActiveClass={navInactive} href="/about">About</NavLi>
     </NavUl>
   </div>
 </Navbar>

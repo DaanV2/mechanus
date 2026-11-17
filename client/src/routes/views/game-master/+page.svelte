@@ -280,9 +280,9 @@
   {/if}
 
   {#if scenes === undefined}
-    <p class="p-4 text-gray-500">Loading scenes...</p>
+    <p class="text-muted p-4">Loading scenes...</p>
   {:else if scenes.length === 0}
-    <p class="p-4 text-gray-500">
+    <p class="text-muted p-4">
       No scenes configured yet. Add scene files to the <code>scenes</code> folder of the server's config
       folder.
     </p>
@@ -300,7 +300,7 @@
               >
             {/if}
             {#if scene.variants.length > 0}
-              <span class="text-sm text-gray-500">{scene.variants.length} variant(s)</span>
+              <span class="text-muted text-sm">{scene.variants.length} variant(s)</span>
             {/if}
           </div>
         </SimpleCard>
@@ -324,7 +324,7 @@
             <TableBodyRow data-testid={`device-${device.deviceId}`}>
               <TableBodyCell>
                 {device.name || device.deviceId}
-                <span class="block text-xs text-gray-500">{device.kind}</span>
+                <span class="text-muted block text-xs">{device.kind}</span>
               </TableBodyCell>
               <TableBodyCell>{device.targets.join(', ') || '—'}</TableBodyCell>
               <TableBodyCell>{device.integration}</TableBodyCell>

@@ -1,4 +1,6 @@
 <script lang="ts">
+  import Page from '$lib/components/page.svelte';
+  import ActionButton from '$lib/components/buttons/action-button.svelte';
   import { goto } from '$app/navigation';
   import ErrorMessage from '$lib/components/error-message.svelte';
   import type { MechanusError } from '$lib/components/errors';
@@ -152,22 +154,22 @@
 
 <NavBar />
 
-<div class="flex min-h-screen flex-col items-center p-8">
-  <div class="w-full max-w-3xl space-y-4">
+<Page>
+  <div class="space-y-4">
     <div class="flex flex-wrap items-center justify-between gap-2">
-      <h1 class="text-2xl font-bold text-white">Users</h1>
+      <h1 class="text-ink text-2xl font-bold">Users</h1>
       <div class="flex gap-2">
         <Button color="alternative" href="/users/invites">Invites</Button>
-        <Button onclick={openCreate}>Create account</Button>
+        <ActionButton intent="create" onclick={openCreate}>Create account</ActionButton>
       </div>
     </div>
 
     {#if success}
-      <p role="status" class="rounded-lg bg-green-800 p-4 text-white">{success}</p>
+      <p role="status" class="bg-ok-800 rounded-lg p-4 text-white">{success}</p>
     {/if}
     <ErrorMessage error={errorObj} />
 
-    <Table>
+    <Table class="border-line overflow-hidden rounded-lg border">
       <TableHead>
         <TableHeadCell>Username</TableHeadCell>
         <TableHeadCell>Roles</TableHeadCell>
@@ -196,7 +198,7 @@
       </TableBody>
     </Table>
   </div>
-</div>
+</Page>
 
 <Modal title={`Reset password of ${resetUser?.name ?? ''}`} bind:open={resetOpen} size="sm">
   <form class="space-y-4" onsubmit={handleReset}>
@@ -208,7 +210,7 @@
       <span>Confirm new password</span>
       <Input type="password" required bind:value={confirmPassword} />
     </Label>
-    <Button type="submit" class="w-full" disabled={!isResetValid}>Reset</Button>
+    <ActionButton type="submit" class="w-full" disabled={!isResetValid}>Reset</ActionButton>
     <ErrorMessage error={resetError} />
   </form>
 </Modal>
@@ -229,7 +231,9 @@
         <Checkbox bind:group={createRoles} value={role}>{role}</Checkbox>
       {/each}
     </fieldset>
-    <Button type="submit" class="w-full" disabled={!isCreateValid}>Create</Button>
+    <ActionButton intent="create" type="submit" class="w-full" disabled={!isCreateValid}
+      >Create</ActionButton
+    >
     <ErrorMessage error={createError} />
   </form>
 </Modal>
@@ -245,9 +249,11 @@
       {/each}
     </fieldset>
     {#if isSelf}
-      <p class="text-sm text-gray-500">You can't remove your own admin role.</p>
+      <p class="text-muted text-sm">You can't remove your own admin role.</p>
     {/if}
-    <Button type="submit" class="w-full" disabled={!isRolesValid}>Save</Button>
+    <ActionButton intent="create" type="submit" class="w-full" disabled={!isRolesValid}
+      >Save</ActionButton
+    >
     <ErrorMessage error={rolesError} />
   </form>
 </Modal>

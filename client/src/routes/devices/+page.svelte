@@ -1,4 +1,6 @@
 <script lang="ts">
+  import Page from '$lib/components/page.svelte';
+  import ActionButton from '$lib/components/buttons/action-button.svelte';
   import { goto } from '$app/navigation';
   import ErrorMessage from '$lib/components/error-message.svelte';
   import type { MechanusError } from '$lib/components/errors';
@@ -9,7 +11,6 @@
   import { timestampDate } from '@bufbuild/protobuf/wkt';
   import {
     Badge,
-    Button,
     Input,
     Label,
     Table,
@@ -107,16 +108,17 @@
 
 <NavBar />
 
-<div class="flex min-h-screen flex-col items-center p-8">
-  <div class="w-full max-w-4xl space-y-4">
-    <h1 class="text-2xl font-bold text-white">Devices</h1>
-    <p class="text-gray-300">
-      To pair a screen, open <code>/devices/pair</code> on it and enter the code it shows.
+<Page width="wide">
+  <div class="space-y-4">
+    <h1 class="text-ink text-2xl font-bold">Devices</h1>
+    <p class="text-muted">
+      To pair a screen, open <code class="bg-surface text-ink rounded px-1">/devices/pair</code> on it
+      and enter the code it shows.
     </p>
 
-    <form class="flex flex-wrap items-end gap-2" onsubmit={confirm}>
+    <form class="panel flex flex-wrap items-end gap-3" onsubmit={confirm}>
       <Label class="space-y-2">
-        <span class="text-white">Pairing code</span>
+        <span class="text-ink">Pairing code</span>
         <Input
           type="text"
           inputmode="numeric"
@@ -128,15 +130,15 @@
         />
       </Label>
       <Label class="space-y-2">
-        <span class="text-white">Device name</span>
+        <span class="text-ink">Device name</span>
         <Input type="text" maxlength={64} required placeholder="Table TV" bind:value={name} />
       </Label>
-      <Button type="submit">Pair device</Button>
+      <ActionButton intent="create" type="submit">Pair device</ActionButton>
     </form>
 
     <ErrorMessage error={errorObj} title="Device error" />
 
-    <Table>
+    <Table class="border-line overflow-hidden rounded-lg border">
       <TableHead>
         <TableHeadCell>Name</TableHeadCell>
         <TableHeadCell>Hardware</TableHeadCell>
@@ -173,7 +175,9 @@
             <TableBodyCell>{lastSeen(device)}</TableBodyCell>
             <TableBodyCell class="text-right">
               {#if device.paired}
-                <Button size="xs" color="red" onclick={() => revoke(device)}>Revoke</Button>
+                <ActionButton intent="delete" size="xs" onclick={() => revoke(device)}
+                  >Revoke</ActionButton
+                >
               {/if}
             </TableBodyCell>
           </TableBodyRow>
@@ -185,6 +189,6 @@
       </TableBody>
     </Table>
   </div>
-</div>
+</Page>
 
 <Footer />

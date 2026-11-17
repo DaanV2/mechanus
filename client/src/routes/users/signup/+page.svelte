@@ -1,4 +1,6 @@
 <script lang="ts">
+  import Page from '$lib/components/page.svelte';
+  import ActionButton from '$lib/components/buttons/action-button.svelte';
   import { goto } from '$app/navigation';
   import { page } from '$app/state';
   import { INVITE_PARAM, inviteHandler } from '$lib/handlers/invites';
@@ -7,7 +9,7 @@
   import Footer from '$lib/components/footer.svelte';
   import NavBar from '$lib/components/nav-bar.svelte';
   import { Code, ConnectError } from '@connectrpc/connect';
-  import { Button, ButtonGroup, Input, InputAddon, Label } from 'flowbite-svelte';
+  import { ButtonGroup, Input, InputAddon, Label } from 'flowbite-svelte';
   import { EyeOutline, EyeSlashOutline } from 'flowbite-svelte-icons';
   import { onMount } from 'svelte';
   import { userHandler } from '../../../lib/handlers/user';
@@ -98,20 +100,20 @@
 
 <NavBar />
 
-<div class="flex min-h-screen items-center justify-center">
-  <form class="space-y-6" onsubmit={handleSubmit}>
-    <h3 class="p-0 text-xl font-medium text-white dark:text-white">Signup</h3>
+<Page width="narrow" class="flex flex-col justify-center">
+  <form class="panel space-y-6" onsubmit={handleSubmit}>
+    <h3 class="text-ink p-0 text-xl font-medium">Signup</h3>
     {#if inviteInvalid}
       <p role="alert" class="rounded-lg bg-red-800 p-4 text-white">
         This invite is invalid, expired or already used. Ask your game master for a new one.
       </p>
     {:else if inviteExpires}
-      <p class="text-sm text-white">
+      <p class="text-muted text-sm">
         You were invited, this invite expires {inviteExpires.toLocaleString()}.
       </p>
     {/if}
     <Label class="space-y-2">
-      <Label for="username" class="font-bold text-white">Your username</Label>
+      <Label for="username" class="text-ink dark:text-ink font-bold">Your username</Label>
       <Input
         id="username"
         type="username"
@@ -122,7 +124,7 @@
       />
     </Label>
     <Label class="space-y-2">
-      <Label for="password" class="font-bold text-white">Your password</Label>
+      <Label for="password" class="text-ink dark:text-ink font-bold">Your password</Label>
       <ButtonGroup class="w-full">
         <Input
           id="password"
@@ -145,7 +147,9 @@
     <Label class="space-y-2">
       <Label
         for="confirm-password"
-        class="font-bold {password_wrong ? 'text-red-800' : 'text-white'}">Confirm password</Label
+        class="font-bold {password_wrong
+          ? 'text-error-700 dark:text-error-400'
+          : 'text-ink dark:text-ink'}">Confirm password</Label
       >
       <ButtonGroup class="w-full">
         <Input
@@ -167,16 +171,15 @@
         </InputAddon>
       </ButtonGroup>
     </Label>
-    <Button type="submit" class="w-full" disabled={!isFormValid}>Signup</Button>
-    <p class="text-sm font-light text-white dark:text-white">
-      Already have an account? <a
-        href="/users/login"
-        class="text-primary-600 dark:text-primary-500 font-medium hover:underline">Login</a
-      >
+    <ActionButton intent="create" type="submit" class="w-full" disabled={!isFormValid}
+      >Signup</ActionButton
+    >
+    <p class="text-muted text-sm">
+      Already have an account? <a href="/users/login" class="link">Login</a>
     </p>
 
     <ErrorMessage error={errorObj} />
   </form>
-</div>
+</Page>
 
 <Footer />
