@@ -67,7 +67,7 @@
 
 <style>
   .error-message {
-    background: #8b1c1c;
+    background: var(--color-error-800);
     color: #fff;
     padding: 1em;
     border-radius: 0.5em;

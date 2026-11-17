@@ -1,4 +1,5 @@
 <script lang="ts">
+  import Page from '$lib/components/page.svelte';
   import SimpleCard from '$lib/components/cards/simple.svelte';
   import Fluid from '$lib/components/collections/fluid.svelte';
   import Footer from '$lib/components/footer.svelte';
@@ -20,23 +21,25 @@
 
 <NavBar />
 
-<Heading tag="h2" class="px-5 py-3">Choose your adventure</Heading>
-<Hr />
+<Page width="wide">
+  <Heading tag="h2" class="text-ink pb-3">Choose your adventure</Heading>
+  <Hr class="bg-line dark:bg-line my-2" />
 
-<Fluid>
-  <!-- User Data -->
-  {#if userData}
-    <SimpleCard href="/campaigns" title="Campaigns" text="see your campaigns" />
-    <SimpleCard href="/users/profile" title="Profile" text="Manage your user Profile" />
-    <SimpleCard href="/devices" title="Devices" text="Manage the devices" />
-  {/if}
-  <!-- Aviable for all -->
-  <SimpleCard href="/views" title="Views" text="..." />
-  <SimpleCard
-    href="/demo"
-    title="Demos & Tools"
-    text="A bunch of demos and tools to ensure everything is working"
-  />
-</Fluid>
+  <Fluid>
+    <!-- User Data -->
+    {#if userData}
+      <SimpleCard href="/campaigns" title="Campaigns" text="see your campaigns" />
+      <SimpleCard href="/users/profile" title="Profile" text="Manage your user Profile" />
+      <SimpleCard href="/devices" title="Devices" text="Manage the devices" />
+    {/if}
+    <!-- Aviable for all -->
+    <SimpleCard href="/views" title="Views" text="..." />
+    <SimpleCard
+      href="/demo"
+      title="Demos & Tools"
+      text="A bunch of demos and tools to ensure everything is working"
+    />
+  </Fluid>
+</Page>
 
 <Footer />

@@ -1,29 +1,10 @@
-<script>
-  // No props needed, just slot for children
+<script lang="ts">
+  import type { Snippet } from 'svelte';
+
+  let { children }: { children?: Snippet } = $props();
 </script>
 
-<div class="w-4/5 justify-center align-middle">
-  <!-- svelte-ignore element_invalid_self_closing_tag -->
-  <div class="h-3" />
-
-  <div class="fluid-container">
-    <slot />
-  </div>
-
-  <!-- svelte-ignore element_invalid_self_closing_tag -->
-  <div class="h-3" />
+<!-- Wrapping, centred row of cards -->
+<div class="flex w-full flex-wrap items-stretch justify-center py-3">
+  {@render children?.()}
 </div>
-
-<style>
-  .fluid-container {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
-    width: auto;
-  }
-  .fluid-container > * {
-    flex: 0 0 auto;
-    min-width: 0;
-  }
-</style>

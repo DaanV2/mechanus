@@ -1,6 +1,7 @@
 <script lang="ts">
+  import Page from '$lib/components/page.svelte';
   import { onMount } from 'svelte';
-  import { Badge, Blockquote, Card, Heading, Hr, P } from 'flowbite-svelte';
+  import { Badge, Heading, P } from 'flowbite-svelte';
   import Footer from '$lib/components/footer.svelte';
   import NavBar from '$lib/components/nav-bar.svelte';
 
@@ -70,35 +71,34 @@
 
 <NavBar />
 
-<div class="flex min-h-screen flex-col items-center px-4 py-5">
-  <Heading tag="h2" class="py-2 text-white dark:text-white">About</Heading>
-  <Blockquote class="max-w-3xl p-4 sm:p-6 md:p-8">
-    <P class="mb-3 leading-tight font-normal text-gray-700 dark:text-gray-400">
+<Page>
+  <Heading tag="h2" class="text-ink pb-3">About</Heading>
+  <div class="panel space-y-3">
+    <P class="text-ink dark:text-ink leading-relaxed">
       Mechanus runs a tabletop RPG room from one server on your home network. The GM picks a
       <em>scene</em>, and every device in the room follows it: the table TV shows the battle map,
       other screens show scenery or information boards, and players follow along on their own
       device. Scenes can have variants, such as night or rain, and switch between them during play.
     </P>
-    <P class="leading-tight font-normal text-gray-700 dark:text-gray-400">
+    <P class="text-ink dark:text-ink leading-relaxed">
       The server is written in Go and serves this web app. Source code, documentation and releases
-      are on <a class="underline" href={REPOSITORY}>GitHub</a>.
+      are on <a class="link" href={REPOSITORY}>GitHub</a>.
     </P>
-  </Blockquote>
+  </div>
 
-  <Hr class="mx-auto my-4 h-1 w-48 rounded md:my-10" />
-  <Heading tag="h2" class="py-2 text-white dark:text-white">Licences</Heading>
+  <Heading tag="h2" class="text-ink pt-10 pb-3">Licences</Heading>
 
-  <Card class="w-full max-w-3xl p-4 sm:p-6 md:p-8">
-    <Heading tag="h3" class="mb-2 text-lg">Mechanus</Heading>
-    <P class="mb-6">
+  <div class="panel">
+    <Heading tag="h3" class="text-accent dark:text-accent mb-2 text-lg">Mechanus</Heading>
+    <P class="text-ink dark:text-ink mb-6">
       Mechanus is licensed under the
-      <a class="underline" href="{REPOSITORY}/blob/main/LICENSE">BSD 3-Clause License</a>.
+      <a class="link" href="{REPOSITORY}/blob/main/LICENSE">BSD 3-Clause License</a>.
     </P>
 
     {#each groups as group (group.file)}
-      <section class="mb-6" data-testid="licenses-{group.file}">
-        <Heading tag="h3" class="mb-1 text-lg">{group.title}</Heading>
-        <P class="mb-2 text-sm text-gray-500 dark:text-gray-400">{group.description}</P>
+      <section class="border-line mb-6 border-t pt-4" data-testid="licenses-{group.file}">
+        <Heading tag="h3" class="text-accent dark:text-accent mb-1 text-lg">{group.title}</Heading>
+        <P class="text-muted dark:text-muted mb-2 text-sm">{group.description}</P>
 
         {#if group.entries}
           <div class="mb-3 flex flex-wrap gap-2">
@@ -106,36 +106,38 @@
               <Badge color="gray">{license} × {count}</Badge>
             {/each}
           </div>
-          <ul class="divide-y divide-gray-200 dark:divide-gray-700">
+          <ul class="divide-line divide-y">
             {#each group.entries as entry (`${entry.name}@${entry.version}`)}
               <li class="py-1">
                 <details>
-                  <summary class="cursor-pointer text-sm">
+                  <summary class="text-ink cursor-pointer text-sm">
                     <span class="font-medium">{entry.name}</span>
-                    <span class="text-gray-500 dark:text-gray-400">{entry.version}</span>
+                    <span class="text-muted">{entry.version}</span>
                     — {entry.license}
                   </summary>
                   {#if entry.url}
-                    <a class="text-xs underline" href={entry.url}>{entry.url}</a>
+                    <a class="link text-xs" href={entry.url}>{entry.url}</a>
                   {/if}
                   {#if entry.text}
                     <pre
-                      class="mt-2 max-h-64 overflow-auto rounded bg-gray-100 p-2 text-xs whitespace-pre-wrap dark:bg-gray-900">{entry.text}</pre>
+                      class="bg-page text-ink mt-2 max-h-64 overflow-auto rounded p-2 text-xs whitespace-pre-wrap">{entry.text}</pre>
                   {:else}
-                    <P class="mt-1 text-xs">No licence file was found in this package.</P>
+                    <P class="text-muted dark:text-muted mt-1 text-xs"
+                      >No licence file was found in this package.</P
+                    >
                   {/if}
                 </details>
               </li>
             {/each}
           </ul>
         {:else if group.error}
-          <P class="text-sm italic">{group.error}</P>
+          <P class="text-muted dark:text-muted text-sm italic">{group.error}</P>
         {:else}
-          <P class="text-sm italic">Loading…</P>
+          <P class="text-muted dark:text-muted text-sm italic">Loading…</P>
         {/if}
       </section>
     {/each}
-  </Card>
-</div>
+  </div>
+</Page>
 
 <Footer />

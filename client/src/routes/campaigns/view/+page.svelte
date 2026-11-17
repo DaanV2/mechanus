@@ -1,4 +1,6 @@
 <script lang="ts">
+  import Page from '$lib/components/page.svelte';
+  import ActionButton from '$lib/components/buttons/action-button.svelte';
   import { goto } from '$app/navigation';
   import ErrorMessage from '$lib/components/error-message.svelte';
   import type { MechanusError } from '$lib/components/errors';
@@ -11,7 +13,6 @@
   import {
     Button,
     Heading,
-    Hr,
     Input,
     Label,
     Listgroup,
@@ -176,120 +177,124 @@
 
 <NavBar />
 
-<div class="px-5 py-3">
-  <a href="/campaigns" class="text-sm hover:underline">&larr; Back to campaigns</a>
-</div>
+<Page>
+  <a href="/campaigns" class="link mb-4 inline-block text-sm">&larr; Back to campaigns</a>
 
-{#if campaign}
-  <Heading tag="h2" class="px-5 pb-3">{campaign.name}</Heading>
-  <Hr />
+  {#if campaign}
+    <Heading tag="h2" class="text-ink dark:text-ink pb-3">{campaign.name}</Heading>
 
-  <div class="max-w-md space-y-6 px-5">
-    {#if campaign.description}
-      <p class="whitespace-pre-line" data-testid="campaign-description">{campaign.description}</p>
-    {/if}
+    <div class="space-y-6">
+      <div class="panel space-y-4">
+        {#if campaign.description}
+          <p class="text-ink whitespace-pre-line" data-testid="campaign-description">
+            {campaign.description}
+          </p>
+        {/if}
 
-    {#if campaign.createdAt}
-      <div class="space-y-1">
-        <p class="text-sm text-gray-500">Created</p>
-        <p class="font-medium">{timestampDate(campaign.createdAt).toLocaleString()}</p>
+        {#if campaign.createdAt}
+          <div class="space-y-1">
+            <p class="text-muted text-sm">Created</p>
+            <p class="text-ink font-medium">{timestampDate(campaign.createdAt).toLocaleString()}</p>
+          </div>
+        {/if}
       </div>
-    {/if}
 
-    <div class="space-y-2">
-      <Heading tag="h3" class="text-lg">Members</Heading>
-      <Listgroup aria-label="Members">
-        {#each campaign.members as member (member.id)}
-          <ListgroupItem>
-            <div class="flex w-full items-center justify-between gap-2">
-              <span>
-                <span>{member.name}</span>
-                {#if member.id === campaign.ownerId}
-                  <span class="text-sm text-gray-500">(owner)</span>
+      <section class="panel space-y-3">
+        <Heading tag="h3" class="text-ink dark:text-ink text-lg">Members</Heading>
+        <Listgroup
+          aria-label="Members"
+          class="bg-surface border-line dark:bg-surface dark:border-line"
+        >
+          {#each campaign.members as member (member.id)}
+            <ListgroupItem class="text-ink">
+              <div class="flex w-full items-center justify-between gap-2">
+                <span>
+                  <span>{member.name}</span>
+                  {#if member.id === campaign.ownerId}
+                    <span class="text-muted text-sm">(owner)</span>
+                  {/if}
+                </span>
+                {#if canRemove(member)}
+                  <ActionButton
+                    intent="delete"
+                    size="xs"
+                    aria-label={member.id === currentUserId
+                      ? 'Leave campaign'
+                      : `Remove ${member.name}`}
+                    onclick={() => handleRemovePlayer(member)}
+                  >
+                    {member.id === currentUserId ? 'Leave' : 'Remove'}
+                  </ActionButton>
                 {/if}
-              </span>
-              {#if canRemove(member)}
-                <Button
-                  size="xs"
-                  color="alternative"
-                  aria-label={member.id === currentUserId
-                    ? 'Leave campaign'
-                    : `Remove ${member.name}`}
-                  onclick={() => handleRemovePlayer(member)}
-                >
-                  {member.id === currentUserId ? 'Leave' : 'Remove'}
-                </Button>
-              {/if}
-            </div>
-          </ListgroupItem>
-        {/each}
-      </Listgroup>
+              </div>
+            </ListgroupItem>
+          {/each}
+        </Listgroup>
+
+        {#if campaign.canManage}
+          <form class="flex flex-wrap items-end gap-2" onsubmit={handleAddPlayer}>
+            <Label class="text-ink dark:text-ink min-w-48 grow space-y-2">
+              <span>Username</span>
+              <Input placeholder="Username of an existing user" bind:value={addUsername} />
+            </Label>
+            <ActionButton intent="create" type="submit" disabled={!isAddValid}
+              >Add player</ActionButton
+            >
+          </form>
+          <p class="text-muted text-sm">
+            {#if isAdmin}
+              New to Mechanus? <a href="/users/invites" class="link">Create an invite link</a>, then
+              add them here once they have signed up.
+            {:else}
+              New to Mechanus? Ask an admin for an invite link, then add them here once they have
+              signed up.
+            {/if}
+          </p>
+        {/if}
+        <ErrorMessage title="Players" error={playersError} />
+      </section>
 
       {#if campaign.canManage}
-        <form class="flex items-end gap-2" onsubmit={handleAddPlayer}>
-          <Label class="grow space-y-2">
-            <span>Username</span>
-            <Input placeholder="Username of an existing user" bind:value={addUsername} />
+        <form class="panel space-y-4" onsubmit={handleSave}>
+          <Heading tag="h3" class="text-ink dark:text-ink text-lg">Edit campaign</Heading>
+          <Label class="text-ink dark:text-ink space-y-2">
+            <span>Name</span>
+            <Input required bind:value={editName} />
           </Label>
-          <Button type="submit" disabled={!isAddValid}>Add player</Button>
-        </form>
-        <p class="text-sm text-gray-500">
-          {#if isAdmin}
-            New to Mechanus? <a href="/users/invites" class="underline">Create an invite link</a>,
-            then add them here once they have signed up.
-          {:else}
-            New to Mechanus? Ask an admin for an invite link, then add them here once they have
-            signed up.
+          <Label class="text-ink dark:text-ink space-y-2">
+            <span>Description</span>
+            <Textarea class="w-full" rows={4} bind:value={editDescription} />
+          </Label>
+          <ActionButton intent="create" type="submit" disabled={!isEditValid}>Save</ActionButton>
+          {#if editSuccess}
+            <p class="text-ok-700 dark:text-ok-400 text-sm" role="status">{editSuccess}</p>
           {/if}
-        </p>
+          <ErrorMessage title="Edit campaign" error={editError} />
+        </form>
+
+        <section class="panel border-error-300 dark:border-error-900 space-y-2">
+          <Heading tag="h3" class="text-ink dark:text-ink text-lg">Danger zone</Heading>
+          <ActionButton intent="delete" onclick={() => ((deleteError = null), (deleteOpen = true))}>
+            Delete campaign
+          </ActionButton>
+        </section>
       {/if}
-      <ErrorMessage title="Players" error={playersError} />
     </div>
 
-    {#if campaign.canManage}
-      <Hr />
-      <form class="space-y-4" onsubmit={handleSave}>
-        <Heading tag="h3" class="text-lg">Edit campaign</Heading>
-        <Label class="space-y-2">
-          <span>Name</span>
-          <Input required bind:value={editName} />
-        </Label>
-        <Label class="space-y-2">
-          <span>Description</span>
-          <Textarea class="w-full" rows={4} bind:value={editDescription} />
-        </Label>
-        <Button type="submit" disabled={!isEditValid}>Save</Button>
-        {#if editSuccess}
-          <p class="text-sm text-green-600" role="status">{editSuccess}</p>
-        {/if}
-        <ErrorMessage title="Edit campaign" error={editError} />
-      </form>
-
-      <Hr />
-      <div class="space-y-2 pb-6">
-        <Heading tag="h3" class="text-lg">Danger zone</Heading>
-        <Button color="red" onclick={() => ((deleteError = null), (deleteOpen = true))}>
-          Delete campaign
-        </Button>
+    <Modal title="Delete campaign" bind:open={deleteOpen} size="sm">
+      <p>
+        Delete <strong>{campaign.name}</strong>? Its players lose access to it. This can't be undone
+        from the app.
+      </p>
+      <div class="flex gap-2">
+        <ActionButton intent="delete" onclick={handleDelete}>Delete</ActionButton>
+        <Button color="alternative" onclick={() => (deleteOpen = false)}>Cancel</Button>
       </div>
-    {/if}
-  </div>
-
-  <Modal title="Delete campaign" bind:open={deleteOpen} size="sm">
-    <p>
-      Delete <strong>{campaign.name}</strong>? Its players lose access to it. This can't be undone
-      from the app.
-    </p>
-    <div class="flex gap-2">
-      <Button color="red" onclick={handleDelete}>Delete</Button>
-      <Button color="alternative" onclick={() => (deleteOpen = false)}>Cancel</Button>
-    </div>
-    <ErrorMessage error={deleteError} />
-  </Modal>
-{:else}
-  <div class="px-5">
+      <ErrorMessage error={deleteError} />
+    </Modal>
+  {:else}
     <ErrorMessage title="Campaign" error={errorObj} />
-  </div>
-{/if}
+  {/if}
+</Page>
 
 <Footer />

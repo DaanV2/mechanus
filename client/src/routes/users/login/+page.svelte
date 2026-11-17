@@ -1,11 +1,13 @@
 <script lang="ts">
+  import Page from '$lib/components/page.svelte';
+  import ActionButton from '$lib/components/buttons/action-button.svelte';
   import { goto } from '$app/navigation';
   import ErrorMessage from '$lib/components/error-message.svelte';
   import type { MechanusError } from '$lib/components/errors';
   import Footer from '$lib/components/footer.svelte';
   import NavBar from '$lib/components/nav-bar.svelte';
   import { Code, ConnectError } from '@connectrpc/connect';
-  import { Button, ButtonGroup, Input, InputAddon, Label } from 'flowbite-svelte';
+  import { ButtonGroup, Input, InputAddon, Label } from 'flowbite-svelte';
   import { EyeOutline, EyeSlashOutline } from 'flowbite-svelte-icons';
   import { onMount } from 'svelte';
   import { userHandler } from '../../../lib/handlers/user';
@@ -58,11 +60,11 @@
 
 <NavBar />
 
-<div class="flex min-h-screen items-center justify-center">
-  <form class="space-y-6" onsubmit={handleSubmit}>
-    <h3 class="p-0 text-xl font-medium text-white dark:text-white">Login</h3>
+<Page width="narrow" class="flex flex-col justify-center">
+  <form class="panel space-y-6" onsubmit={handleSubmit}>
+    <h3 class="text-ink p-0 text-xl font-medium">Login</h3>
     <Label class="space-y-2">
-      <Label for="username" class="font-bold text-white">Your username</Label>
+      <Label for="username" class="text-ink dark:text-ink font-bold">Your username</Label>
       <Input
         id="username"
         type="username"
@@ -73,7 +75,7 @@
       />
     </Label>
     <Label class="space-y-2">
-      <Label for="password" class="font-bold text-white">Your password</Label>
+      <Label for="password" class="text-ink dark:text-ink font-bold">Your password</Label>
       <ButtonGroup class="w-full">
         <Input
           id="password"
@@ -93,16 +95,13 @@
         </InputAddon>
       </ButtonGroup>
     </Label>
-    <Button type="submit" class="w-full" disabled={!isFormValid}>Login</Button>
-    <p class="text-sm font-light text-white dark:text-white">
-      Don't have an account yet? <a
-        href="/users/signup"
-        class="text-primary-600 dark:text-primary-500 font-medium hover:underline">Sign up</a
-      >
+    <ActionButton type="submit" class="w-full" disabled={!isFormValid}>Login</ActionButton>
+    <p class="text-muted text-sm">
+      Don't have an account yet? <a href="/users/signup" class="link">Sign up</a>
     </p>
 
     <ErrorMessage error={errorObj} />
   </form>
-</div>
+</Page>
 
 <Footer />

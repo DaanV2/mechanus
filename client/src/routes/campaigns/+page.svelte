@@ -1,14 +1,14 @@
 <script lang="ts">
+  import Page from '$lib/components/page.svelte';
+  import ActionButton from '$lib/components/buttons/action-button.svelte';
   import { goto } from '$app/navigation';
-  import SimpleCard from '$lib/components/cards/simple.svelte';
-  import Fluid from '$lib/components/collections/fluid.svelte';
   import ErrorMessage from '$lib/components/error-message.svelte';
   import type { MechanusError } from '$lib/components/errors';
   import Footer from '$lib/components/footer.svelte';
   import NavBar from '$lib/components/nav-bar.svelte';
   import { userHandler } from '$lib/handlers/user';
   import { createCampaignClient } from '$lib/stores/clients';
-  import { Button, Heading, Hr, Input, Label } from 'flowbite-svelte';
+  import { Input, Label } from 'flowbite-svelte';
   import { onMount } from 'svelte';
   import type { Campaign } from '../../proto/campaigns/v1/campaign_pb';
 
@@ -58,35 +58,42 @@
 
 <NavBar />
 
-<Heading tag="h2" class="px-5 py-3">{isAdmin ? 'All campaigns' : 'Your campaigns'}</Heading>
-<Hr />
-
-<div class="flex flex-col items-center">
-  <form class="flex w-full max-w-md items-end gap-2 px-5" onsubmit={handleCreate}>
-    <Label class="grow space-y-2">
-      <Label for="campaign-name" class="font-bold">Campaign name</Label>
+<Page title={isAdmin ? 'All campaigns' : 'Your campaigns'}>
+  <form class="panel mb-6 flex flex-wrap items-end gap-3" onsubmit={handleCreate}>
+    <div class="min-w-48 grow space-y-2">
+      <Label for="campaign-name" class="text-ink dark:text-ink font-bold">Campaign name</Label>
       <Input id="campaign-name" placeholder="The Fellowship" bind:value={name} />
-    </Label>
-    <Button type="submit" disabled={!isFormValid}>Create</Button>
+    </div>
+    <ActionButton intent="create" type="submit" disabled={!isFormValid}>Create</ActionButton>
   </form>
 
   <ErrorMessage title="Campaigns" error={errorObj} />
 
   {#if campaigns === undefined}
-    <p class="p-4 text-gray-500">Loading campaigns...</p>
+    <p class="text-muted p-4">Loading campaigns...</p>
   {:else if campaigns.length === 0}
-    <p class="p-4 text-gray-500">You are not in any campaigns yet.</p>
+    <p class="text-muted p-4">You are not in any campaigns yet.</p>
   {:else}
-    <Fluid>
+    <ul
+      class="bg-surface border-line divide-line divide-y overflow-hidden rounded-lg border"
+      aria-label="Campaigns"
+    >
       {#each campaigns as campaign (campaign.id)}
-        <SimpleCard
-          href={`/campaigns/view/?id=${encodeURIComponent(campaign.id)}`}
-          title={campaign.name}
-          text={`${campaign.members.length} member${campaign.members.length === 1 ? '' : 's'}`}
-        />
+        <li>
+          <a
+            href={`/campaigns/view/?id=${encodeURIComponent(campaign.id)}`}
+            class="hover:bg-page group flex items-center justify-between gap-4 px-5 py-4 transition-colors"
+          >
+            <span class="text-ink group-hover:text-accent font-semibold">{campaign.name}</span>
+            <span class="text-muted flex shrink-0 items-center gap-2 text-sm">
+              {campaign.members.length} member{campaign.members.length === 1 ? '' : 's'}
+              <span aria-hidden="true">&rsaquo;</span>
+            </span>
+          </a>
+        </li>
       {/each}
-    </Fluid>
+    </ul>
   {/if}
-</div>
+</Page>
 
 <Footer />

@@ -99,12 +99,11 @@ What still has to be built to get Mechanus from "foundation" to "the whole game 
 
 ### M6 — Polish & release
 
-**Goal**: someone else can install Mechanus on a home network and use it. Packaging, the about page and macOS paths are done.
+**Goal**: someone else can install Mechanus on a home network and use it. Packaging, the about page, macOS paths and the client UI polish are done.
 
 - [`add-client-server-discovery`](./changes/add-client-server-discovery/)
 - [`serve-web-client-by-default`](./changes/serve-web-client-by-default/): open question on embedding vs a `web/` folder
 - [`add-user-documentation`](./changes/add-user-documentation/)
-- [`polish-client-ui`](./changes/polish-client-ui/): styling, contrast, dark mode, page fixes (the former `TODO.md`)
 
 ### Cross-cutting
 

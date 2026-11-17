@@ -1,4 +1,5 @@
 <script lang="ts">
+  import Page from '$lib/components/page.svelte';
   import Footer from '$lib/components/footer.svelte';
   import NavBar from '$lib/components/nav-bar.svelte';
   import { Heading } from 'flowbite-svelte';
@@ -18,12 +19,14 @@
 
 <NavBar />
 
-<Heading class="px-3 py-4" tag="h2">Demos and Tools</Heading>
+<Page width="wide">
+  <Heading class="text-ink pb-3" tag="h2">Demos and Tools</Heading>
 
-<Fluid>
-  {#each subpages as { name, path } (name)}
-    <Simple href={path} title={name}></Simple>
-  {/each}
-</Fluid>
+  <Fluid>
+    {#each subpages as { name, path } (name)}
+      <Simple href={path} title={name}></Simple>
+    {/each}
+  </Fluid>
+</Page>
 
 <Footer />
