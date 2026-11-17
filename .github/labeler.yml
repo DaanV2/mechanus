@@ -23,6 +23,10 @@ documentation:
       - any-glob-to-any-file:
           - "**/docs/**"
           - "*.md"
+openspec:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "docs/openspec/**"
 
 dependencies:
   - changed-files:

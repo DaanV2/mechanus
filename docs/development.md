@@ -7,6 +7,10 @@ Install tools:
 - [Go](https://go.dev/)
 - [Docker](https://www.docker.com/)
 - [Nodejs](https://nodejs.org/en)
+- [just](https://github.com/casey/just) — runs the recipes in the `.justfile`s (`just --list`)
+- [OpenSpec](https://github.com/Fission-AI/OpenSpec) — specs and planned changes in [docs/openspec](./openspec/README.md):
+  `npm install -g @fission-ai/openspec@2.1.0` (keep in step with `OPENSPEC_VERSION` in
+  `.github/workflows/openspec-checks.yaml`), then `just spec list`
 
 if you working on frontend check [client/docs/development](../client/docs/development.md).  
 if you working on backend check [server/docs/development](../server/docs/development.md).
