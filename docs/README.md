@@ -11,6 +11,7 @@
 - [getting-started](./getting-started/README.md) — install a release: [Docker image](./getting-started/docker.md) or [binary](./getting-started/binaries.md) (Linux, Windows, macOS)
 - [contributing](./contributing.md)
 - [development](./development.md)
-- [roadmap](./roadmap.md) — milestones, features still to build, open decisions (`TBD`)
+- [roadmap](./roadmap.md) — milestone map of the work still to build
+- [openspec](./openspec/README.md) — specs of current behaviour and changes still to build (OpenSpec)
 - [server/docs](../server/docs/README.md) — supplementary backend reference (settings, traffic diagram, scene→screen flow)
 - [client/docs/development](../client/docs/development.md) — frontend dev commands

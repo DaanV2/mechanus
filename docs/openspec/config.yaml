@@ -1,0 +1,30 @@
+schema: spec-driven
+
+# The OpenSpec root lives in docs/ (docs/openspec/), not the repo root.
+# Run `openspec` from inside docs/, or use `just spec <recipe>` from the repo root.
+
+context: |
+  Mechanus is a local, LAN-only TTRPG game-room system: one Go server per game table drives
+  browser screens (GM, players, TV / table), lights, music and custom devices from "scenes".
+  One running instance serves exactly one room.
+  Scene / room configuration is authored and read-only at runtime; everything that changes
+  during play is scene state, saved per scene when a scene is loaded or exited.
+  There is no rules engine and no dice: only generic game primitives.
+  Until a GM role exists, "GM" actions are allowed for any logged-in user unless a spec says
+  otherwise; admin-only actions need the `admin` role.
+  Architecture docs in docs/architecture/ describe the how; specs describe observable behaviour.
+  Proposals name the roadmap milestone (M0-M6) they belong to; docs/roadmap.md is the
+  milestone index and must link every open change.
+
+rules:
+  proposal:
+    - State the roadmap milestone (M0-M6) in the Why section.
+    - Carry unresolved roadmap decisions (TBD) into design.md Open Questions, never into specs.
+  tasks:
+    - Each task group lands its own tests (Ginkgo for server, Playwright for browser flows) and docs.
+    - Include running the lint checks from CLAUDE.md for every part touched.
+
+operations:
+  archive:
+    guidance:
+      - When archiving, remove or update the change's entry in docs/roadmap.md.

@@ -2,6 +2,7 @@ set windows-shell := ["powershell.exe", "-c"]
 
 mod client
 mod server
+mod spec 'docs/.justfile'
 
 default:
   just --list

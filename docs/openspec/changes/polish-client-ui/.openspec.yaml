@@ -1,0 +1,6 @@
+schema: spec-driven
+created: 2026-11-17
+goal: Client UI polish (from docs/TODO.md)
+affected_areas:
+  - client
+skip_specs: true
