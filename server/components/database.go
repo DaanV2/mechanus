@@ -28,7 +28,7 @@ func SetupDatabase(setupCtx context.Context, dbOptions ...persistence.Option) (*
 }
 
 func setupDatabase(setupCtx context.Context, dbOptions ...persistence.Option) (*persistence.DB, error) {
-	log.Debug("Setting up a database")
+	log.FromContext(setupCtx).Debug("Setting up a database")
 
 	db, err := persistence.NewDB(dbOptions...)
 	if err != nil {
