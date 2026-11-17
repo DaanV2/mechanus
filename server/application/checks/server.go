@@ -33,6 +33,7 @@ func InitializeServer(ctx context.Context, server *components.ServerComponents) 
 	users, err := server.Users.Find(ctx, &models.User{Roles: pq.StringArray{"admin"}})
 	if err != nil {
 		span.RecordError(err)
+		span.End()
 		log.Fatal("error attempting to check if there is an admin account", "error", err)
 	}
 	if len(users) == 0 {

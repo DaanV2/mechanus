@@ -13,6 +13,7 @@ import (
 // SpanLogger starts a new span and returns a context containing the span and a SpanLogger
 func Span(ctx context.Context, name string, attributes ...attribute.KeyValue) (context.Context, trace.Span) {
 	ctx, span := otel.Tracer("default").Start(ctx, name)
+
 	return ctx, span
 }
 
