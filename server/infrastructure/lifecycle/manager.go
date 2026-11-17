@@ -59,10 +59,12 @@ func Register[T any](c *Manager, v T) T {
 func (m *Manager) AfterInitialize(ctx context.Context) error {
 	ctx, cancel := context.WithDeadline(ctx, time.Now().Add(time.Second*30))
 	defer cancel()
+	ctx, span := tracer.Start(ctx, "lifecycle.AfterInitialize")
+	defer span.End()
 
-	return m.afterInitialize.RangeErrorCollect(func(item AfterInitialize) error {
-		return item.AfterInitialize(ctx)
-	})
+	return endSpan(span, m.afterInitialize.RangeErrorCollect(func(item AfterInitialize) error {
+		return traced(ctx, item, item.AfterInitialize)
+	}))
 }
 
 func (m *Manager) AfterShutDown(ctx context.Context) error {
@@ -77,10 +79,12 @@ func (m *Manager) AfterShutDown(ctx context.Context) error {
 func (m *Manager) BeforeShutdown(ctx context.Context) error {
 	ctx, cancel := context.WithDeadline(ctx, time.Now().Add(time.Second*30))
 	defer cancel()
+	ctx, span := tracer.Start(ctx, "lifecycle.BeforeShutdown")
+	defer span.End()
 
-	return m.beforeshutdown.RangeErrorCollect(func(item BeforeShutdown) error {
-		return item.BeforeShutdown(ctx)
-	})
+	return endSpan(span, m.beforeshutdown.RangeErrorCollect(func(item BeforeShutdown) error {
+		return traced(ctx, item, item.BeforeShutdown)
+	}))
 }
 
 func (m *Manager) HealthCheck(ctx context.Context) error {

@@ -65,12 +65,15 @@ func ServerWorkload(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("couldn't setup the server: %w", err)
 	}
 	// Start initial components
-	err = cmpts.Components.AfterInitialize(cmd.Context())
+	startCtx, span, _ := telemetry.SpanLogger(cmd.Context(), "server.start")
+	err = cmpts.Components.AfterInitialize(startCtx)
 	if err != nil {
+		span.End()
 		log.Fatal("errors while performing initialization calls", "error", err)
 	}
 
-	checks.InitializeServer(cmd.Context(), cmpts)
+	checks.InitializeServer(startCtx, cmpts)
+	span.End()
 	server := cmpts.Server
 
 	// Execute

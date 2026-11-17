@@ -17,7 +17,7 @@ func SpanLogger(ctx context.Context, name string, attributes ...attribute.KeyVal
 
 	if len(attributes) > 0 {
 		span.SetAttributes(attributes...)
-		logger = logger.With(otelToCharmlogAttrs(attributes))
+		logger = logger.With(otelToCharmlogAttrs(attributes)...)
 	}
 	logger = logging.InjectTrace(logger, span)
 	ctx = logging.Context(ctx, logger)

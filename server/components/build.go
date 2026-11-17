@@ -36,6 +36,9 @@ func BuildServer(setupCtx context.Context) (*ServerComponents, error) {
 	if err != nil {
 		return nil, err
 	}
+	// Only now the tracer provider exists, gives the setup work (migrations, ...) a parent span
+	setupCtx, span, _ := telemetry.SpanLogger(setupCtx, "server.build")
+	defer span.End()
 
 	// Storage
 	v, dbErr := GetDatabaseOptions()
