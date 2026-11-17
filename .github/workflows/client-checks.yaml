@@ -7,9 +7,48 @@ on:
   workflow_call:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
-  checks:
-    name: 📋 Checks ${{ matrix.os }}
+  # Platform-independent checks only need to run once, on Linux.
+  lint:
+    name: 🔍 Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📦 Checkout Repository
+        uses: actions/checkout@v7
+
+      - name: ⚒️ Setup Node.js Environment
+        uses: actions/setup-node@v7
+        with:
+          cache: npm
+          cache-dependency-path: client/package-lock.json
+          node-version-file: client/package.json
+
+      - name: ⚒️ Setup Project
+        working-directory: client
+        run: npm ci
+
+      # Check-only variants of `npm run lint`, which rewrites files instead of failing.
+      - name: 🎨 Formatting
+        working-directory: client
+        run: npx prettier --check .
+
+      - name: 🔍 Linting
+        working-directory: client
+        run: npx eslint .
+
+      - name: 🔎 Type check
+        working-directory: client
+        run: npm run check
+
+      - name: 📝 Reporting
+        run: |
+          echo "✅ Client lint" >> $GITHUB_STEP_SUMMARY
+
+  build-test:
+    name: 📋 Build & test ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -39,11 +78,6 @@ jobs:
         working-directory: client
         run: npm run test
 
-      - name: 🔍 Linting
-        working-directory: client
-        run: npm run lint
-
       - name: 📝 Reporting
         run: |
           echo "✅ Client - ${{ matrix.os }}" >> $GITHUB_STEP_SUMMARY
-

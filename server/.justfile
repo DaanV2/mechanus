@@ -49,9 +49,19 @@ format:
 lint:
   go tool golangci-lint run -v --fix
 
-# Run all checks: build, test, format, lint, and documentation
+# Report suspicious constructs
+[group('util')]
+vet:
+  go vet ./...
+
+# Scan dependencies and the standard library for known vulnerabilities
+[group('util')]
+vulncheck:
+  go tool govulncheck ./...
+
+# Run all checks: build, vet, test, format, lint, vulnerabilities, and documentation
 [group('test')]
-checks: fix format build test format lint documentation
+checks: fix format build vet test format lint vulncheck documentation
 
 # Generate documentation
 [group('script')]

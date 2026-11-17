@@ -68,8 +68,10 @@ just dev            # docker compose watch
 just server build          # go build ./...
 just server test           # run all tests (Ginkgo, with coverage)
 just server lint           # golangci-lint --fix
+just server vet            # go vet
+just server vulncheck      # govulncheck (deps + standard library)
 just server format         # go fmt
-just server checks         # build + test + format + lint + docs
+just server checks         # build + vet + test + format + lint + vulncheck + docs
 just server start-server   # go run main.go server
 ```
 
@@ -115,8 +117,9 @@ npm run check       # svelte-check + tsc
 - When working on a dedicated branch (i.e. not `main`), always commit your changes once the task is done — don't leave work uncommitted waiting for confirmation.
 - Still ask before committing directly on `main`, and never force-push.
 - **Lint before every commit and PR** — CI fails on lint, so run the checks for each part you touched and fix every reported issue first:
-  - Server: `just server lint` (runs `go tool golangci-lint`, the version pinned in `server/go.mod` — don't use a globally installed `golangci-lint`, which may not match CI or may crash on this Go version) plus `just server test`.
-  - Client: `just client lint` and `npm run check` in `client/`.
+  - Server: `just server lint` (runs `go tool golangci-lint`, the version pinned in `server/go.mod` — don't use a globally installed `golangci-lint`, which may not match CI or may crash on this Go version) plus `just server test`, `just server vet` and `just server vulncheck`.
+  - Client: `just client lint` and `npm run check` in `client/`. CI runs the check-only variants (`prettier --check`, `eslint` without `--fix`), so commit whatever `just client lint` rewrites.
+  - CI layout: lint, type check and govulncheck run once on Linux; build, `go vet` and tests run on Linux, Windows and macOS. A govulncheck hit in the standard library means bumping the `go` directive in `server/go.mod` and `go.work`.
   - Proto: `just proto-lint`.
   - Linter rules worth knowing: Go tests must live in an external `<pkg>_test` package (`testpackage`); expose unexported identifiers to tests through an `export_test.go` in the package itself.
 
