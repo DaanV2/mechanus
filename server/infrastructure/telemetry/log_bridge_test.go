@@ -2,85 +2,76 @@ package telemetry_test
 
 import (
 	"bytes"
-	"context"
-	"log/slog" //nolint:depguard // Required for testing slog.Handler interface
+	"encoding/json"
 	"strings"
 	"time"
 
+	"github.com/DaanV2/mechanus/server/infrastructure/logging"
 	"github.com/DaanV2/mechanus/server/infrastructure/telemetry"
 	"github.com/charmbracelet/log"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"go.opentelemetry.io/otel/attribute"
+	otellog "go.opentelemetry.io/otel/log"
+	"go.opentelemetry.io/otel/trace"
 )
 
 var _ = Describe("LogBridge", func() {
-	Describe("OtelLogHandler", func() {
-		var (
-			buf     *bytes.Buffer
-			logger  *log.Logger
-			handler *telemetry.OtelLogHandler
-			ctx     context.Context
-		)
+	Describe("ToRecord", func() {
+		It("should convert a log entry into a record", func() {
+			now := time.Now()
+			ctx, record := telemetry.ToRecord(&logging.Entry{
+				Time:    now,
+				Level:   log.ErrorLevel,
+				Prefix:  "scenes",
+				Message: "failed to load",
+				Caller:  "scenes/service.go:42",
+				Attrs: []logging.Attr{
+					{Key: "scene", Value: "tavern"},
+					{Key: "attempt", Value: json.Number("2")},
+					{Key: "ratio", Value: json.Number("0.5")},
+					{Key: "ok", Value: false},
+				},
+			})
 
-		BeforeEach(func() {
-			buf = &bytes.Buffer{}
-			logger = log.New(buf)
-			handler = telemetry.NewOtelLogHandler(logger)
-			ctx = context.Background()
+			Expect(trace.SpanContextFromContext(ctx).IsValid()).To(BeFalse())
+			Expect(record.Timestamp()).To(Equal(now))
+			Expect(record.Severity()).To(Equal(otellog.SeverityError))
+			Expect(record.SeverityText()).To(Equal("error"))
+			Expect(record.Body().AsString()).To(Equal("failed to load"))
+
+			attrs := map[attribute.Key]attribute.Value{}
+			record.WalkAttributes(func(kv attribute.KeyValue) bool {
+				attrs[kv.Key] = kv.Value
+
+				return true
+			})
+			Expect(attrs).To(HaveKeyWithValue(attribute.Key("prefix"), attribute.StringValue("scenes")))
+			Expect(attrs).To(HaveKeyWithValue(attribute.Key("caller"), attribute.StringValue("scenes/service.go:42")))
+			Expect(attrs).To(HaveKeyWithValue(attribute.Key("scene"), attribute.StringValue("tavern")))
+			Expect(attrs).To(HaveKeyWithValue(attribute.Key("attempt"), attribute.Int64Value(2)))
+			Expect(attrs).To(HaveKeyWithValue(attribute.Key("ratio"), attribute.Float64Value(0.5)))
+			Expect(attrs).To(HaveKeyWithValue(attribute.Key("ok"), attribute.BoolValue(false)))
 		})
 
-		It("should forward logs to the original handler", func() {
-			record := slog.NewRecord(time.Now(), slog.LevelInfo, "test message", 0)
-			record.AddAttrs(slog.String("key", "value"))
+		It("should correlate the record with the span of the logged ids", func() {
+			ctx, record := telemetry.ToRecord(&logging.Entry{
+				Level:   log.InfoLevel,
+				Message: "traced",
+				Attrs: []logging.Attr{
+					{Key: logging.TraceIDKey, Value: "0102030405060708090a0b0c0d0e0f10"},
+					{Key: logging.SpanIDKey, Value: "0102030405060708"},
+				},
+			})
 
-			err := handler.Handle(ctx, record)
-			Expect(err).ToNot(HaveOccurred())
-
-			// Verify the log was written to the original handler
-			output := buf.String()
-			Expect(output).To(ContainSubstring("test message"))
-		})
-
-		It("should respect the enabled level of the original handler", func() {
-			logger.SetLevel(log.WarnLevel)
-
-			enabled := handler.Enabled(ctx, slog.LevelInfo)
-			Expect(enabled).To(BeFalse())
-
-			enabled = handler.Enabled(ctx, slog.LevelWarn)
-			Expect(enabled).To(BeTrue())
-		})
-
-		It("should support WithAttrs", func() {
-			attrs := []slog.Attr{slog.String("service", "test")}
-			newHandler := handler.WithAttrs(attrs)
-
-			Expect(newHandler).ToNot(BeNil())
-			Expect(newHandler).To(BeAssignableToTypeOf(&telemetry.OtelLogHandler{}))
-		})
-
-		It("should support WithGroup", func() {
-			newHandler := handler.WithGroup("test-group")
-
-			Expect(newHandler).ToNot(BeNil())
-			Expect(newHandler).To(BeAssignableToTypeOf(&telemetry.OtelLogHandler{}))
-		})
-	})
-
-	Describe("WrapLoggerWithOtel", func() {
-		It("should set up the log bridge without panicking", func() {
-			buf := &bytes.Buffer{}
-			logger := log.New(buf)
-
-			// This should not panic
-			Expect(func() {
-				telemetry.WrapLoggerWithOtel(logger)
-			}).ToNot(Panic())
-
-			// After wrapping, slog should still work
-			slog.Info("test message after wrapping")
+			sc := trace.SpanContextFromContext(ctx)
+			Expect(sc.IsValid()).To(BeTrue())
+			Expect(sc.TraceID().String()).To(Equal("0102030405060708090a0b0c0d0e0f10"))
+			Expect(sc.SpanID().String()).To(Equal("0102030405060708"))
+			Expect(record.AttributesLen()).To(BeZero())
 		})
 	})
+
 
 	Describe("Setup with logging enabled", func() {
 		It("should initialize log provider when telemetry is enabled", func(ctx SpecContext) {

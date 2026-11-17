@@ -1,6 +1,7 @@
 package logging
 
 import (
+	"io"
 	"os"
 	"time"
 
@@ -23,6 +24,12 @@ func validateLogger(c *config.Config) error {
 	return err
 }
 
+var (
+	// console prints the lines of the default logger once a sink is set, see [SetSink]
+	console    *log.Logger
+	consoleOut io.Writer = os.Stderr
+)
+
 func SetupLogger() {
 	logOptions := log.Options{
 		TimeFormat:      time.DateTime,
@@ -32,8 +39,10 @@ func SetupLogger() {
 	}
 
 	// Initialize the default logger.
-	logger := log.NewWithOptions(os.Stderr, logOptions)
+	logger := log.NewWithOptions(consoleOut, logOptions)
 	logger.SetStyles(tui.LogStyle())
+
+	console = newConsole(consoleOut)
 
 	log.SetDefault(logger)
 	updateLogger(
@@ -46,6 +55,19 @@ func SetupLogger() {
 	viper.SetOptions(
 		viper.WithLogger(Slog()),
 	)
+}
+
+// newConsole creates the logger that prints the lines of a bridged default logger.
+// Timestamp, level, caller and prefix are handed over by the bridge, so the console adds nothing itself.
+func newConsole(w io.Writer) *log.Logger {
+	c := log.NewWithOptions(w, log.Options{
+		TimeFormat: time.DateTime,
+		Formatter:  log.TextFormatter,
+		Level:      log.DebugLevel,
+	})
+	c.SetStyles(tui.LogStyle())
+
+	return c
 }
 
 func UpdateLogger(reportCaller bool, level, format string) {
@@ -67,16 +89,25 @@ func updateLogger(logger *log.Logger, reportCaller bool, level, format string) {
 	}
 
 	// format
+	var formatter log.Formatter
 	switch format {
 	default:
 		log.Warn("unknown log format, falling back to text, expected text, json or logfmt", "format", format)
 
 		fallthrough
 	case "text", "":
-		logger.SetFormatter(log.TextFormatter)
+		formatter = log.TextFormatter
 	case "json":
-		logger.SetFormatter(log.JSONFormatter)
+		formatter = log.JSONFormatter
 	case "logfmt":
-		logger.SetFormatter(log.LogfmtFormatter)
+		formatter = log.LogfmtFormatter
+	}
+
+	if console != nil {
+		console.SetFormatter(formatter)
+	}
+	// Once bridged the default logger has to stay JSON, the console takes over the format
+	if !isBridged() {
+		logger.SetFormatter(formatter)
 	}
 }

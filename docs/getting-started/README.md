@@ -57,4 +57,4 @@ The server also announces itself on the LAN over mDNS, so apps that browse for s
 - [Integrations](../configuration/integrations.md): lights, music and other devices
 - [Database](../configuration/database.md): use PostgreSQL or MySQL instead of the built-in SQLite
 - [Config file](../configuration/config-file.md): keep settings in a `config.yaml` instead of flags
-- [OpenTelemetry](../configuration/opentelemetry.md): traces and metrics
+- [OpenTelemetry](../configuration/opentelemetry.md): traces, logs and metrics
