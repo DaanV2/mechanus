@@ -57,10 +57,10 @@ func Register[T any](c *Manager, v T) T {
 }
 
 func (m *Manager) AfterInitialize(ctx context.Context) error {
-	ctx, cancel := context.WithDeadline(ctx, time.Now().Add(time.Second*30))
-	defer cancel()
 	ctx, span := tracer.Start(ctx, "lifecycle.AfterInitialize")
 	defer span.End()
+	ctx, cancel := context.WithDeadline(ctx, time.Now().Add(time.Second*30))
+	defer cancel()
 
 	return endSpan(span, m.afterInitialize.RangeErrorCollect(func(item AfterInitialize) error {
 		return traced(ctx, item, item.AfterInitialize)
@@ -68,19 +68,21 @@ func (m *Manager) AfterInitialize(ctx context.Context) error {
 }
 
 func (m *Manager) AfterShutDown(ctx context.Context) error {
+	ctx, span := tracer.Start(ctx, "lifecycle.AfterShutDown")
+	defer span.End()
 	ctx, cancel := context.WithDeadline(ctx, time.Now().Add(time.Second*30))
 	defer cancel()
 
-	return m.aftershutdown.RangeErrorCollect(func(item AfterShutDown) error {
-		return item.AfterShutDown(ctx)
-	})
+	return endSpan(span, m.aftershutdown.RangeErrorCollect(func(item AfterShutDown) error {
+		return traced(ctx, item, item.AfterShutDown)
+	}))
 }
 
 func (m *Manager) BeforeShutdown(ctx context.Context) error {
-	ctx, cancel := context.WithDeadline(ctx, time.Now().Add(time.Second*30))
-	defer cancel()
 	ctx, span := tracer.Start(ctx, "lifecycle.BeforeShutdown")
 	defer span.End()
+	ctx, cancel := context.WithDeadline(ctx, time.Now().Add(time.Second*30))
+	defer cancel()
 
 	return endSpan(span, m.beforeshutdown.RangeErrorCollect(func(item BeforeShutdown) error {
 		return traced(ctx, item, item.BeforeShutdown)
@@ -106,12 +108,14 @@ func (m *Manager) ReadyCheck(ctx context.Context) error {
 }
 
 func (m *Manager) ShutdownCleanup(ctx context.Context) error {
+	ctx, span := tracer.Start(ctx, "lifecycle.ShutdownCleanup")
+	defer span.End()
 	ctx, cancel := context.WithDeadline(ctx, time.Now().Add(time.Second*30))
 	defer cancel()
 
-	return m.shutdownCleanup.RangeErrorCollect(func(item ShutdownCleanup) error {
-		return item.ShutdownCleanup(ctx)
-	})
+	return endSpan(span, m.shutdownCleanup.RangeErrorCollect(func(item ShutdownCleanup) error {
+		return traced(ctx, item, item.ShutdownCleanup)
+	}))
 }
 
 func (m *Manager) Add(components ...any) {
