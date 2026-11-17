@@ -13,13 +13,15 @@ context: |
   Until a GM role exists, "GM" actions are allowed for any logged-in user unless a spec says
   otherwise; admin-only actions need the `admin` role.
   Architecture docs in docs/architecture/ describe the how; specs describe observable behaviour.
-  Proposals name the roadmap milestone (M0-M6) they belong to; docs/roadmap.md is the
-  milestone index and must link every open change.
+  Proposals name the milestone (M0-M6) they belong to; the Milestones section of
+  docs/openspec/README.md is the milestone index and must link every open change.
+  Battle map layer kinds beyond image and entity layers (walls, lights, sound, ...) are added
+  with the feature that needs them.
 
 rules:
   proposal:
-    - State the roadmap milestone (M0-M6) in the Why section.
-    - Carry unresolved roadmap decisions (TBD) into design.md Open Questions, never into specs.
+    - State the milestone (M0-M6) in the Why section.
+    - Carry unresolved decisions into design.md Open Questions, never into specs.
   tasks:
     - Each task group lands its own tests (Ginkgo for server, Playwright for browser flows) and docs.
     - Include running the lint checks from CLAUDE.md for every part touched.
@@ -27,4 +29,4 @@ rules:
 operations:
   archive:
     guidance:
-      - When archiving, remove or update the change's entry in docs/roadmap.md.
+      - When archiving, remove the change from the Milestones section of docs/openspec/README.md.

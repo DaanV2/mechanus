@@ -13,4 +13,4 @@
 
 ## Workflow follow-up
 
-- Archive the change and update its entry in docs/roadmap.md.
+- Archive the change and update its entry in the milestone list in docs/openspec/README.md.
