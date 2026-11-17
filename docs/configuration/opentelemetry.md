@@ -97,7 +97,16 @@ After starting the server with telemetry enabled and an OpenTelemetry Collector 
 5. Select "mechanus-server" from the service dropdown
 6. Click "Find Traces" to view traces
 
-## What is Traced and Logged?
+### Local development (Grafana)
+
+`just dev` also starts [`grafana/otel-lgtm`](../../docker/telemetry.yaml), which receives traces, logs and metrics.
+Open Grafana at http://localhost:3000 (admin / admin), go to **Explore** and pick a data source:
+
+- **Tempo**: traces, search for service `mechanus`
+- **Loki**: logs, query `{service_name="mechanus"}`; a log line with a `trace_id` links to its trace
+- **Prometheus**: metrics, e.g. `http_server_request_duration_seconds_count{job="mechanus"}`
+
+## What is Traced, Logged and Measured?
 
 The OpenTelemetry integration automatically captures:
 
@@ -105,14 +114,27 @@ The OpenTelemetry integration automatically captures:
 
 - **HTTP requests** to both the web and API servers
 - **gRPC/Connect RPC calls** including login, user management, and other services
+- **Database queries** through the GORM plugin
 - **Request context propagation** across service boundaries
 
 ### Logs
 
-- **Application logs** from the charm.sh logger are automatically forwarded to OpenTelemetry
-- Logs include all structured attributes (key-value pairs) from the charm.sh logger
+- **Application logs** from the charm.sh logger are forwarded to OpenTelemetry, the console output stays as configured
+- Logs include all structured attributes (key-value pairs), plus the logger prefix and caller
 - Log severity levels are mapped to OpenTelemetry severity levels
-- Logs and traces can be correlated using trace and span IDs
+- Lines logged through `logging.From(ctx)` while a span is active carry its trace and span id, correlating logs and traces
+
+Under the hood the default logger writes JSON into a bridge (`infrastructure/logging/bridge.go`) that hands every line
+to OpenTelemetry and re-renders it on the console. Loggers derived from `log.Default()` before telemetry is set up are not forwarded.
+
+### Metrics
+
+- **HTTP server**: request duration and body sizes (`http_server_*`)
+- **RPC server**: call duration per procedure and status (`rpc_server_*`)
+- **Database**: connection pool statistics (`go_sql_*`)
+- **Go runtime**: memory, GC, goroutines (`go_*`)
+
+Metrics are pushed every 60 seconds; set `OTEL_METRIC_EXPORT_INTERVAL` (milliseconds) to change that.
 
 ## Production Considerations
 

@@ -8,8 +8,13 @@ import (
 
 type loggerContextKey struct{}
 
-// From returns the possible injected logger in the context
+// From returns the possible injected logger in the context.
+// Once a sink is set, the ids of the active span are added to it as well.
 func From(ctx context.Context) *log.Logger {
+	return withTrace(ctx, from(ctx))
+}
+
+func from(ctx context.Context) *log.Logger {
 	if ctx != nil {
 		v := ctx.Value(loggerContextKey{})
 		if v != nil {

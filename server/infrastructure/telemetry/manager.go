@@ -10,6 +10,7 @@ import (
 	"go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploghttp"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace"
 	sdklog "go.opentelemetry.io/otel/sdk/log"
+	sdkmetric "go.opentelemetry.io/otel/sdk/metric"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 )
 
@@ -26,6 +27,7 @@ type Manager struct {
 	traceExporter *otlptrace.Exporter
 	logProvider   *sdklog.LoggerProvider
 	logExporter   *otlploghttp.Exporter
+	meterProvider *sdkmetric.MeterProvider
 }
 
 // NewManager creates a new telemetry manager
@@ -35,6 +37,7 @@ func NewManager() *Manager {
 		traceExporter: nil,
 		logProvider:   nil,
 		logExporter:   nil,
+		meterProvider: nil,
 	}
 }
 
@@ -42,6 +45,7 @@ func (m *Manager) SetTraceProvider(provider *sdktrace.TracerProvider) { m.traceP
 func (m *Manager) SetExporter(exporter *otlptrace.Exporter)           { m.traceExporter = exporter }
 func (m *Manager) SetLogProvider(provider *sdklog.LoggerProvider)     { m.logProvider = provider }
 func (m *Manager) SetLogExporter(exporter *otlploghttp.Exporter)      { m.logExporter = exporter }
+func (m *Manager) SetMeterProvider(provider *sdkmetric.MeterProvider) { m.meterProvider = provider }
 
 // AfterInitialize is called during the initialization phase
 func (m *Manager) AfterInitialize(ctx context.Context) error {
@@ -56,6 +60,9 @@ func (m *Manager) AfterInitialize(ctx context.Context) error {
 	}
 	if m.logExporter != nil {
 		log.Debug("OpenTelemetry log exporter initialized")
+	}
+	if m.meterProvider != nil {
+		log.Debug("OpenTelemetry meter provider initialized")
 	}
 
 	return nil
@@ -92,6 +99,13 @@ func (m *Manager) AfterShutDown(ctx context.Context) error {
 		log.Debug("Shutting down OpenTelemetry log exporter")
 		if serr := m.logExporter.Shutdown(ctx); serr != nil {
 			err = errors.Join(err, fmt.Errorf("failed to shut down log exporter: %w", serr))
+		}
+	}
+	if m.meterProvider != nil {
+		// Also flushes and shuts down the metric exporter
+		log.Debug("Shutting down OpenTelemetry meter provider")
+		if serr := m.meterProvider.Shutdown(ctx); serr != nil {
+			err = errors.Join(err, fmt.Errorf("failed to shut down meter provider: %w", serr))
 		}
 	}
 

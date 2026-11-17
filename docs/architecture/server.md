@@ -48,7 +48,7 @@ All technical adapters. See dedicated sub-docs for detail:
 | `scenestore`          | Scene config (file storage) and scene state (database) stores  | [scenes.md](./scenes.md#storage-layout)                                   |
 | `servers`             | `net/http` server wrapper with graceful shutdown               | —                                                                         |
 | `storage`             | Generic file / database key-value storage providers            | —                                                                         |
-| `telemetry`           | OpenTelemetry setup; trace HTTP middleware                     | [../../configuration/opentelemetry.md](../configuration/opentelemetry.md) |
+| `telemetry`           | OpenTelemetry setup (traces, logs, metrics); HTTP middleware   | [../../configuration/opentelemetry.md](../configuration/opentelemetry.md) |
 | `transport/cors`      | CORS middleware                                                | —                                                                         |
 | `transport/grpc`      | gRPC interceptors                                              | [communication.md](./communication.md)                                    |
 | `transport/http`      | WebSocket splitter                                             | [communication.md](./communication.md)                                    |
