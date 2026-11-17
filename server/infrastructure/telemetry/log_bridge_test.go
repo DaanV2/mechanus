@@ -3,6 +3,8 @@ package telemetry_test
 import (
 	"bytes"
 	"encoding/json"
+	"net/http"
+	"net/http/httptest"
 	"strings"
 	"time"
 
@@ -71,13 +73,17 @@ var _ = Describe("LogBridge", func() {
 			Expect(record.AttributesLen()).To(BeZero())
 		})
 	})
-
-
 	Describe("Setup with logging enabled", func() {
 		It("should initialize log provider when telemetry is enabled", func(ctx SpecContext) {
+			// Stand-in collector: shutting down flushes the providers, which must not depend on a real one running
+			collector := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+				w.WriteHeader(http.StatusOK)
+			}))
+			DeferCleanup(collector.Close)
+
 			cfg := &telemetry.Config{
 				Enabled:     true,
-				Endpoint:    "localhost:4318",
+				Endpoint:    collector.Listener.Addr().String(),
 				ServiceName: "test-service",
 				Insecure:    true,
 			}
