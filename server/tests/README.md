@@ -16,6 +16,29 @@ The browser end-to-end tests (Playwright) live in [`tests/`](../../tests) at the
 - The assertions are about responses, errors, policies or messages, and the database just has to exist → **component**.
 - No database or other layers needed → **unit**, next to the code.
 
+## Database backends
+
+Component tests always use `util.CreateDatabase`, an in-memory SQLite database.
+
+Integration tests use `util.CreateIntegrationDatabase`, which picks the backend from `TEST_DATABASE_TYPE`:
+
+| `TEST_DATABASE_TYPE` | Database per test |
+| --- | --- |
+| `memory` (default) | A new in-memory SQLite database. This is what `just server test` uses. |
+| `sqlite` | A SQLite file in a temporary directory. |
+| `postgres` | A schema of its own (`test_<random>`), dropped afterwards. The server comes from `TEST_DATABASE_DSN`. |
+
+Run them locally with:
+
+```bash
+just server test-integration            # sqlite
+just server test-postgres-up            # throwaway Postgres on port 55432
+just server test-integration postgres
+just server test-postgres-down
+```
+
+CI runs the integration tests against sqlite and postgres (the `integration` job in `.github/workflows/server-checks.yaml`).
+
 ## Shared helpers
 
-[`util/`](util) holds helpers both suites use, such as `CreateDatabase` (a fresh database per test) and `CreateUser`.
+[`util/`](util) holds helpers both suites use, such as `CreateDatabase` / `CreateIntegrationDatabase` (a fresh database per test) and `CreateUser`.

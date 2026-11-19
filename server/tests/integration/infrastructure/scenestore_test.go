@@ -21,7 +21,7 @@ var _ = Describe("scenestore StateStore", func() {
 	})
 
 	It("round trips scene state through the database", func() {
-		store, err := scenestore.NewDBStateStore(util_test.CreateDatabase(ctx))
+		store, err := scenestore.NewDBStateStore(util_test.CreateIntegrationDatabase(ctx))
 		Expect(err).ToNot(HaveOccurred())
 
 		_, err = store.LoadSceneState(ctx, "cave")

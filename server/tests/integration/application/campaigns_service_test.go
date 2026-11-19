@@ -20,7 +20,7 @@ var _ = Describe("Campaign Service", func() {
 	)
 
 	BeforeEach(func(setupCtx SpecContext) {
-		db = util_test.CreateDatabase(setupCtx)
+		db = util_test.CreateIntegrationDatabase(setupCtx)
 		repo = repositories.NewCampaignRepository(db)
 		userRepo = repositories.NewUserRepository(db)
 		service = application.NewCampaignService(repo)

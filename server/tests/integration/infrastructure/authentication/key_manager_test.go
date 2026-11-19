@@ -15,7 +15,7 @@ var _ = Describe("KeyManager", func() {
 	var provider storage.StorageProvider[*authentication.KeyData]
 
 	BeforeEach(func(setupCtx SpecContext) {
-		provider = storage.DBStorage[*authentication.KeyData](util_test.CreateDatabase(setupCtx))
+		provider = storage.DBStorage[*authentication.KeyData](util_test.CreateIntegrationDatabase(setupCtx))
 	})
 
 	newManager := func() *authentication.KeyManager {

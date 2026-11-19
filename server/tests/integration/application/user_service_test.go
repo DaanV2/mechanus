@@ -21,7 +21,7 @@ var _ = Describe("User Service", func() {
 	)
 
 	BeforeEach(func(setupCtx SpecContext) {
-		db = util_test.CreateDatabase(setupCtx)
+		db = util_test.CreateIntegrationDatabase(setupCtx)
 		repo = repositories.NewUserRepository(db)
 		service = application.NewUserService(repo)
 	})
