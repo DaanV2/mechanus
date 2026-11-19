@@ -85,7 +85,6 @@ func statusOf(ctx context.Context, m *application.DeviceMonitor, id string) devi
 
 var _ = Describe("DeviceMonitor", func() {
 	var (
-		ctx     context.Context
 		room    *devices.Room
 		configs configStore
 		states  *stateStore
@@ -101,7 +100,6 @@ var _ = Describe("DeviceMonitor", func() {
 	}
 
 	BeforeEach(func() {
-		ctx = context.Background()
 		room = devices.NewRoom("room", "Living room")
 		room.AddDevice(&devices.Device{
 			ID:          "lamp",
@@ -138,7 +136,7 @@ var _ = Describe("DeviceMonitor", func() {
 	})
 
 	Context("with drivers for lights and music", func() {
-		It("delivers each instruction kind with its target", func() {
+		It("delivers each instruction kind with its target", func(ctx SpecContext) {
 			_, err := svc.Activate(ctx, "tavern", "")
 			Expect(err).ToNot(HaveOccurred())
 
@@ -151,7 +149,7 @@ var _ = Describe("DeviceMonitor", func() {
 			))
 		})
 
-		It("reports a status for every device in the room, sorted", func() {
+		It("reports a status for every device in the room, sorted", func(ctx SpecContext) {
 			all, err := monitor.Statuses(ctx)
 			Expect(err).ToNot(HaveOccurred())
 
@@ -162,7 +160,7 @@ var _ = Describe("DeviceMonitor", func() {
 			Expect(ids).To(Equal([]string{"fog", "lamp", "lamp-2", "speaker"}))
 		})
 
-		It("describes each device with its kind and the targets it is bound to", func() {
+		It("describes each device with its kind and the targets it is bound to", func(ctx SpecContext) {
 			room.Devices["lamp"].Name = "Ceiling lamp"
 			Expect(room.Bind("combat", "lamp")).To(Succeed())
 
@@ -177,11 +175,11 @@ var _ = Describe("DeviceMonitor", func() {
 	})
 
 	Describe("status", func() {
-		It("is unknown until a device without a check has been instructed", func() {
+		It("is unknown until a device without a check has been instructed", func(ctx SpecContext) {
 			Expect(statusOf(ctx, monitor, "speaker").State).To(Equal(devices.StateUnknown))
 		})
 
-		It("follows the last instruction for a driver that cannot check", func() {
+		It("follows the last instruction for a driver that cannot check", func(ctx SpecContext) {
 			_, err := svc.Activate(ctx, "tavern", "")
 			Expect(err).ToNot(HaveOccurred())
 
@@ -208,7 +206,7 @@ var _ = Describe("DeviceMonitor", func() {
 			Expect(recovered.LastApplyError).To(BeEmpty())
 		})
 
-		It("takes the driver's own check over the last instruction", func() {
+		It("takes the driver's own check over the last instruction", func(ctx SpecContext) {
 			Expect(statusOf(ctx, monitor, "lamp").State).To(Equal(devices.StateOnline), "checked, so known before any instruction")
 
 			lights.unreachable = errors.New("bridge not reachable")
@@ -217,7 +215,7 @@ var _ = Describe("DeviceMonitor", func() {
 			Expect(status.Error).To(Equal("bridge not reachable"))
 		})
 
-		It("says so when a device's integration has no driver", func() {
+		It("says so when a device's integration has no driver", func(ctx SpecContext) {
 			status := statusOf(ctx, monitor, "fog")
 			Expect(status.State).To(Equal(devices.StateOffline))
 			Expect(status.Error).To(Equal(application.ErrNoDriver.Error()))
@@ -225,7 +223,7 @@ var _ = Describe("DeviceMonitor", func() {
 	})
 
 	Describe("a device that does not respond", func() {
-		It("does not hold up the other devices", func() {
+		It("does not hold up the other devices", func(ctx SpecContext) {
 			release := make(chan struct{})
 			music.blocked["speaker"] = release
 
@@ -247,7 +245,7 @@ var _ = Describe("DeviceMonitor", func() {
 			Expect(music.applied).To(HaveLen(1))
 		})
 
-		It("counts as failed after the timeout", func() {
+		It("counts as failed after the timeout", func(ctx SpecContext) {
 			create(time.Millisecond * 20)
 			music.blocked["speaker"] = make(chan struct{})
 
@@ -262,13 +260,11 @@ var _ = Describe("DeviceMonitor", func() {
 
 var _ = Describe("SceneService listeners", func() {
 	var (
-		ctx      context.Context
 		svc      *application.SceneService
 		listener *recordingListener
 	)
 
 	BeforeEach(func() {
-		ctx = context.Background()
 		configs := configStore{
 			"tavern": {ID: "tavern", Variants: []scenes.Variant{{ID: "night"}}},
 			"road":   {ID: "road"},
@@ -279,7 +275,7 @@ var _ = Describe("SceneService listeners", func() {
 		svc.AddListener(listener)
 	})
 
-	It("are told about scene and variant switches", func() {
+	It("are told about scene and variant switches", func(ctx SpecContext) {
 		_, err := svc.Activate(ctx, "tavern", "")
 		Expect(err).ToNot(HaveOccurred())
 		_, err = svc.SetVariant(ctx, "night")
@@ -294,7 +290,7 @@ var _ = Describe("SceneService listeners", func() {
 		Expect(listener.transitions[2].To).To(Equal(scenes.Ref{SceneID: "road"}))
 	})
 
-	It("are not told about changes within a variant", func() {
+	It("are not told about changes within a variant", func(ctx SpecContext) {
 		_, err := svc.Activate(ctx, "tavern", "")
 		Expect(err).ToNot(HaveOccurred())
 		_, err = svc.Adjust(ctx, scenes.Instructions{Lights: map[string]scenes.LightInstruction{"ambient": {On: false}}})

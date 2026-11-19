@@ -10,6 +10,15 @@ The Go server has three kinds of tests. All of them use Ginkgo + Gomega and run 
 
 The browser end-to-end tests (Playwright) live in [`tests/`](../../tests) at the repository root.
 
+```bash
+just server test               # everything, with coverage
+just server test-unit          # only the tests next to the code
+just server test-component     # only server/tests/component
+just server test-integration   # only server/tests/integration (sqlite, see below)
+```
+
+Take the context from Ginkgo (`func(ctx SpecContext)` on `It`, `BeforeEach`, `DeferCleanup` and table bodies) instead of `context.Background()`, so it ends with the spec. The linter (`forbidigo`) enforces this in test files. The context a `BeforeEach` gets is cancelled when that `BeforeEach` returns, so don't keep it in a shared variable for the `It`s: let each `It` take its own.
+
 ## Which one to write
 
 - The assertions are about what ends up in the database, or a query has to be right → **integration**.

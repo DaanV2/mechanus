@@ -16,6 +16,11 @@ linters:
               desc: "Use the standard library errors package instead of github.com/pkg/errors"
             - pkg: "log"
               desc: "Use github.com/charmbracelet/log for structured logging"
+    forbidigo:
+      forbid:
+        # usetesting only covers functions with a *testing.T, not Ginkgo closures. Only applies to tests, see exclusions.
+        - pattern: ^context\.(Background|TODO)$
+          msg: "use the SpecContext Ginkgo passes to the node (func(ctx SpecContext)), so the context ends with the spec"
     nolintlint:
       require-explanation: true
       require-specific: true
@@ -99,6 +104,10 @@ linters:
       - path: "_test\\.go"
         linters:
           - goconst
+      # Production code may start from a background context, tests get theirs from Ginkgo
+      - path-except: "_test\\.go"
+        linters:
+          - forbidigo
   enable:
     - asciicheck
     - bidichk
@@ -116,6 +125,7 @@ linters:
     - exhaustive
     - exptostd
     - fatcontext
+    - forbidigo
     - ginkgolinter
     - gocheckcompilerdirectives
     - goconst

@@ -1,8 +1,6 @@
 package infrastructure_test
 
 import (
-	"context"
-
 	"github.com/DaanV2/mechanus/server/application"
 	"github.com/DaanV2/mechanus/server/engine/scenes"
 	"github.com/DaanV2/mechanus/server/infrastructure/scenestore"
@@ -14,13 +12,7 @@ import (
 var _ application.SceneStateStore = (*scenestore.StateStore)(nil)
 
 var _ = Describe("scenestore StateStore", func() {
-	var ctx context.Context
-
-	BeforeEach(func() {
-		ctx = context.Background()
-	})
-
-	It("round trips scene state through the database", func() {
+	It("round trips scene state through the database", func(ctx SpecContext) {
 		store, err := scenestore.NewDBStateStore(util_test.CreateIntegrationDatabase(ctx))
 		Expect(err).ToNot(HaveOccurred())
 

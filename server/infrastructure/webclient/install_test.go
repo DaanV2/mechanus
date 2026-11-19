@@ -1,7 +1,6 @@
 package webclient_test
 
 import (
-	"context"
 	"io"
 	"net/http"
 	"os"
@@ -33,16 +32,14 @@ func readServed(fsys http.FileSystem, name string) string {
 
 var _ = Describe("Install", func() {
 	var (
-		ctx    context.Context
 		folder string
 	)
 
 	BeforeEach(func() {
-		ctx = context.Background()
 		folder = filepath.Join(GinkgoT().TempDir(), "web")
 	})
 
-	It("creates and fills a missing folder", func() {
+	It("creates and fills a missing folder", func(ctx SpecContext) {
 		served := webclient.Install(ctx, folder, clientFS("v1"))
 
 		Expect(filepath.Join(folder, "index.html")).To(BeAnExistingFile())
@@ -51,7 +48,7 @@ var _ = Describe("Install", func() {
 		Expect(readServed(served, "/index.html")).To(Equal("v1"))
 	})
 
-	It("fills an empty folder", func() {
+	It("fills an empty folder", func(ctx SpecContext) {
 		Expect(os.MkdirAll(folder, 0o750)).To(Succeed())
 
 		served := webclient.Install(ctx, folder, clientFS("v1"))
@@ -60,7 +57,7 @@ var _ = Describe("Install", func() {
 		Expect(filepath.Join(folder, webclient.MarkerFile)).To(BeAnExistingFile())
 	})
 
-	It("replaces a folder filled by another version", func() {
+	It("replaces a folder filled by another version", func(ctx SpecContext) {
 		webclient.Install(ctx, folder, clientFS("v1"))
 		Expect(os.WriteFile(filepath.Join(folder, "stale.js"), []byte("old"), 0o600)).To(Succeed())
 
@@ -70,7 +67,7 @@ var _ = Describe("Install", func() {
 		Expect(filepath.Join(folder, "stale.js")).ToNot(BeAnExistingFile())
 	})
 
-	It("redoes an interrupted install", func() {
+	It("redoes an interrupted install", func(ctx SpecContext) {
 		Expect(os.MkdirAll(folder, 0o750)).To(Succeed())
 		Expect(os.WriteFile(filepath.Join(folder, webclient.MarkerFile), []byte("installing\n"), 0o600)).To(Succeed())
 		Expect(os.WriteFile(filepath.Join(folder, "index.html"), []byte("partial"), 0o600)).To(Succeed())
@@ -80,7 +77,7 @@ var _ = Describe("Install", func() {
 		Expect(readServed(served, "/index.html")).To(Equal("v1"))
 	})
 
-	It("keeps a folder filled by the same version", func() {
+	It("keeps a folder filled by the same version", func(ctx SpecContext) {
 		webclient.Install(ctx, folder, clientFS("v1"))
 		Expect(os.WriteFile(filepath.Join(folder, "extra.txt"), []byte("kept"), 0o600)).To(Succeed())
 
@@ -89,7 +86,7 @@ var _ = Describe("Install", func() {
 		Expect(filepath.Join(folder, "extra.txt")).To(BeAnExistingFile())
 	})
 
-	It("leaves a folder without a marker untouched", func() {
+	It("leaves a folder without a marker untouched", func(ctx SpecContext) {
 		Expect(os.MkdirAll(folder, 0o750)).To(Succeed())
 		Expect(os.WriteFile(filepath.Join(folder, "index.html"), []byte("custom"), 0o600)).To(Succeed())
 
@@ -99,7 +96,7 @@ var _ = Describe("Install", func() {
 		Expect(filepath.Join(folder, webclient.MarkerFile)).ToNot(BeAnExistingFile())
 	})
 
-	It("serves the embedded client when the folder can't be created", func() {
+	It("serves the embedded client when the folder can't be created", func(ctx SpecContext) {
 		file := filepath.Join(GinkgoT().TempDir(), "file")
 		Expect(os.WriteFile(file, []byte("not a folder"), 0o600)).To(Succeed())
 
@@ -108,7 +105,7 @@ var _ = Describe("Install", func() {
 		Expect(readServed(served, "/index.html")).To(Equal("v1"))
 	})
 
-	It("serves the folder as is without an embedded client", func() {
+	It("serves the folder as is without an embedded client", func(ctx SpecContext) {
 		served := webclient.Install(ctx, folder, nil)
 
 		Expect(folder).ToNot(BeADirectory())

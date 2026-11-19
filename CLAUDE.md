@@ -68,6 +68,9 @@ just dev            # docker compose watch
 ```bash
 just server build          # go build ./...
 just server test           # run all tests (Ginkgo, with coverage)
+just server test-unit      # only the unit tests next to the code
+just server test-component # only server/tests/component
+just server test-integration [sqlite|postgres]  # only server/tests/integration, see server/tests/README.md
 just server lint           # golangci-lint --fix
 just server vet            # go vet
 just server vulncheck      # govulncheck (deps + standard library)

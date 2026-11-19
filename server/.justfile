@@ -22,7 +22,17 @@ generate:
 test:
   go tool ginkgo run --vv --output-dir reports --cover --covermode atomic -coverprofile=coverage.out ./...
 
-# Run the integration tests against a database backend: memory, sqlite or postgres.
+# Run only the unit tests: the tests next to the code, without server/tests (see server/tests/README.md)
+[group('test')]
+test-unit:
+  go tool ginkgo run --skip-package=tests ./...
+
+# Run only the component tests (server/tests/component), on an in-memory database
+[group('test')]
+test-component:
+  go tool ginkgo run ./tests/component/...
+
+# Run the integration tests (server/tests/integration) against a database backend: memory, sqlite or postgres.
 # Postgres needs a running server, see `test-postgres-up`.
 [group('test')]
 test-integration $TEST_DATABASE_TYPE="sqlite" $TEST_DATABASE_DSN="host=localhost port=55432 user=mechanus password=mechanus_test dbname=mechanus_test sslmode=disable":

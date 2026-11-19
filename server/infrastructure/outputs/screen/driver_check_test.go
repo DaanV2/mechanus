@@ -46,30 +46,28 @@ func openScreen(ctx context.Context, manager *screens.ScreenManager, screenID st
 
 var _ = Describe("Driver.CheckDevice", func() {
 	var (
-		ctx     context.Context
 		manager *screens.ScreenManager
 		driver  *screen.Driver
 		tv      = &devices.Device{ID: "table-tv", Kind: devices.KindScreen, Integration: devices.IntegrationScreen}
 	)
 
 	BeforeEach(func() {
-		ctx = context.Background()
 		manager = screens.NewScreenManager()
 		driver = screen.NewDriver(manager, assets.NewStore(fstest.MapFS{}))
 	})
 
-	It("is offline while the device has no screen", func() {
+	It("is offline while the device has no screen", func(ctx SpecContext) {
 		Expect(driver.CheckDevice(ctx, tv)).To(MatchError(screen.ErrNotConnected))
 	})
 
-	It("is offline when only a user looks at the device's screen", func() {
+	It("is offline when only a user looks at the device's screen", func(ctx SpecContext) {
 		manager.GetOrCreate(tv.ID)
 		openScreen(ctx, manager, tv.ID, &screens.ConnectionInfo{ID: "user-1", Type: devices.DeviceTypeUser})
 
 		Expect(driver.CheckDevice(ctx, tv)).To(MatchError(screen.ErrNotConnected))
 	})
 
-	It("is online while the device has its screen open, and offline once it closes", func() {
+	It("is online while the device has its screen open, and offline once it closes", func(ctx SpecContext) {
 		closeScreen := openScreen(ctx, manager, tv.ID, &screens.ConnectionInfo{ID: tv.ID, Type: devices.DeviceTypeDevice, DeviceID: tv.ID})
 
 		Expect(driver.CheckDevice(ctx, tv)).To(Succeed())

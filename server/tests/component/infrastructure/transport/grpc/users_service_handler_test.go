@@ -38,8 +38,8 @@ var _ = Describe("UserServiceHandler", func() {
 	})
 
 	// as returns a context authenticated as the session of the claims
-	as := func(claims *authentication.JWTClaims) context.Context {
-		return authentication.ContextWithJWT(context.Background(), claims, true)
+	as := func(ctx context.Context, claims *authentication.JWTClaims) context.Context {
+		return authentication.ContextWithJWT(ctx, claims, true)
 	}
 
 	Describe("Create", func() {
@@ -51,8 +51,8 @@ var _ = Describe("UserServiceHandler", func() {
 
 		It("requires an admin while sign-up is disabled", func(ctx SpecContext) {
 			Expect(create(ctx)).To(HaveConnectCode(connect.CodeUnauthenticated))
-			Expect(create(as(userClaims))).To(HaveConnectCode(connect.CodePermissionDenied))
-			Expect(create(as(adminClaims))).To(Succeed())
+			Expect(create(as(ctx, userClaims))).To(HaveConnectCode(connect.CodePermissionDenied))
+			Expect(create(as(ctx, adminClaims))).To(Succeed())
 		})
 
 		It("allows anyone while sign-up is enabled", func(ctx SpecContext) {
@@ -82,16 +82,16 @@ var _ = Describe("UserServiceHandler", func() {
 			Expect(err).To(HaveConnectCode(connect.CodeUnauthenticated))
 		})
 
-		It("returns full info to the user themselves and admins", func() {
-			for _, ctx := range []context.Context{as(userClaims), as(adminClaims)} {
-				result, err := get(ctx, user.ID)
+		It("returns full info to the user themselves and admins", func(ctx SpecContext) {
+			for _, authCtx := range []context.Context{as(ctx, userClaims), as(ctx, adminClaims)} {
+				result, err := get(authCtx, user.ID)
 				Expect(err).ShouldNot(HaveOccurred())
 				Expect(result.GetRoles()).To(ConsistOf("user"))
 			}
 		})
 
-		It("returns reduced info to other users", func() {
-			result, err := get(as(otherClaims), user.ID)
+		It("returns reduced info to other users", func(ctx SpecContext) {
+			result, err := get(as(ctx, otherClaims), user.ID)
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(result.GetName()).To(Equal(user.Username))
 			Expect(result.GetRoles()).To(BeEmpty())
@@ -103,10 +103,10 @@ var _ = Describe("UserServiceHandler", func() {
 			_, err := handler.List(ctx, connect.NewRequest(&usersv1.ListUsersRequest{}))
 			Expect(err).To(HaveConnectCode(connect.CodeUnauthenticated))
 
-			_, err = handler.List(as(userClaims), connect.NewRequest(&usersv1.ListUsersRequest{}))
+			_, err = handler.List(as(ctx, userClaims), connect.NewRequest(&usersv1.ListUsersRequest{}))
 			Expect(err).To(HaveConnectCode(connect.CodePermissionDenied))
 
-			resp, err := handler.List(as(adminClaims), connect.NewRequest(&usersv1.ListUsersRequest{}))
+			resp, err := handler.List(as(ctx, adminClaims), connect.NewRequest(&usersv1.ListUsersRequest{}))
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(resp.Msg.GetUsers()).To(HaveLen(3))
 		})
@@ -119,12 +119,12 @@ var _ = Describe("UserServiceHandler", func() {
 			return err
 		}
 
-		It("requires an admin", func() {
-			Expect(reset(as(userClaims))).To(HaveConnectCode(connect.CodePermissionDenied))
+		It("requires an admin", func(ctx SpecContext) {
+			Expect(reset(as(ctx, userClaims))).To(HaveConnectCode(connect.CodePermissionDenied))
 		})
 
 		It("signs out every session of the user", func(ctx SpecContext) {
-			Expect(reset(as(adminClaims))).To(Succeed())
+			Expect(reset(as(ctx, adminClaims))).To(Succeed())
 
 			Expect(env.isRevoked(ctx, userClaims.ID)).To(BeTrue())
 		})
@@ -141,14 +141,14 @@ var _ = Describe("UserServiceHandler", func() {
 			Expect(change(ctx, password)).To(HaveConnectCode(connect.CodeUnauthenticated))
 		})
 
-		It("rejects a wrong current password", func() {
-			Expect(change(as(userClaims), "wrong")).To(HaveConnectCode(connect.CodePermissionDenied))
+		It("rejects a wrong current password", func(ctx SpecContext) {
+			Expect(change(as(ctx, userClaims), "wrong")).To(HaveConnectCode(connect.CodePermissionDenied))
 		})
 
 		It("changes the password and signs out the other sessions", func(ctx SpecContext) {
 			_, otherSession := env.loginAs(ctx, user)
 
-			Expect(change(as(userClaims), password)).To(Succeed())
+			Expect(change(as(ctx, userClaims), password)).To(Succeed())
 
 			Expect(env.isRevoked(ctx, userClaims.ID)).To(BeFalse())
 			Expect(env.isRevoked(ctx, otherSession.ID)).To(BeTrue())
@@ -171,13 +171,13 @@ var _ = Describe("UserServiceHandler", func() {
 			return resp.Msg.GetUser(), nil
 		}
 
-		It("requires an admin", func() {
-			_, err := setRoles(as(userClaims), user.ID, "admin")
+		It("requires an admin", func(ctx SpecContext) {
+			_, err := setRoles(as(ctx, userClaims), user.ID, "admin")
 			Expect(err).To(HaveConnectCode(connect.CodePermissionDenied))
 		})
 
 		It("replaces the roles of the user", func(ctx SpecContext) {
-			result, err := setRoles(as(adminClaims), user.ID, "operator", "Viewer", "operator")
+			result, err := setRoles(as(ctx, adminClaims), user.ID, "operator", "Viewer", "operator")
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(result.GetRoles()).To(ConsistOf("operator", "viewer"))
 
@@ -187,13 +187,13 @@ var _ = Describe("UserServiceHandler", func() {
 		})
 
 		DescribeTable("rejects",
-			func(roles []string, self bool, code connect.Code) {
+			func(ctx SpecContext, roles []string, self bool, code connect.Code) {
 				id := user.ID
 				if self {
 					id = admin.ID
 				}
 
-				_, err := setRoles(as(adminClaims), id, roles...)
+				_, err := setRoles(as(ctx, adminClaims), id, roles...)
 				Expect(err).To(HaveConnectCode(code))
 			},
 			Entry("unknown roles", []string{"wizard"}, false, connect.CodeInvalidArgument),
@@ -201,8 +201,8 @@ var _ = Describe("UserServiceHandler", func() {
 			Entry("removing your own admin role", []string{"user"}, true, connect.CodeFailedPrecondition),
 		)
 
-		It("returns not found for an unknown user", func() {
-			_, err := setRoles(as(adminClaims), "does-not-exist", "user")
+		It("returns not found for an unknown user", func(ctx SpecContext) {
+			_, err := setRoles(as(ctx, adminClaims), "does-not-exist", "user")
 			Expect(err).To(HaveConnectCode(connect.CodeNotFound))
 		})
 	})

@@ -38,8 +38,8 @@ var _ = Describe("InviteServiceHandler", func() {
 		_, userClaims = env.loginAs(ctx, env.createUser(ctx, password, "user"))
 	})
 
-	as := func(claims *authentication.JWTClaims) context.Context {
-		return authentication.ContextWithJWT(context.Background(), claims, true)
+	as := func(ctx context.Context, claims *authentication.JWTClaims) context.Context {
+		return authentication.ContextWithJWT(ctx, claims, true)
 	}
 
 	create := func(ctx context.Context, validFor time.Duration) (*usersv1.Invite, error) {
@@ -71,17 +71,17 @@ var _ = Describe("InviteServiceHandler", func() {
 		It("requires an admin", func(ctx SpecContext) {
 			_, err := create(ctx, 0)
 			Expect(err).To(HaveConnectCode(connect.CodeUnauthenticated))
-			_, err = create(as(userClaims), 0)
+			_, err = create(as(ctx, userClaims), 0)
 			Expect(err).To(HaveConnectCode(connect.CodePermissionDenied))
 		})
 
-		It("uses the default duration, and caps long ones", func() {
-			invite, err := create(as(adminClaims), 0)
+		It("uses the default duration, and caps long ones", func(ctx SpecContext) {
+			invite, err := create(as(ctx, adminClaims), 0)
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(invite.GetExpiresAt().AsTime()).To(BeTemporally("~", time.Now().Add(time.Hour), time.Minute))
 			Expect(invite.GetCreatedBy()).To(Equal(adminClaims.User.ID))
 
-			invite, err = create(as(adminClaims), 365*24*time.Hour)
+			invite, err = create(as(ctx, adminClaims), 365*24*time.Hour)
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(invite.GetExpiresAt().AsTime()).To(BeTemporally("~", time.Now().Add(application.MaxInviteDuration), time.Minute))
 		})
@@ -89,28 +89,28 @@ var _ = Describe("InviteServiceHandler", func() {
 
 	Describe("List and Revoke", func() {
 		It("require an admin", func(ctx SpecContext) {
-			_, err := handler.List(as(userClaims), connect.NewRequest(&usersv1.ListInvitesRequest{}))
+			_, err := handler.List(as(ctx, userClaims), connect.NewRequest(&usersv1.ListInvitesRequest{}))
 			Expect(err).To(HaveConnectCode(connect.CodePermissionDenied))
 			_, err = handler.Revoke(ctx, connect.NewRequest(&usersv1.RevokeInviteRequest{Id: "x"}))
 			Expect(err).To(HaveConnectCode(connect.CodeUnauthenticated))
 		})
 
 		It("lists only usable invites, and revoked invites can't be used", func(ctx SpecContext) {
-			kept, err := create(as(adminClaims), 0)
+			kept, err := create(as(ctx, adminClaims), 0)
 			Expect(err).ShouldNot(HaveOccurred())
-			revoked, err := create(as(adminClaims), 0)
+			revoked, err := create(as(ctx, adminClaims), 0)
 			Expect(err).ShouldNot(HaveOccurred())
-			used, err := create(as(adminClaims), 0)
+			used, err := create(as(ctx, adminClaims), 0)
 			Expect(err).ShouldNot(HaveOccurred())
 			_, err = accept(ctx, used.GetId(), "user_"+util_test.CreateUserID())
 			Expect(err).ShouldNot(HaveOccurred())
 
-			_, err = handler.Revoke(as(adminClaims), connect.NewRequest(&usersv1.RevokeInviteRequest{Id: revoked.GetId()}))
+			_, err = handler.Revoke(as(ctx, adminClaims), connect.NewRequest(&usersv1.RevokeInviteRequest{Id: revoked.GetId()}))
 			Expect(err).ShouldNot(HaveOccurred())
-			_, err = handler.Revoke(as(adminClaims), connect.NewRequest(&usersv1.RevokeInviteRequest{Id: revoked.GetId()}))
+			_, err = handler.Revoke(as(ctx, adminClaims), connect.NewRequest(&usersv1.RevokeInviteRequest{Id: revoked.GetId()}))
 			Expect(err).To(HaveConnectCode(connect.CodeNotFound))
 
-			resp, err := handler.List(as(adminClaims), connect.NewRequest(&usersv1.ListInvitesRequest{}))
+			resp, err := handler.List(as(ctx, adminClaims), connect.NewRequest(&usersv1.ListInvitesRequest{}))
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(resp.Msg.GetInvites()).To(HaveLen(1))
 			Expect(resp.Msg.GetInvites()[0].GetId()).To(Equal(kept.GetId()))
@@ -123,7 +123,7 @@ var _ = Describe("InviteServiceHandler", func() {
 
 	Describe("Accept", func() {
 		It("creates a user account without login, once", func(ctx SpecContext) {
-			invite, err := create(as(adminClaims), 0)
+			invite, err := create(as(ctx, adminClaims), 0)
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(check(ctx, invite.GetId())).To(BeTrue())
 
@@ -157,7 +157,7 @@ var _ = Describe("InviteServiceHandler", func() {
 		})
 
 		It("keeps the invite usable when the username is taken", func(ctx SpecContext) {
-			invite, err := create(as(adminClaims), 0)
+			invite, err := create(as(ctx, adminClaims), 0)
 			Expect(err).ShouldNot(HaveOccurred())
 			taken := env.createUser(ctx, password, "user")
 
@@ -167,7 +167,7 @@ var _ = Describe("InviteServiceHandler", func() {
 		})
 
 		It("requires a username and password", func(ctx SpecContext) {
-			invite, err := create(as(adminClaims), 0)
+			invite, err := create(as(ctx, adminClaims), 0)
 			Expect(err).ShouldNot(HaveOccurred())
 
 			_, err = accept(ctx, invite.GetId(), "")
@@ -176,7 +176,7 @@ var _ = Describe("InviteServiceHandler", func() {
 		})
 
 		It("lets only one of concurrent accepts use the invite", func(ctx SpecContext) {
-			invite, err := create(as(adminClaims), 0)
+			invite, err := create(as(ctx, adminClaims), 0)
 			Expect(err).ShouldNot(HaveOccurred())
 
 			const attempts = 5

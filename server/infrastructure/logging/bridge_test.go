@@ -2,7 +2,6 @@ package logging_test
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"errors"
 	"sync"
@@ -71,12 +70,12 @@ var _ = Describe("Bridge", func() {
 		Expect(console.String()).To(BeEmpty())
 	})
 
-	It("should add the ids of the active span, without printing them", func() {
+	It("should add the ids of the active span, without printing them", func(specCtx SpecContext) {
 		traceID, err := trace.TraceIDFromHex("0102030405060708090a0b0c0d0e0f10")
 		Expect(err).ToNot(HaveOccurred())
 		spanID, err := trace.SpanIDFromHex("0102030405060708")
 		Expect(err).ToNot(HaveOccurred())
-		ctx := trace.ContextWithSpanContext(context.Background(), trace.NewSpanContext(trace.SpanContextConfig{
+		ctx := trace.ContextWithSpanContext(specCtx, trace.NewSpanContext(trace.SpanContextConfig{
 			TraceID: traceID,
 			SpanID:  spanID,
 		}))
@@ -92,8 +91,8 @@ var _ = Describe("Bridge", func() {
 		Expect(console.String()).ToNot(ContainSubstring(traceID.String()))
 	})
 
-	It("should not add span ids without an active span", func() {
-		logging.From(context.Background()).Info("untraced")
+	It("should not add span ids without an active span", func(ctx SpecContext) {
+		logging.From(ctx).Info("untraced")
 
 		Expect(entries).To(HaveLen(1))
 		Expect(entries[0].Attrs).To(BeEmpty())
