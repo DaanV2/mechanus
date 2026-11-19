@@ -117,8 +117,14 @@ func (d *dbStorage[T]) Set(ctx context.Context, item T) error {
 func (d *dbStorage[T]) Keys(ctx context.Context) iter.Seq[string] {
 	return func(yield func(string) bool) {
 		var kvs []models.KeyValue
-		tx := d.db.WithContext(ctx).Where("`key` LIKE ?", d.prefix+"%").Select("key").Find(&kvs)
+		// clause.Like quotes the column for the dialect: `key` is MySQL only and a syntax error on Postgres
+		tx := d.db.WithContext(ctx).
+			Where(clause.Like{Column: clause.Column{Name: "key"}, Value: d.prefix + "%"}).
+			Select("key").
+			Find(&kvs)
 		if tx.Error != nil {
+			logging.FromPrefix(ctx, "db-storage").Error("listing keys", "prefix", d.prefix, "error", tx.Error)
+
 			return
 		}
 		for _, kv := range kvs {
