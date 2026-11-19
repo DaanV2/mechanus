@@ -11,6 +11,7 @@ import (
 	"slices"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/DaanV2/mechanus/server/engine/devices"
 	"github.com/DaanV2/mechanus/server/engine/scenes"
@@ -50,16 +51,16 @@ type FileError struct {
 //
 // Scene files are read on demand: [ConfigStore.ListSceneConfigs] scans the scenes folder on every call
 // and [ConfigStore.GetSceneConfig] reads the file of the scene asked for, so added, edited or removed
-// scenes are picked up without a restart. The room file is read once by [ConfigStore.Load]. Nothing
-// is watched: an active scene keeps the configuration it was activated with. Files that fail to load
+// scenes are picked up without a restart. [ConfigStore.CurrentRoom] reads the room file the same way,
+// only parsing it again when its name, size or modification time changed. Nothing is watched: an
+// active scene keeps the configuration it was activated with. Files that fail to load
 // are skipped and reported by [ConfigStore.Errors].
 type ConfigStore struct {
 	dir    string // The app config dir; scene and room folders are below it
 	roomID string
 
 	lock        sync.RWMutex
-	room        *devices.Room
-	roomErrors  map[string]error // Relative file path -> error
+	room        roomRead
 	sceneErrors map[string]error // Relative file path -> error, from the last scan of the scenes folder
 }
 
@@ -74,7 +75,6 @@ func NewConfigStore(dir, roomID string) *ConfigStore {
 	return &ConfigStore{
 		dir:         dir,
 		roomID:      roomID,
-		roomErrors:  map[string]error{},
 		sceneErrors: map[string]error{},
 	}
 }
@@ -101,33 +101,23 @@ func NewFileConfigStore(ctx context.Context, roomID string) (*ConfigStore, error
 }
 
 // Load reads the room file and scans the scenes folder, logging the files that cannot be loaded. They
-// are skipped and reported by [ConfigStore.Errors].
+// are skipped and reported by [ConfigStore.Errors]. Later reads happen on demand.
 func (c *ConfigStore) Load(ctx context.Context) {
-	room, file, err := c.loadRoom(c.filesFor(ctx, roomsFolder, c.roomID))
-	roomErrs := map[string]error{}
-	if err != nil {
-		roomErrs[file] = err
-		ConfigLogger.From(ctx).Warn("room config could not be loaded, skipping it", "file", file, "error", err)
-	}
-
-	c.lock.Lock()
-	c.room, c.roomErrors = room, roomErrs
-	c.lock.Unlock()
-
+	_, _ = c.CurrentRoom(ctx)
 	_, sceneErrs := c.scanScenes(ctx)
 	for file, err := range sceneErrs {
 		ConfigLogger.From(ctx).Warn("scene config could not be loaded, skipping it", "file", file, "error", err)
 	}
 }
 
-// Errors returns the config files that could not be loaded, sorted by file: the room file as read by
-// [ConfigStore.Load], and the scene files as found by the last scan of the scenes folder.
+// Errors returns the config files that could not be loaded, sorted by file, as found by the last read
+// of the room file and the last scan of the scenes folder.
 func (c *ConfigStore) Errors() []FileError {
 	c.lock.RLock()
 	defer c.lock.RUnlock()
 
-	result := make([]FileError, 0, len(c.roomErrors)+len(c.sceneErrors))
-	for _, errs := range []map[string]error{c.roomErrors, c.sceneErrors} {
+	result := make([]FileError, 0, len(c.room.err)+len(c.sceneErrors))
+	for _, errs := range []map[string]error{c.room.err, c.sceneErrors} {
 		for file, err := range errs {
 			result = append(result, FileError{File: file, Message: err.Error()})
 		}
@@ -156,9 +146,11 @@ func (c *ConfigStore) GetSceneConfig(ctx context.Context, sceneID string) (*scen
 	return cfg, nil
 }
 
-// ListSceneConfigs implements application.SceneConfigStore. It scans the scenes folder on every call.
-// Scene files that cannot be loaded are not listed; see [ConfigStore.Errors].
+// ListSceneConfigs implements application.SceneConfigStore. It scans the scenes folder on every call,
+// and checks the room file too, so [ConfigStore.Errors] is up to date for both afterwards. Scene files
+// that cannot be loaded are not listed.
 func (c *ConfigStore) ListSceneConfigs(ctx context.Context) ([]*scenes.Config, error) {
+	_, _ = c.CurrentRoom(ctx)
 	result, _ := c.scanScenes(ctx)
 
 	return result, nil
@@ -188,17 +180,65 @@ func (c *ConfigStore) scanScenes(ctx context.Context) (configs []*scenes.Config,
 	return configs, errs
 }
 
-// CurrentRoom implements application.RoomConfigStore. A room that is not set up yet has no devices:
-// scenes can still be activated, nothing is instructed.
-func (c *ConfigStore) CurrentRoom(_ context.Context) (*devices.Room, error) {
-	c.lock.RLock()
-	defer c.lock.RUnlock()
+// roomRead is the room file as last read, see [ConfigStore.CurrentRoom].
+type roomRead struct {
+	stamp []fileStamp      // The room file candidates at the time of reading
+	room  *devices.Room    // Nil when there is no (valid) room file
+	err   map[string]error // Relative file path -> error
+}
 
-	if c.room == nil {
+// fileStamp identifies a version of a file without reading it.
+type fileStamp struct {
+	rel     string
+	size    int64
+	modTime time.Time
+}
+
+// CurrentRoom implements application.RoomConfigStore. It checks the room file on every call and parses
+// it again when its name, size or modification time changed. A room that is not set up yet, or whose
+// file cannot be loaded (see [ConfigStore.Errors]), has no devices: scenes can still be activated,
+// nothing is instructed.
+func (c *ConfigStore) CurrentRoom(ctx context.Context) (*devices.Room, error) {
+	files := c.filesFor(ctx, roomsFolder, c.roomID)
+	stamp := stampFiles(files)
+
+	c.lock.RLock()
+	cached := c.room
+	c.lock.RUnlock()
+
+	if cached.stamp == nil || !slices.Equal(cached.stamp, stamp) {
+		room, file, err := c.loadRoom(files)
+		cached = roomRead{stamp: stamp, room: room, err: map[string]error{}}
+		if err != nil {
+			cached.err[file] = err
+			ConfigLogger.From(ctx).Warn("room config could not be loaded, skipping it", "file", file, "error", err)
+		}
+
+		c.lock.Lock()
+		c.room = cached
+		c.lock.Unlock()
+	}
+
+	if cached.room == nil {
 		return devices.NewRoom(c.roomID, ""), nil
 	}
 
-	return c.room, nil
+	return cached.room, nil
+}
+
+// stampFiles stamps config file candidates; a file that cannot be read is stamped as missing. The
+// result is never nil, so an empty folder is a valid stamp too.
+func stampFiles(files []configFile) []fileStamp {
+	result := make([]fileStamp, 0, len(files))
+	for _, f := range files {
+		s := fileStamp{rel: f.rel}
+		if info, err := os.Stat(f.abs); err == nil {
+			s.size, s.modTime = info.Size(), info.ModTime()
+		}
+		result = append(result, s)
+	}
+
+	return result
 }
 
 // loadScene decodes the file of a scene.

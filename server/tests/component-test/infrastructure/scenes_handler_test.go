@@ -100,6 +100,22 @@ instructions:
 		Expect(screenView().GetAsset().GetUrl()).To(HavePrefix("/assets/scenes/cave/maps/cave2.png?v="))
 	})
 
+	It("uses the room file as it is now when a scene is activated", func(ctx SpecContext) {
+		room := devices.NewRoom(scenestore.RoomID, "Living room")
+		room.AddDevice(&devices.Device{ID: "tv", Kind: devices.KindScreen, Integration: devices.IntegrationScreen})
+		room.AddDevice(&devices.Device{ID: "tv2", Kind: devices.KindScreen, Integration: devices.IntegrationScreen})
+		Expect(room.Bind("table", "tv")).To(Succeed())
+		Expect(room.Bind("table", "tv2")).To(Succeed())
+		util_test.WriteConfigFile(configDir, "rooms/room.json", room)
+
+		_, err := handler.Activate(userContext(ctx), connect.NewRequest(&scenesv1.ActivateSceneRequest{SceneId: "cave"}))
+		Expect(err).ToNot(HaveOccurred())
+
+		h, ok := screenManager.Get("tv2")
+		Expect(ok).To(BeTrue(), "the tv added to the room file should have been instructed")
+		Expect(h.State().GetView().GetKind()).To(Equal(screensv1.ViewKind_VIEW_KIND_BATTLEMAP))
+	})
+
 	It("lists the configured scenes with their variants", func(ctx SpecContext) {
 		resp, err := handler.List(userContext(ctx), connect.NewRequest(&scenesv1.ListScenesRequest{}))
 		Expect(err).ToNot(HaveOccurred())

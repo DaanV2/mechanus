@@ -222,6 +222,56 @@ variants:
 			})
 		})
 
+		Describe("reading the room file on demand", func() {
+			roomName := func() string {
+				GinkgoHelper()
+				r, err := store.CurrentRoom(ctx)
+				Expect(err).ToNot(HaveOccurred())
+
+				return r.Name
+			}
+
+			It("picks up an edited room file", func() {
+				util_test.WriteConfigFile(dir, "rooms/living-room.json", devices.NewRoom("living-room", "Game room"))
+				Expect(roomName()).To(Equal("Game room"))
+			})
+
+			It("does not parse an unchanged room file again", func() {
+				first, err := store.CurrentRoom(ctx)
+				Expect(err).ToNot(HaveOccurred())
+				second, err := store.CurrentRoom(ctx)
+				Expect(err).ToNot(HaveOccurred())
+				Expect(second).To(BeIdenticalTo(first))
+			})
+
+			It("picks up a room file added after start", func() {
+				attic := scenestore.NewConfigStore(dir, "attic")
+				attic.Load(ctx)
+				util_test.WriteRawFile(dir, "rooms/attic.yaml", "version: 1\nname: Attic")
+
+				r, err := attic.CurrentRoom(ctx)
+				Expect(err).ToNot(HaveOccurred())
+				Expect(r.Name).To(Equal("Attic"))
+			})
+
+			It("treats a removed room file as an empty room", func() {
+				Expect(os.Remove(filepath.Join(dir, "rooms", "living-room.json"))).To(Succeed())
+				Expect(roomName()).To(BeEmpty())
+			})
+
+			It("skips an invalid room file, reports it when scenes are listed, and picks it up once fixed", func() {
+				util_test.WriteRawFile(dir, "rooms/living-room.json", `{"version": 1, "name": `)
+				_, err := store.ListSceneConfigs(ctx)
+				Expect(err).ToNot(HaveOccurred())
+				Expect(store.Errors()).To(ConsistOf(HaveField("File", "rooms/living-room.json")))
+				Expect(roomName()).To(BeEmpty())
+
+				util_test.WriteConfigFile(dir, "rooms/living-room.json", devices.NewRoom("living-room", "Fixed room"))
+				Expect(roomName()).To(Equal("Fixed room"))
+				Expect(store.Errors()).To(BeEmpty())
+			})
+		})
+
 		Describe("reading scene files on demand", func() {
 			listed := func() []string {
 				GinkgoHelper()
