@@ -189,12 +189,12 @@ Not covered by the framework: the Spotify OAuth flow on a LAN-only server is sti
 
 | Data          | Provider                                     | Location                                  |
 | ------------- | -------------------------------------------- | ----------------------------------------- |
-| Scene configs | `scenestore.ConfigStore` (YAML / JSON, watched) | `<app config dir>/scenes/<scene id>.yaml` |
-| Rooms         | `scenestore.ConfigStore` (YAML / JSON, watched) | `<app config dir>/rooms/<room id>.yaml`   |
+| Scene configs | `scenestore.ConfigStore` (YAML / JSON)       | `<app config dir>/scenes/<scene id>.yaml` |
+| Rooms         | `scenestore.ConfigStore` (YAML / JSON)       | `<app config dir>/rooms/<room id>.yaml`   |
 | Battle maps   | `assets.Store.Open`, read by the screen driver | `<app config dir>/scenes/<scene id>/.../*.map.json` |
 | Scene states  | `NamedDBStorage[*scenes.State](db, "scene")` | `key_values` row `state/scene/<scene id>` |
 
-Config files are YAML or JSON (by extension) with a `version` field; older versions are migrated in memory (`scenestore.SceneMigrations` / `RoomMigrations`), see [scene-files.md](../configuration/scene-files.md). `ConfigStore` loads every file at start, watches the folders (fsnotify) and reloads changed files: an invalid file keeps its last good version and is listed by `ConfigStore.Errors` (returned in `scenes/v1.ListScenesResponse.config_errors`), a changed active scene or room is re-applied through `SceneService.SceneConfigChanged` / `RoomConfigChanged`. Rows contain JSON. Scene and room IDs are file names, so `ConfigStore` only accepts `[A-Za-z0-9_-]` IDs and checks that a file's `id`, when given, matches its name.
+Config files are YAML or JSON (by extension) with a `version` field; older versions are migrated in memory (`scenestore.SceneMigrations` / `RoomMigrations`), see [scene-files.md](../configuration/scene-files.md). `ConfigStore` reads scene and room files on demand (`ListSceneConfigs` scans the folder, `GetSceneConfig` reads one file, so activating or resetting a scene uses the file as it is now; `CurrentRoom` checks the room file on every call and parses it again when its name, size or modification time changed); nothing is watched and the active scene is not re-instructed when its file changes. An invalid file is skipped and listed by `ConfigStore.Errors` (returned in `scenes/v1.ListScenesResponse.config_errors`). Rows contain JSON. Scene and room IDs are file names, so `ConfigStore` only accepts `[A-Za-z0-9_-]` IDs and checks that a file's `id`, when given, matches its name.
 
 ## Outputs
 

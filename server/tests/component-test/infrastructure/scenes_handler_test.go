@@ -64,16 +64,6 @@ var _ = Describe("SceneServiceHandler", func() {
 			monitor.Track(screen.NewDriver(screenManager, assetStore)),
 		)
 		handler = grpc.NewSceneServiceHandler(sceneService, monitor, configStore)
-		// As wired in components: reloaded config files re-instruct the devices
-		configStore.AddListener(func(ctx context.Context, change scenestore.ConfigChange) {
-			var err error
-			if change.Room {
-				_, err = sceneService.RoomConfigChanged(ctx)
-			} else {
-				_, err = sceneService.SceneConfigChanged(ctx, change.SceneID)
-			}
-			Expect(err).ToNot(HaveOccurred())
-		})
 		userContext = withUser(util_test.CreateUser())
 	})
 
@@ -85,71 +75,45 @@ var _ = Describe("SceneServiceHandler", func() {
 		return h.State().GetView()
 	}
 
-	Describe("reloaded config files", func() {
-		BeforeEach(func(ctx SpecContext) {
-			_, err := handler.Activate(userContext(ctx), connect.NewRequest(&scenesv1.ActivateSceneRequest{SceneId: "cave"}))
-			Expect(err).ToNot(HaveOccurred())
-		})
+	It("lists config files that cannot be loaded, also ones added while running", func(ctx SpecContext) {
+		util_test.WriteRawFile(configDir, "scenes/broken.yaml", "version: 1\ninstructions: [")
 
-		It("re-instructs the screen when the active scene's file changed", func(ctx SpecContext) {
-			util_test.WriteRawFile(configDir, "scenes/cave.yaml", `
+		resp, err := handler.List(userContext(ctx), connect.NewRequest(&scenesv1.ListScenesRequest{}))
+		Expect(err).ToNot(HaveOccurred())
+		Expect(resp.Msg.GetScenes()).To(HaveLen(1), "the invalid scene is skipped")
+		Expect(resp.Msg.GetConfigErrors()).To(HaveLen(1))
+		Expect(resp.Msg.GetConfigErrors()[0].GetFile()).To(Equal("scenes/broken.yaml"))
+		Expect(resp.Msg.GetConfigErrors()[0].GetMessage()).To(ContainSubstring("YAML"))
+	})
+
+	It("activates a scene as its file is now", func(ctx SpecContext) {
+		util_test.WriteRawFile(configDir, "scenes/cave.yaml", `
 version: 1
 name: Cave
 instructions:
   screens:
     table: { view: battlemap, asset: maps/cave2.png }
 `)
-			configStore.Reload(ctx, "scenes/cave.yaml")
+		_, err := handler.Activate(userContext(ctx), connect.NewRequest(&scenesv1.ActivateSceneRequest{SceneId: "cave"}))
+		Expect(err).ToNot(HaveOccurred())
 
-			Expect(screenView().GetAsset().GetUrl()).To(HavePrefix("/assets/scenes/cave/maps/cave2.png?v="))
-		})
+		Expect(screenView().GetAsset().GetUrl()).To(HavePrefix("/assets/scenes/cave/maps/cave2.png?v="))
+	})
 
-		It("keeps the screen as it is when the edited file is invalid, and reports it in the list", func(ctx SpecContext) {
-			util_test.WriteRawFile(configDir, "scenes/cave.yaml", "version: 1\ninstructions: [")
-			configStore.Reload(ctx, "scenes/cave.yaml")
+	It("uses the room file as it is now when a scene is activated", func(ctx SpecContext) {
+		room := devices.NewRoom(scenestore.RoomID, "Living room")
+		room.AddDevice(&devices.Device{ID: "tv", Kind: devices.KindScreen, Integration: devices.IntegrationScreen})
+		room.AddDevice(&devices.Device{ID: "tv2", Kind: devices.KindScreen, Integration: devices.IntegrationScreen})
+		Expect(room.Bind("table", "tv")).To(Succeed())
+		Expect(room.Bind("table", "tv2")).To(Succeed())
+		util_test.WriteConfigFile(configDir, "rooms/room.json", room)
 
-			Expect(screenView().GetAsset().GetUrl()).To(HavePrefix("/assets/scenes/cave/maps/cave.png?v="))
-			resp, err := handler.List(userContext(ctx), connect.NewRequest(&scenesv1.ListScenesRequest{}))
-			Expect(err).ToNot(HaveOccurred())
-			Expect(resp.Msg.GetScenes()).To(HaveLen(1), "the last good version is still listed")
-			Expect(resp.Msg.GetConfigErrors()).To(HaveLen(1))
-			Expect(resp.Msg.GetConfigErrors()[0].GetFile()).To(Equal("scenes/cave.yaml"))
-			Expect(resp.Msg.GetConfigErrors()[0].GetMessage()).To(ContainSubstring("YAML"))
-		})
+		_, err := handler.Activate(userContext(ctx), connect.NewRequest(&scenesv1.ActivateSceneRequest{SceneId: "cave"}))
+		Expect(err).ToNot(HaveOccurred())
 
-		It("falls back to the default variant when the active variant was removed", func(ctx SpecContext) {
-			_, err := handler.SetVariant(userContext(ctx), connect.NewRequest(&scenesv1.SetVariantRequest{VariantId: "dark"}))
-			Expect(err).ToNot(HaveOccurred())
-			Expect(screenView().GetKind()).To(Equal(screensv1.ViewKind_VIEW_KIND_BLANK))
-
-			util_test.WriteRawFile(configDir, "scenes/cave.yaml", `
-version: 1
-name: Cave
-instructions:
-  screens:
-    table: { view: battlemap, asset: maps/cave.png }
-`)
-			configStore.Reload(ctx, "scenes/cave.yaml")
-
-			Expect(screenView().GetKind()).To(Equal(screensv1.ViewKind_VIEW_KIND_BATTLEMAP))
-			active, err := handler.GetActive(userContext(ctx), connect.NewRequest(&scenesv1.GetActiveSceneRequest{}))
-			Expect(err).ToNot(HaveOccurred())
-			Expect(active.Msg.GetActive().GetVariantId()).To(BeEmpty())
-		})
-
-		It("instructs a screen that the reloaded room newly binds", func(ctx SpecContext) {
-			room := devices.NewRoom(scenestore.RoomID, "Living room")
-			room.AddDevice(&devices.Device{ID: "tv", Kind: devices.KindScreen, Integration: devices.IntegrationScreen})
-			room.AddDevice(&devices.Device{ID: "tv2", Kind: devices.KindScreen, Integration: devices.IntegrationScreen})
-			Expect(room.Bind("table", "tv")).To(Succeed())
-			Expect(room.Bind("table", "tv2")).To(Succeed())
-			util_test.WriteConfigFile(configDir, "rooms/room.json", room)
-			configStore.Reload(ctx, "rooms/room.json")
-
-			h, ok := screenManager.Get("tv2")
-			Expect(ok).To(BeTrue(), "the new tv should have been instructed")
-			Expect(h.State().GetView().GetKind()).To(Equal(screensv1.ViewKind_VIEW_KIND_BATTLEMAP))
-		})
+		h, ok := screenManager.Get("tv2")
+		Expect(ok).To(BeTrue(), "the tv added to the room file should have been instructed")
+		Expect(h.State().GetView().GetKind()).To(Equal(screensv1.ViewKind_VIEW_KIND_BATTLEMAP))
 	})
 
 	It("lists the configured scenes with their variants", func(ctx SpecContext) {

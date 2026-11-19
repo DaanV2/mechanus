@@ -1,13 +1,10 @@
 package components
 
 import (
-	"context"
-
 	"github.com/DaanV2/mechanus/server/application"
 	"github.com/DaanV2/mechanus/server/infrastructure/lifecycle"
 	"github.com/DaanV2/mechanus/server/infrastructure/outputs"
 	"github.com/DaanV2/mechanus/server/infrastructure/outputs/mqtt"
-	"github.com/DaanV2/mechanus/server/infrastructure/scenestore"
 )
 
 // createSceneService wires the output drivers of the configured integrations into a scene service.
@@ -45,18 +42,3 @@ func createSceneService(
 	return service, monitor, nil
 }
 
-// reinstructOnConfigChange tells the scene service about reloaded scene and room config files, so the
-// devices of the active scene get the changes.
-func reinstructOnConfigChange(service *application.SceneService) scenestore.ConfigChangeListener {
-	return func(ctx context.Context, change scenestore.ConfigChange) {
-		var err error
-		if change.Room {
-			_, err = service.RoomConfigChanged(ctx)
-		} else {
-			_, err = service.SceneConfigChanged(ctx, change.SceneID)
-		}
-		if err != nil {
-			scenestore.ConfigLogger.From(ctx).Error("could not apply the reloaded configuration", "change", change, "error", err)
-		}
-	}
-}

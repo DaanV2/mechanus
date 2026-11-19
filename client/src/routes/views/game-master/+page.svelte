@@ -77,17 +77,6 @@
     active = current.active;
   }
 
-  // Scene and room files are reloaded by the server when edited, so the list is refreshed on the timer too
-  async function refresh() {
-    await loadStatuses();
-    if (busy) return;
-    try {
-      await load();
-    } catch (err) {
-      console.warn('could not refresh the scenes', err);
-    }
-  }
-
   async function run(action: () => Promise<{ active?: ActiveScene; deviceErrors: string[] }>) {
     errorObj = null;
     busy = true;
@@ -159,7 +148,7 @@
       errorObj = err instanceof Error ? err : new Error('An unexpected error occurred.');
     }
     await loadStatuses();
-    statusTimer = setInterval(refresh, STATUS_REFRESH_MS);
+    statusTimer = setInterval(loadStatuses, STATUS_REFRESH_MS);
   });
 
   onDestroy(() => clearInterval(statusTimer));
@@ -184,8 +173,8 @@
       role="alert"
     >
       <p class="font-medium">
-        These scene or room files could not be loaded. Their last good version, if any, is still in
-        use.
+        These scene or room files could not be loaded and are skipped. They are read again when this
+        page loads.
       </p>
       <ul class="mt-2 space-y-1">
         {#each configErrors as configError (configError.file)}
