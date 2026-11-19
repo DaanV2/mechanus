@@ -2,7 +2,9 @@ package scenestore
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"io/fs"
 
 	"github.com/DaanV2/mechanus/server/engine/scenes"
 	"github.com/DaanV2/mechanus/server/infrastructure/persistence"
@@ -42,4 +44,8 @@ func (s *StateStore) LoadSceneState(ctx context.Context, sceneID string) (*scene
 // SaveSceneState implements application.SceneStateStore.
 func (s *StateStore) SaveSceneState(ctx context.Context, state *scenes.State) error {
 	return s.states.Set(ctx, state)
+}
+
+func isNotFound(err error) bool {
+	return errors.Is(err, fs.ErrNotExist) || persistence.IsNotExist(err)
 }

@@ -28,6 +28,7 @@
   import {
     DeviceState,
     EntityKind,
+    type ConfigFileError,
     type DeviceStatus,
     type ActiveScene,
     type Entity,
@@ -45,6 +46,7 @@
   let scenes = $state<Scene[] | undefined>(undefined);
   let active = $state<ActiveScene | undefined>(undefined);
   let deviceErrors = $state<string[]>([]);
+  let configErrors = $state<ConfigFileError[]>([]);
   let busy = $state(false);
   let errorObj = $state<MechanusError>(null);
 
@@ -71,7 +73,19 @@
     const client = createSceneClient();
     const [list, current] = await Promise.all([client.list({}), client.getActive({})]);
     scenes = list.scenes;
+    configErrors = list.configErrors;
     active = current.active;
+  }
+
+  // Scene and room files are reloaded by the server when edited, so the list is refreshed on the timer too
+  async function refresh() {
+    await loadStatuses();
+    if (busy) return;
+    try {
+      await load();
+    } catch (err) {
+      console.warn('could not refresh the scenes', err);
+    }
   }
 
   async function run(action: () => Promise<{ active?: ActiveScene; deviceErrors: string[] }>) {
@@ -145,7 +159,7 @@
       errorObj = err instanceof Error ? err : new Error('An unexpected error occurred.');
     }
     await loadStatuses();
-    statusTimer = setInterval(loadStatuses, STATUS_REFRESH_MS);
+    statusTimer = setInterval(refresh, STATUS_REFRESH_MS);
   });
 
   onDestroy(() => clearInterval(statusTimer));
@@ -162,6 +176,24 @@
 
 <div class="flex flex-col items-center">
   <ErrorMessage title="Scenes" error={errorObj} />
+
+  {#if configErrors.length > 0}
+    <section
+      class="my-3 w-full max-w-3xl rounded-lg border border-red-300 bg-red-50 px-5 py-3 text-sm text-red-800 dark:border-red-800 dark:bg-gray-800 dark:text-red-400"
+      aria-label="Invalid config files"
+      role="alert"
+    >
+      <p class="font-medium">
+        These scene or room files could not be loaded. Their last good version, if any, is still in
+        use.
+      </p>
+      <ul class="mt-2 space-y-1">
+        {#each configErrors as configError (configError.file)}
+          <li><code>{configError.file}</code>: {configError.message}</li>
+        {/each}
+      </ul>
+    </section>
+  {/if}
 
   {#if active?.scene}
     <div class="w-full max-w-3xl px-5">

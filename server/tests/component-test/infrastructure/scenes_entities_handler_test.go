@@ -12,7 +12,6 @@ import (
 	"github.com/DaanV2/mechanus/server/infrastructure/assets"
 	"github.com/DaanV2/mechanus/server/infrastructure/outputs/screen"
 	"github.com/DaanV2/mechanus/server/infrastructure/scenestore"
-	"github.com/DaanV2/mechanus/server/infrastructure/storage"
 	"github.com/DaanV2/mechanus/server/infrastructure/transport/grpc"
 	scenesv1 "github.com/DaanV2/mechanus/server/proto/scenes/v1"
 	util_test "github.com/DaanV2/mechanus/server/tests/component-test/util"
@@ -30,12 +29,7 @@ var _ = Describe("SceneServiceHandler entity controls", func() {
 
 	BeforeEach(func(setupCtx SpecContext) {
 		db := util_test.CreateDatabase(setupCtx)
-		sceneStorage, err := storage.NamedDBStorage[*scenes.Config](db, "scenes").AppStorage()
-		Expect(err).ToNot(HaveOccurred())
-		roomStorage, err := storage.NamedDBStorage[*devices.Room](db, "rooms").AppStorage()
-		Expect(err).ToNot(HaveOccurred())
-
-		Expect(sceneStorage.Set(setupCtx, &scenes.Config{
+		cave := &scenes.Config{
 			ID:   "cave",
 			Name: "Cave",
 			Entities: []scenes.Entity{
@@ -45,22 +39,21 @@ var _ = Describe("SceneServiceHandler entity controls", func() {
 			Instructions: scenes.Instructions{
 				Screens: map[string]scenes.ScreenInstruction{"table": {View: scenes.ViewBattleMap, Asset: "maps/cave.png"}},
 			},
-		})).To(Succeed())
+		}
 
 		room := devices.NewRoom(scenestore.RoomID, "Living room")
 		room.AddDevice(&devices.Device{ID: "tv", Kind: devices.KindScreen, Integration: devices.IntegrationScreen})
 		Expect(room.Bind("table", "tv")).To(Succeed())
-		Expect(roomStorage.Set(setupCtx, room)).To(Succeed())
 
 		stateStore, err := scenestore.NewDBStateStore(db)
 		Expect(err).ToNot(HaveOccurred())
-		configStore := scenestore.NewConfigStore(sceneStorage, roomStorage, scenestore.RoomID)
+		configStore, _ := util_test.CreateConfigStore(setupCtx, room, cave)
 		screenManager = screens.NewScreenManager()
 		driver := screen.NewDriver(screenManager, assets.NewStore(fstest.MapFS{"scenes/cave/maps/cave.png": {Data: []byte("png")}}))
 
 		sceneService = application.NewSceneService(configStore, stateStore, configStore, driver)
 		sceneService.AddBattleMapDriver(driver)
-		handler = grpc.NewSceneServiceHandler(sceneService, application.NewDeviceMonitor(configStore, 0))
+		handler = grpc.NewSceneServiceHandler(sceneService, application.NewDeviceMonitor(configStore, 0), configStore)
 		userContext = withUser(util_test.CreateUser())
 
 		_, err = handler.Activate(userContext(setupCtx), connect.NewRequest(&scenesv1.ActivateSceneRequest{SceneId: "cave"}))

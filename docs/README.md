@@ -8,6 +8,7 @@
 - [configuration/database](./configuration/database.md)
 - [configuration/integrations](./configuration/integrations.md)
 - [configuration/opentelemetry](./configuration/opentelemetry.md)
+- [configuration/scene-files](./configuration/scene-files.md) — scene and room files: YAML / JSON, versions, live reload
 - [getting-started](./getting-started/README.md) — install a release: [Docker image](./getting-started/docker.md) or [binary](./getting-started/binaries.md) (Linux, Windows, macOS)
 - [contributing](./contributing.md)
 - [development](./development.md)

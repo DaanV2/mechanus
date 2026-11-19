@@ -76,7 +76,7 @@ func BuildServer(setupCtx context.Context) (*ServerComponents, error) {
 	if err != nil {
 		return nil, err
 	}
-	sceneConfigs, err := scenestore.NewFileConfigStore(scenestore.RoomID)
+	sceneConfigs, err := scenestore.NewFileConfigStore(setupCtx, scenestore.RoomID)
 	if err != nil {
 		return nil, err
 	}
@@ -91,6 +91,8 @@ func BuildServer(setupCtx context.Context) (*ServerComponents, error) {
 	if err != nil {
 		return nil, err
 	}
+	// Edited scene and room files are reloaded while running, devices get the changes
+	sceneConfigs.AddListener(reinstructOnConfigChange(sceneService))
 	// Token and camera moves reach the screens without re-sending the whole battle map
 	sceneService.AddBattleMapDriver(screenDriver)
 	screenManager.SetController(screen.NewController(sceneService))
@@ -119,7 +121,7 @@ func BuildServer(setupCtx context.Context) (*ServerComponents, error) {
 	routerRpcs := &RouterRPCS{
 		Campaign: grpc.NewCampaignServiceHandler(campaignService, userService),
 		Login:    grpc.NewLoginServiceHandler(userService, jwtService, jtiService),
-		Scene:    grpc.NewSceneServiceHandler(sceneService, deviceMonitor),
+		Scene:    grpc.NewSceneServiceHandler(sceneService, deviceMonitor, sceneConfigs),
 		User:     grpc.NewUserServiceHandler(userService, jtiService, grpc.UserServiceOptions{SignupEnabled: authCfg.SignupEnabled}),
 		Invite:   grpc.NewInviteServiceHandler(inviteService),
 		Device:   grpc.NewDeviceServiceHandler(deviceService),
@@ -138,7 +140,7 @@ func BuildServer(setupCtx context.Context) (*ServerComponents, error) {
 		Components: lfManager,
 	}
 	// sceneService before screenManager: the active scene is saved while screens are still connected
-	lfManager.Add(sceneService, deviceService, screenManager, keyManager, jwtService, db, otelmanager, server.Server)
+	lfManager.Add(sceneConfigs, sceneService, deviceService, screenManager, keyManager, jwtService, db, otelmanager, server.Server)
 
 	return server, nil
 }
