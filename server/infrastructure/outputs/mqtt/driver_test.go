@@ -110,7 +110,6 @@ func (s *subscriber) live() []received {
 
 var _ = Describe("Driver", func() {
 	var (
-		ctx        context.Context
 		broker     *mochi.Server
 		stopBroker func()
 		address    string
@@ -124,12 +123,12 @@ var _ = Describe("Driver", func() {
 
 		d, err := mqtt.NewDriver(&mqtt.Config{Broker: "tcp://" + address, ClientID: driverClientID})
 		Expect(err).ToNot(HaveOccurred())
-		DeferCleanup(func() { _ = d.AfterShutDown(context.Background()) })
+		DeferCleanup(func(ctx SpecContext) { _ = d.AfterShutDown(ctx) })
 
 		return d
 	}
 
-	connect := func(d *mqtt.Driver) {
+	connect := func(ctx context.Context, d *mqtt.Driver) {
 		GinkgoHelper()
 
 		Expect(d.AfterInitialize(ctx)).To(Succeed())
@@ -137,7 +136,6 @@ var _ = Describe("Driver", func() {
 	}
 
 	BeforeEach(func() {
-		ctx = context.Background()
 		var err error
 		broker, address, err = startBroker("127.0.0.1:0")
 		Expect(err).ToNot(HaveOccurred())
@@ -172,9 +170,9 @@ var _ = Describe("Driver", func() {
 	})
 
 	Describe("Apply", func() {
-		BeforeEach(func() { connect(driver) })
+		BeforeEach(func(ctx SpecContext) { connect(ctx, driver) })
 
-		It("publishes the payload in an envelope", func() {
+		It("publishes the payload in an envelope", func(ctx SpecContext) {
 			device := subscribe(address, "device", "mechanus/devices/fog/set")
 
 			instruction := scenes.CustomInstruction{Payload: json.RawMessage(`{"burst":3,"keep":"as is"}`)}
@@ -189,7 +187,7 @@ var _ = Describe("Driver", func() {
 			}`))
 		})
 
-		It("publishes retained, so a device that connects later gets it", func() {
+		It("publishes retained, so a device that connects later gets it", func(ctx SpecContext) {
 			Expect(driver.Apply(ctx, ref, "smoke", fog, scenes.CustomInstruction{Payload: json.RawMessage(`1`)})).To(Succeed())
 			Expect(driver.Apply(ctx, ref, "smoke", fog, scenes.CustomInstruction{Payload: json.RawMessage(`2`)})).To(Succeed())
 
@@ -200,7 +198,7 @@ var _ = Describe("Driver", func() {
 			Expect(late.messages()[0].payload).To(ContainSubstring(`"payload":2`))
 		})
 
-		It("publishes to the topic from the device config", func() {
+		It("publishes to the topic from the device config", func(ctx SpecContext) {
 			fog.Config = map[string]string{mqtt.DeviceConfigTopic: "props/fog"}
 			device := subscribe(address, "device", "props/fog")
 
@@ -209,7 +207,7 @@ var _ = Describe("Driver", func() {
 			Eventually(device.live).Should(HaveLen(1))
 		})
 
-		It("ignores other kinds of instructions", func() {
+		It("ignores other kinds of instructions", func(ctx SpecContext) {
 			device := subscribe(address, "device", "#")
 			Eventually(device.messages).Should(HaveLen(1), "the retained status")
 
@@ -220,8 +218,8 @@ var _ = Describe("Driver", func() {
 	})
 
 	Describe("with one failing device in a scene", func() {
-		It("still instructs the other devices", func() {
-			connect(driver)
+		It("still instructs the other devices", func(ctx SpecContext) {
+			connect(ctx, driver)
 
 			room := devices.NewRoom("room", "Room")
 			room.AddDevice(&devices.Device{ID: "a-broken", Kind: devices.KindCustom, Integration: devices.IntegrationMQTT, Config: map[string]string{mqtt.DeviceConfigTopic: "props/#"}})
@@ -254,9 +252,9 @@ var _ = Describe("Driver", func() {
 	})
 
 	Describe("SceneChanged", func() {
-		BeforeEach(func() { connect(driver) })
+		BeforeEach(func(ctx SpecContext) { connect(ctx, driver) })
 
-		It("publishes the change to the scene event topic, not retained", func() {
+		It("publishes the change to the scene event topic, not retained", func(ctx SpecContext) {
 			listener := subscribe(address, "listener", mqtt.TopicSceneEvents)
 
 			driver.SceneChanged(ctx, &scenes.Transition{From: scenes.Ref{SceneID: "road"}, To: ref})
@@ -272,7 +270,7 @@ var _ = Describe("Driver", func() {
 			Consistently(late.messages, "100ms").Should(BeEmpty())
 		})
 
-		It("leaves out where it came from when no scene was active", func() {
+		It("leaves out where it came from when no scene was active", func(ctx SpecContext) {
 			listener := subscribe(address, "listener", mqtt.TopicSceneEvents)
 
 			driver.SceneChanged(ctx, &scenes.Transition{To: ref})
@@ -283,15 +281,15 @@ var _ = Describe("Driver", func() {
 	})
 
 	Describe("availability", func() {
-		It("announces online, retained", func() {
-			connect(driver)
+		It("announces online, retained", func(ctx SpecContext) {
+			connect(ctx, driver)
 
 			late := subscribe(address, "late", mqtt.TopicStatus)
 			Eventually(late.messages).Should(ContainElement(received{mqtt.TopicStatus, mqtt.StatusOnline, true}))
 		})
 
-		It("has the broker publish its last will when the connection drops", func() {
-			connect(driver)
+		It("has the broker publish its last will when the connection drops", func(ctx SpecContext) {
+			connect(ctx, driver)
 			status := subscribe(address, "status", mqtt.TopicStatus)
 			Eventually(status.messages).Should(ConsistOf(received{mqtt.TopicStatus, mqtt.StatusOnline, true}))
 
@@ -302,8 +300,8 @@ var _ = Describe("Driver", func() {
 			Eventually(status.messages, "5s").Should(ContainElement(received{mqtt.TopicStatus, mqtt.StatusOffline, false}))
 		})
 
-		It("announces offline itself on a clean shutdown", func() {
-			connect(driver)
+		It("announces offline itself on a clean shutdown", func(ctx SpecContext) {
+			connect(ctx, driver)
 			status := subscribe(address, "status", mqtt.TopicStatus)
 			Eventually(status.messages).Should(HaveLen(1))
 
@@ -318,13 +316,13 @@ var _ = Describe("Driver", func() {
 	})
 
 	Describe("when the broker is down", func() {
-		It("does not hold up starting the server", func() {
+		It("does not hold up starting the server", func(ctx SpecContext) {
 			stopBroker()
 			Expect(driver.AfterInitialize(ctx)).To(Succeed())
 			Eventually(func() error { return driver.CheckDevice(ctx, fog) }, "5s").Should(MatchError(ContainSubstring("connect")))
 		})
 
-		It("fails right away", func() {
+		It("fails right away", func(ctx SpecContext) {
 			start := time.Now()
 			err := driver.Apply(ctx, ref, "smoke", fog, scenes.CustomInstruction{Payload: json.RawMessage(`1`)})
 
@@ -333,7 +331,7 @@ var _ = Describe("Driver", func() {
 			Expect(driver.CheckDevice(ctx, fog)).To(MatchError(mqtt.ErrNotConnected))
 		})
 
-		It("does not wait long on a broker that accepts a connection but never answers", func() {
+		It("does not wait long on a broker that accepts a connection but never answers", func(ctx SpecContext) {
 			stopBroker()
 
 			var silent net.Listener
@@ -364,8 +362,8 @@ var _ = Describe("Driver", func() {
 			Eventually(func() error { return driver.CheckDevice(ctx, fog) }, reconnectWait).Should(Succeed())
 		})
 
-		It("delivers the latest instruction per topic once it is back", func() {
-			connect(driver)
+		It("delivers the latest instruction per topic once it is back", func(ctx SpecContext) {
+			connect(ctx, driver)
 			stopBroker()
 			Eventually(func() error { return driver.CheckDevice(ctx, fog) }, "5s").Should(MatchError(mqtt.ErrNotConnected))
 

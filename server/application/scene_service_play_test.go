@@ -46,15 +46,13 @@ func (d *recordingBattleMaps) SetCamera(_ context.Context, _ scenes.Ref, device 
 
 var _ = Describe("SceneService during play", func() {
 	var (
-		ctx    context.Context
 		states *stateStore
 		screen *recordingDriver
 		live   *recordingBattleMaps
 		svc    *application.SceneService
 	)
 
-	BeforeEach(func() {
-		ctx = context.Background()
+	BeforeEach(func(ctx SpecContext) {
 		room := devices.NewRoom("room", "Living room")
 		for _, id := range []string{"tv", "tablet", "wall-tv"} {
 			room.AddDevice(&devices.Device{ID: id, Kind: devices.KindScreen, Integration: devices.IntegrationScreen})
@@ -106,7 +104,7 @@ var _ = Describe("SceneService during play", func() {
 	}
 
 	Describe("GM controls", func() {
-		It("reveals and hides entities, re-instructing only the battle map screens", func() {
+		It("reveals and hides entities, re-instructing only the battle map screens", func(ctx SpecContext) {
 			_, err := svc.SetEntityHidden(ctx, "troll", false)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(screen.applied).To(HaveLen(2), "tv and tablet, not the wall")
@@ -117,7 +115,7 @@ var _ = Describe("SceneService during play", func() {
 			Expect(battleMapEntities()).To(ConsistOf("hero"), "hidden entities are not sent to screens")
 		})
 
-		It("spawns entities, at a position when given", func() {
+		It("spawns entities, at a position when given", func(ctx SpecContext) {
 			_, err := svc.SpawnEntity(ctx, scenes.Entity{ID: "wolf", Kind: scenes.EntityEnemy, Name: "Wolf"}, &vectors.Vector2D{X: 2, Y: 3})
 			Expect(err).ToNot(HaveOccurred())
 			Expect(battleMapEntities()).To(ConsistOf("hero", "wolf"))
@@ -130,7 +128,7 @@ var _ = Describe("SceneService during play", func() {
 			}))
 		})
 
-		It("spawns nothing when the entity or its position is invalid", func() {
+		It("spawns nothing when the entity or its position is invalid", func(ctx SpecContext) {
 			_, err := svc.SpawnEntity(ctx, scenes.Entity{ID: "wolf", Kind: scenes.EntityEnemy}, &vectors.Vector2D{X: scenes.MaxCoordinate * 2})
 			Expect(err).To(MatchError(scenes.ErrInvalidPosition))
 			_, err = svc.SpawnEntity(ctx, scenes.Entity{ID: "hero", Kind: scenes.EntityPlayer}, nil)
@@ -142,7 +140,7 @@ var _ = Describe("SceneService during play", func() {
 			Expect(screen.applied).To(BeEmpty())
 		})
 
-		It("removes entities", func() {
+		It("removes entities", func(ctx SpecContext) {
 			_, err := svc.RemoveEntity(ctx, "hero")
 			Expect(err).ToNot(HaveOccurred())
 			Expect(battleMapEntities()).To(BeEmpty())
@@ -151,7 +149,7 @@ var _ = Describe("SceneService during play", func() {
 			}), "the GM still sees hidden entities")
 		})
 
-		It("refuses unknown entities and needs an active scene", func() {
+		It("refuses unknown entities and needs an active scene", func(ctx SpecContext) {
 			_, err := svc.SetEntityHidden(ctx, "ghost", false)
 			Expect(err).To(MatchError(scenes.ErrEntityNotFound))
 			_, err = svc.RemoveEntity(ctx, "ghost")
@@ -166,13 +164,13 @@ var _ = Describe("SceneService during play", func() {
 	})
 
 	Describe("MoveEntity", func() {
-		It("re-instructs the battle map screens on the first move, as the map may not draw the entity", func() {
+		It("re-instructs the battle map screens on the first move, as the map may not draw the entity", func(ctx SpecContext) {
 			Expect(svc.MoveEntity(ctx, "hero", vectors.Vector2D{X: 1, Y: 1})).To(Succeed())
 			Expect(screen.applied).To(HaveLen(2))
 			Expect(live.updates).To(BeEmpty())
 		})
 
-		It("sends later moves to every battle map screen without re-instructing them", func() {
+		It("sends later moves to every battle map screen without re-instructing them", func(ctx SpecContext) {
 			Expect(svc.MoveEntity(ctx, "hero", vectors.Vector2D{X: 1, Y: 1})).To(Succeed())
 			screen.applied = nil
 
@@ -184,7 +182,7 @@ var _ = Describe("SceneService during play", func() {
 			))
 		})
 
-		It("moves hidden entities without telling any screen", func() {
+		It("moves hidden entities without telling any screen", func(ctx SpecContext) {
 			Expect(svc.MoveEntity(ctx, "troll", vectors.Vector2D{X: 1, Y: 1})).To(Succeed())
 			Expect(svc.MoveEntity(ctx, "troll", vectors.Vector2D{X: 3, Y: 3})).To(Succeed())
 			Expect(live.updates).To(BeEmpty())
@@ -195,7 +193,7 @@ var _ = Describe("SceneService during play", func() {
 			Expect(ins.Positions).To(HaveKeyWithValue("troll", vectors.Vector2D{X: 3, Y: 3}), "revealed where it was moved to")
 		})
 
-		It("saves the position with the state on exit", func() {
+		It("saves the position with the state on exit", func(ctx SpecContext) {
 			Expect(svc.MoveEntity(ctx, "hero", vectors.Vector2D{X: 4, Y: 2})).To(Succeed())
 			_, err := svc.Activate(ctx, "road", "")
 			Expect(err).ToNot(HaveOccurred())
@@ -203,12 +201,12 @@ var _ = Describe("SceneService during play", func() {
 			Expect(states.saved["cave"].Entities["hero"].Position).To(Equal(&vectors.Vector2D{X: 4, Y: 2}))
 		})
 
-		It("refuses invalid moves", func() {
+		It("refuses invalid moves", func(ctx SpecContext) {
 			Expect(svc.MoveEntity(ctx, "ghost", vectors.Vector2D{})).To(MatchError(scenes.ErrEntityNotFound))
 			Expect(svc.MoveEntity(ctx, "hero", vectors.Vector2D{X: scenes.MaxCoordinate * 2})).To(MatchError(scenes.ErrInvalidPosition))
 		})
 
-		It("reports devices that could not be told, the entity moved regardless", func() {
+		It("reports devices that could not be told, the entity moved regardless", func(ctx SpecContext) {
 			Expect(svc.MoveEntity(ctx, "hero", vectors.Vector2D{X: 1, Y: 1})).To(Succeed())
 			live.err = errors.New("unreachable")
 
@@ -220,7 +218,7 @@ var _ = Describe("SceneService during play", func() {
 	Describe("SetCamera", func() {
 		camera := scenes.Camera{Center: vectors.Vector2D{X: 3, Y: 4}, Zoom: 2}
 
-		It("moves the camera of every screen bound to the same battle map target", func() {
+		It("moves the camera of every screen bound to the same battle map target", func(ctx SpecContext) {
 			Expect(svc.SetCamera(ctx, "tablet", camera)).To(Succeed())
 			Expect(live.updates).To(ConsistOf(
 				liveUpdate{device: "tv", camera: &camera},
@@ -229,7 +227,7 @@ var _ = Describe("SceneService during play", func() {
 			Expect(screen.applied).To(BeEmpty(), "the map is not re-sent")
 		})
 
-		It("keeps the camera when the battle map is re-instructed", func() {
+		It("keeps the camera when the battle map is re-instructed", func(ctx SpecContext) {
 			Expect(svc.SetCamera(ctx, "tv", camera)).To(Succeed())
 			_, err := svc.SetEntityHidden(ctx, "troll", false)
 			Expect(err).ToNot(HaveOccurred())
@@ -238,14 +236,14 @@ var _ = Describe("SceneService during play", func() {
 			Expect(ins.Camera).To(Equal(&camera))
 		})
 
-		It("refuses screens without a battle map, and invalid cameras", func() {
+		It("refuses screens without a battle map, and invalid cameras", func(ctx SpecContext) {
 			Expect(svc.SetCamera(ctx, "wall-tv", camera)).To(MatchError(application.ErrNoBattleMap))
 			Expect(svc.SetCamera(ctx, "unknown", camera)).To(MatchError(application.ErrNoBattleMap))
 			Expect(svc.SetCamera(ctx, "tv", scenes.Camera{Zoom: 100})).To(MatchError(scenes.ErrInvalidCamera))
 			Expect(live.updates).To(BeEmpty())
 		})
 
-		It("tells which screens show a battle map", func() {
+		It("tells which screens show a battle map", func(ctx SpecContext) {
 			Expect(svc.ShowsBattleMap(ctx, "tv")).To(BeTrue())
 			Expect(svc.ShowsBattleMap(ctx, "wall-tv")).To(BeFalse())
 			Expect(svc.Exit(ctx)).To(Succeed())
@@ -254,7 +252,7 @@ var _ = Describe("SceneService during play", func() {
 	})
 
 	Describe("Reset", func() {
-		play := func() {
+		play := func(ctx context.Context) {
 			GinkgoHelper()
 			_, err := svc.SetEntityHidden(ctx, "troll", false)
 			Expect(err).ToNot(HaveOccurred())
@@ -266,8 +264,8 @@ var _ = Describe("SceneService during play", func() {
 			Expect(svc.SetCamera(ctx, "tv", scenes.Camera{Center: vectors.Vector2D{X: 1, Y: 1}, Zoom: 2})).To(Succeed())
 		}
 
-		It("puts the active scene back as configured and re-instructs every device", func() {
-			play()
+		It("puts the active scene back as configured and re-instructs every device", func(ctx SpecContext) {
+			play(ctx)
 			screen.applied = nil
 
 			t, err := svc.Reset(ctx, "cave")
@@ -290,7 +288,7 @@ var _ = Describe("SceneService during play", func() {
 			Expect(states.saved["cave"].Cameras).To(BeEmpty())
 		})
 
-		It("goes back to the default variant", func() {
+		It("goes back to the default variant", func(ctx SpecContext) {
 			_, err := svc.Activate(ctx, "road", "")
 			Expect(err).ToNot(HaveOccurred())
 			_, err = svc.Reset(ctx, "road")
@@ -298,8 +296,8 @@ var _ = Describe("SceneService during play", func() {
 			Expect(svc.Active()).To(Equal(scenes.Ref{SceneID: "road"}))
 		})
 
-		It("replaces the saved state of a scene that isn't active", func() {
-			play()
+		It("replaces the saved state of a scene that isn't active", func(ctx SpecContext) {
+			play(ctx)
 			_, err := svc.Activate(ctx, "road", "")
 			Expect(err).ToNot(HaveOccurred())
 			screen.applied = nil
@@ -316,11 +314,11 @@ var _ = Describe("SceneService during play", func() {
 			Expect(svc.ActiveEntities()).To(HaveEach(HaveField("Position", BeNil())))
 		})
 
-		It("refuses unknown scenes and changes nothing when the state can't be saved", func() {
+		It("refuses unknown scenes and changes nothing when the state can't be saved", func(ctx SpecContext) {
 			_, err := svc.Reset(ctx, "ghost")
 			Expect(err).To(HaveOccurred())
 
-			play()
+			play(ctx)
 			states.err = errors.New("disk full")
 			_, err = svc.Reset(ctx, "cave")
 			Expect(err).To(MatchError(ContainSubstring("disk full")))

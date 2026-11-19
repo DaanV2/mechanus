@@ -75,3 +75,50 @@ jobs:
       - name: 📝 Reporting
         run: |
           echo "✅ Server - ${{ matrix.os }}" >> $GITHUB_STEP_SUMMARY
+
+  # The integration tests (server/tests/integration) assert what gets stored in the database,
+  # so they run against every supported backend. Linux only: service containers need Linux runners.
+  integration:
+    name: 🗃️ Integration tests (${{ matrix.database }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        database: [sqlite, postgres]
+    services:
+      postgres:
+        # An empty image skips the service for the other backends
+        image: ${{ matrix.database == 'postgres' && 'postgres:18-alpine' || '' }}
+        env:
+          POSTGRES_USER: mechanus
+          POSTGRES_PASSWORD: mechanus_test
+          POSTGRES_DB: mechanus_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U mechanus"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      TEST_DATABASE_TYPE: ${{ matrix.database }}
+      # Test credentials only
+      TEST_DATABASE_DSN: ${{ matrix.database == 'postgres' && 'host=localhost port=5432 user=mechanus password=mechanus_test dbname=mechanus_test sslmode=disable' || '' }}
+
+    steps:
+      - name: 📦 Checkout Repository
+        uses: actions/checkout@v7
+
+      - name: ⚒️ Setup Golang
+        uses: actions/setup-go@v7
+        with:
+          go-version-file: ./server/go.mod
+          cache-dependency-path: ./server/go.sum
+
+      - name: 🗃️ Run integration tests
+        working-directory: server
+        run: go tool ginkgo run ./tests/integration/...
+
+      - name: 📝 Reporting
+        run: |
+          echo "✅ Server integration - ${{ matrix.database }}" >> $GITHUB_STEP_SUMMARY

@@ -68,6 +68,9 @@ just dev            # docker compose watch
 ```bash
 just server build          # go build ./...
 just server test           # run all tests (Ginkgo, with coverage)
+just server test-unit      # only the unit tests next to the code
+just server test-component # only server/tests/component
+just server test-integration [sqlite|postgres]  # only server/tests/integration, see server/tests/README.md
 just server lint           # golangci-lint --fix
 just server vet            # go vet
 just server vulncheck      # govulncheck (deps + standard library)
@@ -118,7 +121,7 @@ npm run check       # svelte-check + tsc
 - **Config**: use Viper config sets (`infrastructure/config`). Add flags to the relevant `*ConfigSet` and register them in the appropriate `cmd/*.go` file.
 - **Error handling**: wrap errors with `fmt.Errorf("context: %w", err)`. Use `errors.Join` to combine multiple errors.
 - **Logging**: use `infrastructure/logging` (Charm.sh). Pass `ctx` through and use `logging.From(ctx)` to get a logger with trace context.
-- **Tests**: Ginkgo + Gomega for Go unit/component tests. Playwright for integration/browser tests in `tests/`.
+- **Tests**: Ginkgo + Gomega for Go tests, in three kinds (see `server/tests/README.md`): unit tests next to the code, component tests in `server/tests/component` (behaviour of handlers / services; the database is only setup) and integration tests in `server/tests/integration` (what gets stored and read back from the database). Playwright for end-to-end browser tests in `tests/`.
 - **Proto style**: follow Buf lint rules. Run `just proto-lint` before committing proto changes.
 
 ## Git workflow

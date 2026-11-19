@@ -10,21 +10,22 @@ import (
 )
 
 var _ = Describe("Context", func() {
-	ctx := context.Background()
-	ctx = authentication.ContextWithJWT(ctx, &authentication.JWTClaims{
-		Issuer:  "test-issuer",
-		Subject: "test-subject",
-		User: authentication.JWTUser{
-			ID:        "test-user-id",
-			Name:      "Test User",
-			Roles:     []string{"user"},
-			Campaigns: []string{"test-campaign"},
-		},
-	}, true)
+	authenticated := func(ctx context.Context) context.Context {
+		return authentication.ContextWithJWT(ctx, &authentication.JWTClaims{
+			Issuer:  "test-issuer",
+			Subject: "test-subject",
+			User: authentication.JWTUser{
+				ID:        "test-user-id",
+				Name:      "Test User",
+				Roles:     []string{"user"},
+				Campaigns: []string{"test-campaign"},
+			},
+		}, true)
+	}
 
 	DescribeTable("IsAuthenicated",
-		func(role roles.Role, expected bool) {
-			Expect(authentication.IsAuthenicatedWithRole(ctx, role)).To(Equal(expected))
+		func(ctx SpecContext, role roles.Role, expected bool) {
+			Expect(authentication.IsAuthenicatedWithRole(authenticated(ctx), role)).To(Equal(expected))
 		},
 		Entry("should have viewer", roles.Viewer, true),
 		Entry("should have user", roles.User, true),

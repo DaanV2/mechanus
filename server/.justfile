@@ -22,6 +22,32 @@ generate:
 test:
   go tool ginkgo run --vv --output-dir reports --cover --covermode atomic -coverprofile=coverage.out ./...
 
+# Run only the unit tests: the tests next to the code, without server/tests (see server/tests/README.md)
+[group('test')]
+test-unit:
+  go tool ginkgo run --skip-package=tests ./...
+
+# Run only the component tests (server/tests/component), on an in-memory database
+[group('test')]
+test-component:
+  go tool ginkgo run ./tests/component/...
+
+# Run the integration tests (server/tests/integration) against a database backend: memory, sqlite or postgres.
+# Postgres needs a running server, see `test-postgres-up`.
+[group('test')]
+test-integration $TEST_DATABASE_TYPE="sqlite" $TEST_DATABASE_DSN="host=localhost port=55432 user=mechanus password=mechanus_test dbname=mechanus_test sslmode=disable":
+  go tool ginkgo run ./tests/integration/...
+
+# Start a throwaway Postgres for `just server test-integration postgres` (port 55432, test credentials only)
+[group('test')]
+test-postgres-up:
+  docker run -d --rm --name mechanus-test-postgres -p 55432:5432 -e POSTGRES_USER=mechanus -e POSTGRES_PASSWORD=mechanus_test -e POSTGRES_DB=mechanus_test postgres:18-alpine
+
+# Stop the Postgres started by `test-postgres-up`
+[group('test')]
+test-postgres-down:
+  docker stop mechanus-test-postgres
+
 # Generate HTML coverage report and open in browser
 [group('test')]
 coverage-report:

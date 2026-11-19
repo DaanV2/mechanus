@@ -29,7 +29,7 @@ var _ = Describe("ScreenHandler.SetState", func() {
 			Expect(err).ToNot(HaveOccurred())
 
 			info := &screens.ConnectionInfo{}
-			handler.AddListener(context.Background(), screens.NewScreenConn("conn", "tv", context.Background(), conn, info))
+			handler.AddListener(ctx, screens.NewScreenConn("conn", "tv", ctx, conn, info))
 			close(connected)
 		}))
 		DeferCleanup(server.Close)

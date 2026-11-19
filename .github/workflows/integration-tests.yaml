@@ -8,15 +8,15 @@ env:
 
 jobs:
   test:
-    name: 🎭 Integration tests (${{ matrix.db-backend }})
+    name: 🎭 Integration tests
     timeout-minutes: 10
     runs-on: ubuntu-latest
     permissions:
       contents: read
-    strategy:
-      fail-fast: false
-      matrix:
-        db-backend: [sqlite, inmemory, postgres]
+    env:
+      # One backend is enough here: the server's integration tests (server/tests/integration) cover
+      # what differs per database, on sqlite and postgres. SQLite is the default in production.
+      DB_BACKEND: sqlite
     steps:
       - name: 📦 Checkout Repository
         uses: actions/checkout@v7
@@ -46,8 +46,6 @@ jobs:
 
       - name: 🐋 Start server
         working-directory: tests
-        env:
-          DB_BACKEND: ${{ matrix.db-backend }}
         run: |
           make server
 
@@ -59,14 +57,12 @@ jobs:
       - name: ✒️ export server logs
         if: ${{ !cancelled() }}
         working-directory: tests
-        env:
-          DB_BACKEND: ${{ matrix.db-backend }}
         run: |
           make server-logs
 
       - uses: actions/upload-artifact@v7
         if: ${{ !cancelled() }}
         with:
-          name: playwright-report-${{ matrix.db-backend }}
+          name: playwright-report
           path: tests/playwright-report/
           retention-days: 5

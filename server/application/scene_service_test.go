@@ -82,7 +82,6 @@ func (d *recordingDriver) Apply(_ context.Context, _ scenes.Ref, target string, 
 
 var _ = Describe("SceneService", func() {
 	var (
-		ctx    context.Context
 		room   *devices.Room
 		states *stateStore
 		screen *recordingDriver
@@ -91,7 +90,6 @@ var _ = Describe("SceneService", func() {
 	)
 
 	BeforeEach(func() {
-		ctx = context.Background()
 		room = devices.NewRoom("room", "Living room")
 		room.AddDevice(&devices.Device{ID: "tv", Kind: devices.KindScreen, Integration: devices.IntegrationScreen})
 		room.AddDevice(&devices.Device{ID: "lamp", Kind: devices.KindLight, Integration: devices.IntegrationHue})
@@ -127,7 +125,7 @@ var _ = Describe("SceneService", func() {
 		svc = application.NewSceneService(configs, states, staticRoom{room}, screen, hue)
 	})
 
-	It("instructs bound devices through their driver", func() {
+	It("instructs bound devices through their driver", func(ctx SpecContext) {
 		_, err := svc.Activate(ctx, "cave", "")
 		Expect(err).ToNot(HaveOccurred())
 		Expect(svc.Active()).To(Equal(scenes.Ref{SceneID: "cave"}))
@@ -136,7 +134,7 @@ var _ = Describe("SceneService", func() {
 		Expect(hue.applied).To(HaveLen(1))
 	})
 
-	It("only re-instructs changed devices on a variant transition", func() {
+	It("only re-instructs changed devices on a variant transition", func(ctx SpecContext) {
 		_, err := svc.Activate(ctx, "cave", "")
 		Expect(err).ToNot(HaveOccurred())
 		_, err = svc.SetVariant(ctx, "collapse")
@@ -147,7 +145,7 @@ var _ = Describe("SceneService", func() {
 		Expect(hue.applied[1].instruction).To(Equal(scenes.LightInstruction{On: true, Brightness: 0.2, Effect: "flicker"}))
 	})
 
-	It("dispatches live adjustments", func() {
+	It("dispatches live adjustments", func(ctx SpecContext) {
 		_, err := svc.Activate(ctx, "cave", "")
 		Expect(err).ToNot(HaveOccurred())
 		_, err = svc.Adjust(ctx, scenes.Instructions{Lights: map[string]scenes.LightInstruction{"ambient": {On: false}}})
@@ -157,7 +155,7 @@ var _ = Describe("SceneService", func() {
 		Expect(hue.applied[1].instruction).To(Equal(scenes.LightInstruction{On: false}))
 	})
 
-	It("saves state on load and exit, and restores it on the next load", func() {
+	It("saves state on load and exit, and restores it on the next load", func(ctx SpecContext) {
 		_, err := svc.Activate(ctx, "cave", "collapse")
 		Expect(err).ToNot(HaveOccurred())
 		Expect(states.saved).To(HaveKey("cave"), "saved on load")
@@ -176,7 +174,7 @@ var _ = Describe("SceneService", func() {
 		Expect(hue.applied[len(hue.applied)-1].instruction).To(Equal(scenes.LightInstruction{On: false}))
 	})
 
-	It("saves state on exit", func() {
+	It("saves state on exit", func(ctx SpecContext) {
 		_, err := svc.Activate(ctx, "cave", "")
 		Expect(err).ToNot(HaveOccurred())
 		saves := states.saves
@@ -186,12 +184,12 @@ var _ = Describe("SceneService", func() {
 		Expect(svc.Active().IsZero()).To(BeTrue())
 	})
 
-	It("requires an active scene for variant switches", func() {
+	It("requires an active scene for variant switches", func(ctx SpecContext) {
 		_, err := svc.SetVariant(ctx, "collapse")
 		Expect(err).To(MatchError(application.ErrNoActiveScene))
 	})
 
-	It("reports devices without a driver", func() {
+	It("reports devices without a driver", func(ctx SpecContext) {
 		room.AddDevice(&devices.Device{ID: "strip", Kind: devices.KindLight, Integration: devices.IntegrationMatter})
 		Expect(room.Bind("ambient", "strip")).To(Succeed())
 
