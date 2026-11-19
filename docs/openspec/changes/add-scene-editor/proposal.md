@@ -25,4 +25,4 @@ None.
 
 - New authoring RPCs in `scenes/v1`
 - GM client editor pages
-- Depends on `add-versioned-config-files` for the file format
+- Builds on the `scene-config-files` capability (archived `add-versioned-config-files`) for the file format
