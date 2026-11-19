@@ -4,8 +4,6 @@ import (
 	"context"
 	"os"
 	"path/filepath"
-	"sync"
-	"time"
 
 	"github.com/DaanV2/mechanus/server/application"
 	"github.com/DaanV2/mechanus/server/engine/devices"
@@ -147,9 +145,10 @@ variants:
 
 			It("reports two files for the same scene", func() {
 				util_test.WriteConfigFile(dir, "scenes/cave.json", &scenes.Config{ID: "cave", Name: "Other cave"})
-				store.Reload(ctx, "scenes/cave.json")
+				store.Load(ctx)
 				Expect(store.Errors()).To(ConsistOf(HaveField("Message", ContainSubstring("more than one file"))))
-				Expect(sceneName("cave")).To(Equal("Cave"), "the last good version stays in use")
+				_, err := store.GetSceneConfig(ctx, "cave")
+				Expect(err).To(MatchError(scenes.ErrSceneNotFound), "the scene is skipped")
 			})
 
 			It("ignores asset folders and hidden files", func() {
@@ -199,88 +198,99 @@ variants:
 			})
 		})
 
-		Describe("reloading", func() {
-			var (
-				lock    sync.Mutex
-				changes []scenestore.ConfigChange
-			)
+		Describe("reading the room file on demand", func() {
+			roomName := func() string {
+				GinkgoHelper()
+				r, err := store.CurrentRoom(ctx)
+				Expect(err).ToNot(HaveOccurred())
 
-			BeforeEach(func() {
-				lock.Lock()
-				changes = nil
-				lock.Unlock()
-				store.AddListener(func(_ context.Context, change scenestore.ConfigChange) {
-					lock.Lock()
-					defer lock.Unlock()
-					changes = append(changes, change)
-				})
-			})
-
-			seen := func() []scenestore.ConfigChange {
-				lock.Lock()
-				defer lock.Unlock()
-
-				return append([]scenestore.ConfigChange(nil), changes...)
+				return r.Name
 			}
 
-			It("picks up a changed scene file", func() {
-				util_test.WriteConfigFile(dir, "scenes/cave.yaml", &scenes.Config{ID: "cave", Name: "Deep cave"})
-				store.Reload(ctx, filepath.Join(dir, "scenes", "cave.yaml"))
-
-				Expect(sceneName("cave")).To(Equal("Deep cave"))
-				Expect(seen()).To(Equal([]scenestore.ConfigChange{{SceneID: "cave"}}))
+			It("picks up an edited room file", func() {
+				util_test.WriteConfigFile(dir, "rooms/living-room.json", devices.NewRoom("living-room", "Game room"))
+				Expect(roomName()).To(Equal("Game room"))
 			})
 
-			It("keeps the last good version of an invalid file and reports it", func() {
-				util_test.WriteRawFile(dir, "scenes/cave.yaml", "version: 1\nname: [broken")
-				store.Reload(ctx, "scenes/cave.yaml")
+			It("does not parse an unchanged room file again", func() {
+				first, err := store.CurrentRoom(ctx)
+				Expect(err).ToNot(HaveOccurred())
+				second, err := store.CurrentRoom(ctx)
+				Expect(err).ToNot(HaveOccurred())
+				Expect(second).To(BeIdenticalTo(first))
+			})
 
-				Expect(sceneName("cave")).To(Equal("Cave"))
-				Expect(store.Errors()).To(ConsistOf(HaveField("File", "scenes/cave.yaml")))
-				Expect(seen()).To(BeEmpty(), "nothing in use changed")
+			It("picks up a room file added after start", func() {
+				attic := scenestore.NewConfigStore(dir, "attic")
+				attic.Load(ctx)
+				util_test.WriteRawFile(dir, "rooms/attic.yaml", "version: 1\nname: Attic")
 
-				util_test.WriteConfigFile(dir, "scenes/cave.yaml", &scenes.Config{ID: "cave", Name: "Fixed cave"})
-				store.Reload(ctx, "scenes/cave.yaml")
-				Expect(sceneName("cave")).To(Equal("Fixed cave"))
+				r, err := attic.CurrentRoom(ctx)
+				Expect(err).ToNot(HaveOccurred())
+				Expect(r.Name).To(Equal("Attic"))
+			})
+
+			It("treats a removed room file as an empty room", func() {
+				Expect(os.Remove(filepath.Join(dir, "rooms", "living-room.json"))).To(Succeed())
+				Expect(roomName()).To(BeEmpty())
+			})
+
+			It("skips an invalid room file, reports it when scenes are listed, and picks it up once fixed", func() {
+				util_test.WriteRawFile(dir, "rooms/living-room.json", `{"version": 1, "name": `)
+				_, err := store.ListSceneConfigs(ctx)
+				Expect(err).ToNot(HaveOccurred())
+				Expect(store.Errors()).To(ConsistOf(HaveField("File", "rooms/living-room.json")))
+				Expect(roomName()).To(BeEmpty())
+
+				util_test.WriteConfigFile(dir, "rooms/living-room.json", devices.NewRoom("living-room", "Fixed room"))
+				Expect(roomName()).To(Equal("Fixed room"))
 				Expect(store.Errors()).To(BeEmpty())
 			})
+		})
 
-			It("removes a deleted scene", func() {
+		Describe("reading scene files on demand", func() {
+			listed := func() []string {
+				GinkgoHelper()
+				cfgs, err := store.ListSceneConfigs(ctx)
+				Expect(err).ToNot(HaveOccurred())
+				ids := make([]string, 0, len(cfgs))
+				for _, cfg := range cfgs {
+					ids = append(ids, cfg.ID)
+				}
+
+				return ids
+			}
+
+			It("lists a scene file added after start", func() {
+				util_test.WriteConfigFile(dir, "scenes/attic.yaml", &scenes.Config{ID: "attic", Name: "Attic"})
+				Expect(listed()).To(Equal([]string{"attic", "cave"}))
+			})
+
+			It("reads the file as it is now when getting a scene", func() {
+				util_test.WriteConfigFile(dir, "scenes/cave.yaml", &scenes.Config{ID: "cave", Name: "Deep cave"})
+				Expect(sceneName("cave")).To(Equal("Deep cave"))
+			})
+
+			It("forgets a deleted scene", func() {
 				Expect(os.Remove(filepath.Join(dir, "scenes", "cave.yaml"))).To(Succeed())
-				store.Reload(ctx, "scenes/cave.yaml")
+				Expect(listed()).To(BeEmpty())
+				_, err := store.GetSceneConfig(ctx, "cave")
+				Expect(err).To(MatchError(scenes.ErrSceneNotFound))
+			})
+
+			It("skips an invalid file, reports it, and picks it up once fixed", func() {
+				util_test.WriteRawFile(dir, "scenes/cave.yaml", "version: 1\nname: [broken")
 
 				_, err := store.GetSceneConfig(ctx, "cave")
 				Expect(err).To(MatchError(scenes.ErrSceneNotFound))
-				Expect(seen()).To(Equal([]scenestore.ConfigChange{{SceneID: "cave"}}))
-			})
+				Expect(err).To(MatchError(ContainSubstring("scenes/cave.yaml")))
+				Expect(listed()).To(BeEmpty())
+				Expect(store.Errors()).To(ConsistOf(HaveField("File", "scenes/cave.yaml")))
 
-			It("picks up a changed room file", func() {
-				util_test.WriteConfigFile(dir, "rooms/living-room.json", devices.NewRoom("living-room", "Game room"))
-				store.Reload(ctx, "rooms/living-room.json")
-
-				r, err := store.CurrentRoom(ctx)
-				Expect(err).ToNot(HaveOccurred())
-				Expect(r.Name).To(Equal("Game room"))
-				Expect(seen()).To(Equal([]scenestore.ConfigChange{{Room: true}}))
-			})
-
-			It("ignores other files", func() {
-				store.Reload(ctx, "rooms/other-room.json")
-				store.Reload(ctx, "scenes/cave/maps/cave.map.json")
-				store.Reload(ctx, "shared/props/barrel.svg")
-				Expect(seen()).To(BeEmpty())
-			})
-
-			It("watches the folders and reloads edited files", func() {
-				Expect(store.Watch(ctx)).To(Succeed())
-				DeferCleanup(store.StopWatching)
-
-				util_test.WriteConfigFile(dir, "scenes/cave.yaml", &scenes.Config{ID: "cave", Name: "Watched cave"})
-				Eventually(func() string { return sceneName("cave") }).WithTimeout(5 * time.Second).Should(Equal("Watched cave"))
-
-				util_test.WriteConfigFile(dir, "scenes/attic.json", &scenes.Config{ID: "attic", Name: "Attic"})
-				Eventually(seen).WithTimeout(5 * time.Second).Should(ContainElement(scenestore.ConfigChange{SceneID: "attic"}))
-				Expect(sceneName("attic")).To(Equal("Attic"))
+				util_test.WriteConfigFile(dir, "scenes/cave.yaml", &scenes.Config{ID: "cave", Name: "Fixed cave"})
+				Expect(listed()).To(Equal([]string{"cave"}))
+				Expect(store.Errors()).To(BeEmpty())
+				Expect(sceneName("cave")).To(Equal("Fixed cave"))
 			})
 		})
 	})

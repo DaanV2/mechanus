@@ -89,17 +89,16 @@ bindings:                           # Target -> device IDs
 
 Paired screens are registered in the database and can be bound to targets from the app; those bindings are added to the ones in the file. See [integrations.md](./integrations.md) for each integration's `config`.
 
-## Editing while the server runs
+## Editing files
 
-The server watches the `scenes` and `rooms` folders. When a file is saved:
+Scene and room files are read from disk when they are needed, nothing is watched:
 
-- The new version is used straight away; a scene that appears is listed, a deleted scene is no longer listed. An active scene whose file is deleted keeps running with what it loaded.
-- If the edited scene is the active one, or the room changed, devices are re-instructed with what changed. The scene keeps what happened during play (moved, spawned or hidden entities, live adjustments); if its active variant no longer exists, the default variant is applied.
-- If the file is invalid (syntax error, unknown version, wrong ID, ...), the last good version stays in use and the GM view lists the file with the error until it is fixed.
+- The scene list in the GM view scans the `scenes` folder each time it loads, so added, edited and removed scenes show up after reloading the page.
+- Activating or resetting a scene reads its file, so it starts with what is in the file now. The active scene keeps what it was activated with; activate or reset it again to apply an edit.
+- The room file is checked every time the room is used (activating a scene, switching variant, device statuses), so new devices and bindings apply from the next change on the table.
+- A file that is invalid (syntax error, unknown version, wrong ID, ...) is skipped and the GM view lists the file with the error.
 
-Battle map files (`*.map.json`) are not watched: they are read every time a screen is instructed.
-
-Watching relies on file system events. With Docker Desktop on Windows or macOS, edits made on the host to a bind-mounted folder may not reach the container; restart the server (or edit inside the container) in that case.
+Battle map files (`*.map.json`) are read every time a screen is instructed.
 
 ## Example
 
