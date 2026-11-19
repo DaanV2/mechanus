@@ -4,4 +4,4 @@ db.sqlite
 mechanus
 
 # GoReleaser output
-dist/
+/dist/

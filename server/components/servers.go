@@ -50,6 +50,7 @@ type RouterSetup struct {
 	WebsocketHandler *websocket.WebsocketHandler
 	DevicePolicies   connect.Interceptor // Enforces the route policies of the device service
 	Assets           gohttp.Handler      // Serves scene and shared assets under assets.RoutePrefix
+	WebClient        gohttp.FileSystem   // The web client served under /, falls back to the static folder when nil
 }
 
 // RouterRPCS contains the gRPC service handlers for the router.
@@ -90,6 +91,11 @@ func CreateRouter(setup *RouterSetup, rpcs *RouterRPCS, cfgs RouterConfig) (goht
 		grpchealth.HealthV1ServiceName,
 	)
 
+	webClient := setup.WebClient
+	if webClient == nil {
+		webClient = gohttp.Dir(cfgs.Server.StaticFolder)
+	}
+
 	wrouter := websocket.NewWebsocketRouter(setup.WebsocketHandler)
 	router := routers.CreateRouter(
 		// gRPC
@@ -105,7 +111,7 @@ func CreateRouter(setup *RouterSetup, rpcs *RouterRPCS, cfgs RouterConfig) (goht
 		routers.WithGrpcRoute(grpchealth.NewHandler, grpchealth.Checker(healthServ), grpcOpts),
 
 		// http
-		routers.WithHandle("/", gohttp.FileServer(gohttp.Dir(cfgs.Server.StaticFolder))),
+		routers.WithHandle("/", gohttp.FileServer(webClient)),
 		routers.WithHandle(assets.RoutePrefix, setup.Assets),
 		// http utils
 		routers.WithHandle("/health", healthServ),

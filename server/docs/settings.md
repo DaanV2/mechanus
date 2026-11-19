@@ -111,7 +111,7 @@
 
 | Name | Type | Description | Default | Env |
 |------|------|-------------|---------|-----|
-| folder | string | The default files to serve | /web | SERVER_STATIC_FOLDER |
+| folder | string | The folder the web client is served from. Created and filled with the client built into the binary when missing | web | SERVER_STATIC_FOLDER |
 
 ### Tls
 

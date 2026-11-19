@@ -1,7 +1,7 @@
 # yaml-language-server: $schema=https://goreleaser.com/static/schema.json
 # Release binaries for Linux, Windows and macOS (amd64 + arm64).
-# Each archive holds the server binary and the compiled web client in `web/`;
-# start it with `mechanus server --server.static.folder web`, see docs/getting-started/binaries.md.
+# The compiled web client is embedded in the binary (server/infrastructure/webclient); on start the
+# server writes it to `web/` and serves it, see docs/getting-started/binaries.md.
 #
 # Local / PR check:  goreleaser release --snapshot --clean   (output in dist/)
 # Release:           .github/workflows/release-assets.yaml
@@ -14,6 +14,8 @@ before:
     # also writes client/build/licenses/npm.json (client/scripts/vite-plugin-licenses.ts)
     - npm run build --prefix client
     - go -C server run ./scripts/licenses -o ../client/build/licenses/go.json
+    # copy client/build into the folder the binary embeds
+    - go -C server run ./scripts/embedclient
 
 builds:
   - id: mechanus
@@ -38,9 +40,6 @@ archives:
     files:
       - LICENSE
       - README.md
-      - src: client/build/*
-        dst: web
-        strip_parent: false
 
 checksum:
   name_template: checksums.txt

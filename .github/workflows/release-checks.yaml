@@ -47,7 +47,8 @@ jobs:
           mkdir smoke
           tar -xzf dist/*_linux_amd64.tar.gz -C smoke
           cd smoke
-          ./mechanus server --server.static.folder web > server.log 2>&1 &
+          # no flags: the binary writes its embedded web client to web/ and serves it
+          ./mechanus server > server.log 2>&1 &
           for i in $(seq 1 30); do
             curl -sf http://localhost:8080/ > /dev/null && break
             sleep 1

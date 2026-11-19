@@ -12,7 +12,7 @@ Default port is `8080` (`--server.port` / `SERVER_PORT`); see [configuration/con
 | `/users.v1.LoginService/*`, `/users.v1.UserService/*` | ConnectRPC handlers (login, user management) |
 | `/health`, `/healthz`      | HTTP health check                                         |
 | `/ready`, `/readyz`        | HTTP readiness check                                      |
-| `/` (anything else)        | Static file server for the compiled SvelteKit SPA (`--server.static.folder` / `SERVER_STATIC_FOLDER`, default `/web`) |
+| `/` (anything else)        | Static file server for the compiled SvelteKit SPA (`--server.static.folder` / `SERVER_STATIC_FOLDER`, default `web`; filled with the client embedded in the binary when missing) |
 
 ConnectRPC also exposes gRPC reflection and gRPC health endpoints for tooling.
 

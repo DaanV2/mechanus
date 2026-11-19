@@ -2,10 +2,10 @@
 
 ## 1. Default client
 
-- [ ] 1.1 Decide embed vs `web/` default (design.md)
-- [ ] 1.2 Implement and verify the binary serves the client with no flags
-- [ ] 1.3 Update docs/getting-started/
-- [ ] 1.4 Run `just server lint` and `just server test` and fix every reported issue
+- [x] 1.1 Decide embed vs `web/` default (design.md)
+- [x] 1.2 Implement and verify the binary serves the client with no flags
+- [x] 1.3 Update docs/getting-started/
+- [x] 1.4 Run `just server lint` and `just server test` and fix every reported issue
 
 ## Workflow follow-up
 
