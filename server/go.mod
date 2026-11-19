@@ -27,6 +27,7 @@ require (
 	github.com/daanv2/go-kit v1.1.1
 	github.com/daanv2/go-locks v1.5.1
 	github.com/eclipse/paho.mqtt.golang v1.5.1
+	github.com/fsnotify/fsnotify v1.10.1
 	github.com/glebarez/sqlite v1.11.0
 	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/google/uuid v1.6.0
@@ -170,7 +171,6 @@ require (
 	github.com/felixge/fgprof v0.9.5 // indirect
 	github.com/felixge/httpsnoop v1.1.0 // indirect
 	github.com/firefart/nonamedreturns v1.0.8 // indirect
-	github.com/fsnotify/fsnotify v1.10.1 // indirect
 	github.com/fullstorydev/grpcurl v1.9.2 // indirect
 	github.com/fzipp/gocyclo v0.6.0 // indirect
 	github.com/ghostiam/protogetter v1.0.1 // indirect

@@ -127,7 +127,7 @@ The route's policy (`http.RequirePolicy`) resolves the connection's identity and
 
 ### Scene assets
 
-Scene assets (maps, images, video) are served by `infrastructure/assets.Store` under `/assets/`: scene assets from `<app config dir>/scenes/<scene id>/...` (referenced relative to the scene folder, `maps/cave.webp`), shared assets from `<app config dir>/shared/...` (referenced as `shared:/monsters/goblin.png`). The screen driver resolves references to URLs with a content hash (`?v=<hash>`); versioned requests are served `Cache-Control: immutable`. Only files inside a scene folder or the shared folder are served, never scene configs (`scenes/<id>.dat`), battle map files (`*.map.json`, which the server reads itself) or other config files.
+Scene assets (maps, images, video) are served by `infrastructure/assets.Store` under `/assets/`: scene assets from `<app config dir>/scenes/<scene id>/...` (referenced relative to the scene folder, `maps/cave.webp`), shared assets from `<app config dir>/shared/...` (referenced as `shared:/monsters/goblin.png`). The screen driver resolves references to URLs with a content hash (`?v=<hash>`); versioned requests are served `Cache-Control: immutable`. Only files inside a scene folder or the shared folder are served, never scene configs (`scenes/<id>.yaml`), battle map files (`*.map.json`, which the server reads itself) or other config files.
 
 ## Static file serving
 

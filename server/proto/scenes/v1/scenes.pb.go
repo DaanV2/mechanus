@@ -167,6 +167,7 @@ func (*ListScenesRequest) Descriptor() ([]byte, []int) {
 type ListScenesResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Scenes        []*Scene               `protobuf:"bytes,1,rep,name=scenes,proto3" json:"scenes,omitempty"`
+	ConfigErrors  []*ConfigFileError     `protobuf:"bytes,2,rep,name=config_errors,json=configErrors,proto3" json:"config_errors,omitempty"` // Scene and room files that could not be loaded; their last good version, if any, stays in use
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -208,6 +209,66 @@ func (x *ListScenesResponse) GetScenes() []*Scene {
 	return nil
 }
 
+func (x *ListScenesResponse) GetConfigErrors() []*ConfigFileError {
+	if x != nil {
+		return x.ConfigErrors
+	}
+	return nil
+}
+
+// ConfigFileError is an authored config file that could not be loaded.
+type ConfigFileError struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	File          string                 `protobuf:"bytes,1,opt,name=file,proto3" json:"file,omitempty"`       // Path relative to the config folder, e.g. scenes/cave.yaml
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"` // What is wrong with it
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ConfigFileError) Reset() {
+	*x = ConfigFileError{}
+	mi := &file_scenes_v1_scenes_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ConfigFileError) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ConfigFileError) ProtoMessage() {}
+
+func (x *ConfigFileError) ProtoReflect() protoreflect.Message {
+	mi := &file_scenes_v1_scenes_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ConfigFileError.ProtoReflect.Descriptor instead.
+func (*ConfigFileError) Descriptor() ([]byte, []int) {
+	return file_scenes_v1_scenes_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *ConfigFileError) GetFile() string {
+	if x != nil {
+		return x.File
+	}
+	return ""
+}
+
+func (x *ConfigFileError) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
 type ActivateSceneRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	SceneId       string                 `protobuf:"bytes,1,opt,name=scene_id,json=sceneId,proto3" json:"scene_id,omitempty"`       // The scene to activate
@@ -218,7 +279,7 @@ type ActivateSceneRequest struct {
 
 func (x *ActivateSceneRequest) Reset() {
 	*x = ActivateSceneRequest{}
-	mi := &file_scenes_v1_scenes_proto_msgTypes[2]
+	mi := &file_scenes_v1_scenes_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -230,7 +291,7 @@ func (x *ActivateSceneRequest) String() string {
 func (*ActivateSceneRequest) ProtoMessage() {}
 
 func (x *ActivateSceneRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_scenes_v1_scenes_proto_msgTypes[2]
+	mi := &file_scenes_v1_scenes_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -243,7 +304,7 @@ func (x *ActivateSceneRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ActivateSceneRequest.ProtoReflect.Descriptor instead.
 func (*ActivateSceneRequest) Descriptor() ([]byte, []int) {
-	return file_scenes_v1_scenes_proto_rawDescGZIP(), []int{2}
+	return file_scenes_v1_scenes_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *ActivateSceneRequest) GetSceneId() string {
@@ -270,7 +331,7 @@ type ActivateSceneResponse struct {
 
 func (x *ActivateSceneResponse) Reset() {
 	*x = ActivateSceneResponse{}
-	mi := &file_scenes_v1_scenes_proto_msgTypes[3]
+	mi := &file_scenes_v1_scenes_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -282,7 +343,7 @@ func (x *ActivateSceneResponse) String() string {
 func (*ActivateSceneResponse) ProtoMessage() {}
 
 func (x *ActivateSceneResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_scenes_v1_scenes_proto_msgTypes[3]
+	mi := &file_scenes_v1_scenes_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -295,7 +356,7 @@ func (x *ActivateSceneResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ActivateSceneResponse.ProtoReflect.Descriptor instead.
 func (*ActivateSceneResponse) Descriptor() ([]byte, []int) {
-	return file_scenes_v1_scenes_proto_rawDescGZIP(), []int{3}
+	return file_scenes_v1_scenes_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *ActivateSceneResponse) GetActive() *ActiveScene {
@@ -321,7 +382,7 @@ type SetVariantRequest struct {
 
 func (x *SetVariantRequest) Reset() {
 	*x = SetVariantRequest{}
-	mi := &file_scenes_v1_scenes_proto_msgTypes[4]
+	mi := &file_scenes_v1_scenes_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -333,7 +394,7 @@ func (x *SetVariantRequest) String() string {
 func (*SetVariantRequest) ProtoMessage() {}
 
 func (x *SetVariantRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_scenes_v1_scenes_proto_msgTypes[4]
+	mi := &file_scenes_v1_scenes_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -346,7 +407,7 @@ func (x *SetVariantRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SetVariantRequest.ProtoReflect.Descriptor instead.
 func (*SetVariantRequest) Descriptor() ([]byte, []int) {
-	return file_scenes_v1_scenes_proto_rawDescGZIP(), []int{4}
+	return file_scenes_v1_scenes_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *SetVariantRequest) GetVariantId() string {
@@ -366,7 +427,7 @@ type SetVariantResponse struct {
 
 func (x *SetVariantResponse) Reset() {
 	*x = SetVariantResponse{}
-	mi := &file_scenes_v1_scenes_proto_msgTypes[5]
+	mi := &file_scenes_v1_scenes_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -378,7 +439,7 @@ func (x *SetVariantResponse) String() string {
 func (*SetVariantResponse) ProtoMessage() {}
 
 func (x *SetVariantResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_scenes_v1_scenes_proto_msgTypes[5]
+	mi := &file_scenes_v1_scenes_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -391,7 +452,7 @@ func (x *SetVariantResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SetVariantResponse.ProtoReflect.Descriptor instead.
 func (*SetVariantResponse) Descriptor() ([]byte, []int) {
-	return file_scenes_v1_scenes_proto_rawDescGZIP(), []int{5}
+	return file_scenes_v1_scenes_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *SetVariantResponse) GetActive() *ActiveScene {
@@ -416,7 +477,7 @@ type GetActiveSceneRequest struct {
 
 func (x *GetActiveSceneRequest) Reset() {
 	*x = GetActiveSceneRequest{}
-	mi := &file_scenes_v1_scenes_proto_msgTypes[6]
+	mi := &file_scenes_v1_scenes_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -428,7 +489,7 @@ func (x *GetActiveSceneRequest) String() string {
 func (*GetActiveSceneRequest) ProtoMessage() {}
 
 func (x *GetActiveSceneRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_scenes_v1_scenes_proto_msgTypes[6]
+	mi := &file_scenes_v1_scenes_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -441,7 +502,7 @@ func (x *GetActiveSceneRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetActiveSceneRequest.ProtoReflect.Descriptor instead.
 func (*GetActiveSceneRequest) Descriptor() ([]byte, []int) {
-	return file_scenes_v1_scenes_proto_rawDescGZIP(), []int{6}
+	return file_scenes_v1_scenes_proto_rawDescGZIP(), []int{7}
 }
 
 type GetActiveSceneResponse struct {
@@ -453,7 +514,7 @@ type GetActiveSceneResponse struct {
 
 func (x *GetActiveSceneResponse) Reset() {
 	*x = GetActiveSceneResponse{}
-	mi := &file_scenes_v1_scenes_proto_msgTypes[7]
+	mi := &file_scenes_v1_scenes_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -465,7 +526,7 @@ func (x *GetActiveSceneResponse) String() string {
 func (*GetActiveSceneResponse) ProtoMessage() {}
 
 func (x *GetActiveSceneResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_scenes_v1_scenes_proto_msgTypes[7]
+	mi := &file_scenes_v1_scenes_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -478,7 +539,7 @@ func (x *GetActiveSceneResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetActiveSceneResponse.ProtoReflect.Descriptor instead.
 func (*GetActiveSceneResponse) Descriptor() ([]byte, []int) {
-	return file_scenes_v1_scenes_proto_rawDescGZIP(), []int{7}
+	return file_scenes_v1_scenes_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *GetActiveSceneResponse) GetActive() *ActiveScene {
@@ -502,7 +563,7 @@ type Scene struct {
 
 func (x *Scene) Reset() {
 	*x = Scene{}
-	mi := &file_scenes_v1_scenes_proto_msgTypes[8]
+	mi := &file_scenes_v1_scenes_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -514,7 +575,7 @@ func (x *Scene) String() string {
 func (*Scene) ProtoMessage() {}
 
 func (x *Scene) ProtoReflect() protoreflect.Message {
-	mi := &file_scenes_v1_scenes_proto_msgTypes[8]
+	mi := &file_scenes_v1_scenes_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -527,7 +588,7 @@ func (x *Scene) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Scene.ProtoReflect.Descriptor instead.
 func (*Scene) Descriptor() ([]byte, []int) {
-	return file_scenes_v1_scenes_proto_rawDescGZIP(), []int{8}
+	return file_scenes_v1_scenes_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *Scene) GetId() string {
@@ -577,7 +638,7 @@ type Variant struct {
 
 func (x *Variant) Reset() {
 	*x = Variant{}
-	mi := &file_scenes_v1_scenes_proto_msgTypes[9]
+	mi := &file_scenes_v1_scenes_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -589,7 +650,7 @@ func (x *Variant) String() string {
 func (*Variant) ProtoMessage() {}
 
 func (x *Variant) ProtoReflect() protoreflect.Message {
-	mi := &file_scenes_v1_scenes_proto_msgTypes[9]
+	mi := &file_scenes_v1_scenes_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -602,7 +663,7 @@ func (x *Variant) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Variant.ProtoReflect.Descriptor instead.
 func (*Variant) Descriptor() ([]byte, []int) {
-	return file_scenes_v1_scenes_proto_rawDescGZIP(), []int{9}
+	return file_scenes_v1_scenes_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *Variant) GetId() string {
@@ -637,7 +698,7 @@ type ActiveScene struct {
 
 func (x *ActiveScene) Reset() {
 	*x = ActiveScene{}
-	mi := &file_scenes_v1_scenes_proto_msgTypes[10]
+	mi := &file_scenes_v1_scenes_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -649,7 +710,7 @@ func (x *ActiveScene) String() string {
 func (*ActiveScene) ProtoMessage() {}
 
 func (x *ActiveScene) ProtoReflect() protoreflect.Message {
-	mi := &file_scenes_v1_scenes_proto_msgTypes[10]
+	mi := &file_scenes_v1_scenes_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -662,7 +723,7 @@ func (x *ActiveScene) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ActiveScene.ProtoReflect.Descriptor instead.
 func (*ActiveScene) Descriptor() ([]byte, []int) {
-	return file_scenes_v1_scenes_proto_rawDescGZIP(), []int{10}
+	return file_scenes_v1_scenes_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *ActiveScene) GetScene() *Scene {
@@ -696,7 +757,7 @@ type SetEntityHiddenRequest struct {
 
 func (x *SetEntityHiddenRequest) Reset() {
 	*x = SetEntityHiddenRequest{}
-	mi := &file_scenes_v1_scenes_proto_msgTypes[11]
+	mi := &file_scenes_v1_scenes_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -708,7 +769,7 @@ func (x *SetEntityHiddenRequest) String() string {
 func (*SetEntityHiddenRequest) ProtoMessage() {}
 
 func (x *SetEntityHiddenRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_scenes_v1_scenes_proto_msgTypes[11]
+	mi := &file_scenes_v1_scenes_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -721,7 +782,7 @@ func (x *SetEntityHiddenRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SetEntityHiddenRequest.ProtoReflect.Descriptor instead.
 func (*SetEntityHiddenRequest) Descriptor() ([]byte, []int) {
-	return file_scenes_v1_scenes_proto_rawDescGZIP(), []int{11}
+	return file_scenes_v1_scenes_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *SetEntityHiddenRequest) GetEntityId() string {
@@ -748,7 +809,7 @@ type SetEntityHiddenResponse struct {
 
 func (x *SetEntityHiddenResponse) Reset() {
 	*x = SetEntityHiddenResponse{}
-	mi := &file_scenes_v1_scenes_proto_msgTypes[12]
+	mi := &file_scenes_v1_scenes_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -760,7 +821,7 @@ func (x *SetEntityHiddenResponse) String() string {
 func (*SetEntityHiddenResponse) ProtoMessage() {}
 
 func (x *SetEntityHiddenResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_scenes_v1_scenes_proto_msgTypes[12]
+	mi := &file_scenes_v1_scenes_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -773,7 +834,7 @@ func (x *SetEntityHiddenResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SetEntityHiddenResponse.ProtoReflect.Descriptor instead.
 func (*SetEntityHiddenResponse) Descriptor() ([]byte, []int) {
-	return file_scenes_v1_scenes_proto_rawDescGZIP(), []int{12}
+	return file_scenes_v1_scenes_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *SetEntityHiddenResponse) GetActive() *ActiveScene {
@@ -803,7 +864,7 @@ type SpawnEntityRequest struct {
 
 func (x *SpawnEntityRequest) Reset() {
 	*x = SpawnEntityRequest{}
-	mi := &file_scenes_v1_scenes_proto_msgTypes[13]
+	mi := &file_scenes_v1_scenes_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -815,7 +876,7 @@ func (x *SpawnEntityRequest) String() string {
 func (*SpawnEntityRequest) ProtoMessage() {}
 
 func (x *SpawnEntityRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_scenes_v1_scenes_proto_msgTypes[13]
+	mi := &file_scenes_v1_scenes_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -828,7 +889,7 @@ func (x *SpawnEntityRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SpawnEntityRequest.ProtoReflect.Descriptor instead.
 func (*SpawnEntityRequest) Descriptor() ([]byte, []int) {
-	return file_scenes_v1_scenes_proto_rawDescGZIP(), []int{13}
+	return file_scenes_v1_scenes_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *SpawnEntityRequest) GetEntityId() string {
@@ -876,7 +937,7 @@ type SpawnEntityResponse struct {
 
 func (x *SpawnEntityResponse) Reset() {
 	*x = SpawnEntityResponse{}
-	mi := &file_scenes_v1_scenes_proto_msgTypes[14]
+	mi := &file_scenes_v1_scenes_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -888,7 +949,7 @@ func (x *SpawnEntityResponse) String() string {
 func (*SpawnEntityResponse) ProtoMessage() {}
 
 func (x *SpawnEntityResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_scenes_v1_scenes_proto_msgTypes[14]
+	mi := &file_scenes_v1_scenes_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -901,7 +962,7 @@ func (x *SpawnEntityResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SpawnEntityResponse.ProtoReflect.Descriptor instead.
 func (*SpawnEntityResponse) Descriptor() ([]byte, []int) {
-	return file_scenes_v1_scenes_proto_rawDescGZIP(), []int{14}
+	return file_scenes_v1_scenes_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *SpawnEntityResponse) GetActive() *ActiveScene {
@@ -927,7 +988,7 @@ type RemoveEntityRequest struct {
 
 func (x *RemoveEntityRequest) Reset() {
 	*x = RemoveEntityRequest{}
-	mi := &file_scenes_v1_scenes_proto_msgTypes[15]
+	mi := &file_scenes_v1_scenes_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -939,7 +1000,7 @@ func (x *RemoveEntityRequest) String() string {
 func (*RemoveEntityRequest) ProtoMessage() {}
 
 func (x *RemoveEntityRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_scenes_v1_scenes_proto_msgTypes[15]
+	mi := &file_scenes_v1_scenes_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -952,7 +1013,7 @@ func (x *RemoveEntityRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RemoveEntityRequest.ProtoReflect.Descriptor instead.
 func (*RemoveEntityRequest) Descriptor() ([]byte, []int) {
-	return file_scenes_v1_scenes_proto_rawDescGZIP(), []int{15}
+	return file_scenes_v1_scenes_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *RemoveEntityRequest) GetEntityId() string {
@@ -972,7 +1033,7 @@ type RemoveEntityResponse struct {
 
 func (x *RemoveEntityResponse) Reset() {
 	*x = RemoveEntityResponse{}
-	mi := &file_scenes_v1_scenes_proto_msgTypes[16]
+	mi := &file_scenes_v1_scenes_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -984,7 +1045,7 @@ func (x *RemoveEntityResponse) String() string {
 func (*RemoveEntityResponse) ProtoMessage() {}
 
 func (x *RemoveEntityResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_scenes_v1_scenes_proto_msgTypes[16]
+	mi := &file_scenes_v1_scenes_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -997,7 +1058,7 @@ func (x *RemoveEntityResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RemoveEntityResponse.ProtoReflect.Descriptor instead.
 func (*RemoveEntityResponse) Descriptor() ([]byte, []int) {
-	return file_scenes_v1_scenes_proto_rawDescGZIP(), []int{16}
+	return file_scenes_v1_scenes_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *RemoveEntityResponse) GetActive() *ActiveScene {
@@ -1024,7 +1085,7 @@ type MoveEntityRequest struct {
 
 func (x *MoveEntityRequest) Reset() {
 	*x = MoveEntityRequest{}
-	mi := &file_scenes_v1_scenes_proto_msgTypes[17]
+	mi := &file_scenes_v1_scenes_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1036,7 +1097,7 @@ func (x *MoveEntityRequest) String() string {
 func (*MoveEntityRequest) ProtoMessage() {}
 
 func (x *MoveEntityRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_scenes_v1_scenes_proto_msgTypes[17]
+	mi := &file_scenes_v1_scenes_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1049,7 +1110,7 @@ func (x *MoveEntityRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MoveEntityRequest.ProtoReflect.Descriptor instead.
 func (*MoveEntityRequest) Descriptor() ([]byte, []int) {
-	return file_scenes_v1_scenes_proto_rawDescGZIP(), []int{17}
+	return file_scenes_v1_scenes_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *MoveEntityRequest) GetEntityId() string {
@@ -1076,7 +1137,7 @@ type MoveEntityResponse struct {
 
 func (x *MoveEntityResponse) Reset() {
 	*x = MoveEntityResponse{}
-	mi := &file_scenes_v1_scenes_proto_msgTypes[18]
+	mi := &file_scenes_v1_scenes_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1088,7 +1149,7 @@ func (x *MoveEntityResponse) String() string {
 func (*MoveEntityResponse) ProtoMessage() {}
 
 func (x *MoveEntityResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_scenes_v1_scenes_proto_msgTypes[18]
+	mi := &file_scenes_v1_scenes_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1101,7 +1162,7 @@ func (x *MoveEntityResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MoveEntityResponse.ProtoReflect.Descriptor instead.
 func (*MoveEntityResponse) Descriptor() ([]byte, []int) {
-	return file_scenes_v1_scenes_proto_rawDescGZIP(), []int{18}
+	return file_scenes_v1_scenes_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *MoveEntityResponse) GetActive() *ActiveScene {
@@ -1127,7 +1188,7 @@ type ResetSceneRequest struct {
 
 func (x *ResetSceneRequest) Reset() {
 	*x = ResetSceneRequest{}
-	mi := &file_scenes_v1_scenes_proto_msgTypes[19]
+	mi := &file_scenes_v1_scenes_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1139,7 +1200,7 @@ func (x *ResetSceneRequest) String() string {
 func (*ResetSceneRequest) ProtoMessage() {}
 
 func (x *ResetSceneRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_scenes_v1_scenes_proto_msgTypes[19]
+	mi := &file_scenes_v1_scenes_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1152,7 +1213,7 @@ func (x *ResetSceneRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ResetSceneRequest.ProtoReflect.Descriptor instead.
 func (*ResetSceneRequest) Descriptor() ([]byte, []int) {
-	return file_scenes_v1_scenes_proto_rawDescGZIP(), []int{19}
+	return file_scenes_v1_scenes_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *ResetSceneRequest) GetSceneId() string {
@@ -1172,7 +1233,7 @@ type ResetSceneResponse struct {
 
 func (x *ResetSceneResponse) Reset() {
 	*x = ResetSceneResponse{}
-	mi := &file_scenes_v1_scenes_proto_msgTypes[20]
+	mi := &file_scenes_v1_scenes_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1184,7 +1245,7 @@ func (x *ResetSceneResponse) String() string {
 func (*ResetSceneResponse) ProtoMessage() {}
 
 func (x *ResetSceneResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_scenes_v1_scenes_proto_msgTypes[20]
+	mi := &file_scenes_v1_scenes_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1197,7 +1258,7 @@ func (x *ResetSceneResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ResetSceneResponse.ProtoReflect.Descriptor instead.
 func (*ResetSceneResponse) Descriptor() ([]byte, []int) {
-	return file_scenes_v1_scenes_proto_rawDescGZIP(), []int{20}
+	return file_scenes_v1_scenes_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *ResetSceneResponse) GetActive() *ActiveScene {
@@ -1228,7 +1289,7 @@ type Entity struct {
 
 func (x *Entity) Reset() {
 	*x = Entity{}
-	mi := &file_scenes_v1_scenes_proto_msgTypes[21]
+	mi := &file_scenes_v1_scenes_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1240,7 +1301,7 @@ func (x *Entity) String() string {
 func (*Entity) ProtoMessage() {}
 
 func (x *Entity) ProtoReflect() protoreflect.Message {
-	mi := &file_scenes_v1_scenes_proto_msgTypes[21]
+	mi := &file_scenes_v1_scenes_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1253,7 +1314,7 @@ func (x *Entity) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Entity.ProtoReflect.Descriptor instead.
 func (*Entity) Descriptor() ([]byte, []int) {
-	return file_scenes_v1_scenes_proto_rawDescGZIP(), []int{21}
+	return file_scenes_v1_scenes_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *Entity) GetId() string {
@@ -1302,7 +1363,7 @@ type Position struct {
 
 func (x *Position) Reset() {
 	*x = Position{}
-	mi := &file_scenes_v1_scenes_proto_msgTypes[22]
+	mi := &file_scenes_v1_scenes_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1314,7 +1375,7 @@ func (x *Position) String() string {
 func (*Position) ProtoMessage() {}
 
 func (x *Position) ProtoReflect() protoreflect.Message {
-	mi := &file_scenes_v1_scenes_proto_msgTypes[22]
+	mi := &file_scenes_v1_scenes_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1327,7 +1388,7 @@ func (x *Position) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Position.ProtoReflect.Descriptor instead.
 func (*Position) Descriptor() ([]byte, []int) {
-	return file_scenes_v1_scenes_proto_rawDescGZIP(), []int{22}
+	return file_scenes_v1_scenes_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *Position) GetX() float64 {
@@ -1352,7 +1413,7 @@ type ListDeviceStatusesRequest struct {
 
 func (x *ListDeviceStatusesRequest) Reset() {
 	*x = ListDeviceStatusesRequest{}
-	mi := &file_scenes_v1_scenes_proto_msgTypes[23]
+	mi := &file_scenes_v1_scenes_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1364,7 +1425,7 @@ func (x *ListDeviceStatusesRequest) String() string {
 func (*ListDeviceStatusesRequest) ProtoMessage() {}
 
 func (x *ListDeviceStatusesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_scenes_v1_scenes_proto_msgTypes[23]
+	mi := &file_scenes_v1_scenes_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1377,7 +1438,7 @@ func (x *ListDeviceStatusesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListDeviceStatusesRequest.ProtoReflect.Descriptor instead.
 func (*ListDeviceStatusesRequest) Descriptor() ([]byte, []int) {
-	return file_scenes_v1_scenes_proto_rawDescGZIP(), []int{23}
+	return file_scenes_v1_scenes_proto_rawDescGZIP(), []int{24}
 }
 
 type ListDeviceStatusesResponse struct {
@@ -1389,7 +1450,7 @@ type ListDeviceStatusesResponse struct {
 
 func (x *ListDeviceStatusesResponse) Reset() {
 	*x = ListDeviceStatusesResponse{}
-	mi := &file_scenes_v1_scenes_proto_msgTypes[24]
+	mi := &file_scenes_v1_scenes_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1401,7 +1462,7 @@ func (x *ListDeviceStatusesResponse) String() string {
 func (*ListDeviceStatusesResponse) ProtoMessage() {}
 
 func (x *ListDeviceStatusesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_scenes_v1_scenes_proto_msgTypes[24]
+	mi := &file_scenes_v1_scenes_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1414,7 +1475,7 @@ func (x *ListDeviceStatusesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListDeviceStatusesResponse.ProtoReflect.Descriptor instead.
 func (*ListDeviceStatusesResponse) Descriptor() ([]byte, []int) {
-	return file_scenes_v1_scenes_proto_rawDescGZIP(), []int{24}
+	return file_scenes_v1_scenes_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *ListDeviceStatusesResponse) GetDevices() []*DeviceStatus {
@@ -1442,7 +1503,7 @@ type DeviceStatus struct {
 
 func (x *DeviceStatus) Reset() {
 	*x = DeviceStatus{}
-	mi := &file_scenes_v1_scenes_proto_msgTypes[25]
+	mi := &file_scenes_v1_scenes_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1454,7 +1515,7 @@ func (x *DeviceStatus) String() string {
 func (*DeviceStatus) ProtoMessage() {}
 
 func (x *DeviceStatus) ProtoReflect() protoreflect.Message {
-	mi := &file_scenes_v1_scenes_proto_msgTypes[25]
+	mi := &file_scenes_v1_scenes_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1467,7 +1528,7 @@ func (x *DeviceStatus) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeviceStatus.ProtoReflect.Descriptor instead.
 func (*DeviceStatus) Descriptor() ([]byte, []int) {
-	return file_scenes_v1_scenes_proto_rawDescGZIP(), []int{25}
+	return file_scenes_v1_scenes_proto_rawDescGZIP(), []int{26}
 }
 
 func (x *DeviceStatus) GetDeviceId() string {
@@ -1538,9 +1599,13 @@ var File_scenes_v1_scenes_proto protoreflect.FileDescriptor
 const file_scenes_v1_scenes_proto_rawDesc = "" +
 	"\n" +
 	"\x16scenes/v1/scenes.proto\x12\tscenes.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"\x13\n" +
-	"\x11ListScenesRequest\">\n" +
+	"\x11ListScenesRequest\"\x7f\n" +
 	"\x12ListScenesResponse\x12(\n" +
-	"\x06scenes\x18\x01 \x03(\v2\x10.scenes.v1.SceneR\x06scenes\"P\n" +
+	"\x06scenes\x18\x01 \x03(\v2\x10.scenes.v1.SceneR\x06scenes\x12?\n" +
+	"\rconfig_errors\x18\x02 \x03(\v2\x1a.scenes.v1.ConfigFileErrorR\fconfigErrors\"?\n" +
+	"\x0fConfigFileError\x12\x12\n" +
+	"\x04file\x18\x01 \x01(\tR\x04file\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\"P\n" +
 	"\x14ActivateSceneRequest\x12\x19\n" +
 	"\bscene_id\x18\x01 \x01(\tR\asceneId\x12\x1d\n" +
 	"\n" +
@@ -1671,86 +1736,88 @@ func file_scenes_v1_scenes_proto_rawDescGZIP() []byte {
 }
 
 var file_scenes_v1_scenes_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
-var file_scenes_v1_scenes_proto_msgTypes = make([]protoimpl.MessageInfo, 27)
+var file_scenes_v1_scenes_proto_msgTypes = make([]protoimpl.MessageInfo, 28)
 var file_scenes_v1_scenes_proto_goTypes = []any{
 	(EntityKind)(0),                    // 0: scenes.v1.EntityKind
 	(DeviceState)(0),                   // 1: scenes.v1.DeviceState
 	(*ListScenesRequest)(nil),          // 2: scenes.v1.ListScenesRequest
 	(*ListScenesResponse)(nil),         // 3: scenes.v1.ListScenesResponse
-	(*ActivateSceneRequest)(nil),       // 4: scenes.v1.ActivateSceneRequest
-	(*ActivateSceneResponse)(nil),      // 5: scenes.v1.ActivateSceneResponse
-	(*SetVariantRequest)(nil),          // 6: scenes.v1.SetVariantRequest
-	(*SetVariantResponse)(nil),         // 7: scenes.v1.SetVariantResponse
-	(*GetActiveSceneRequest)(nil),      // 8: scenes.v1.GetActiveSceneRequest
-	(*GetActiveSceneResponse)(nil),     // 9: scenes.v1.GetActiveSceneResponse
-	(*Scene)(nil),                      // 10: scenes.v1.Scene
-	(*Variant)(nil),                    // 11: scenes.v1.Variant
-	(*ActiveScene)(nil),                // 12: scenes.v1.ActiveScene
-	(*SetEntityHiddenRequest)(nil),     // 13: scenes.v1.SetEntityHiddenRequest
-	(*SetEntityHiddenResponse)(nil),    // 14: scenes.v1.SetEntityHiddenResponse
-	(*SpawnEntityRequest)(nil),         // 15: scenes.v1.SpawnEntityRequest
-	(*SpawnEntityResponse)(nil),        // 16: scenes.v1.SpawnEntityResponse
-	(*RemoveEntityRequest)(nil),        // 17: scenes.v1.RemoveEntityRequest
-	(*RemoveEntityResponse)(nil),       // 18: scenes.v1.RemoveEntityResponse
-	(*MoveEntityRequest)(nil),          // 19: scenes.v1.MoveEntityRequest
-	(*MoveEntityResponse)(nil),         // 20: scenes.v1.MoveEntityResponse
-	(*ResetSceneRequest)(nil),          // 21: scenes.v1.ResetSceneRequest
-	(*ResetSceneResponse)(nil),         // 22: scenes.v1.ResetSceneResponse
-	(*Entity)(nil),                     // 23: scenes.v1.Entity
-	(*Position)(nil),                   // 24: scenes.v1.Position
-	(*ListDeviceStatusesRequest)(nil),  // 25: scenes.v1.ListDeviceStatusesRequest
-	(*ListDeviceStatusesResponse)(nil), // 26: scenes.v1.ListDeviceStatusesResponse
-	(*DeviceStatus)(nil),               // 27: scenes.v1.DeviceStatus
-	nil,                                // 28: scenes.v1.Variant.TagsEntry
-	(*timestamppb.Timestamp)(nil),      // 29: google.protobuf.Timestamp
+	(*ConfigFileError)(nil),            // 4: scenes.v1.ConfigFileError
+	(*ActivateSceneRequest)(nil),       // 5: scenes.v1.ActivateSceneRequest
+	(*ActivateSceneResponse)(nil),      // 6: scenes.v1.ActivateSceneResponse
+	(*SetVariantRequest)(nil),          // 7: scenes.v1.SetVariantRequest
+	(*SetVariantResponse)(nil),         // 8: scenes.v1.SetVariantResponse
+	(*GetActiveSceneRequest)(nil),      // 9: scenes.v1.GetActiveSceneRequest
+	(*GetActiveSceneResponse)(nil),     // 10: scenes.v1.GetActiveSceneResponse
+	(*Scene)(nil),                      // 11: scenes.v1.Scene
+	(*Variant)(nil),                    // 12: scenes.v1.Variant
+	(*ActiveScene)(nil),                // 13: scenes.v1.ActiveScene
+	(*SetEntityHiddenRequest)(nil),     // 14: scenes.v1.SetEntityHiddenRequest
+	(*SetEntityHiddenResponse)(nil),    // 15: scenes.v1.SetEntityHiddenResponse
+	(*SpawnEntityRequest)(nil),         // 16: scenes.v1.SpawnEntityRequest
+	(*SpawnEntityResponse)(nil),        // 17: scenes.v1.SpawnEntityResponse
+	(*RemoveEntityRequest)(nil),        // 18: scenes.v1.RemoveEntityRequest
+	(*RemoveEntityResponse)(nil),       // 19: scenes.v1.RemoveEntityResponse
+	(*MoveEntityRequest)(nil),          // 20: scenes.v1.MoveEntityRequest
+	(*MoveEntityResponse)(nil),         // 21: scenes.v1.MoveEntityResponse
+	(*ResetSceneRequest)(nil),          // 22: scenes.v1.ResetSceneRequest
+	(*ResetSceneResponse)(nil),         // 23: scenes.v1.ResetSceneResponse
+	(*Entity)(nil),                     // 24: scenes.v1.Entity
+	(*Position)(nil),                   // 25: scenes.v1.Position
+	(*ListDeviceStatusesRequest)(nil),  // 26: scenes.v1.ListDeviceStatusesRequest
+	(*ListDeviceStatusesResponse)(nil), // 27: scenes.v1.ListDeviceStatusesResponse
+	(*DeviceStatus)(nil),               // 28: scenes.v1.DeviceStatus
+	nil,                                // 29: scenes.v1.Variant.TagsEntry
+	(*timestamppb.Timestamp)(nil),      // 30: google.protobuf.Timestamp
 }
 var file_scenes_v1_scenes_proto_depIdxs = []int32{
-	10, // 0: scenes.v1.ListScenesResponse.scenes:type_name -> scenes.v1.Scene
-	12, // 1: scenes.v1.ActivateSceneResponse.active:type_name -> scenes.v1.ActiveScene
-	12, // 2: scenes.v1.SetVariantResponse.active:type_name -> scenes.v1.ActiveScene
-	12, // 3: scenes.v1.GetActiveSceneResponse.active:type_name -> scenes.v1.ActiveScene
-	11, // 4: scenes.v1.Scene.variants:type_name -> scenes.v1.Variant
-	28, // 5: scenes.v1.Variant.tags:type_name -> scenes.v1.Variant.TagsEntry
-	10, // 6: scenes.v1.ActiveScene.scene:type_name -> scenes.v1.Scene
-	23, // 7: scenes.v1.ActiveScene.entities:type_name -> scenes.v1.Entity
-	12, // 8: scenes.v1.SetEntityHiddenResponse.active:type_name -> scenes.v1.ActiveScene
-	0,  // 9: scenes.v1.SpawnEntityRequest.kind:type_name -> scenes.v1.EntityKind
-	24, // 10: scenes.v1.SpawnEntityRequest.position:type_name -> scenes.v1.Position
-	12, // 11: scenes.v1.SpawnEntityResponse.active:type_name -> scenes.v1.ActiveScene
-	12, // 12: scenes.v1.RemoveEntityResponse.active:type_name -> scenes.v1.ActiveScene
-	24, // 13: scenes.v1.MoveEntityRequest.position:type_name -> scenes.v1.Position
-	12, // 14: scenes.v1.MoveEntityResponse.active:type_name -> scenes.v1.ActiveScene
-	12, // 15: scenes.v1.ResetSceneResponse.active:type_name -> scenes.v1.ActiveScene
-	0,  // 16: scenes.v1.Entity.kind:type_name -> scenes.v1.EntityKind
-	24, // 17: scenes.v1.Entity.position:type_name -> scenes.v1.Position
-	27, // 18: scenes.v1.ListDeviceStatusesResponse.devices:type_name -> scenes.v1.DeviceStatus
-	1,  // 19: scenes.v1.DeviceStatus.state:type_name -> scenes.v1.DeviceState
-	29, // 20: scenes.v1.DeviceStatus.last_apply:type_name -> google.protobuf.Timestamp
-	2,  // 21: scenes.v1.SceneService.List:input_type -> scenes.v1.ListScenesRequest
-	4,  // 22: scenes.v1.SceneService.Activate:input_type -> scenes.v1.ActivateSceneRequest
-	6,  // 23: scenes.v1.SceneService.SetVariant:input_type -> scenes.v1.SetVariantRequest
-	8,  // 24: scenes.v1.SceneService.GetActive:input_type -> scenes.v1.GetActiveSceneRequest
-	13, // 25: scenes.v1.SceneService.SetEntityHidden:input_type -> scenes.v1.SetEntityHiddenRequest
-	15, // 26: scenes.v1.SceneService.SpawnEntity:input_type -> scenes.v1.SpawnEntityRequest
-	17, // 27: scenes.v1.SceneService.RemoveEntity:input_type -> scenes.v1.RemoveEntityRequest
-	19, // 28: scenes.v1.SceneService.MoveEntity:input_type -> scenes.v1.MoveEntityRequest
-	21, // 29: scenes.v1.SceneService.Reset:input_type -> scenes.v1.ResetSceneRequest
-	25, // 30: scenes.v1.SceneService.ListDeviceStatuses:input_type -> scenes.v1.ListDeviceStatusesRequest
-	3,  // 31: scenes.v1.SceneService.List:output_type -> scenes.v1.ListScenesResponse
-	5,  // 32: scenes.v1.SceneService.Activate:output_type -> scenes.v1.ActivateSceneResponse
-	7,  // 33: scenes.v1.SceneService.SetVariant:output_type -> scenes.v1.SetVariantResponse
-	9,  // 34: scenes.v1.SceneService.GetActive:output_type -> scenes.v1.GetActiveSceneResponse
-	14, // 35: scenes.v1.SceneService.SetEntityHidden:output_type -> scenes.v1.SetEntityHiddenResponse
-	16, // 36: scenes.v1.SceneService.SpawnEntity:output_type -> scenes.v1.SpawnEntityResponse
-	18, // 37: scenes.v1.SceneService.RemoveEntity:output_type -> scenes.v1.RemoveEntityResponse
-	20, // 38: scenes.v1.SceneService.MoveEntity:output_type -> scenes.v1.MoveEntityResponse
-	22, // 39: scenes.v1.SceneService.Reset:output_type -> scenes.v1.ResetSceneResponse
-	26, // 40: scenes.v1.SceneService.ListDeviceStatuses:output_type -> scenes.v1.ListDeviceStatusesResponse
-	31, // [31:41] is the sub-list for method output_type
-	21, // [21:31] is the sub-list for method input_type
-	21, // [21:21] is the sub-list for extension type_name
-	21, // [21:21] is the sub-list for extension extendee
-	0,  // [0:21] is the sub-list for field type_name
+	11, // 0: scenes.v1.ListScenesResponse.scenes:type_name -> scenes.v1.Scene
+	4,  // 1: scenes.v1.ListScenesResponse.config_errors:type_name -> scenes.v1.ConfigFileError
+	13, // 2: scenes.v1.ActivateSceneResponse.active:type_name -> scenes.v1.ActiveScene
+	13, // 3: scenes.v1.SetVariantResponse.active:type_name -> scenes.v1.ActiveScene
+	13, // 4: scenes.v1.GetActiveSceneResponse.active:type_name -> scenes.v1.ActiveScene
+	12, // 5: scenes.v1.Scene.variants:type_name -> scenes.v1.Variant
+	29, // 6: scenes.v1.Variant.tags:type_name -> scenes.v1.Variant.TagsEntry
+	11, // 7: scenes.v1.ActiveScene.scene:type_name -> scenes.v1.Scene
+	24, // 8: scenes.v1.ActiveScene.entities:type_name -> scenes.v1.Entity
+	13, // 9: scenes.v1.SetEntityHiddenResponse.active:type_name -> scenes.v1.ActiveScene
+	0,  // 10: scenes.v1.SpawnEntityRequest.kind:type_name -> scenes.v1.EntityKind
+	25, // 11: scenes.v1.SpawnEntityRequest.position:type_name -> scenes.v1.Position
+	13, // 12: scenes.v1.SpawnEntityResponse.active:type_name -> scenes.v1.ActiveScene
+	13, // 13: scenes.v1.RemoveEntityResponse.active:type_name -> scenes.v1.ActiveScene
+	25, // 14: scenes.v1.MoveEntityRequest.position:type_name -> scenes.v1.Position
+	13, // 15: scenes.v1.MoveEntityResponse.active:type_name -> scenes.v1.ActiveScene
+	13, // 16: scenes.v1.ResetSceneResponse.active:type_name -> scenes.v1.ActiveScene
+	0,  // 17: scenes.v1.Entity.kind:type_name -> scenes.v1.EntityKind
+	25, // 18: scenes.v1.Entity.position:type_name -> scenes.v1.Position
+	28, // 19: scenes.v1.ListDeviceStatusesResponse.devices:type_name -> scenes.v1.DeviceStatus
+	1,  // 20: scenes.v1.DeviceStatus.state:type_name -> scenes.v1.DeviceState
+	30, // 21: scenes.v1.DeviceStatus.last_apply:type_name -> google.protobuf.Timestamp
+	2,  // 22: scenes.v1.SceneService.List:input_type -> scenes.v1.ListScenesRequest
+	5,  // 23: scenes.v1.SceneService.Activate:input_type -> scenes.v1.ActivateSceneRequest
+	7,  // 24: scenes.v1.SceneService.SetVariant:input_type -> scenes.v1.SetVariantRequest
+	9,  // 25: scenes.v1.SceneService.GetActive:input_type -> scenes.v1.GetActiveSceneRequest
+	14, // 26: scenes.v1.SceneService.SetEntityHidden:input_type -> scenes.v1.SetEntityHiddenRequest
+	16, // 27: scenes.v1.SceneService.SpawnEntity:input_type -> scenes.v1.SpawnEntityRequest
+	18, // 28: scenes.v1.SceneService.RemoveEntity:input_type -> scenes.v1.RemoveEntityRequest
+	20, // 29: scenes.v1.SceneService.MoveEntity:input_type -> scenes.v1.MoveEntityRequest
+	22, // 30: scenes.v1.SceneService.Reset:input_type -> scenes.v1.ResetSceneRequest
+	26, // 31: scenes.v1.SceneService.ListDeviceStatuses:input_type -> scenes.v1.ListDeviceStatusesRequest
+	3,  // 32: scenes.v1.SceneService.List:output_type -> scenes.v1.ListScenesResponse
+	6,  // 33: scenes.v1.SceneService.Activate:output_type -> scenes.v1.ActivateSceneResponse
+	8,  // 34: scenes.v1.SceneService.SetVariant:output_type -> scenes.v1.SetVariantResponse
+	10, // 35: scenes.v1.SceneService.GetActive:output_type -> scenes.v1.GetActiveSceneResponse
+	15, // 36: scenes.v1.SceneService.SetEntityHidden:output_type -> scenes.v1.SetEntityHiddenResponse
+	17, // 37: scenes.v1.SceneService.SpawnEntity:output_type -> scenes.v1.SpawnEntityResponse
+	19, // 38: scenes.v1.SceneService.RemoveEntity:output_type -> scenes.v1.RemoveEntityResponse
+	21, // 39: scenes.v1.SceneService.MoveEntity:output_type -> scenes.v1.MoveEntityResponse
+	23, // 40: scenes.v1.SceneService.Reset:output_type -> scenes.v1.ResetSceneResponse
+	27, // 41: scenes.v1.SceneService.ListDeviceStatuses:output_type -> scenes.v1.ListDeviceStatusesResponse
+	32, // [32:42] is the sub-list for method output_type
+	22, // [22:32] is the sub-list for method input_type
+	22, // [22:22] is the sub-list for extension type_name
+	22, // [22:22] is the sub-list for extension extendee
+	0,  // [0:22] is the sub-list for field type_name
 }
 
 func init() { file_scenes_v1_scenes_proto_init() }
@@ -1758,17 +1825,17 @@ func file_scenes_v1_scenes_proto_init() {
 	if File_scenes_v1_scenes_proto != nil {
 		return
 	}
-	file_scenes_v1_scenes_proto_msgTypes[7].OneofWrappers = []any{}
-	file_scenes_v1_scenes_proto_msgTypes[13].OneofWrappers = []any{}
-	file_scenes_v1_scenes_proto_msgTypes[20].OneofWrappers = []any{}
+	file_scenes_v1_scenes_proto_msgTypes[8].OneofWrappers = []any{}
+	file_scenes_v1_scenes_proto_msgTypes[14].OneofWrappers = []any{}
 	file_scenes_v1_scenes_proto_msgTypes[21].OneofWrappers = []any{}
+	file_scenes_v1_scenes_proto_msgTypes[22].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_scenes_v1_scenes_proto_rawDesc), len(file_scenes_v1_scenes_proto_rawDesc)),
 			NumEnums:      2,
-			NumMessages:   27,
+			NumMessages:   28,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

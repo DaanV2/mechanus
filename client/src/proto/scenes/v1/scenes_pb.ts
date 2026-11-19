@@ -12,7 +12,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file scenes/v1/scenes.proto.
  */
 export const file_scenes_v1_scenes: GenFile = /*@__PURE__*/
-  fileDesc("ChZzY2VuZXMvdjEvc2NlbmVzLnByb3RvEglzY2VuZXMudjEiEwoRTGlzdFNjZW5lc1JlcXVlc3QiNgoSTGlzdFNjZW5lc1Jlc3BvbnNlEiAKBnNjZW5lcxgBIAMoCzIQLnNjZW5lcy52MS5TY2VuZSI8ChRBY3RpdmF0ZVNjZW5lUmVxdWVzdBIQCghzY2VuZV9pZBgBIAEoCRISCgp2YXJpYW50X2lkGAIgASgJIlYKFUFjdGl2YXRlU2NlbmVSZXNwb25zZRImCgZhY3RpdmUYASABKAsyFi5zY2VuZXMudjEuQWN0aXZlU2NlbmUSFQoNZGV2aWNlX2Vycm9ycxgCIAMoCSInChFTZXRWYXJpYW50UmVxdWVzdBISCgp2YXJpYW50X2lkGAEgASgJIlMKElNldFZhcmlhbnRSZXNwb25zZRImCgZhY3RpdmUYASABKAsyFi5zY2VuZXMudjEuQWN0aXZlU2NlbmUSFQoNZGV2aWNlX2Vycm9ycxgCIAMoCSIXChVHZXRBY3RpdmVTY2VuZVJlcXVlc3QiUAoWR2V0QWN0aXZlU2NlbmVSZXNwb25zZRIrCgZhY3RpdmUYASABKAsyFi5zY2VuZXMudjEuQWN0aXZlU2NlbmVIAIgBAUIJCgdfYWN0aXZlInUKBVNjZW5lEgoKAmlkGAEgASgJEgwKBG5hbWUYAiABKAkSEwoLZGVzY3JpcHRpb24YAyABKAkSJAoIdmFyaWFudHMYBCADKAsyEi5zY2VuZXMudjEuVmFyaWFudBIXCg9kZWZhdWx0X3ZhcmlhbnQYBSABKAkifAoHVmFyaWFudBIKCgJpZBgBIAEoCRIMCgRuYW1lGAIgASgJEioKBHRhZ3MYAyADKAsyHC5zY2VuZXMudjEuVmFyaWFudC5UYWdzRW50cnkaKwoJVGFnc0VudHJ5EgsKA2tleRgBIAEoCRINCgV2YWx1ZRgCIAEoCToCOAEiZwoLQWN0aXZlU2NlbmUSHwoFc2NlbmUYASABKAsyEC5zY2VuZXMudjEuU2NlbmUSEgoKdmFyaWFudF9pZBgCIAEoCRIjCghlbnRpdGllcxgDIAMoCzIRLnNjZW5lcy52MS5FbnRpdHkiOwoWU2V0RW50aXR5SGlkZGVuUmVxdWVzdBIRCgllbnRpdHlfaWQYASABKAkSDgoGaGlkZGVuGAIgASgIIlgKF1NldEVudGl0eUhpZGRlblJlc3BvbnNlEiYKBmFjdGl2ZRgBIAEoCzIWLnNjZW5lcy52MS5BY3RpdmVTY2VuZRIVCg1kZXZpY2VfZXJyb3JzGAIgAygJIqMBChJTcGF3bkVudGl0eVJlcXVlc3QSEQoJZW50aXR5X2lkGAEgASgJEiMKBGtpbmQYAiABKA4yFS5zY2VuZXMudjEuRW50aXR5S2luZBIMCgRuYW1lGAMgASgJEg4KBmhpZGRlbhgEIAEoCBIqCghwb3NpdGlvbhgFIAEoCzITLnNjZW5lcy52MS5Qb3NpdGlvbkgAiAEBQgsKCV9wb3NpdGlvbiJUChNTcGF3bkVudGl0eVJlc3BvbnNlEiYKBmFjdGl2ZRgBIAEoCzIWLnNjZW5lcy52MS5BY3RpdmVTY2VuZRIVCg1kZXZpY2VfZXJyb3JzGAIgAygJIigKE1JlbW92ZUVudGl0eVJlcXVlc3QSEQoJZW50aXR5X2lkGAEgASgJIlUKFFJlbW92ZUVudGl0eVJlc3BvbnNlEiYKBmFjdGl2ZRgBIAEoCzIWLnNjZW5lcy52MS5BY3RpdmVTY2VuZRIVCg1kZXZpY2VfZXJyb3JzGAIgAygJIk0KEU1vdmVFbnRpdHlSZXF1ZXN0EhEKCWVudGl0eV9pZBgBIAEoCRIlCghwb3NpdGlvbhgCIAEoCzITLnNjZW5lcy52MS5Qb3NpdGlvbiJTChJNb3ZlRW50aXR5UmVzcG9uc2USJgoGYWN0aXZlGAEgASgLMhYuc2NlbmVzLnYxLkFjdGl2ZVNjZW5lEhUKDWRldmljZV9lcnJvcnMYAiADKAkiJQoRUmVzZXRTY2VuZVJlcXVlc3QSEAoIc2NlbmVfaWQYASABKAkiYwoSUmVzZXRTY2VuZVJlc3BvbnNlEisKBmFjdGl2ZRgBIAEoCzIWLnNjZW5lcy52MS5BY3RpdmVTY2VuZUgAiAEBEhUKDWRldmljZV9lcnJvcnMYAiADKAlCCQoHX2FjdGl2ZSKQAQoGRW50aXR5EgoKAmlkGAEgASgJEiMKBGtpbmQYAiABKA4yFS5zY2VuZXMudjEuRW50aXR5S2luZBIMCgRuYW1lGAMgASgJEg4KBmhpZGRlbhgEIAEoCBIqCghwb3NpdGlvbhgFIAEoCzITLnNjZW5lcy52MS5Qb3NpdGlvbkgAiAEBQgsKCV9wb3NpdGlvbiIgCghQb3NpdGlvbhIJCgF4GAEgASgBEgkKAXkYAiABKAEiGwoZTGlzdERldmljZVN0YXR1c2VzUmVxdWVzdCJGChpMaXN0RGV2aWNlU3RhdHVzZXNSZXNwb25zZRIoCgdkZXZpY2VzGAEgAygLMhcuc2NlbmVzLnYxLkRldmljZVN0YXR1cyLjAQoMRGV2aWNlU3RhdHVzEhEKCWRldmljZV9pZBgBIAEoCRIMCgRuYW1lGAIgASgJEgwKBGtpbmQYAyABKAkSEwoLaW50ZWdyYXRpb24YBCABKAkSDwoHdGFyZ2V0cxgFIAMoCRIlCgVzdGF0ZRgGIAEoDjIWLnNjZW5lcy52MS5EZXZpY2VTdGF0ZRINCgVlcnJvchgHIAEoCRIuCgpsYXN0X2FwcGx5GAggASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBIYChBsYXN0X2FwcGx5X2Vycm9yGAkgASgJKoUBCgpFbnRpdHlLaW5kEhsKF0VOVElUWV9LSU5EX1VOU1BFQ0lGSUVEEAASFgoSRU5USVRZX0tJTkRfUExBWUVSEAESEwoPRU5USVRZX0tJTkRfTlBDEAISFQoRRU5USVRZX0tJTkRfRU5FTVkQAxIWChJFTlRJVFlfS0lORF9PQkpFQ1QQBCpeCgtEZXZpY2VTdGF0ZRIcChhERVZJQ0VfU1RBVEVfVU5TUEVDSUZJRUQQABIXChNERVZJQ0VfU1RBVEVfT05MSU5FEAESGAoUREVWSUNFX1NUQVRFX09GRkxJTkUQAjLABgoMU2NlbmVTZXJ2aWNlEkUKBExpc3QSHC5zY2VuZXMudjEuTGlzdFNjZW5lc1JlcXVlc3QaHS5zY2VuZXMudjEuTGlzdFNjZW5lc1Jlc3BvbnNlIgASTwoIQWN0aXZhdGUSHy5zY2VuZXMudjEuQWN0aXZhdGVTY2VuZVJlcXVlc3QaIC5zY2VuZXMudjEuQWN0aXZhdGVTY2VuZVJlc3BvbnNlIgASSwoKU2V0VmFyaWFudBIcLnNjZW5lcy52MS5TZXRWYXJpYW50UmVxdWVzdBodLnNjZW5lcy52MS5TZXRWYXJpYW50UmVzcG9uc2UiABJSCglHZXRBY3RpdmUSIC5zY2VuZXMudjEuR2V0QWN0aXZlU2NlbmVSZXF1ZXN0GiEuc2NlbmVzLnYxLkdldEFjdGl2ZVNjZW5lUmVzcG9uc2UiABJaCg9TZXRFbnRpdHlIaWRkZW4SIS5zY2VuZXMudjEuU2V0RW50aXR5SGlkZGVuUmVxdWVzdBoiLnNjZW5lcy52MS5TZXRFbnRpdHlIaWRkZW5SZXNwb25zZSIAEk4KC1NwYXduRW50aXR5Eh0uc2NlbmVzLnYxLlNwYXduRW50aXR5UmVxdWVzdBoeLnNjZW5lcy52MS5TcGF3bkVudGl0eVJlc3BvbnNlIgASUQoMUmVtb3ZlRW50aXR5Eh4uc2NlbmVzLnYxLlJlbW92ZUVudGl0eVJlcXVlc3QaHy5zY2VuZXMudjEuUmVtb3ZlRW50aXR5UmVzcG9uc2UiABJLCgpNb3ZlRW50aXR5Ehwuc2NlbmVzLnYxLk1vdmVFbnRpdHlSZXF1ZXN0Gh0uc2NlbmVzLnYxLk1vdmVFbnRpdHlSZXNwb25zZSIAEkYKBVJlc2V0Ehwuc2NlbmVzLnYxLlJlc2V0U2NlbmVSZXF1ZXN0Gh0uc2NlbmVzLnYxLlJlc2V0U2NlbmVSZXNwb25zZSIAEmMKEkxpc3REZXZpY2VTdGF0dXNlcxIkLnNjZW5lcy52MS5MaXN0RGV2aWNlU3RhdHVzZXNSZXF1ZXN0GiUuc2NlbmVzLnYxLkxpc3REZXZpY2VTdGF0dXNlc1Jlc3BvbnNlIgBCPFo6Z2l0aHViLmNvbS9EYWFuVjIvbWVjaGFudXMvc2VydmVyL3Byb3RvL3NjZW5lcy92MTtzY2VuZXN2MWIGcHJvdG8z", [file_google_protobuf_timestamp]);
+  fileDesc("ChZzY2VuZXMvdjEvc2NlbmVzLnByb3RvEglzY2VuZXMudjEiEwoRTGlzdFNjZW5lc1JlcXVlc3QiaQoSTGlzdFNjZW5lc1Jlc3BvbnNlEiAKBnNjZW5lcxgBIAMoCzIQLnNjZW5lcy52MS5TY2VuZRIxCg1jb25maWdfZXJyb3JzGAIgAygLMhouc2NlbmVzLnYxLkNvbmZpZ0ZpbGVFcnJvciIwCg9Db25maWdGaWxlRXJyb3ISDAoEZmlsZRgBIAEoCRIPCgdtZXNzYWdlGAIgASgJIjwKFEFjdGl2YXRlU2NlbmVSZXF1ZXN0EhAKCHNjZW5lX2lkGAEgASgJEhIKCnZhcmlhbnRfaWQYAiABKAkiVgoVQWN0aXZhdGVTY2VuZVJlc3BvbnNlEiYKBmFjdGl2ZRgBIAEoCzIWLnNjZW5lcy52MS5BY3RpdmVTY2VuZRIVCg1kZXZpY2VfZXJyb3JzGAIgAygJIicKEVNldFZhcmlhbnRSZXF1ZXN0EhIKCnZhcmlhbnRfaWQYASABKAkiUwoSU2V0VmFyaWFudFJlc3BvbnNlEiYKBmFjdGl2ZRgBIAEoCzIWLnNjZW5lcy52MS5BY3RpdmVTY2VuZRIVCg1kZXZpY2VfZXJyb3JzGAIgAygJIhcKFUdldEFjdGl2ZVNjZW5lUmVxdWVzdCJQChZHZXRBY3RpdmVTY2VuZVJlc3BvbnNlEisKBmFjdGl2ZRgBIAEoCzIWLnNjZW5lcy52MS5BY3RpdmVTY2VuZUgAiAEBQgkKB19hY3RpdmUidQoFU2NlbmUSCgoCaWQYASABKAkSDAoEbmFtZRgCIAEoCRITCgtkZXNjcmlwdGlvbhgDIAEoCRIkCgh2YXJpYW50cxgEIAMoCzISLnNjZW5lcy52MS5WYXJpYW50EhcKD2RlZmF1bHRfdmFyaWFudBgFIAEoCSJ8CgdWYXJpYW50EgoKAmlkGAEgASgJEgwKBG5hbWUYAiABKAkSKgoEdGFncxgDIAMoCzIcLnNjZW5lcy52MS5WYXJpYW50LlRhZ3NFbnRyeRorCglUYWdzRW50cnkSCwoDa2V5GAEgASgJEg0KBXZhbHVlGAIgASgJOgI4ASJnCgtBY3RpdmVTY2VuZRIfCgVzY2VuZRgBIAEoCzIQLnNjZW5lcy52MS5TY2VuZRISCgp2YXJpYW50X2lkGAIgASgJEiMKCGVudGl0aWVzGAMgAygLMhEuc2NlbmVzLnYxLkVudGl0eSI7ChZTZXRFbnRpdHlIaWRkZW5SZXF1ZXN0EhEKCWVudGl0eV9pZBgBIAEoCRIOCgZoaWRkZW4YAiABKAgiWAoXU2V0RW50aXR5SGlkZGVuUmVzcG9uc2USJgoGYWN0aXZlGAEgASgLMhYuc2NlbmVzLnYxLkFjdGl2ZVNjZW5lEhUKDWRldmljZV9lcnJvcnMYAiADKAkiowEKElNwYXduRW50aXR5UmVxdWVzdBIRCgllbnRpdHlfaWQYASABKAkSIwoEa2luZBgCIAEoDjIVLnNjZW5lcy52MS5FbnRpdHlLaW5kEgwKBG5hbWUYAyABKAkSDgoGaGlkZGVuGAQgASgIEioKCHBvc2l0aW9uGAUgASgLMhMuc2NlbmVzLnYxLlBvc2l0aW9uSACIAQFCCwoJX3Bvc2l0aW9uIlQKE1NwYXduRW50aXR5UmVzcG9uc2USJgoGYWN0aXZlGAEgASgLMhYuc2NlbmVzLnYxLkFjdGl2ZVNjZW5lEhUKDWRldmljZV9lcnJvcnMYAiADKAkiKAoTUmVtb3ZlRW50aXR5UmVxdWVzdBIRCgllbnRpdHlfaWQYASABKAkiVQoUUmVtb3ZlRW50aXR5UmVzcG9uc2USJgoGYWN0aXZlGAEgASgLMhYuc2NlbmVzLnYxLkFjdGl2ZVNjZW5lEhUKDWRldmljZV9lcnJvcnMYAiADKAkiTQoRTW92ZUVudGl0eVJlcXVlc3QSEQoJZW50aXR5X2lkGAEgASgJEiUKCHBvc2l0aW9uGAIgASgLMhMuc2NlbmVzLnYxLlBvc2l0aW9uIlMKEk1vdmVFbnRpdHlSZXNwb25zZRImCgZhY3RpdmUYASABKAsyFi5zY2VuZXMudjEuQWN0aXZlU2NlbmUSFQoNZGV2aWNlX2Vycm9ycxgCIAMoCSIlChFSZXNldFNjZW5lUmVxdWVzdBIQCghzY2VuZV9pZBgBIAEoCSJjChJSZXNldFNjZW5lUmVzcG9uc2USKwoGYWN0aXZlGAEgASgLMhYuc2NlbmVzLnYxLkFjdGl2ZVNjZW5lSACIAQESFQoNZGV2aWNlX2Vycm9ycxgCIAMoCUIJCgdfYWN0aXZlIpABCgZFbnRpdHkSCgoCaWQYASABKAkSIwoEa2luZBgCIAEoDjIVLnNjZW5lcy52MS5FbnRpdHlLaW5kEgwKBG5hbWUYAyABKAkSDgoGaGlkZGVuGAQgASgIEioKCHBvc2l0aW9uGAUgASgLMhMuc2NlbmVzLnYxLlBvc2l0aW9uSACIAQFCCwoJX3Bvc2l0aW9uIiAKCFBvc2l0aW9uEgkKAXgYASABKAESCQoBeRgCIAEoASIbChlMaXN0RGV2aWNlU3RhdHVzZXNSZXF1ZXN0IkYKGkxpc3REZXZpY2VTdGF0dXNlc1Jlc3BvbnNlEigKB2RldmljZXMYASADKAsyFy5zY2VuZXMudjEuRGV2aWNlU3RhdHVzIuMBCgxEZXZpY2VTdGF0dXMSEQoJZGV2aWNlX2lkGAEgASgJEgwKBG5hbWUYAiABKAkSDAoEa2luZBgDIAEoCRITCgtpbnRlZ3JhdGlvbhgEIAEoCRIPCgd0YXJnZXRzGAUgAygJEiUKBXN0YXRlGAYgASgOMhYuc2NlbmVzLnYxLkRldmljZVN0YXRlEg0KBWVycm9yGAcgASgJEi4KCmxhc3RfYXBwbHkYCCABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEhgKEGxhc3RfYXBwbHlfZXJyb3IYCSABKAkqhQEKCkVudGl0eUtpbmQSGwoXRU5USVRZX0tJTkRfVU5TUEVDSUZJRUQQABIWChJFTlRJVFlfS0lORF9QTEFZRVIQARITCg9FTlRJVFlfS0lORF9OUEMQAhIVChFFTlRJVFlfS0lORF9FTkVNWRADEhYKEkVOVElUWV9LSU5EX09CSkVDVBAEKl4KC0RldmljZVN0YXRlEhwKGERFVklDRV9TVEFURV9VTlNQRUNJRklFRBAAEhcKE0RFVklDRV9TVEFURV9PTkxJTkUQARIYChRERVZJQ0VfU1RBVEVfT0ZGTElORRACMsAGCgxTY2VuZVNlcnZpY2USRQoETGlzdBIcLnNjZW5lcy52MS5MaXN0U2NlbmVzUmVxdWVzdBodLnNjZW5lcy52MS5MaXN0U2NlbmVzUmVzcG9uc2UiABJPCghBY3RpdmF0ZRIfLnNjZW5lcy52MS5BY3RpdmF0ZVNjZW5lUmVxdWVzdBogLnNjZW5lcy52MS5BY3RpdmF0ZVNjZW5lUmVzcG9uc2UiABJLCgpTZXRWYXJpYW50Ehwuc2NlbmVzLnYxLlNldFZhcmlhbnRSZXF1ZXN0Gh0uc2NlbmVzLnYxLlNldFZhcmlhbnRSZXNwb25zZSIAElIKCUdldEFjdGl2ZRIgLnNjZW5lcy52MS5HZXRBY3RpdmVTY2VuZVJlcXVlc3QaIS5zY2VuZXMudjEuR2V0QWN0aXZlU2NlbmVSZXNwb25zZSIAEloKD1NldEVudGl0eUhpZGRlbhIhLnNjZW5lcy52MS5TZXRFbnRpdHlIaWRkZW5SZXF1ZXN0GiIuc2NlbmVzLnYxLlNldEVudGl0eUhpZGRlblJlc3BvbnNlIgASTgoLU3Bhd25FbnRpdHkSHS5zY2VuZXMudjEuU3Bhd25FbnRpdHlSZXF1ZXN0Gh4uc2NlbmVzLnYxLlNwYXduRW50aXR5UmVzcG9uc2UiABJRCgxSZW1vdmVFbnRpdHkSHi5zY2VuZXMudjEuUmVtb3ZlRW50aXR5UmVxdWVzdBofLnNjZW5lcy52MS5SZW1vdmVFbnRpdHlSZXNwb25zZSIAEksKCk1vdmVFbnRpdHkSHC5zY2VuZXMudjEuTW92ZUVudGl0eVJlcXVlc3QaHS5zY2VuZXMudjEuTW92ZUVudGl0eVJlc3BvbnNlIgASRgoFUmVzZXQSHC5zY2VuZXMudjEuUmVzZXRTY2VuZVJlcXVlc3QaHS5zY2VuZXMudjEuUmVzZXRTY2VuZVJlc3BvbnNlIgASYwoSTGlzdERldmljZVN0YXR1c2VzEiQuc2NlbmVzLnYxLkxpc3REZXZpY2VTdGF0dXNlc1JlcXVlc3QaJS5zY2VuZXMudjEuTGlzdERldmljZVN0YXR1c2VzUmVzcG9uc2UiAEI8WjpnaXRodWIuY29tL0RhYW5WMi9tZWNoYW51cy9zZXJ2ZXIvcHJvdG8vc2NlbmVzL3YxO3NjZW5lc3YxYgZwcm90bzM", [file_google_protobuf_timestamp]);
 
 /**
  * @generated from message scenes.v1.ListScenesRequest
@@ -35,6 +35,13 @@ export type ListScenesResponse = Message<"scenes.v1.ListScenesResponse"> & {
    * @generated from field: repeated scenes.v1.Scene scenes = 1;
    */
   scenes: Scene[];
+
+  /**
+   * Scene and room files that could not be loaded; their last good version, if any, stays in use
+   *
+   * @generated from field: repeated scenes.v1.ConfigFileError config_errors = 2;
+   */
+  configErrors: ConfigFileError[];
 };
 
 /**
@@ -43,6 +50,34 @@ export type ListScenesResponse = Message<"scenes.v1.ListScenesResponse"> & {
  */
 export const ListScenesResponseSchema: GenMessage<ListScenesResponse> = /*@__PURE__*/
   messageDesc(file_scenes_v1_scenes, 1);
+
+/**
+ * ConfigFileError is an authored config file that could not be loaded.
+ *
+ * @generated from message scenes.v1.ConfigFileError
+ */
+export type ConfigFileError = Message<"scenes.v1.ConfigFileError"> & {
+  /**
+   * Path relative to the config folder, e.g. scenes/cave.yaml
+   *
+   * @generated from field: string file = 1;
+   */
+  file: string;
+
+  /**
+   * What is wrong with it
+   *
+   * @generated from field: string message = 2;
+   */
+  message: string;
+};
+
+/**
+ * Describes the message scenes.v1.ConfigFileError.
+ * Use `create(ConfigFileErrorSchema)` to create a new message.
+ */
+export const ConfigFileErrorSchema: GenMessage<ConfigFileError> = /*@__PURE__*/
+  messageDesc(file_scenes_v1_scenes, 2);
 
 /**
  * @generated from message scenes.v1.ActivateSceneRequest
@@ -68,7 +103,7 @@ export type ActivateSceneRequest = Message<"scenes.v1.ActivateSceneRequest"> & {
  * Use `create(ActivateSceneRequestSchema)` to create a new message.
  */
 export const ActivateSceneRequestSchema: GenMessage<ActivateSceneRequest> = /*@__PURE__*/
-  messageDesc(file_scenes_v1_scenes, 2);
+  messageDesc(file_scenes_v1_scenes, 3);
 
 /**
  * @generated from message scenes.v1.ActivateSceneResponse
@@ -92,7 +127,7 @@ export type ActivateSceneResponse = Message<"scenes.v1.ActivateSceneResponse"> &
  * Use `create(ActivateSceneResponseSchema)` to create a new message.
  */
 export const ActivateSceneResponseSchema: GenMessage<ActivateSceneResponse> = /*@__PURE__*/
-  messageDesc(file_scenes_v1_scenes, 3);
+  messageDesc(file_scenes_v1_scenes, 4);
 
 /**
  * @generated from message scenes.v1.SetVariantRequest
@@ -111,7 +146,7 @@ export type SetVariantRequest = Message<"scenes.v1.SetVariantRequest"> & {
  * Use `create(SetVariantRequestSchema)` to create a new message.
  */
 export const SetVariantRequestSchema: GenMessage<SetVariantRequest> = /*@__PURE__*/
-  messageDesc(file_scenes_v1_scenes, 4);
+  messageDesc(file_scenes_v1_scenes, 5);
 
 /**
  * @generated from message scenes.v1.SetVariantResponse
@@ -135,7 +170,7 @@ export type SetVariantResponse = Message<"scenes.v1.SetVariantResponse"> & {
  * Use `create(SetVariantResponseSchema)` to create a new message.
  */
 export const SetVariantResponseSchema: GenMessage<SetVariantResponse> = /*@__PURE__*/
-  messageDesc(file_scenes_v1_scenes, 5);
+  messageDesc(file_scenes_v1_scenes, 6);
 
 /**
  * @generated from message scenes.v1.GetActiveSceneRequest
@@ -148,7 +183,7 @@ export type GetActiveSceneRequest = Message<"scenes.v1.GetActiveSceneRequest"> &
  * Use `create(GetActiveSceneRequestSchema)` to create a new message.
  */
 export const GetActiveSceneRequestSchema: GenMessage<GetActiveSceneRequest> = /*@__PURE__*/
-  messageDesc(file_scenes_v1_scenes, 6);
+  messageDesc(file_scenes_v1_scenes, 7);
 
 /**
  * @generated from message scenes.v1.GetActiveSceneResponse
@@ -167,7 +202,7 @@ export type GetActiveSceneResponse = Message<"scenes.v1.GetActiveSceneResponse">
  * Use `create(GetActiveSceneResponseSchema)` to create a new message.
  */
 export const GetActiveSceneResponseSchema: GenMessage<GetActiveSceneResponse> = /*@__PURE__*/
-  messageDesc(file_scenes_v1_scenes, 7);
+  messageDesc(file_scenes_v1_scenes, 8);
 
 /**
  * A scene as configured by the GM
@@ -208,7 +243,7 @@ export type Scene = Message<"scenes.v1.Scene"> & {
  * Use `create(SceneSchema)` to create a new message.
  */
 export const SceneSchema: GenMessage<Scene> = /*@__PURE__*/
-  messageDesc(file_scenes_v1_scenes, 8);
+  messageDesc(file_scenes_v1_scenes, 9);
 
 /**
  * An alternative state of a scene (night, rain, combat, ...)
@@ -239,7 +274,7 @@ export type Variant = Message<"scenes.v1.Variant"> & {
  * Use `create(VariantSchema)` to create a new message.
  */
 export const VariantSchema: GenMessage<Variant> = /*@__PURE__*/
-  messageDesc(file_scenes_v1_scenes, 9);
+  messageDesc(file_scenes_v1_scenes, 10);
 
 /**
  * @generated from message scenes.v1.ActiveScene
@@ -270,7 +305,7 @@ export type ActiveScene = Message<"scenes.v1.ActiveScene"> & {
  * Use `create(ActiveSceneSchema)` to create a new message.
  */
 export const ActiveSceneSchema: GenMessage<ActiveScene> = /*@__PURE__*/
-  messageDesc(file_scenes_v1_scenes, 10);
+  messageDesc(file_scenes_v1_scenes, 11);
 
 /**
  * @generated from message scenes.v1.SetEntityHiddenRequest
@@ -294,7 +329,7 @@ export type SetEntityHiddenRequest = Message<"scenes.v1.SetEntityHiddenRequest">
  * Use `create(SetEntityHiddenRequestSchema)` to create a new message.
  */
 export const SetEntityHiddenRequestSchema: GenMessage<SetEntityHiddenRequest> = /*@__PURE__*/
-  messageDesc(file_scenes_v1_scenes, 11);
+  messageDesc(file_scenes_v1_scenes, 12);
 
 /**
  * @generated from message scenes.v1.SetEntityHiddenResponse
@@ -318,7 +353,7 @@ export type SetEntityHiddenResponse = Message<"scenes.v1.SetEntityHiddenResponse
  * Use `create(SetEntityHiddenResponseSchema)` to create a new message.
  */
 export const SetEntityHiddenResponseSchema: GenMessage<SetEntityHiddenResponse> = /*@__PURE__*/
-  messageDesc(file_scenes_v1_scenes, 12);
+  messageDesc(file_scenes_v1_scenes, 13);
 
 /**
  * @generated from message scenes.v1.SpawnEntityRequest
@@ -361,7 +396,7 @@ export type SpawnEntityRequest = Message<"scenes.v1.SpawnEntityRequest"> & {
  * Use `create(SpawnEntityRequestSchema)` to create a new message.
  */
 export const SpawnEntityRequestSchema: GenMessage<SpawnEntityRequest> = /*@__PURE__*/
-  messageDesc(file_scenes_v1_scenes, 13);
+  messageDesc(file_scenes_v1_scenes, 14);
 
 /**
  * @generated from message scenes.v1.SpawnEntityResponse
@@ -385,7 +420,7 @@ export type SpawnEntityResponse = Message<"scenes.v1.SpawnEntityResponse"> & {
  * Use `create(SpawnEntityResponseSchema)` to create a new message.
  */
 export const SpawnEntityResponseSchema: GenMessage<SpawnEntityResponse> = /*@__PURE__*/
-  messageDesc(file_scenes_v1_scenes, 14);
+  messageDesc(file_scenes_v1_scenes, 15);
 
 /**
  * @generated from message scenes.v1.RemoveEntityRequest
@@ -402,7 +437,7 @@ export type RemoveEntityRequest = Message<"scenes.v1.RemoveEntityRequest"> & {
  * Use `create(RemoveEntityRequestSchema)` to create a new message.
  */
 export const RemoveEntityRequestSchema: GenMessage<RemoveEntityRequest> = /*@__PURE__*/
-  messageDesc(file_scenes_v1_scenes, 15);
+  messageDesc(file_scenes_v1_scenes, 16);
 
 /**
  * @generated from message scenes.v1.RemoveEntityResponse
@@ -426,7 +461,7 @@ export type RemoveEntityResponse = Message<"scenes.v1.RemoveEntityResponse"> & {
  * Use `create(RemoveEntityResponseSchema)` to create a new message.
  */
 export const RemoveEntityResponseSchema: GenMessage<RemoveEntityResponse> = /*@__PURE__*/
-  messageDesc(file_scenes_v1_scenes, 16);
+  messageDesc(file_scenes_v1_scenes, 17);
 
 /**
  * @generated from message scenes.v1.MoveEntityRequest
@@ -448,7 +483,7 @@ export type MoveEntityRequest = Message<"scenes.v1.MoveEntityRequest"> & {
  * Use `create(MoveEntityRequestSchema)` to create a new message.
  */
 export const MoveEntityRequestSchema: GenMessage<MoveEntityRequest> = /*@__PURE__*/
-  messageDesc(file_scenes_v1_scenes, 17);
+  messageDesc(file_scenes_v1_scenes, 18);
 
 /**
  * @generated from message scenes.v1.MoveEntityResponse
@@ -472,7 +507,7 @@ export type MoveEntityResponse = Message<"scenes.v1.MoveEntityResponse"> & {
  * Use `create(MoveEntityResponseSchema)` to create a new message.
  */
 export const MoveEntityResponseSchema: GenMessage<MoveEntityResponse> = /*@__PURE__*/
-  messageDesc(file_scenes_v1_scenes, 18);
+  messageDesc(file_scenes_v1_scenes, 19);
 
 /**
  * @generated from message scenes.v1.ResetSceneRequest
@@ -491,7 +526,7 @@ export type ResetSceneRequest = Message<"scenes.v1.ResetSceneRequest"> & {
  * Use `create(ResetSceneRequestSchema)` to create a new message.
  */
 export const ResetSceneRequestSchema: GenMessage<ResetSceneRequest> = /*@__PURE__*/
-  messageDesc(file_scenes_v1_scenes, 19);
+  messageDesc(file_scenes_v1_scenes, 20);
 
 /**
  * @generated from message scenes.v1.ResetSceneResponse
@@ -517,7 +552,7 @@ export type ResetSceneResponse = Message<"scenes.v1.ResetSceneResponse"> & {
  * Use `create(ResetSceneResponseSchema)` to create a new message.
  */
 export const ResetSceneResponseSchema: GenMessage<ResetSceneResponse> = /*@__PURE__*/
-  messageDesc(file_scenes_v1_scenes, 20);
+  messageDesc(file_scenes_v1_scenes, 21);
 
 /**
  * An entity present in the active scene
@@ -560,7 +595,7 @@ export type Entity = Message<"scenes.v1.Entity"> & {
  * Use `create(EntitySchema)` to create a new message.
  */
 export const EntitySchema: GenMessage<Entity> = /*@__PURE__*/
-  messageDesc(file_scenes_v1_scenes, 21);
+  messageDesc(file_scenes_v1_scenes, 22);
 
 /**
  * A position on a battle map, in grid units
@@ -584,7 +619,7 @@ export type Position = Message<"scenes.v1.Position"> & {
  * Use `create(PositionSchema)` to create a new message.
  */
 export const PositionSchema: GenMessage<Position> = /*@__PURE__*/
-  messageDesc(file_scenes_v1_scenes, 22);
+  messageDesc(file_scenes_v1_scenes, 23);
 
 /**
  * @generated from message scenes.v1.ListDeviceStatusesRequest
@@ -597,7 +632,7 @@ export type ListDeviceStatusesRequest = Message<"scenes.v1.ListDeviceStatusesReq
  * Use `create(ListDeviceStatusesRequestSchema)` to create a new message.
  */
 export const ListDeviceStatusesRequestSchema: GenMessage<ListDeviceStatusesRequest> = /*@__PURE__*/
-  messageDesc(file_scenes_v1_scenes, 23);
+  messageDesc(file_scenes_v1_scenes, 24);
 
 /**
  * @generated from message scenes.v1.ListDeviceStatusesResponse
@@ -616,7 +651,7 @@ export type ListDeviceStatusesResponse = Message<"scenes.v1.ListDeviceStatusesRe
  * Use `create(ListDeviceStatusesResponseSchema)` to create a new message.
  */
 export const ListDeviceStatusesResponseSchema: GenMessage<ListDeviceStatusesResponse> = /*@__PURE__*/
-  messageDesc(file_scenes_v1_scenes, 24);
+  messageDesc(file_scenes_v1_scenes, 25);
 
 /**
  * The health / connection status of a device of the room
@@ -689,7 +724,7 @@ export type DeviceStatus = Message<"scenes.v1.DeviceStatus"> & {
  * Use `create(DeviceStatusSchema)` to create a new message.
  */
 export const DeviceStatusSchema: GenMessage<DeviceStatus> = /*@__PURE__*/
-  messageDesc(file_scenes_v1_scenes, 25);
+  messageDesc(file_scenes_v1_scenes, 26);
 
 /**
  * EntityKind is the role an entity plays in a scene.

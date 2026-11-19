@@ -29,17 +29,24 @@ type DeviceStatuses interface {
 	Statuses(ctx context.Context) ([]devices.Status, error)
 }
 
+// ConfigErrors reports authored config files that could not be loaded, see [scenestore.ConfigStore.Errors].
+type ConfigErrors interface {
+	Errors() []scenestore.FileError
+}
+
 // SceneServiceHandler implements the scenes gRPC service, the GM's control over the active scene.
 type SceneServiceHandler struct {
-	scenes  *application.SceneService
-	devices DeviceStatuses
+	scenes       *application.SceneService
+	devices      DeviceStatuses
+	configErrors ConfigErrors
 }
 
 // NewSceneServiceHandler creates a new SceneServiceHandler.
-func NewSceneServiceHandler(sceneService *application.SceneService, deviceStatuses DeviceStatuses) *SceneServiceHandler {
+func NewSceneServiceHandler(sceneService *application.SceneService, deviceStatuses DeviceStatuses, configErrors ConfigErrors) *SceneServiceHandler {
 	return &SceneServiceHandler{
-		scenes:  sceneService,
-		devices: deviceStatuses,
+		scenes:       sceneService,
+		devices:      deviceStatuses,
+		configErrors: configErrors,
 	}
 }
 
@@ -60,7 +67,13 @@ func (s *SceneServiceHandler) List(ctx context.Context, _ *connect.Request[scene
 		result = append(result, toScene(cfg))
 	}
 
-	return connect.NewResponse(&scenesv1.ListScenesResponse{Scenes: result}), nil
+	fileErrs := s.configErrors.Errors()
+	configErrs := make([]*scenesv1.ConfigFileError, 0, len(fileErrs))
+	for _, e := range fileErrs {
+		configErrs = append(configErrs, &scenesv1.ConfigFileError{File: e.File, Message: e.Message})
+	}
+
+	return connect.NewResponse(&scenesv1.ListScenesResponse{Scenes: result, ConfigErrors: configErrs}), nil
 }
 
 // Activate implements scenesv1connect.SceneServiceHandler.
