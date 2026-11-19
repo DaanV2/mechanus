@@ -24,9 +24,12 @@ dev-stop:
 image:
   docker build . -t mechanus
 
-# Build the server binary
+# Build the server binary, with the web client embedded
 [group('build')]
 binary:
+  just client build
+  go -C server run ./scripts/licenses -o ../client/build/licenses/go.json
+  go -C server run ./scripts/embedclient
   go build -o mechanus ./server/main.go
 
 # Generate Go code from proto files

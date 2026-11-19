@@ -77,8 +77,7 @@ The archive has no top-level folder, so extract it into a folder of its own. You
 
 ```text
 mechanus/
-├── mechanus        the server (mechanus.exe on Windows)
-├── web/            the web app the server hands to browsers
+├── mechanus        the server and web app (mechanus.exe on Windows)
 ├── LICENSE
 └── README.md
 ```
@@ -110,18 +109,18 @@ From the extracted folder:
 **Linux / macOS**
 
 ```bash
-./mechanus server --server.static.folder web \
+./mechanus server \
   --initialize.admin.username admin --initialize.admin.password 'change-me'
 ```
 
 **Windows** (PowerShell)
 
 ```powershell
-.\mechanus.exe server --server.static.folder web `
+.\mechanus.exe server `
   --initialize.admin.username admin --initialize.admin.password 'change-me'
 ```
 
-- `--server.static.folder web` points the server at the web app. The path is relative to the folder you start from; from anywhere else, pass the full path to `web`. Without it the server looks for `/web` (where the Docker image keeps it) and serves no pages.
+- The web app is built into the binary. On the first start the server writes it to a `web/` folder in the folder you start from and serves it from there; a newer binary replaces that folder with its own version. To keep it elsewhere, pass `--server.static.folder <path>`. A folder the server didn't create itself (no `.mechanus-client` file in it) is served as it is, so you can point it at your own build of the client.
 - `--initialize.admin.*` creates the first admin account when the database has none. Leave them off on later starts. Without them, the first start creates `admin` with a random password and prints it **once** in the log.
 
 The server runs in the foreground and logs to the terminal; stop it with `Ctrl+C`. Open `http://localhost:8080` and continue with [Getting started → Log in](./README.md#2-log-in).
@@ -178,7 +177,7 @@ mkdir .config, .local
 ```text
 mechanus/
 ├── mechanus
-├── web/
+├── web/            written by the server on start
 ├── .config/        scenes/, rooms/, shared/, config.yaml
 └── .local/         db.sqlite, screens/
 ```
@@ -196,14 +195,13 @@ Every setting can be a flag, an environment variable or a key in `config.yaml`:
 | Flag | Environment variable | `config.yaml` |
 | --- | --- | --- |
 | `--server.port 9000` | `SERVER_PORT=9000` | `server: { port: 9000 }` |
-| `--server.static.folder web` | `SERVER_STATIC_FOLDER=web` | `server: { static: { folder: web } }` |
+| `--server.static.folder /srv/mechanus-web` | `SERVER_STATIC_FOLDER=/srv/mechanus-web` | `server: { static: { folder: /srv/mechanus-web } }` |
 
-`./mechanus server --help` lists every flag with its variable and default. To avoid typing `--server.static.folder web` on every start, put it in `.config/config.yaml`:
+`./mechanus server --help` lists every flag with its variable and default. To avoid typing a flag on every start, put it in `.config/config.yaml`:
 
 ```yaml
 server:
-  static:
-    folder: web
+  port: 9000
 ```
 
 See [config file](../configuration/config-file.md) for where `config.yaml` is looked for, [database](../configuration/database.md) for PostgreSQL / MySQL, and [integrations](../configuration/integrations.md) for MQTT devices. For HTTPS, pass a certificate with `--server.tls.cert` and `--server.tls.key`.
@@ -218,9 +216,9 @@ Install into `/opt/mechanus` and run it as its own user:
 
 ```bash
 sudo useradd --system --no-create-home --shell /usr/sbin/nologin mechanus
-sudo mkdir -p /opt/mechanus/.config /opt/mechanus/.local
+sudo mkdir -p /opt/mechanus/.config /opt/mechanus/.local /opt/mechanus/web
 sudo tar -xzf mechanus_0.4.1_linux_amd64.tar.gz -C /opt/mechanus
-sudo chown -R mechanus:mechanus /opt/mechanus/.config /opt/mechanus/.local
+sudo chown -R mechanus:mechanus /opt/mechanus/.config /opt/mechanus/.local /opt/mechanus/web
 ```
 
 Create `/etc/systemd/system/mechanus.service`:
@@ -234,7 +232,7 @@ Wants=network-online.target
 [Service]
 User=mechanus
 WorkingDirectory=/opt/mechanus
-ExecStart=/opt/mechanus/mechanus server --server.static.folder web
+ExecStart=/opt/mechanus/mechanus server
 Restart=on-failure
 
 [Install]
@@ -264,8 +262,6 @@ Create `~/Library/LaunchAgents/com.github.daanv2.mechanus.plist`, with `/Users/y
   <array>
     <string>/Users/you/mechanus/mechanus</string>
     <string>server</string>
-    <string>--server.static.folder</string>
-    <string>web</string>
   </array>
   <key>WorkingDirectory</key>
   <string>/Users/you/mechanus</string>
@@ -295,7 +291,7 @@ Extract to `C:\mechanus` with `.config` and `.local` folders in it, then in a Po
 
 ```powershell
 $action   = New-ScheduledTaskAction -Execute "C:\mechanus\mechanus.exe" `
-              -Argument "server --server.static.folder web" -WorkingDirectory "C:\mechanus"
+              -Argument "server" -WorkingDirectory "C:\mechanus"
 $trigger  = New-ScheduledTaskTrigger -AtStartup
 $settings = New-ScheduledTaskSettingsSet -ExecutionTimeLimit ([TimeSpan]::Zero) `
               -RestartCount 3 -RestartInterval (New-TimeSpan -Minutes 1)
@@ -317,9 +313,8 @@ Your config and data aren't in the archive, so updating only replaces the progra
 
 1. Stop the server (`Ctrl+C`, or stop the service).
 2. Download and verify the new archive.
-3. Delete the old `mechanus` binary and `web/` folder; leave `.config/` and `.local/` alone.
-4. Extract the new archive into the same folder.
-5. Start the server again. Database migrations run on start.
+3. Extract the new archive into the same folder, replacing the old `mechanus` binary; leave `.config/` and `.local/` alone. Coming from a release whose archive still had a `web/` folder? Delete that folder once, or the server keeps serving the old web app.
+4. Start the server again. It replaces `web/` with the web app of the new version, and database migrations run on start.
 
 Read the release notes before skipping several versions, and back up the state folder (`.local/`, or the OS state folder) first.
 
@@ -329,7 +324,8 @@ Stop and remove the service if you set one up, then delete the extracted folder.
 
 ## Troubleshooting
 
-- **The page is blank or 404s**: the server can't find the web app. Start it from the extracted folder, or pass the full path: `--server.static.folder /opt/mechanus/web`.
+- **The page is blank or 404s**: the server serves a `web/` folder it didn't create (it has no `.mechanus-client` file), for example one left over from an older release. Delete that `web/` folder and start again; the server writes a fresh one.
+- **`cannot install the web client` in the log**: the server can't write `web/` in the folder it starts from. It still serves the web app from memory; to get rid of the warning, make the folder writable for the user running the server, or point it somewhere writable with `--server.static.folder`.
 - **`address already in use` / `Only one usage of each socket address`**: something else uses port 8080. Pick another with `--server.port 8081`.
 - **Other devices can't connect**: it's almost always the firewall, see the first-start notes for [Windows](#first-start-on-windows), [macOS](#first-start-on-macos) and [Linux](#first-start-on-linux), and [Getting started → Connect the other devices](./README.md#3-connect-the-other-devices).
 - **`permission denied` on Linux / macOS**: the executable bit got lost (for example after copying through a Windows share). Run `chmod +x mechanus`.
