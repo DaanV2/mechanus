@@ -25,7 +25,9 @@ jobs:
           push: false
           load: true
           cache-from: type=gha
-          cache-to: type=gha,mode=max
+          # Only main writes the cache: PR runs can read main's cache but not each other's, so their
+          # uploads (~1.5-2 min) would only use up the 10 GB GitHub Actions cache limit.
+          cache-to: ${{ github.ref == 'refs/heads/main' && 'type=gha,mode=max' || '' }}
           tags: mechanus,mechanus:latest,mechanus:${{ github.sha }}
 
       - name: 💾 Export Docker image
@@ -59,7 +61,8 @@ jobs:
           load: false
           platforms: linux/amd64,linux/arm64
           cache-from: type=gha,scope=multi-arch
-          cache-to: type=gha,mode=max,scope=multi-arch
+          # Only main writes the cache (see the default build above).
+          cache-to: ${{ github.ref == 'refs/heads/main' && 'type=gha,mode=max,scope=multi-arch' || '' }}
           tags: mechanus:multi-arch
 
       - name: 🛠️ Load and run the arm64 image

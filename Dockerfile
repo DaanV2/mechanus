@@ -17,8 +17,6 @@ RUN npm run build
 
 # build server
 FROM --platform=$BUILDPLATFORM golang:1.27.4 AS server
-ARG TARGETOS
-ARG TARGETARCH
 WORKDIR /app
 
 COPY ./server/go.mod .
@@ -28,10 +26,19 @@ RUN go mod download
 
 COPY ./server .
 
-# using mechanus-result because of collision with the folder
-RUN CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH go build -trimpath -ldflags="-s -w" -o mechanus-result main.go
-RUN go run ./scripts/licenses -o /app/licenses-go.json
+# The licenses report is the same for every target platform, so it runs before TARGETOS /
+# TARGETARCH are declared: BuildKit puts declared build args in the environment of every later
+# RUN, which would make each platform rebuild this step (and the steps above) separately.
+RUN --mount=type=cache,target=/root/.cache/go-build \
+    go run ./scripts/licenses -o /app/licenses-go.json
 
+# Only the compile itself is per target platform.
+ARG TARGETOS
+ARG TARGETARCH
+
+# using mechanus-result because of collision with the folder
+RUN --mount=type=cache,target=/root/.cache/go-build \
+    CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH go build -trimpath -ldflags="-s -w" -o mechanus-result main.go
 # Combine
 FROM busybox AS final
 # FROM gcr.io/distroless/static-debian12 AS final
