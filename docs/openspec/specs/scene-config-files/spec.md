@@ -29,7 +29,7 @@ Every config file SHALL carry a `version` field; the system SHALL migrate files 
 - **THEN** the file is reported as invalid
 
 ### Requirement: Config files are read at start
-The system SHALL read config files when the server starts and SHALL NOT watch them; changes to files on disk take effect after a restart.
+The system SHALL read scene and room config files when the server starts and SHALL NOT watch them; changes to files on disk take effect after a restart.
 
 #### Scenario: Edit a scene file
 - **WHEN** the GM saves a change to a scene file while the server runs
