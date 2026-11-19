@@ -1,0 +1,3 @@
+# Filled by `go run ./scripts/embedclient` before a release build; only the placeholder is committed.
+dist/*
+!dist/.gitkeep
