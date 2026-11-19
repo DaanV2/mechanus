@@ -37,7 +37,7 @@ export type ListScenesResponse = Message<"scenes.v1.ListScenesResponse"> & {
   scenes: Scene[];
 
   /**
-   * Scene and room files that could not be loaded at start; they are skipped
+   * Scene and room files that could not be loaded; they are skipped
    *
    * @generated from field: repeated scenes.v1.ConfigFileError config_errors = 2;
    */

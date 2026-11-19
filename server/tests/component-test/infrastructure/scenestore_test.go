@@ -222,27 +222,49 @@ variants:
 			})
 		})
 
-		Describe("invalid files", func() {
-			It("skips an invalid file, reports it, and loads it once fixed", func() {
+		Describe("reading scene files on demand", func() {
+			listed := func() []string {
+				GinkgoHelper()
+				cfgs, err := store.ListSceneConfigs(ctx)
+				Expect(err).ToNot(HaveOccurred())
+				ids := make([]string, 0, len(cfgs))
+				for _, cfg := range cfgs {
+					ids = append(ids, cfg.ID)
+				}
+
+				return ids
+			}
+
+			It("lists a scene file added after start", func() {
+				util_test.WriteConfigFile(dir, "scenes/attic.yaml", &scenes.Config{ID: "attic", Name: "Attic"})
+				Expect(listed()).To(Equal([]string{"attic", "cave"}))
+			})
+
+			It("reads the file as it is now when getting a scene", func() {
+				util_test.WriteConfigFile(dir, "scenes/cave.yaml", &scenes.Config{ID: "cave", Name: "Deep cave"})
+				Expect(sceneName("cave")).To(Equal("Deep cave"))
+			})
+
+			It("forgets a deleted scene", func() {
+				Expect(os.Remove(filepath.Join(dir, "scenes", "cave.yaml"))).To(Succeed())
+				Expect(listed()).To(BeEmpty())
+				_, err := store.GetSceneConfig(ctx, "cave")
+				Expect(err).To(MatchError(scenes.ErrSceneNotFound))
+			})
+
+			It("skips an invalid file, reports it, and picks it up once fixed", func() {
 				util_test.WriteRawFile(dir, "scenes/cave.yaml", "version: 1\nname: [broken")
-				store.Load(ctx)
 
 				_, err := store.GetSceneConfig(ctx, "cave")
 				Expect(err).To(MatchError(scenes.ErrSceneNotFound))
+				Expect(err).To(MatchError(ContainSubstring("scenes/cave.yaml")))
+				Expect(listed()).To(BeEmpty())
 				Expect(store.Errors()).To(ConsistOf(HaveField("File", "scenes/cave.yaml")))
 
 				util_test.WriteConfigFile(dir, "scenes/cave.yaml", &scenes.Config{ID: "cave", Name: "Fixed cave"})
-				store.Load(ctx)
-				Expect(sceneName("cave")).To(Equal("Fixed cave"))
+				Expect(listed()).To(Equal([]string{"cave"}))
 				Expect(store.Errors()).To(BeEmpty())
-			})
-
-			It("forgets a deleted scene on the next load", func() {
-				Expect(os.Remove(filepath.Join(dir, "scenes", "cave.yaml"))).To(Succeed())
-				store.Load(ctx)
-
-				_, err := store.GetSceneConfig(ctx, "cave")
-				Expect(err).To(MatchError(scenes.ErrSceneNotFound))
+				Expect(sceneName("cave")).To(Equal("Fixed cave"))
 			})
 		})
 	})

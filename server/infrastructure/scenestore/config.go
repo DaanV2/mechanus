@@ -48,16 +48,19 @@ type FileError struct {
 // ConfigStore reads authored scene and room configuration from config files (YAML or JSON, see
 // [configfile]): <dir>/scenes/<scene id>.yaml and <dir>/rooms/<room id>.yaml. The server never writes them.
 //
-// Files are read by [ConfigStore.Load] when the server starts; edits need a restart. A file that fails
-// to load is skipped and reported by [ConfigStore.Errors].
+// Scene files are read on demand: [ConfigStore.ListSceneConfigs] scans the scenes folder on every call
+// and [ConfigStore.GetSceneConfig] reads the file of the scene asked for, so added, edited or removed
+// scenes are picked up without a restart. The room file is read once by [ConfigStore.Load]. Nothing
+// is watched: an active scene keeps the configuration it was activated with. Files that fail to load
+// are skipped and reported by [ConfigStore.Errors].
 type ConfigStore struct {
 	dir    string // The app config dir; scene and room folders are below it
 	roomID string
 
-	lock   sync.RWMutex
-	scenes map[string]*scenes.Config
-	room   *devices.Room
-	errors map[string]error // Relative file path -> error
+	lock        sync.RWMutex
+	room        *devices.Room
+	roomErrors  map[string]error // Relative file path -> error
+	sceneErrors map[string]error // Relative file path -> error, from the last scan of the scenes folder
 }
 
 const (
@@ -69,10 +72,10 @@ const (
 // selects the room returned by [ConfigStore.CurrentRoom]. Call [ConfigStore.Load] before use.
 func NewConfigStore(dir, roomID string) *ConfigStore {
 	return &ConfigStore{
-		dir:    dir,
-		roomID: roomID,
-		scenes: map[string]*scenes.Config{},
-		errors: map[string]error{},
+		dir:         dir,
+		roomID:      roomID,
+		roomErrors:  map[string]error{},
+		sceneErrors: map[string]error{},
 	}
 }
 
@@ -97,85 +100,92 @@ func NewFileConfigStore(ctx context.Context, roomID string) (*ConfigStore, error
 	return store, nil
 }
 
-// Load reads every scene file and the room file, replacing what was loaded before. Files that cannot
-// be loaded are skipped and reported by [ConfigStore.Errors].
+// Load reads the room file and scans the scenes folder, logging the files that cannot be loaded. They
+// are skipped and reported by [ConfigStore.Errors].
 func (c *ConfigStore) Load(ctx context.Context) {
-	loaded := map[string]*scenes.Config{}
-	errs := map[string]error{}
-
-	files := c.sceneFiles(ctx)
-	ids := make([]string, 0, len(files))
-	for id := range files {
-		ids = append(ids, id)
-	}
-	slices.Sort(ids)
-	for _, id := range ids {
-		cfg, file, err := loadScene(files[id], id)
-		switch {
-		case err != nil:
-			errs[file] = err
-			ConfigLogger.From(ctx).Warn("scene config could not be loaded, skipping it", "file", file, "error", err)
-		case cfg != nil:
-			loaded[id] = cfg
-		}
-	}
-
 	room, file, err := c.loadRoom(c.filesFor(ctx, roomsFolder, c.roomID))
+	roomErrs := map[string]error{}
 	if err != nil {
-		errs[file] = err
+		roomErrs[file] = err
 		ConfigLogger.From(ctx).Warn("room config could not be loaded, skipping it", "file", file, "error", err)
 	}
 
 	c.lock.Lock()
-	defer c.lock.Unlock()
+	c.room, c.roomErrors = room, roomErrs
+	c.lock.Unlock()
 
-	c.scenes, c.room, c.errors = loaded, room, errs
+	_, sceneErrs := c.scanScenes(ctx)
+	for file, err := range sceneErrs {
+		ConfigLogger.From(ctx).Warn("scene config could not be loaded, skipping it", "file", file, "error", err)
+	}
 }
 
-// Errors returns the config files that could not be loaded, sorted by file.
+// Errors returns the config files that could not be loaded, sorted by file: the room file as read by
+// [ConfigStore.Load], and the scene files as found by the last scan of the scenes folder.
 func (c *ConfigStore) Errors() []FileError {
 	c.lock.RLock()
 	defer c.lock.RUnlock()
 
-	result := make([]FileError, 0, len(c.errors))
-	for file, err := range c.errors {
-		result = append(result, FileError{File: file, Message: err.Error()})
+	result := make([]FileError, 0, len(c.roomErrors)+len(c.sceneErrors))
+	for _, errs := range []map[string]error{c.roomErrors, c.sceneErrors} {
+		for file, err := range errs {
+			result = append(result, FileError{File: file, Message: err.Error()})
+		}
 	}
 	slices.SortFunc(result, func(a, b FileError) int { return cmp.Compare(a.File, b.File) })
 
 	return result
 }
 
-// GetSceneConfig implements application.SceneConfigStore.
-func (c *ConfigStore) GetSceneConfig(_ context.Context, sceneID string) (*scenes.Config, error) {
+// GetSceneConfig implements application.SceneConfigStore. It reads the scene's file, so the
+// configuration is as the file is now. A file that cannot be loaded is reported as
+// [scenes.ErrSceneNotFound], wrapping the reason.
+func (c *ConfigStore) GetSceneConfig(ctx context.Context, sceneID string) (*scenes.Config, error) {
 	if err := validateID(sceneID); err != nil {
 		return nil, err
 	}
 
-	c.lock.RLock()
-	defer c.lock.RUnlock()
-
-	cfg, ok := c.scenes[sceneID]
-	if !ok {
+	cfg, file, err := loadScene(c.filesFor(ctx, scenesFolder, sceneID), sceneID)
+	if err != nil {
+		return nil, fmt.Errorf("%q: %w: %s: %w", sceneID, scenes.ErrSceneNotFound, file, err)
+	}
+	if cfg == nil {
 		return nil, fmt.Errorf("%q: %w", sceneID, scenes.ErrSceneNotFound)
 	}
 
 	return cfg, nil
 }
 
-// ListSceneConfigs implements application.SceneConfigStore. Scene files that cannot be loaded are not
-// listed; see [ConfigStore.Errors].
-func (c *ConfigStore) ListSceneConfigs(_ context.Context) ([]*scenes.Config, error) {
-	c.lock.RLock()
-	defer c.lock.RUnlock()
-
-	result := make([]*scenes.Config, 0, len(c.scenes))
-	for _, cfg := range c.scenes {
-		result = append(result, cfg)
-	}
-	slices.SortFunc(result, func(a, b *scenes.Config) int { return cmp.Compare(a.ID, b.ID) })
+// ListSceneConfigs implements application.SceneConfigStore. It scans the scenes folder on every call.
+// Scene files that cannot be loaded are not listed; see [ConfigStore.Errors].
+func (c *ConfigStore) ListSceneConfigs(ctx context.Context) ([]*scenes.Config, error) {
+	result, _ := c.scanScenes(ctx)
 
 	return result, nil
+}
+
+// scanScenes reads every scene file, records the files that cannot be loaded for [ConfigStore.Errors]
+// and returns the loaded scenes sorted by ID, and the errors by file.
+func (c *ConfigStore) scanScenes(ctx context.Context) (configs []*scenes.Config, errs map[string]error) {
+	files := c.sceneFiles(ctx)
+	configs = make([]*scenes.Config, 0, len(files))
+	errs = map[string]error{}
+	for id, candidates := range files {
+		cfg, file, err := loadScene(candidates, id)
+		switch {
+		case err != nil:
+			errs[file] = err
+		case cfg != nil:
+			configs = append(configs, cfg)
+		}
+	}
+	slices.SortFunc(configs, func(a, b *scenes.Config) int { return cmp.Compare(a.ID, b.ID) })
+
+	c.lock.Lock()
+	c.sceneErrors = errs
+	c.lock.Unlock()
+
+	return configs, errs
 }
 
 // CurrentRoom implements application.RoomConfigStore. A room that is not set up yet has no devices:

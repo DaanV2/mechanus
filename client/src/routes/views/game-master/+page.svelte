@@ -173,8 +173,8 @@
       role="alert"
     >
       <p class="font-medium">
-        These scene or room files could not be loaded and are skipped. Fix them and restart the
-        server.
+        These scene or room files could not be loaded and are skipped. Scene files are read again
+        when this page loads, the room file when the server restarts.
       </p>
       <ul class="mt-2 space-y-1">
         {#each configErrors as configError (configError.file)}

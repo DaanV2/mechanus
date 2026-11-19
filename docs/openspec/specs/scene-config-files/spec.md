@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Defines how authored scene and room configuration is stored on disk, versioned and migrated when the server starts.
+Defines how authored scene and room configuration is stored on disk, versioned and migrated when it is read.
 
 ## Requirements
 
@@ -28,11 +28,23 @@ Every config file SHALL carry a `version` field; the system SHALL migrate files 
 - **WHEN** a scene file has a `version` newer than the server supports
 - **THEN** the file is reported as invalid
 
-### Requirement: Config files are read at start
-The system SHALL read scene and room config files when the server starts and SHALL NOT watch them; changes to files on disk take effect after a restart.
+### Requirement: Scene files are read on demand
+The system SHALL read scene files from disk when they are needed and SHALL NOT watch them: listing scenes SHALL scan the scenes folder, and activating or resetting a scene SHALL read that scene's file. The active scene SHALL keep the configuration it was activated with. The room file SHALL be read when the server starts.
+
+#### Scenario: Add a scene file
+- **WHEN** the GM adds a scene file while the server runs
+- **THEN** the scene is listed the next time scenes are listed
 
 #### Scenario: Edit a scene file
-- **WHEN** the GM saves a change to a scene file while the server runs
+- **WHEN** the GM edits the file of a scene and then activates the scene
+- **THEN** the scene is activated with the edited configuration
+
+#### Scenario: Edit the active scene's file
+- **WHEN** the GM edits the file of the active scene
+- **THEN** devices are not re-instructed until the scene is activated or reset again
+
+#### Scenario: Edit the room file
+- **WHEN** the GM edits the room file while the server runs
 - **THEN** the change takes effect after the server restarts
 
 ### Requirement: Invalid files are skipped and reported
@@ -40,4 +52,4 @@ When a config file is invalid, the system SHALL skip it, keep loading the other 
 
 #### Scenario: Syntax error
 - **WHEN** a hand-edited scene file no longer parses
-- **THEN** the server starts without that scene and the GM view shows the file and error
+- **THEN** the scene is not listed and the GM view shows the file and error

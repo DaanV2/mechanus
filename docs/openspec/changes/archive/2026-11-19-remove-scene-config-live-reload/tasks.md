@@ -2,9 +2,10 @@
 
 ## 1. Server
 
-- [x] 1.1 Remove the fsnotify watcher, `ConfigStore.Reload` and the change listeners; `Load` reads every file fresh and skips invalid ones; verify with component tests for skipped, fixed and deleted files
-- [x] 1.2 Remove `SceneService.SceneConfigChanged` / `RoomConfigChanged` and their wiring in `components`
-- [x] 1.3 Run `just server lint`, `just server test`, `just server vet` and `just server vulncheck` and fix every reported issue
+- [x] 1.1 Remove the fsnotify watcher, `ConfigStore.Reload` and the change listeners
+- [x] 1.2 Read scene files on demand in `ListSceneConfigs` and `GetSceneConfig`, the room file once in `Load`; skip and report invalid files; verify with component tests for added, edited, deleted, invalid and fixed files and for activating an edited scene
+- [x] 1.3 Remove `SceneService.SceneConfigChanged` / `RoomConfigChanged` and their wiring in `components`
+- [x] 1.4 Run `just server lint`, `just server test`, `just server vet` and `just server vulncheck` and fix every reported issue
 
 ## 2. Client and tests
 

@@ -34,7 +34,7 @@ message ListScenesRequest {}
 
 message ListScenesResponse {
   repeated Scene scenes = 1;
-  repeated ConfigFileError config_errors = 2; // Scene and room files that could not be loaded at start; they are skipped
+  repeated ConfigFileError config_errors = 2; // Scene and room files that could not be loaded; they are skipped
 }
 
 // ConfigFileError is an authored config file that could not be loaded.

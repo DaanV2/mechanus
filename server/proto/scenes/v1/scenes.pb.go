@@ -167,7 +167,7 @@ func (*ListScenesRequest) Descriptor() ([]byte, []int) {
 type ListScenesResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Scenes        []*Scene               `protobuf:"bytes,1,rep,name=scenes,proto3" json:"scenes,omitempty"`
-	ConfigErrors  []*ConfigFileError     `protobuf:"bytes,2,rep,name=config_errors,json=configErrors,proto3" json:"config_errors,omitempty"` // Scene and room files that could not be loaded at start; they are skipped
+	ConfigErrors  []*ConfigFileError     `protobuf:"bytes,2,rep,name=config_errors,json=configErrors,proto3" json:"config_errors,omitempty"` // Scene and room files that could not be loaded; they are skipped
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }

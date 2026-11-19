@@ -75,9 +75,8 @@ var _ = Describe("SceneServiceHandler", func() {
 		return h.State().GetView()
 	}
 
-	It("lists the config files that could not be loaded", func(ctx SpecContext) {
+	It("lists config files that cannot be loaded, also ones added while running", func(ctx SpecContext) {
 		util_test.WriteRawFile(configDir, "scenes/broken.yaml", "version: 1\ninstructions: [")
-		configStore.Load(ctx)
 
 		resp, err := handler.List(userContext(ctx), connect.NewRequest(&scenesv1.ListScenesRequest{}))
 		Expect(err).ToNot(HaveOccurred())
@@ -85,6 +84,20 @@ var _ = Describe("SceneServiceHandler", func() {
 		Expect(resp.Msg.GetConfigErrors()).To(HaveLen(1))
 		Expect(resp.Msg.GetConfigErrors()[0].GetFile()).To(Equal("scenes/broken.yaml"))
 		Expect(resp.Msg.GetConfigErrors()[0].GetMessage()).To(ContainSubstring("YAML"))
+	})
+
+	It("activates a scene as its file is now", func(ctx SpecContext) {
+		util_test.WriteRawFile(configDir, "scenes/cave.yaml", `
+version: 1
+name: Cave
+instructions:
+  screens:
+    table: { view: battlemap, asset: maps/cave2.png }
+`)
+		_, err := handler.Activate(userContext(ctx), connect.NewRequest(&scenesv1.ActivateSceneRequest{SceneId: "cave"}))
+		Expect(err).ToNot(HaveOccurred())
+
+		Expect(screenView().GetAsset().GetUrl()).To(HavePrefix("/assets/scenes/cave/maps/cave2.png?v="))
 	})
 
 	It("lists the configured scenes with their variants", func(ctx SpecContext) {

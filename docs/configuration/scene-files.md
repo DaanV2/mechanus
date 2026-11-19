@@ -91,9 +91,14 @@ Paired screens are registered in the database and can be bound to targets from t
 
 ## Editing files
 
-The server reads the `scenes` and `rooms` folders when it starts; restart it after editing a file. A file that is invalid (syntax error, unknown version, wrong ID, ...) is skipped and the GM view lists the file with the error.
+Scene files are read from disk when they are needed, nothing is watched:
 
-Battle map files (`*.map.json`) are read every time a screen is instructed, so they need no restart.
+- The scene list in the GM view scans the `scenes` folder each time it loads, so added, edited and removed scenes show up after reloading the page.
+- Activating or resetting a scene reads its file, so it starts with what is in the file now. The active scene keeps what it was activated with; activate or reset it again to apply an edit.
+- The room file is read when the server starts; restart it after editing the room.
+- A file that is invalid (syntax error, unknown version, wrong ID, ...) is skipped and the GM view lists the file with the error.
+
+Battle map files (`*.map.json`) are read every time a screen is instructed.
 
 ## Example
 
