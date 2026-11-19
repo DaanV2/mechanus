@@ -45,36 +45,31 @@ integrations:
 INTEGRATIONS_MQTT_PASSWORD=change-me
 ```
 
-`rooms/room.dat` binds a target to the device. `topic` is optional and defaults to `mechanus/devices/<device-id>/set`:
+`rooms/room.yaml` binds a target to the device (see [scene-files.md](./scene-files.md) for the file format). `topic` is optional and defaults to `mechanus/devices/<device-id>/set`:
 
-```json
-{
-  "id": "room",
-  "name": "Living room",
-  "devices": {
-    "fog-machine": {
-      "id": "fog-machine",
-      "name": "Fog machine",
-      "kind": "custom",
-      "integration": "mqtt",
-      "config": { "topic": "props/fog-machine/set" }
-    }
-  },
-  "bindings": { "fog": ["fog-machine"] }
-}
+```yaml
+version: 1
+name: Living room
+devices:
+  fog-machine:
+    id: fog-machine
+    name: Fog machine
+    kind: custom
+    integration: mqtt
+    config: { topic: props/fog-machine/set }
+bindings:
+  fog: [fog-machine]
 ```
 
-`scenes/crypt.dat` holds what that target should do. The payload can be any JSON:
+`scenes/crypt.yaml` holds what that target should do. The payload can be any JSON / YAML value:
 
-```json
-{
-  "id": "crypt",
-  "instructions": {
-    "custom": {
-      "fog": { "payload": { "burst_seconds": 3, "fan": "low" } }
-    }
-  }
-}
+```yaml
+version: 1
+name: Crypt
+instructions:
+  custom:
+    fog:
+      payload: { burst_seconds: 3, fan: low }
 ```
 
 ### What a device receives

@@ -126,7 +126,7 @@ Make a folder on the host with this layout (all parts optional):
 config/
 ├── config.yaml     settings, instead of environment variables
 ├── rooms/          rooms: devices and target bindings
-├── scenes/         scene configs (.dat) and their assets
+├── scenes/         scene configs (.yaml / .json) and their assets
 └── shared/         assets shared between scenes
 ```
 
