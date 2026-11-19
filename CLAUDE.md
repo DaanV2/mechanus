@@ -125,9 +125,13 @@ npm run check       # svelte-check + tsc
 
 - When working on a dedicated branch (i.e. not `main`), always commit your changes once the task is done — don't leave work uncommitted waiting for confirmation.
 - Still ask before committing directly on `main`, and never force-push.
+- **Update OpenSpec before every PR** — specs describe current behaviour, so they ship in the same PR as the code:
+  - Implementing an OpenSpec change: tick the tasks you completed in its `tasks.md`. When every task is done, archive it (`openspec-archive-change` skill, which syncs its delta specs into `docs/openspec/specs/`) and remove it from the Milestones section of `docs/openspec/README.md`; otherwise leave it open and name the remaining tasks in the PR body.
+  - Changing behaviour no change covers: update the affected spec in `docs/openspec/specs/` directly.
+  - Run `just spec validate`, commit the result, and link the change from the PR body.
 - **Lint before every commit and PR** — CI fails on lint, so run the checks for each part you touched and fix every reported issue first:
   - Server: `just server lint` (runs `go tool golangci-lint`, the version pinned in `server/go.mod` — don't use a globally installed `golangci-lint`, which may not match CI or may crash on this Go version) plus `just server test`, `just server vet` and `just server vulncheck`.
-  - Client: `just client lint` and `npm run check` in `client/`. CI runs the check-only variants (`prettier --check`, `eslint` without `--fix`), so commit whatever `just client lint` rewrites.
+  - Client: `just client lint` and `npm run check` in `client/`. CI runs the check-only variants (`prettier --check`, `eslint` without `--fix`), so commit whatever `just client lint` rewrites — except in the generated `client/src/proto/`, where its `--fix` strips the `/* eslint-disable */` header: keep those files as `just proto` generates them.
   - CI layout: lint, type check and govulncheck run once on Linux; build, `go vet` and tests run on Linux, Windows and macOS. A govulncheck hit in the standard library means bumping the `go` directive in `server/go.mod` and `go.work`.
   - Proto: `just proto-lint`.
   - Linter rules worth knowing: Go tests must live in an external `<pkg>_test` package (`testpackage`); expose unexported identifiers to tests through an `export_test.go` in the package itself.

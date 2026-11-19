@@ -5,3 +5,6 @@ mechanus
 
 # GoReleaser output
 dist/
+
+# Scene files written by the Playwright tests (tests/lib/server/config-files.ts)
+docs/examples/battlemap/scenes/playwright-*

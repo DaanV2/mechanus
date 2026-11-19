@@ -226,6 +226,52 @@ func (s *SceneService) Reset(ctx context.Context, sceneID string) (*scenes.Trans
 	return s.transition(ctx, s.active.Ref(), scenes.Instructions{}, next)
 }
 
+// SceneConfigChanged re-instructs the devices after the authored configuration of a scene was
+// reloaded, if it is the active scene. The active scene keeps its state (entities spawned, moved or
+// hidden during play, live adjustments) on top of the new configuration; when its variant no longer
+// exists, the default variant is applied. Devices only get what changed. A scene whose configuration
+// was removed stays active with the configuration it was loaded with.
+func (s *SceneService) SceneConfigChanged(ctx context.Context, sceneID string) (*scenes.Transition, error) {
+	s.lock.Lock()
+	defer s.lock.Unlock()
+
+	if s.active == nil || s.active.ID() != sceneID {
+		return nil, nil //nolint:nilnil // Not the active scene: no devices to instruct
+	}
+	cfg, err := s.configs.GetSceneConfig(ctx, sceneID)
+	if errors.Is(err, scenes.ErrSceneNotFound) {
+		return nil, nil //nolint:nilnil // Removed: keep playing what is loaded
+	}
+	if err != nil {
+		return nil, fmt.Errorf("loading config of scene %q: %w", sceneID, err)
+	}
+
+	from := s.active.Ref()
+	prev, err := s.active.Instructions()
+	if err != nil {
+		return nil, err
+	}
+	next, err := scenes.Load(cfg, s.active.State)
+	if err != nil {
+		return nil, err
+	}
+
+	return s.transition(ctx, from, prev, next)
+}
+
+// RoomConfigChanged re-instructs every device of the room with the active scene after the room
+// configuration was reloaded, as devices or target bindings may have been added or changed.
+func (s *SceneService) RoomConfigChanged(ctx context.Context) (*scenes.Transition, error) {
+	s.lock.Lock()
+	defer s.lock.Unlock()
+
+	if s.active == nil {
+		return nil, nil //nolint:nilnil // No active scene: nothing to instruct
+	}
+
+	return s.transition(ctx, s.active.Ref(), scenes.Instructions{}, s.active)
+}
+
 // SetEntityHidden hides an entity of the active scene from the screens, or reveals it.
 func (s *SceneService) SetEntityHidden(ctx context.Context, entityID string, hidden bool) (*scenes.Transition, error) {
 	s.lock.Lock()

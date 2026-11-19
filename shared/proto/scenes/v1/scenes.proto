@@ -34,6 +34,13 @@ message ListScenesRequest {}
 
 message ListScenesResponse {
   repeated Scene scenes = 1;
+  repeated ConfigFileError config_errors = 2; // Scene and room files that could not be loaded; their last good version, if any, stays in use
+}
+
+// ConfigFileError is an authored config file that could not be loaded.
+message ConfigFileError {
+  string file = 1; // Path relative to the config folder, e.g. scenes/cave.yaml
+  string message = 2; // What is wrong with it
 }
 
 message ActivateSceneRequest {
