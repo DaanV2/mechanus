@@ -160,9 +160,7 @@ Each backend has a dedicated Docker Compose file in the `tests/` directory:
 
 ### CI/CD Matrix Testing
 
-In CI, the integration tests automatically run in parallel for all three database backends using GitHub Actions matrix strategy. This ensures compatibility across all tested database backends.
-
-The workflow configuration can be found in `.github/workflows/integration-tests.yaml`.
+In CI, the Playwright tests run against the **SQLite** backend only (`.github/workflows/integration-tests.yaml`). What differs per database is covered by the server's own integration tests in [`server/tests/integration`](../server/tests/integration), which CI runs against SQLite and PostgreSQL (see [`server/tests/README.md`](../server/tests/README.md)). The other backends can still be run locally as shown above.
 
 ---
 
