@@ -9,6 +9,9 @@ services:
       - "9090:9090" # Prometheus endpoint
     volumes:
       - ./data:/data
+      # Dashboards as code, see docs/configuration/opentelemetry.md
+      - ./grafana/dashboards.yaml:/otel-lgtm/grafana/conf/provisioning/dashboards/mechanus.yaml:ro
+      - ./grafana/dashboards:/otel-lgtm/mechanus-dashboards:ro
     networks:
       default:
         aliases:

@@ -106,6 +106,17 @@ Open Grafana at http://localhost:3000 (admin / admin), go to **Explore** and pic
 - **Loki**: logs, query `{service_name="mechanus"}`; a log line with a `trace_id` links to its trace
 - **Prometheus**: metrics, e.g. `http_server_request_duration_seconds_count{job="mechanus"}`
 
+#### Dashboards
+
+Dashboards live as JSON files in [`docker/grafana/dashboards/`](../../docker/grafana/dashboards) and are provisioned
+into the **Mechanus** folder by [`docker/grafana/dashboards.yaml`](../../docker/grafana/dashboards.yaml).
+Grafana rescans the folder every 10 seconds, so adding or editing a file needs no restart.
+
+To change a dashboard: edit it in Grafana, then **Export → Export as JSON** (leave "Export for sharing externally" off,
+so the data source UIDs `prometheus`, `loki` and `tempo` stay as they are) and overwrite the file in the repo.
+Saving in the UI alone only stores the change in Grafana's database (`docker/data/`); the next change to the file overwrites it.
+Give every new dashboard a fixed `uid` so links to it stay stable.
+
 ## What is Traced, Logged and Measured?
 
 The OpenTelemetry integration automatically captures:

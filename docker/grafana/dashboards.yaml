@@ -1,0 +1,12 @@
+# Grafana dashboard provider: loads every *.json in docker/grafana/dashboards/ into the "Mechanus" folder.
+# Grafana rescans the folder every 10 seconds, so edits to the files show up without a restart.
+apiVersion: 1
+
+providers:
+  - name: "Mechanus"
+    type: file
+    folder: "Mechanus"
+    allowUiUpdates: true
+    updateIntervalSeconds: 10
+    options:
+      path: /otel-lgtm/mechanus-dashboards
