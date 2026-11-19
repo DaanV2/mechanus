@@ -39,43 +39,25 @@ var SceneMigrations = configfile.Migrations{}
 // RoomMigrations upgrades older room config files, see [configfile.Migrations].
 var RoomMigrations = configfile.Migrations{}
 
-// FileError is a config file that could not be loaded. If an earlier version of the file loaded, that
-// version stays in use.
+// FileError is a config file that could not be loaded. The scene or room it defines is skipped.
 type FileError struct {
 	File    string // Path relative to the app config dir, e.g. scenes/cave.yaml
 	Message string
 }
 
-// ConfigChange tells what an (re)load changed. Exactly one of SceneID and Room is set.
-type ConfigChange struct {
-	SceneID string // The scene whose configuration changed, appeared or was removed
-	Room    bool   // The room configuration changed
-}
-
-// ConfigChangeListener is called after a config file was reloaded and changed what is in use.
-type ConfigChangeListener func(ctx context.Context, change ConfigChange)
-
 // ConfigStore reads authored scene and room configuration from config files (YAML or JSON, see
 // [configfile]): <dir>/scenes/<scene id>.yaml and <dir>/rooms/<room id>.yaml. The server never writes them.
 //
-// Files are loaded by [ConfigStore.Load] and reloaded by [ConfigStore.Reload] (called by the watcher,
-// see [ConfigStore.Watch]). A file that fails to load keeps its last good version in use and is
-// reported by [ConfigStore.Errors].
+// Files are read by [ConfigStore.Load] when the server starts; edits need a restart. A file that fails
+// to load is skipped and reported by [ConfigStore.Errors].
 type ConfigStore struct {
 	dir    string // The app config dir; scene and room folders are below it
 	roomID string
 
-	lock      sync.RWMutex
-	scenes    map[string]*scenes.Config
-	room      *devices.Room
-	errors    map[string]error // Relative file path -> error
-	listeners []ConfigChangeListener
-
-	reloadLock sync.Mutex // Serializes (re)loads, so an older read never replaces a newer one
-
-	watchLock sync.Mutex
-	stopWatch context.CancelFunc
-	watchDone chan struct{}
+	lock   sync.RWMutex
+	scenes map[string]*scenes.Config
+	room   *devices.Room
+	errors map[string]error // Relative file path -> error
 }
 
 const (
@@ -115,19 +97,11 @@ func NewFileConfigStore(ctx context.Context, roomID string) (*ConfigStore, error
 	return store, nil
 }
 
-// AddListener registers a listener for configuration changes found by [ConfigStore.Reload].
-func (c *ConfigStore) AddListener(listener ConfigChangeListener) {
-	c.lock.Lock()
-	defer c.lock.Unlock()
-
-	c.listeners = append(c.listeners, listener)
-}
-
-// Load (re)reads every scene file and the room file. Files that cannot be loaded are reported by
-// [ConfigStore.Errors]; listeners are not called.
+// Load reads every scene file and the room file, replacing what was loaded before. Files that cannot
+// be loaded are skipped and reported by [ConfigStore.Errors].
 func (c *ConfigStore) Load(ctx context.Context) {
-	c.reloadLock.Lock()
-	defer c.reloadLock.Unlock()
+	loaded := map[string]*scenes.Config{}
+	errs := map[string]error{}
 
 	files := c.sceneFiles(ctx)
 	ids := make([]string, 0, len(files))
@@ -136,58 +110,26 @@ func (c *ConfigStore) Load(ctx context.Context) {
 	}
 	slices.Sort(ids)
 	for _, id := range ids {
-		c.reloadScene(ctx, id)
-	}
-	c.reloadRoom(ctx)
-}
-
-// Reload re-reads the config file at path (absolute, or relative to the app config dir) after it was
-// created, changed or removed, and tells the listeners if that changed the configuration in use.
-// Paths that are not scene or room config files are ignored.
-func (c *ConfigStore) Reload(ctx context.Context, path string) {
-	rel := path
-	if filepath.IsAbs(path) {
-		r, err := filepath.Rel(c.dir, path)
-		if err != nil {
-			return
+		cfg, file, err := loadScene(files[id], id)
+		switch {
+		case err != nil:
+			errs[file] = err
+			ConfigLogger.From(ctx).Warn("scene config could not be loaded, skipping it", "file", file, "error", err)
+		case cfg != nil:
+			loaded[id] = cfg
 		}
-		rel = r
-	}
-	folder, name := filepath.Split(filepath.Clean(rel))
-	id := configfile.ID(name)
-
-	var change ConfigChange
-	switch filepath.Clean(folder) {
-	case scenesFolder:
-		change = ConfigChange{SceneID: id}
-	case roomsFolder:
-		if id != c.roomID {
-			return
-		}
-		change = ConfigChange{Room: true}
-	default:
-		return
 	}
 
-	c.reloadLock.Lock()
-	var changed bool
-	if change.Room {
-		changed = c.reloadRoom(ctx)
-	} else {
-		changed = c.reloadScene(ctx, id)
-	}
-	c.reloadLock.Unlock()
-	if !changed {
-		return
+	room, file, err := c.loadRoom(c.filesFor(ctx, roomsFolder, c.roomID))
+	if err != nil {
+		errs[file] = err
+		ConfigLogger.From(ctx).Warn("room config could not be loaded, skipping it", "file", file, "error", err)
 	}
 
-	ConfigLogger.From(ctx).Info("configuration reloaded", "file", rel)
-	c.lock.RLock()
-	listeners := slices.Clone(c.listeners)
-	c.lock.RUnlock()
-	for _, l := range listeners {
-		l(ctx, change)
-	}
+	c.lock.Lock()
+	defer c.lock.Unlock()
+
+	c.scenes, c.room, c.errors = loaded, room, errs
 }
 
 // Errors returns the config files that could not be loaded, sorted by file.
@@ -222,7 +164,7 @@ func (c *ConfigStore) GetSceneConfig(_ context.Context, sceneID string) (*scenes
 }
 
 // ListSceneConfigs implements application.SceneConfigStore. Scene files that cannot be loaded are not
-// listed (unless an earlier version loaded); see [ConfigStore.Errors].
+// listed; see [ConfigStore.Errors].
 func (c *ConfigStore) ListSceneConfigs(_ context.Context) ([]*scenes.Config, error) {
 	c.lock.RLock()
 	defer c.lock.RUnlock()
@@ -249,10 +191,9 @@ func (c *ConfigStore) CurrentRoom(_ context.Context) (*devices.Room, error) {
 	return c.room, nil
 }
 
-// reloadScene re-reads the files of a scene and reports whether the configuration in use changed.
-func (c *ConfigStore) reloadScene(ctx context.Context, id string) bool {
-	files := c.filesFor(ctx, scenesFolder, id)
-	cfg, file, err := loadOne(files, SceneMigrations, func(cfg *scenes.Config) error {
+// loadScene decodes the file of a scene.
+func loadScene(files []configFile, id string) (*scenes.Config, string, error) {
+	return loadOne(files, SceneMigrations, func(cfg *scenes.Config) error {
 		if err := validateID(id); err != nil {
 			return err
 		}
@@ -265,33 +206,11 @@ func (c *ConfigStore) reloadScene(ctx context.Context, id string) bool {
 
 		return nil
 	})
-
-	c.lock.Lock()
-	defer c.lock.Unlock()
-
-	c.clearErrors(scenesFolder, id)
-	switch {
-	case err != nil:
-		c.errors[file] = err
-		ConfigLogger.From(ctx).Warn("scene config could not be loaded, keeping the last good version", "file", file, "error", err)
-
-		return false
-	case cfg == nil:
-		_, existed := c.scenes[id]
-		delete(c.scenes, id)
-
-		return existed
-	default:
-		c.scenes[id] = cfg
-
-		return true
-	}
 }
 
-// reloadRoom re-reads the room file and reports whether the configuration in use changed.
-func (c *ConfigStore) reloadRoom(ctx context.Context) bool {
-	files := c.filesFor(ctx, roomsFolder, c.roomID)
-	room, file, err := loadOne(files, RoomMigrations, func(room *devices.Room) error {
+// loadRoom decodes the room file.
+func (c *ConfigStore) loadRoom(files []configFile) (*devices.Room, string, error) {
+	return loadOne(files, RoomMigrations, func(room *devices.Room) error {
 		if room.ID == "" {
 			room.ID = c.roomID
 		}
@@ -307,37 +226,6 @@ func (c *ConfigStore) reloadRoom(ctx context.Context) bool {
 
 		return nil
 	})
-
-	c.lock.Lock()
-	defer c.lock.Unlock()
-
-	c.clearErrors(roomsFolder, c.roomID)
-	switch {
-	case err != nil:
-		c.errors[file] = err
-		ConfigLogger.From(ctx).Warn("room config could not be loaded, keeping the last good version", "file", file, "error", err)
-
-		return false
-	case room == nil:
-		existed := c.room != nil
-		c.room = nil
-
-		return existed
-	default:
-		c.room = room
-
-		return true
-	}
-}
-
-// clearErrors removes the reported errors of every file of an ID. Must hold the write lock.
-func (c *ConfigStore) clearErrors(folder, id string) {
-	for file := range c.errors {
-		f, name := filepath.Split(file)
-		if filepath.Clean(f) == folder && configfile.ID(name) == id {
-			delete(c.errors, file)
-		}
-	}
 }
 
 // loadOne decodes the single config file of an ID. No files means the ID is not configured (nil, no

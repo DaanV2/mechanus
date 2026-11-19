@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Defines how authored scene and room configuration is stored on disk, versioned, migrated, and reloaded while the server runs.
+Defines how authored scene and room configuration is stored on disk, versioned and migrated when the server starts.
 
 ## Requirements
 
@@ -28,16 +28,16 @@ Every config file SHALL carry a `version` field; the system SHALL migrate files 
 - **WHEN** a scene file has a `version` newer than the server supports
 - **THEN** the file is reported as invalid
 
-### Requirement: Live reload
-The system SHALL watch config folders, reload changed files, and re-instruct devices when the active scene's configuration changed.
+### Requirement: Config files are read at start
+The system SHALL read config files when the server starts and SHALL NOT watch them; changes to files on disk take effect after a restart.
 
-#### Scenario: Edit the active scene
-- **WHEN** the GM saves a change to the active scene's file
-- **THEN** bound devices receive the updated instructions without a restart
+#### Scenario: Edit a scene file
+- **WHEN** the GM saves a change to a scene file while the server runs
+- **THEN** the change takes effect after the server restarts
 
-### Requirement: Invalid files keep the last good version
-When a changed file is invalid, the system SHALL keep using its last good version and SHALL report the error in the GM view.
+### Requirement: Invalid files are skipped and reported
+When a config file is invalid, the system SHALL skip it, keep loading the other files, and SHALL report the file and error in the GM view.
 
 #### Scenario: Syntax error
 - **WHEN** a hand-edited scene file no longer parses
-- **THEN** the previous version stays active and the GM view shows the file and error
+- **THEN** the server starts without that scene and the GM view shows the file and error

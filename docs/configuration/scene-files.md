@@ -89,17 +89,11 @@ bindings:                           # Target -> device IDs
 
 Paired screens are registered in the database and can be bound to targets from the app; those bindings are added to the ones in the file. See [integrations.md](./integrations.md) for each integration's `config`.
 
-## Editing while the server runs
+## Editing files
 
-The server watches the `scenes` and `rooms` folders. When a file is saved:
+The server reads the `scenes` and `rooms` folders when it starts; restart it after editing a file. A file that is invalid (syntax error, unknown version, wrong ID, ...) is skipped and the GM view lists the file with the error.
 
-- The new version is used straight away; a scene that appears is listed, a deleted scene is no longer listed. An active scene whose file is deleted keeps running with what it loaded.
-- If the edited scene is the active one, or the room changed, devices are re-instructed with what changed. The scene keeps what happened during play (moved, spawned or hidden entities, live adjustments); if its active variant no longer exists, the default variant is applied.
-- If the file is invalid (syntax error, unknown version, wrong ID, ...), the last good version stays in use and the GM view lists the file with the error until it is fixed.
-
-Battle map files (`*.map.json`) are not watched: they are read every time a screen is instructed.
-
-Watching relies on file system events. With Docker Desktop on Windows or macOS, edits made on the host to a bind-mounted folder may not reach the container; restart the server (or edit inside the container) in that case.
+Battle map files (`*.map.json`) are read every time a screen is instructed, so they need no restart.
 
 ## Example
 

@@ -4,8 +4,6 @@ import (
 	"context"
 	"os"
 	"path/filepath"
-	"sync"
-	"time"
 
 	"github.com/DaanV2/mechanus/server/application"
 	"github.com/DaanV2/mechanus/server/engine/devices"
@@ -171,9 +169,10 @@ variants:
 
 			It("reports two files for the same scene", func() {
 				util_test.WriteConfigFile(dir, "scenes/cave.json", &scenes.Config{ID: "cave", Name: "Other cave"})
-				store.Reload(ctx, "scenes/cave.json")
+				store.Load(ctx)
 				Expect(store.Errors()).To(ConsistOf(HaveField("Message", ContainSubstring("more than one file"))))
-				Expect(sceneName("cave")).To(Equal("Cave"), "the last good version stays in use")
+				_, err := store.GetSceneConfig(ctx, "cave")
+				Expect(err).To(MatchError(scenes.ErrSceneNotFound), "the scene is skipped")
 			})
 
 			It("ignores asset folders and hidden files", func() {
@@ -223,88 +222,27 @@ variants:
 			})
 		})
 
-		Describe("reloading", func() {
-			var (
-				lock    sync.Mutex
-				changes []scenestore.ConfigChange
-			)
-
-			BeforeEach(func() {
-				lock.Lock()
-				changes = nil
-				lock.Unlock()
-				store.AddListener(func(_ context.Context, change scenestore.ConfigChange) {
-					lock.Lock()
-					defer lock.Unlock()
-					changes = append(changes, change)
-				})
-			})
-
-			seen := func() []scenestore.ConfigChange {
-				lock.Lock()
-				defer lock.Unlock()
-
-				return append([]scenestore.ConfigChange(nil), changes...)
-			}
-
-			It("picks up a changed scene file", func() {
-				util_test.WriteConfigFile(dir, "scenes/cave.yaml", &scenes.Config{ID: "cave", Name: "Deep cave"})
-				store.Reload(ctx, filepath.Join(dir, "scenes", "cave.yaml"))
-
-				Expect(sceneName("cave")).To(Equal("Deep cave"))
-				Expect(seen()).To(Equal([]scenestore.ConfigChange{{SceneID: "cave"}}))
-			})
-
-			It("keeps the last good version of an invalid file and reports it", func() {
+		Describe("invalid files", func() {
+			It("skips an invalid file, reports it, and loads it once fixed", func() {
 				util_test.WriteRawFile(dir, "scenes/cave.yaml", "version: 1\nname: [broken")
-				store.Reload(ctx, "scenes/cave.yaml")
+				store.Load(ctx)
 
-				Expect(sceneName("cave")).To(Equal("Cave"))
+				_, err := store.GetSceneConfig(ctx, "cave")
+				Expect(err).To(MatchError(scenes.ErrSceneNotFound))
 				Expect(store.Errors()).To(ConsistOf(HaveField("File", "scenes/cave.yaml")))
-				Expect(seen()).To(BeEmpty(), "nothing in use changed")
 
 				util_test.WriteConfigFile(dir, "scenes/cave.yaml", &scenes.Config{ID: "cave", Name: "Fixed cave"})
-				store.Reload(ctx, "scenes/cave.yaml")
+				store.Load(ctx)
 				Expect(sceneName("cave")).To(Equal("Fixed cave"))
 				Expect(store.Errors()).To(BeEmpty())
 			})
 
-			It("removes a deleted scene", func() {
+			It("forgets a deleted scene on the next load", func() {
 				Expect(os.Remove(filepath.Join(dir, "scenes", "cave.yaml"))).To(Succeed())
-				store.Reload(ctx, "scenes/cave.yaml")
+				store.Load(ctx)
 
 				_, err := store.GetSceneConfig(ctx, "cave")
 				Expect(err).To(MatchError(scenes.ErrSceneNotFound))
-				Expect(seen()).To(Equal([]scenestore.ConfigChange{{SceneID: "cave"}}))
-			})
-
-			It("picks up a changed room file", func() {
-				util_test.WriteConfigFile(dir, "rooms/living-room.json", devices.NewRoom("living-room", "Game room"))
-				store.Reload(ctx, "rooms/living-room.json")
-
-				r, err := store.CurrentRoom(ctx)
-				Expect(err).ToNot(HaveOccurred())
-				Expect(r.Name).To(Equal("Game room"))
-				Expect(seen()).To(Equal([]scenestore.ConfigChange{{Room: true}}))
-			})
-
-			It("ignores other files", func() {
-				store.Reload(ctx, "rooms/other-room.json")
-				store.Reload(ctx, "scenes/cave/maps/cave.map.json")
-				store.Reload(ctx, "shared/props/barrel.svg")
-				Expect(seen()).To(BeEmpty())
-			})
-
-			It("watches the folders and reloads edited files", func() {
-				Expect(store.Watch(ctx)).To(Succeed())
-				DeferCleanup(store.StopWatching)
-
-				util_test.WriteConfigFile(dir, "scenes/cave.yaml", &scenes.Config{ID: "cave", Name: "Watched cave"})
-				Eventually(func() string { return sceneName("cave") }).WithTimeout(5 * time.Second).Should(Equal("Watched cave"))
-
-				util_test.WriteConfigFile(dir, "scenes/attic.json", &scenes.Config{ID: "attic", Name: "Attic"})
-				Eventually(seen).WithTimeout(5 * time.Second).Should(ContainElement(scenestore.ConfigChange{SceneID: "attic"}))
-				Expect(sceneName("attic")).To(Equal("Attic"))
 			})
 		})
 	})

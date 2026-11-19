@@ -40,8 +40,7 @@ services:
     command: ./mechanus server --log.level debug --log.format text --log.report-caller
     volumes:
       # The example battle map scene, see docs/configuration/battle-maps.md
-      # Writable, so tests can edit scene files while the server runs (tests/lib/server/config-files.ts)
-      - ../docs/examples/battlemap/scenes:/app/.config/scenes
+      - ../docs/examples/battlemap/scenes:/app/.config/scenes:ro
       - ../docs/examples/battlemap/rooms:/app/.config/rooms:ro
       - ../docs/examples/battlemap/shared:/app/.config/shared:ro
     ports:
