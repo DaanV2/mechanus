@@ -16,7 +16,7 @@ None.
 
 ### Modified Capabilities
 
-- `distribution`: the web client is served without extra configuration
+- `distribution`: the web client is embedded in the binary and served without extra configuration; archives drop `web/`
 
 ## Impact
 

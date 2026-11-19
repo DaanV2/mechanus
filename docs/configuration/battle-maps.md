@@ -16,9 +16,9 @@ Map files are configuration: the server reads them when it instructs a screen an
 
 ```text
 <app config dir>/
-├── rooms/room.dat                    The room: devices and target bindings
+├── rooms/room.yaml                   The room: devices and target bindings, see scene-files.md
 ├── scenes/
-│   ├── tavern.dat                    The scene config
+│   ├── tavern.yaml                   The scene config, see scene-files.md
 │   └── tavern/                       The scene's assets
 │       ├── maps/tavern.map.json
 │       ├── images/floor.webp

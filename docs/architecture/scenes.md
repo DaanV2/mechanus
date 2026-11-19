@@ -33,8 +33,8 @@ State only records what differs from or adds to the configuration. That keeps th
 ```ascii
                     file storage                                      database
               ┌──────────────────────┐                        ┌──────────────────────┐
-              │ scenes/<id>.dat      │                        │ state/scene/<id>     │
-              │ rooms/<id>.dat       │                        │                      │
+              │ scenes/<id>.yaml     │                        │ state/scene/<id>     │
+              │ rooms/<id>.yaml      │                        │                      │
               └──────────┬───────────┘                        └───▲──────────┬───────┘
                          │ read only                       save   │          │ restore (or none
                          ▼                                        │          ▼  → NewState(config))
@@ -185,16 +185,16 @@ Not covered by the framework: the Spotify OAuth flow on a LAN-only server is sti
 
 ## Storage layout
 
-`infrastructure/scenestore` builds on the generic `infrastructure/storage` providers:
+`infrastructure/scenestore` reads configuration with `infrastructure/configfile` and keeps state with the generic `infrastructure/storage` providers:
 
 | Data          | Provider                                     | Location                                  |
 | ------------- | -------------------------------------------- | ----------------------------------------- |
-| Scene configs | `NamedFileStorage[*scenes.Config]("scenes")` | `<app config dir>/scenes/<scene id>.dat`  |
-| Rooms         | `NamedFileStorage[*devices.Room]("rooms")`   | `<app config dir>/rooms/<room id>.dat`    |
+| Scene configs | `scenestore.ConfigStore` (YAML / JSON, watched) | `<app config dir>/scenes/<scene id>.yaml` |
+| Rooms         | `scenestore.ConfigStore` (YAML / JSON, watched) | `<app config dir>/rooms/<room id>.yaml`   |
 | Battle maps   | `assets.Store.Open`, read by the screen driver | `<app config dir>/scenes/<scene id>/.../*.map.json` |
 | Scene states  | `NamedDBStorage[*scenes.State](db, "scene")` | `key_values` row `state/scene/<scene id>` |
 
-Files and rows contain JSON. Scene and room IDs are used as file names, so `ConfigStore` only accepts `[A-Za-z0-9_-]` IDs and checks that a file's `id` matches its name.
+Config files are YAML or JSON (by extension) with a `version` field; older versions are migrated in memory (`scenestore.SceneMigrations` / `RoomMigrations`), see [scene-files.md](../configuration/scene-files.md). `ConfigStore` loads every file at start, watches the folders (fsnotify) and reloads changed files: an invalid file keeps its last good version and is listed by `ConfigStore.Errors` (returned in `scenes/v1.ListScenesResponse.config_errors`), a changed active scene or room is re-applied through `SceneService.SceneConfigChanged` / `RoomConfigChanged`. Rows contain JSON. Scene and room IDs are file names, so `ConfigStore` only accepts `[A-Za-z0-9_-]` IDs and checks that a file's `id`, when given, matches its name.
 
 ## Outputs
 
@@ -279,7 +279,7 @@ server/
 
 ## Status
 
-**Implemented**: the domain model above with the config / state split, variant resolution, live overrides, entity status tracking, transition change detection, `SceneService` with load / exit persistence, `scenestore` adapters for file storage and the database, and tests for each. `SceneService` is wired in `components` with the instance's single room (`rooms/room.dat`, `scenestore.RoomID`; a missing room file is an empty room) and saves the active scene on `BeforeShutdown`. Paired devices (`application.DeviceService`) are registered in the database and can be bound to a target, those bindings are merged into the room when it is read. Battle map format v0 (`scenes.BattleMap`, [battle-maps.md](../configuration/battle-maps.md)) with an example scene in `docs/examples/battlemap`. The screen driver (`infrastructure/outputs/screen`) turns a `ScreenInstruction` into screen state (view, asset URL, and for battle maps the grid settings, layers, visible entities and instance groups) and pushes it to the device's screen; screens are keyed by device ID. The client draws it with the layer system in `client/src/lib/2d/layers`. `scenes/v1.SceneService` (ConnectRPC) lists scenes, activates them, switches variant, returns the active scene with its entities, and reveals / hides / spawns / removes / moves entities and resets a scene to its config; the GM view (`/views/game-master/`) has the entity controls and a reset button per scene. Token positions and a camera per target are kept in the scene state, and screens send token moves, pans and zooms over the screen WebSocket ([communication.md](./communication.md#supported-client-messages)), which are validated and sent to the screens of the scene without reloading the map. Scene and shared assets are served under `/assets/` with a content hash (`infrastructure/assets`). The [driver framework](#driver-framework) is in place with integration config sets and `DeviceMonitor` (device statuses in the GM view), and the MQTT driver (`infrastructure/outputs/mqtt`) delivers custom instructions, scene events and availability.
+**Implemented**: the domain model above with the config / state split, variant resolution, live overrides, entity status tracking, transition change detection, `SceneService` with load / exit persistence, `scenestore` adapters for file storage and the database, and tests for each. `SceneService` is wired in `components` with the instance's single room (`rooms/room.yaml`, `scenestore.RoomID`; a missing room file is an empty room) and saves the active scene on `BeforeShutdown`. Paired devices (`application.DeviceService`) are registered in the database and can be bound to a target, those bindings are merged into the room when it is read. Battle map format v0 (`scenes.BattleMap`, [battle-maps.md](../configuration/battle-maps.md)) with an example scene in `docs/examples/battlemap`. The screen driver (`infrastructure/outputs/screen`) turns a `ScreenInstruction` into screen state (view, asset URL, and for battle maps the grid settings, layers, visible entities and instance groups) and pushes it to the device's screen; screens are keyed by device ID. The client draws it with the layer system in `client/src/lib/2d/layers`. `scenes/v1.SceneService` (ConnectRPC) lists scenes, activates them, switches variant, returns the active scene with its entities, and reveals / hides / spawns / removes / moves entities and resets a scene to its config; the GM view (`/views/game-master/`) has the entity controls and a reset button per scene. Token positions and a camera per target are kept in the scene state, and screens send token moves, pans and zooms over the screen WebSocket ([communication.md](./communication.md#supported-client-messages)), which are validated and sent to the screens of the scene without reloading the map. Scene and shared assets are served under `/assets/` with a content hash (`infrastructure/assets`). The [driver framework](#driver-framework) is in place with integration config sets and `DeviceMonitor` (device statuses in the GM view), and the MQTT driver (`infrastructure/outputs/mqtt`) delivers custom instructions, scene events and availability.
 
 **Not implemented yet**:
 
