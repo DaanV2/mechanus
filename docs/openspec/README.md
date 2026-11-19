@@ -60,7 +60,7 @@ What still has to be built to get Mechanus from "foundation" to "the whole game 
 
 **Goal**: a GM can create and edit scenes, variants and the room setup from the app, and import existing maps, without touching JSON files.
 
-- [`add-versioned-config-files`](./changes/add-versioned-config-files/): YAML / JSON, `version` + migrations
+- [`add-versioned-config-files`](./changes/add-versioned-config-files/): YAML / JSON, `version` + migrations, live reload
 - [`add-scene-editor`](./changes/add-scene-editor/): scene and room editors, preview
 - [`add-asset-management`](./changes/add-asset-management/)
 - [`add-map-import`](./changes/add-map-import/): Universal VTT and Dungeondraft
