@@ -2,6 +2,7 @@ package components
 
 import (
 	"context"
+	gohttp "net/http"
 
 	"connectrpc.com/connect"
 	"github.com/DaanV2/mechanus/server/application"
@@ -18,6 +19,7 @@ import (
 	"github.com/DaanV2/mechanus/server/infrastructure/transport/cors"
 	"github.com/DaanV2/mechanus/server/infrastructure/transport/grpc"
 	"github.com/DaanV2/mechanus/server/infrastructure/transport/websocket"
+	"github.com/DaanV2/mechanus/server/infrastructure/webclient"
 )
 
 // BuildServer setup all the necessary components for an api server
@@ -107,6 +109,7 @@ func BuildServer(setupCtx context.Context) (*ServerComponents, error) {
 		WebsocketHandler: websocketHandler,
 		DevicePolicies:   grpc.NewPolicyInterceptor(authentication.NewIdentityResolver(jwtService), grpc.DeviceServicePolicies()),
 		Assets:           assetStore,
+		WebClient:        installWebClient(setupCtx, serverCfg.StaticFolder),
 		HealthChecker:    lfManager,
 		ReadyChecker:     lfManager,
 		Interceptors: []connect.Interceptor{
@@ -140,4 +143,15 @@ func BuildServer(setupCtx context.Context) (*ServerComponents, error) {
 	lfManager.Add(sceneConfigs, sceneService, deviceService, screenManager, keyManager, jwtService, db, otelmanager, server.Server)
 
 	return server, nil
+}
+
+// installWebClient makes sure the static folder holds the web client built into the binary, see
+// [webclient.Install].
+func installWebClient(ctx context.Context, folder string) gohttp.FileSystem {
+	client, ok := webclient.Embedded()
+	if !ok {
+		return webclient.Install(ctx, folder, nil)
+	}
+
+	return webclient.Install(ctx, folder, client)
 }

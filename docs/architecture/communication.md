@@ -131,4 +131,4 @@ Scene assets (maps, images, video) are served by `infrastructure/assets.Store` u
 
 ## Static file serving
 
-The compiled SvelteKit SPA is served as static files from the path configured via `--server.static-folder` (default: `./static`). Any request not matched by ConnectRPC or WebSocket routes falls through to this file server. This means the Go server is the only process needed in production — no separate frontend server required.
+The compiled SvelteKit SPA is embedded in release binaries and served as static files from the folder configured via `--server.static.folder` (default: `web`, created and filled with the embedded client when missing; see `server/infrastructure/webclient`). Any request not matched by ConnectRPC or WebSocket routes falls through to this file server. This means the Go server is the only process needed in production — no separate frontend server required.
