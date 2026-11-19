@@ -102,7 +102,6 @@ What still has to be built to get Mechanus from "foundation" to "the whole game 
 **Goal**: someone else can install Mechanus on a home network and use it. Packaging, the about page, macOS paths and the client UI polish are done.
 
 - [`add-client-server-discovery`](./changes/add-client-server-discovery/)
-- [`serve-web-client-by-default`](./changes/serve-web-client-by-default/): open question on embedding vs a `web/` folder
 - [`add-user-documentation`](./changes/add-user-documentation/)
 
 ### Cross-cutting
