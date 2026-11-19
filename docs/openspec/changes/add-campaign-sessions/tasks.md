@@ -8,7 +8,7 @@
 ## 2. Sessions
 
 - [ ] 2.1 Add the session object and campaign switching; verify with tests
-- [ ] 2.2 Persist and restore the active scene on restart; verify with a component test
+- [ ] 2.2 Persist and restore the active scene on restart; verify with an integration test (`server/tests/integration`)
 - [ ] 2.3 Add a campaign switcher to the GM view; verify with a Playwright test
 - [ ] 2.4 Run `just client lint` and `npm run check` in client/ and fix every reported issue
 
